@@ -2301,6 +2301,7 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 			if( pLink == 0 )
 				continue;
 			pLink->AddConnector( pKeepConnector );
+			pKeepConnector->AddLink( pLink );
 		}
 	}
 

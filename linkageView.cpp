@@ -5881,6 +5881,10 @@ void CLinkageView::DrawMeasurementLine( CRenderer* pRenderer, CFLine &InputLine,
 
 CFArea CLinkageView::DrawMeasurementLine( CRenderer* pRenderer, CFLine &InputLine, CFPoint &FirstPoint, CFPoint &SecondPoint, double Offset, bool bDrawLines, bool bDrawText )
 {
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	double DocumentScale = pDoc->GetUnitScale();
+
 	CFArea DimensionsArea;
 	CFLine MeasurementLine;
 
@@ -5899,30 +5903,37 @@ CFArea CLinkageView::DrawMeasurementLine( CRenderer* pRenderer, CFLine &InputLin
 
 	MeasurementLine = Scale( MeasurementLine );
 
+	double Length = DocumentScale * InputLine.GetDistance();
+
 	if( bDrawLines )
 	{
 		CFLine Temp = MeasurementLine;
-		Temp.MoveEnds( UnscaledUnits( 4 ), -UnscaledUnits( 4 ) );
 
-		MeasurementLine.MoveEnds( UnscaledUnits( 0.5 ), -UnscaledUnits( 0.5 ) );
+		if( Length > UnscaledUnits( 9 ) )
+		{
+			Temp.MoveEnds( UnscaledUnits( 4 ), -UnscaledUnits( 4 ) );
+
+			MeasurementLine.MoveEnds( UnscaledUnits( 0.5 ), -UnscaledUnits( 0.5 ) );
+		}
 
 		pRenderer->DrawLine( Temp );
-		pRenderer->DrawArrow( MeasurementLine.GetEnd(), MeasurementLine.GetStart(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
-		pRenderer->DrawArrow( MeasurementLine.GetStart(), MeasurementLine.GetEnd(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
+
+		if( Length > UnscaledUnits( 9 ) )
+		{
+			pRenderer->DrawArrow( MeasurementLine.GetEnd(), MeasurementLine.GetStart(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
+			pRenderer->DrawArrow( MeasurementLine.GetStart(), MeasurementLine.GetEnd(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
+		}
 	}
 
 	if( bDrawText )
 	{
-		CLinkageDoc* pDoc = GetDocument();
-		ASSERT_VALID(pDoc);
 
 		pRenderer->SetBkMode( OPAQUE );
 		pRenderer->SetTextAlign( TA_CENTER | TA_TOP );
 		pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
 
 		CString String;
-		double DocumentScale = pDoc->GetUnitScale();
-		String.Format( "%.4lf", DocumentScale * InputLine.GetDistance() );
+		String.Format( "%.4lf", Length );
 
 		CFLine Temp( MeasurementLine );
 		Temp.SetDistance( MeasurementLine.GetDistance() / 2 );

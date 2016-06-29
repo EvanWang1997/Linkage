@@ -311,9 +311,6 @@
     <None Include="Linkage.pdf">
       <Filter>Content</Filter>
     </None>
-    <None Include="res\bitmap7.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\bitmap9.bmp">
       <Filter>Resource Files</Filter>
     </None>

@@ -75,7 +75,7 @@ public:
 	void SetScaleFactor( double Scale ) { m_ScaleFactor = Scale; }
 	double GetScaleFactor( void ) { return m_ScaleFactor; }
 
-	static enum _Units { MM, INCH };
+	enum _Units { MM, INCH };
 
 	void SetUnits( CLinkageDoc::_Units Units );
 	CLinkageDoc::_Units GetUnits( void );

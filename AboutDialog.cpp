@@ -20,7 +20,7 @@ CAboutDialog::CAboutDialog(CWnd* pParent /*=NULL*/)
 	#else
 		double DPIScale = 1.0;
 	#endif
-	m_BigFont.CreateFont( -12 * DPIScale, 0, 0, 0, FW_EXTRABOLD, 0, 0, 0, 0, 0, 0, ANTIALIASED_QUALITY, 0, "arial" );
+	m_BigFont.CreateFont( (int)( -12 * DPIScale ), 0, 0, 0, FW_EXTRABOLD, 0, 0, 0, 0, 0, 0, ANTIALIASED_QUALITY, 0, "arial" );
 }
 
 CAboutDialog::~CAboutDialog()

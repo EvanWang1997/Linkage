@@ -70,7 +70,6 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_wndRibbonBar.Create(this);
 
-
 	InitializeRibbon();
 
 	if (!m_wndStatusBar.Create(this))
@@ -541,11 +540,11 @@ void CMainFrame::CreateMainCategory( void )
 	CMFCRibbonGallery *pSampleGallery = new CMFCRibbonGallery( ID_RIBBON_SAMPLE_GALLERY, strTemp, -1, 41, IDB_SAMPLE_GALLERY, 96 );
 	m_pSampleGallery = pSampleGallery;
 
-	pSampleGallery->SetIconsInRow( 6 );
-	pSampleGallery->SetButtonMode();
-	pSampleGallery->SelectItem( -1 );
+	m_pSampleGallery->SetIconsInRow( 6 );
+	m_pSampleGallery->SetButtonMode();
+	m_pSampleGallery->SelectItem( -1 );
 
-	pMainPanel->Add( pSampleGallery );
+	pMainPanel->Add( m_pSampleGallery );
 
 	CSampleGallery GalleryData;
 	int Count = GalleryData.GetCount();
@@ -556,16 +555,13 @@ void CMainFrame::CreateMainCategory( void )
 		int EOL = strTemp.Find( '\n' );
 		if( EOL >= 0 )
 			strTemp.Truncate( EOL );
-		pSampleGallery->SetItemToolTip( Counter, strTemp );
+		m_pSampleGallery->SetItemToolTip( Counter, strTemp );
 	}
 
 	AddRibbonButton( pMainPanel, IDS_RIBBON_SAVE, ID_FILE_SAVE, 2, LARGE );
 	AddRibbonButton( pMainPanel, IDS_RIBBON_SAVEAS, ID_FILE_SAVE_AS, 3, LARGE );
 
 	AddExportButton( pMainPanel );
-
-	//AddRibbonButton( pMainPanel, IDS_RIBBON_SAVEVIDEO, ID_FILE_SAVEVIDEO, 5, LARGE );
-	//AddRibbonButton( pMainPanel, IDS_RIBBON_SAVEIMAGE, ID_FILE_SAVEIMAGE, 37, LARGE );
 
 	pMainPanel->Add(new CMFCRibbonSeparator(TRUE));
 	AddPrintButton( pMainPanel );
@@ -659,6 +655,7 @@ void CMainFrame::InitializeRibbon()
 
 	SetTimer( 0, 1, 0 );
 	return;
+
 
 	CreateMainCategory();
 	CreateHomeCategory();

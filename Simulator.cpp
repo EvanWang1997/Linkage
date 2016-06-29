@@ -1084,7 +1084,7 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine TestLine( pSlider->GetPreviousPoint(), pSlider->GetPoint() );
-		TestLine.SetDistance( TestLine.GetDistance() + 1 );
+		TestLine.SetDistance( TestLine.GetDistance() * 1.1 );
 		CFPoint SuggestedPoint = TestLine.GetEnd();
 
 		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );
@@ -1467,7 +1467,7 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine Line( pCommonConnector->GetPreviousPoint(), pCommonConnector->GetPoint() );
-		Line.SetDistance( Line.GetDistance() * 2 );
+		Line.SetDistance( Line.GetDistance() * 1.1 );
 		CFPoint SuggestedPoint = Line.GetEnd();
 
 		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );
@@ -1587,7 +1587,7 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine Line( pCommonConnector->GetPreviousPoint(), pCommonConnector->GetPoint() );
-		Line.SetDistance( Line.GetDistance() * 2 );
+		Line.SetDistance( Line.GetDistance() * 1.1 );
 		CFPoint SuggestedPoint = Line.GetEnd();
 
 		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );
@@ -1774,7 +1774,7 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine Line( pCommonConnector->GetPreviousPoint(), pCommonConnector->GetPoint() );
-		Line.SetDistance( Line.GetDistance() * 2 );
+		Line.SetDistance( Line.GetDistance() * 1.1 );
 		CFPoint SuggestedPoint = Line.GetEnd();
 
 		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );
