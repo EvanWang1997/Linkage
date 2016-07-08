@@ -629,16 +629,23 @@ bool GetTangents( const CFCircle &Circle1, const CFCircle &Circle2, CFLine &Resu
 double GetClosestAngle( double OldAngle, double NewAngle )
 {
 	/*
-	 * NewAngle could be about 360 degrees off due to code doing normalization. Figure out how
-	 * to get the angle as close to the old angle as possible by adding or subtracting 360.
+	 * NewAngle could be off by a significant amount due to normalization of the new angle.
+	 * Get a new angle that is the same directionn but is adjusted to be less than 360 degrees away from the old angle.
 	 */
 
-	double AsIs = fabs( NewAngle - OldAngle );
+	double Distance = fabs( NewAngle - OldAngle );
+	long Adjustment = (long)( Distance / 360 );
+	if( NewAngle < OldAngle )
+		NewAngle += Adjustment * 360;
+	else
+		NewAngle -= Adjustment * 360;
+	Distance = fabs( NewAngle - OldAngle );
+
 	double WithAdd = fabs( ( NewAngle + 360 ) - OldAngle );
-	if( WithAdd < AsIs )
+	if( WithAdd < Distance )
 		return NewAngle + 360;
 	double WithSubtract = fabs( ( NewAngle - 360 ) - OldAngle );
-	if( WithSubtract < AsIs )
+	if( WithSubtract < Distance )
 		return NewAngle - 360;
 	return NewAngle;
 }
