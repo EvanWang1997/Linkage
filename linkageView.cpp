@@ -1777,6 +1777,8 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 
 	DrawGroundDimensions( pRenderer, pDoc, m_SelectedViewLayers, 0, true, true );
 
+	DrawSliderRadiusDimensions( pRenderer, pDoc, m_SelectedViewLayers, true, true );
+
 	DrawSnapLines( pRenderer );
 
 	if( m_bShowAngles )
@@ -5659,7 +5661,69 @@ void CLinkageView::DrawStackedConnectors( CRenderer* pRenderer, unsigned int OnL
 	pRenderer->SelectObject( pOldPen );
 }
 
-CFArea CLinkageView::DrawGroundDimensions( CRenderer* pRenderer, CLinkageDoc *pDoc, unsigned int OnLayers, CLink *pGroundLink, bool bDrawLines, bool bDrawText)
+CFArea CLinkageView::DrawSliderRadiusDimensions( CRenderer* pRenderer, CLinkageDoc *pDoc, unsigned int OnLayers, bool bDrawLines, bool bDrawText )
+{
+	if( !m_bShowDimensions )
+		return CFArea();
+
+	if( ( OnLayers & CLinkageDoc::MECHANISMLAYERS ) == 0 )
+		return CFArea();
+
+	CFArea DimensionsArea;
+
+	CList<CFArc> ArcList; 
+
+	CPen Pen;
+	Pen.CreatePen( PS_SOLID, 1, RGB( 192, 192, 192 ) );
+	CPen *pOldPen = pRenderer->SelectObject( &Pen );
+	COLORREF OldFontColor = pRenderer->GetTextColor();
+	pRenderer->SetTextColor( RGB( 96, 96, 96 ) );
+
+	pRenderer->SetBkMode( OPAQUE );
+	pRenderer->SetTextAlign( TA_CENTER | TA_TOP );
+	pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
+
+	POSITION Position = pDoc->GetConnectorList()->GetHeadPosition();
+	while( Position != 0 )
+	{
+		CConnector *pConnector = pDoc->GetConnectorList()->GetNext( Position );
+		if( pConnector == 0 || !pConnector->IsSlider() )
+			continue;
+
+		if( pConnector->GetOriginalSlideRadius() != 0.0 )
+		{
+			CFArc SliderArc;
+			if( !pConnector->GetSliderArc( SliderArc ) )
+				continue;
+
+			bool bAlreadyInList = false;
+			POSITION Position2 = ArcList.GetHeadPosition();
+			while( Position2 != 0 )
+			{
+				CFArc Arc = ArcList.GetNext( Position2 );
+				if( SliderArc == Arc )
+				{
+					bAlreadyInList = true;
+					break;
+				}
+			}
+
+			if( bAlreadyInList )
+				continue;
+
+			// Draw this one and add it to the list.
+			DimensionsArea += DrawArcRadius( pRenderer, SliderArc, bDrawLines, bDrawText );
+
+			ArcList.AddTail( SliderArc );
+		}
+	}
+	pRenderer->SelectObject( pOldPen );
+	pRenderer->SetTextColor( OldFontColor );
+
+	return DimensionsArea;
+}
+
+CFArea CLinkageView::DrawGroundDimensions( CRenderer* pRenderer, CLinkageDoc *pDoc, unsigned int OnLayers, CLink *pGroundLink, bool bDrawLines, bool bDrawText )
 {
 	if( !m_bShowDimensions || !m_bShowGroundDimensions )
 		return CFArea();
@@ -6031,6 +6095,74 @@ CFArea CLinkageView::DrawCirclesRadius( CRenderer *pRenderer, CFPoint Center, st
 
 		pRenderer->SetTextAlign( TA_LEFT | TA_TOP );
 		pRenderer->TextOut( Point.x + UnscaledUnits( 2 ), Point.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ) - UnscaledUnits( 1 ), String );
+	}
+
+	return DimensionsArea;
+}
+
+CFArea CLinkageView::DrawArcRadius( CRenderer *pRenderer, CFArc &Arc, bool bDrawLines, bool bDrawText )
+{
+	if( pRenderer == 0 )
+		return CFArea();
+
+	CFArea DimensionsArea;
+
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	double Angle = Arc.GetStartAngle();
+	double EndAngle = Arc.GetEndAngle();
+	if( Angle == EndAngle )
+		Angle = 45;
+	else if( Angle > EndAngle )
+		Angle += ( ( 360 - Angle ) + EndAngle ) / 2;
+	else
+		Angle += ( EndAngle - Angle ) / 2;
+		
+	CFPoint Point = Arc.GetCenter();
+	Point.SetPoint( Point, fabs( Arc.r ), Angle );
+	CFPoint Point2;
+	Point2.SetPoint( Point, Unscale( RADIUS_MEASUREMENT_OFFSET * 2 ), Angle );
+	CFPoint Point3;
+	CFPoint Point4;
+	if( Angle <= 90 && Angle >= -90 )
+	{
+		Point3.SetPoint( Point2.x + Unscale( RADIUS_MEASUREMENT_OFFSET ), Point2.y );
+		Point4.SetPoint( Point3.x + UnscaledUnits( 2 ), Point3.y );
+		pRenderer->SetTextAlign( TA_LEFT | TA_TOP );
+	}
+	else
+	{
+		Point3.SetPoint( Point2.x - Unscale( RADIUS_MEASUREMENT_OFFSET ), Point2.y );
+		Point4.SetPoint( Point3.x - UnscaledUnits( 2 ), Point3.y );
+		pRenderer->SetTextAlign( TA_RIGHT | TA_TOP );
+	}
+
+	if( bDrawLines )
+	{
+		CFLine MeasurementLine( Point, Point2 );
+		MeasurementLine = Scale( MeasurementLine );
+
+		CFLine Temp = MeasurementLine;
+		if( pRenderer->GetScale() > 1.0 )
+			Temp.MoveEnds( 0, -4 );
+
+		pRenderer->DrawLine( Temp );
+		pRenderer->DrawArrow( MeasurementLine.GetEnd(), MeasurementLine.GetStart(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
+		
+		MeasurementLine.SetLine( Point2, Point3 );
+		MeasurementLine = Scale( MeasurementLine );
+		pRenderer->DrawLine( MeasurementLine );
+	}
+
+	if( bDrawText )
+	{
+		CString String;
+		double DocumentScale = pDoc->GetUnitScale();
+		String.Format( "R%.4lf", DocumentScale * fabs( Arc.r ) );
+
+		Point4 = Scale( Point4 );
+
+		pRenderer->TextOut( Point4.x, Point4.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ) - UnscaledUnits( 1 ), String );
 	}
 
 	return DimensionsArea;

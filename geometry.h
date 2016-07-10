@@ -162,6 +162,9 @@ class CFArc : public CFCircle
 	CFArc( double x, double y, double Radius, CFPoint &Start, CFPoint &End ) { SetArc( CFPoint( x, y ), Radius, Start, End ); }
 	void SetArc( CFPoint &Center, double Radius, CFPoint &Start, CFPoint &End ) { x = Center.x; y = Center.y; r = Radius; m_Start = Start; m_End = End; }
 
+	_inline bool operator==( const CFArc &Right ) const
+		{ return x == Right.x && y == Right.y && r == Right.r && m_Start == Right.m_Start && m_End == Right.m_End; }
+
 	CFPoint GetStart( void ) { return m_Start; }
 	CFPoint GetEnd( void ) { return m_End; }
 

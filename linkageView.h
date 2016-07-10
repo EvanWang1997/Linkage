@@ -256,6 +256,7 @@ private:
 	CFArea DrawConnectorLinkDimensions( CRenderer* pRenderer, const GearConnectionList *pGearConnections, unsigned int OnLayers, CLink *pLink, bool bDrawLines, bool bDrawText );
 	CFArea DrawGroundDimensions( CRenderer* pRenderer, CLinkageDoc *pDoc, unsigned int OnLayers, CLink *pGroundLink, bool bDrawLines, bool bDrawText );
 	CFArea DrawCirclesRadius( CRenderer *pRenderer, CFPoint Center, std::list<double> &RadiusList, bool bDrawLines, bool bDrawText );
+	CFArea DrawArcRadius( CRenderer *pRenderer, CFArc &Arc, bool bDrawLines, bool bDrawText );
 	void DrawStackedConnectors( CRenderer* pRenderer, unsigned int OnLayers );
 	void DrawActuator( CRenderer* pRenderer, unsigned int OnLayers, CLink *pLink, bool bDrawFill = false );
 	void DrawFasteners( CRenderer* pRenderer, unsigned int OnLayers, CElement *pElement );
@@ -265,6 +266,7 @@ private:
 	void DrawData( CRenderer *pRenderer );
 	void DrawAnicrop( CRenderer *pRenderer );
 	void DrawRuler( CRenderer *pRenderer );
+	CFArea DrawSliderRadiusDimensions( CRenderer* pRenderer, CLinkageDoc *pDoc, unsigned int OnLayers, bool bDrawLines, bool bDrawText );
 	double AdjustYCoordinate( double y );
 	void MovePartsLinkToOrigin( CLink *pPartsLink, CFPoint Origin, GearConnectionList *pGearConnections, bool bRotateToOptimal = true );
 	class CTempLink* GetTemporaryPartsLink( CLink *pLink, CFPoint PartOrigin, GearConnectionList *pGearConnections );
