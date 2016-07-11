@@ -8492,11 +8492,11 @@ bool CLinkageView::SaveAsImage( const char *pFileName, int RenderWidth, int Rend
 
 	double ScaleFactor = 4.0;
 
-	PrepareRenderer( Renderer, &ImageRect, &MemoryBitmap, pDC, ScaleFactor, true, MarginScale, 1.0, false, true, false, 0 );
-
-	m_Zoom = m_ScreenZoom * m_DPIScale;
+	//m_Zoom = m_ScreenZoom * m_DPIScale;
 	double SaveDPIScale = m_DPIScale;
 	m_DPIScale = 1.0;
+
+	PrepareRenderer( Renderer, &ImageRect, &MemoryBitmap, pDC, ScaleFactor, true, MarginScale, 1.0, false, true, false, 0 );
 
 	DoDraw( &Renderer );
 
