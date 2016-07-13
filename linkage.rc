@@ -1176,7 +1176,7 @@ STRINGTABLE
 BEGIN
     ID_SAMPLE_VARYSPEED     "Varying speed mechanism."
     ID_SAMPLE_FINGERBOX     "Button pushing machine."
-    ID_SAMPLE_WATT          "Watt Parallel Mechanism."
+    ID_SAMPLE_WATT          "Watt Straight Line Mechanism."
     ID_SAMPLE_THROW         "Throw Distance Test Mechanism."
     ID_SAMPLE_PISTON        "Piston and Crank Mechanism."
     ID_SAMPLE_LIFTER        "Two-Stage Ball Lifting Mechanism."
@@ -1216,7 +1216,7 @@ BEGIN
     IDS_SAMPLE_SCISSORS     "Scissor lift mechanism.\nScissor Lift Mechanism"
     IDS_SAMPLE_VARYSPEED    "Varying rotational speed mechanism.\nVarying Speed Mechanism"
     IDS_SAMPLE_FINGERBOX    "Finger pushing button machine.\nButton Pushing Machine"
-    IDS_SAMPLE_WATT         "Watt parallel mechanism for stem engines.\nWatt Parallel Mechanism"
+    IDS_SAMPLE_WATT         "Watt straight line mechanism for steam engines.\nWatt Mechanism"
 END
 
 STRINGTABLE

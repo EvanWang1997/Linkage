@@ -1778,7 +1778,13 @@ class CD2DRenderer : public CRendererImplementation
 		ID2D1Factory* pD2D1Factory = GetD2D1Factory();
 
 		pD2D1Factory->CreateStrokeStyle( D2D1::StrokeStyleProperties( D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE), 0, 0, &m_pSolidLineStroke );
-		pD2D1Factory->CreateStrokeStyle( D2D1::StrokeStyleProperties( D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_LINE_JOIN_MITER, 10.f, D2D1_DASH_STYLE_DASH ), 0, 0, &m_DashedLineStroke );
+
+
+		
+		//pD2D1Factory->CreateStrokeStyle( D2D1::StrokeStyleProperties( D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_LINE_JOIN_MITER, 10.f, D2D1_DASH_STYLE_DASH ), 0, 0, &m_DashedLineStroke );
+
+		float Pattern[] = { 3.0, 3.0 };
+		pD2D1Factory->CreateStrokeStyle( D2D1::StrokeStyleProperties( D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_LINE_JOIN_MITER, 10.f, D2D1_DASH_STYLE_CUSTOM ), Pattern, 2, &m_DashedLineStroke );
 	}
 
 	virtual ~CD2DRenderer()
