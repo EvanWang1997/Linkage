@@ -4480,6 +4480,8 @@ void CLinkageView::OnViewDrawing()
 		m_SelectedViewLayers |= CLinkageDoc::DRAWINGLAYER;
 	SaveSettings();
 
+	pDoc->SetViewLayers( m_SelectedViewLayers );
+
 	InvalidateRect( 0 );
 }
 
@@ -4503,6 +4505,8 @@ void CLinkageView::OnViewMechanism()
 		m_SelectedViewLayers |= CLinkageDoc::MECHANISMLAYERS;
 	SaveSettings();
 
+	pDoc->SetViewLayers( m_SelectedViewLayers );
+
 	InvalidateRect( 0 );
 }
 
@@ -4525,6 +4529,8 @@ void CLinkageView::OnEditDrawing()
 	else
 		m_SelectedEditLayers |= CLinkageDoc::DRAWINGLAYER;
 	SaveSettings();
+
+	pDoc->SetEditLayers( m_SelectedEditLayers );
 
 	InvalidateRect( 0 );
 }
@@ -4550,6 +4556,8 @@ void CLinkageView::OnEditMechanism()
 	else
 		m_SelectedEditLayers |= CLinkageDoc::MECHANISMLAYERS;
 	SaveSettings();
+
+	pDoc->SetEditLayers( m_SelectedEditLayers );
 
 	InvalidateRect( 0 );
 }
@@ -5968,12 +5976,13 @@ CFArea CLinkageView::DrawMeasurementLine( CRenderer* pRenderer, CFLine &InputLin
 	MeasurementLine = Scale( MeasurementLine );
 
 	double Length = DocumentScale * InputLine.GetDistance();
+	double DocUnitLength = MeasurementLine.GetDistance();
 
 	if( bDrawLines )
 	{
 		CFLine Temp = MeasurementLine;
 
-		if( Length > UnscaledUnits( 9 ) )
+		if( DocUnitLength > UnscaledUnits( 9 ) )
 		{
 			Temp.MoveEnds( UnscaledUnits( 4 ), -UnscaledUnits( 4 ) );
 
@@ -5982,7 +5991,7 @@ CFArea CLinkageView::DrawMeasurementLine( CRenderer* pRenderer, CFLine &InputLin
 
 		pRenderer->DrawLine( Temp );
 
-		if( Length > UnscaledUnits( 9 ) )
+		if( DocUnitLength > UnscaledUnits( 9 ) )
 		{
 			pRenderer->DrawArrow( MeasurementLine.GetEnd(), MeasurementLine.GetStart(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
 			pRenderer->DrawArrow( MeasurementLine.GetStart(), MeasurementLine.GetEnd(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );

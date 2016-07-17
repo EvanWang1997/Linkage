@@ -4176,7 +4176,7 @@ void CLinkageDoc::SetUnits( CLinkageDoc::_Units Units )
 	{
 		case INCH: m_UnitScaling = 1 / OneInch; break;
 		case MM:
-		default: m_UnitScaling = 24.5 / OneInch; break;
+		default: m_UnitScaling = 25.4 / OneInch; break;
 	}
 }
 

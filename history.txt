@@ -309,6 +309,9 @@ Received some feature requests recently. These are some NOT YET ADDED:
 5/10/2016 12:00 AM: Changes to the stretching computations to be more consistent.
 5/12/2016 1:47 AM: Draw chains to show chain link movement.
 5/12/2016 12:09 PM: Fixed bug that caused rotation angle of links to change by 360 or -360 unexpectedly. It only screwed things up for some gears that are on connectors of the screwed up link.
+7/10/2016 12:01 PM: Fixed bug in link rotation code that caused failure to pick the closest adjusted length once the adjustment gets to be more than 360 degrees.
+7/17/2016 12:01 PM: Fixed bug with inch to MM conversion being 24.5 instead of 25.4! Whoops.
+7/17/2016 12:01 PM: Fixed bug in arrowhead drawing decision code - it was using the virtual line length, not picel length, to determine if the line is too short to have arrow heads.
 
 
 
