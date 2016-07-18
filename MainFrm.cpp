@@ -871,7 +871,15 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 		case 3: CreateHelpCategory(); break;
 		case 4: CreateHelpButtons(); break;
 		case 5: CreateQuickAccessCommands(); break;
-		case 6: KillTimer( nIDEvent ); SetCursor( AfxGetApp()->LoadStandardCursor( IDC_ARROW ) ); break;
+		case 6: 
+		{
+			KillTimer( nIDEvent ); 
+			SetCursor( AfxGetApp()->LoadStandardCursor( IDC_ARROW ) ); 
+			CDocument *pDoc = GetActiveDocument();
+			if( pDoc != 0 )
+				pDoc->UpdateAllViews( 0 );
+			break;
+		}
 	}
 	++m_RibbonInitializingCounter;
 }
