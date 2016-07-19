@@ -5061,9 +5061,9 @@ void CLinkageView::DrawSliderTrack( CRenderer* pRenderer, unsigned int OnLayers,
 			int Found2 = -2;
 			for( int Index = 0; Index < PointCount; ++Index )
 			{
-				if( Limit1->GetOriginalPoint() == Points[Index] )
+				if( Limit1->GetPoint() == Points[Index] )
 					Found1 = Index;
-				if( Limit2->GetOriginalPoint() == Points[Index] )
+				if( Limit2->GetPoint() == Points[Index] )
 					Found2 = Index;
 				if( Found1 >= 0 && Found2 >= 0 )
 					break;
