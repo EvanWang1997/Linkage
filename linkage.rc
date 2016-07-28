@@ -680,7 +680,7 @@ BEGIN
     ID_INSERT_ANCHOR        "Add a single lone anchor.\nInsert Anchor"
     ID_EDIT_PROPERTIES      "Modifies the properties of the selected connector.\nProperties"
     ID_EDIT_JOIN            "Convert the selected connectors into a single connector.\nJoin Connectors"
-    ID_EDIT_GRIDSNAP        "Snap to align with an invisible grid.\nGrid Snap"
+    ID_EDIT_GRIDSNAP        "Snap to align with the grid.\nGrid Snap"
     ID_VIEW_DIMENSIONS      "Automatically draw dimension lines for all links.\nAuto Dimensions"
     ID_VIEW_GROUNDDIMENSIONS 
                             "Include ground dimensions with the automatic dimensions. Show the ground link relative to the page in the parts list.\nInclude Ground Dimensions"
@@ -809,7 +809,7 @@ STRINGTABLE
 BEGIN
     IDS_RIBBON_ZOOM         "Zoom"
     IDS_RIBBON_ZOOMFIT      "Fit"
-    IDS_RIBBON_SNAP         "Object"
+    IDS_RIBBON_SNAP         "Element"
     ID_INSERT_SLIDER        "Add a single lone sliding connector.\nInsert Sliding Connector"
     ID_INSERT_LINK2         "Add a link with two connectors.\nInsert Link"
     ID_INSERT_LINK3         "Add a link with three connectors.\nInsert 3-Connector Link"
@@ -1025,7 +1025,7 @@ STRINGTABLE
 BEGIN
     ID_VIEW_DATA            "Show position and length information for the links and connectors.\nShow Data"
     ID_VIEW_DEBUG           "Show debugging information such as possible rotations of various links and connectors.\nDebug"
-    ID_EDIT_SNAP            "Snap to align with connectors.\nObject Snap"
+    ID_EDIT_SNAP            "Snap to align with connectors.\Element Snap"
 END
 
 STRINGTABLE

@@ -2744,7 +2744,24 @@ void CLinkageView::OnMouseMoveDrag(UINT nFlags, CFPoint point)
 
 	CFPoint AdjustedPoint = Unscale( point );
 
-	bool bNoSnap = ( nFlags & ( MK_CONTROL | MK_SHIFT ) ) != 0;
+	bool bControlKey = ( nFlags & ( MK_CONTROL ) ) != 0;
+	bool bShiftKey = ( nFlags & ( MK_SHIFT ) ) != 0;
+
+	bool bGridSnap = m_bGridSnap;
+	bool bElementSnap = m_bSnapOn;
+
+	if( m_bGridSnap || m_bSnapOn )
+	{
+		// Either is on so bToggleSnap==true disables both.
+		bGridSnap = bGridSnap && !bControlKey && !bShiftKey;
+		bElementSnap = bElementSnap && !bControlKey && !bShiftKey;
+	}
+	else
+	{
+		// Both are off so bToggleSnap==true enables one or both depending on the key.
+		bGridSnap = bShiftKey;
+		bElementSnap = bControlKey;
+	}
 
 	CFPoint ReferencePoint = AdjustedPoint;
 
@@ -2778,7 +2795,7 @@ void CLinkageView::OnMouseMoveDrag(UINT nFlags, CFPoint point)
 
 	if( m_bAllowEdit )
 	{
-		if( pDoc->MoveSelected( AdjustedPoint, m_bSnapOn && !bNoSnap, m_bGridSnap && !bNoSnap,  GapDistance / pDoc->GetUnitScale(),  GapDistance / pDoc->GetUnitScale(), Unscale( PIXEL_SNAP_DISTANCE ), ReferencePoint ) )
+		if( pDoc->MoveSelected( AdjustedPoint, bElementSnap, bGridSnap,  GapDistance / pDoc->GetUnitScale(),  GapDistance / pDoc->GetUnitScale(), Unscale( PIXEL_SNAP_DISTANCE ), ReferencePoint ) )
 		InvalidateRect( 0 );
 	}
 
