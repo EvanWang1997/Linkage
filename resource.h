@@ -473,13 +473,15 @@
 #define ID_VIEW_PARTS                   5427
 #define ID_FILE_PRINTFULL               5935
 #define IDD_EXPORTIMAGE                 6000
+#define IDD_DIALOG3                     6006
+#define IDD_SELECTELEMENTS              6006
 #define IDC_PREVIEW                     8000
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6006
+#define _APS_NEXT_RESOURCE_VALUE        6008
 #define _APS_NEXT_COMMAND_VALUE         7002
 #define _APS_NEXT_CONTROL_VALUE         8001
 #define _APS_NEXT_SYMED_VALUE           9000

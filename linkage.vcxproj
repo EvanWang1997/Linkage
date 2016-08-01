@@ -783,6 +783,7 @@ exit 0
     <ClInclude Include="ConnectorPropertiesDialog.h" />
     <ClInclude Include="SampleGallery.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="SelectElementsDialog.h" />
     <ClInclude Include="Simulator.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="stdbool.h" />
@@ -917,6 +918,7 @@ exit 0
     <ClCompile Include="ConnectorPropertiesDialog.cpp" />
     <ClCompile Include="SampleGallery.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="SelectElementsDialog.cpp" />
     <ClCompile Include="Simulator.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
