@@ -223,6 +223,7 @@ void CMainFrame::CreateClipboardPanel( CMFCRibbonCategory* pCategory )
 	AddRibbonButton( pPanelClipboard, IDS_RIBBON_CUT, ID_EDIT_CUT, 21, SMALL );
 	AddRibbonButton( pPanelClipboard, IDS_RIBBON_COPY, ID_EDIT_COPY, 22, SMALL );
 	AddRibbonButton( pPanelClipboard, IDS_RIBBON_SELECTALL, ID_EDIT_SELECT_ALL, 44, SMALL );
+	AddRibbonButton( pPanelClipboard, IDS_RIBBON_SELECTELEMENTS, ID_EDIT_SELECT_ELEMENTS, 90, LARGE );
 }
 
 void CMainFrame::CreateViewPanel( CMFCRibbonCategory* pCategory )

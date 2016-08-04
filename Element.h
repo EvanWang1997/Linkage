@@ -64,6 +64,7 @@ class CElement
 	void SetIdentifier( int Value ) { m_Identifier = Value; }
 	int GetIdentifier( void ) { return m_Identifier; }
 	virtual CString GetIdentifierString( bool bDebugging ) = 0;
+	virtual CString GetTypeString( void );
 
 	void SetLayers( unsigned int Layers ) { m_Layers = Layers; }
 	unsigned int GetLayers( void ) { return m_Layers; }

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Element.h"
+#include "linkageDoc.h"
 
 CElement::CElement(void)
 {
@@ -60,4 +61,13 @@ void CElement::UnfastenTo( void )
 		pItem->GetElement()->RemoveFastenElement( this );
 	m_pFastenedTo = CElementItem();
 }
+
+CString CElement::GetTypeString( void )
+{
+	bool bDrawingLayer = GetLayers() & CLinkageDoc::DRAWINGLAYER;
+	if( IsMeasurementElement() )
+		return "Measurement";
+	return IsConnector() ? ( bDrawingLayer ? "Point" : "Connector" ) : ( bDrawingLayer ? "Line" : "Link" );
+}
+
 

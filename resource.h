@@ -142,6 +142,8 @@
 #define IDS_RIBBON_PROPERTIES           4155
 #define IDS_RIBBON_CONNECTPROPERTIES    4156
 #define IDS_RIBBON_CAPTIONBAR           4157
+#define IDS_RIBBON_SELECTELEMENTS       4158
+#define ID_EDIT_SELECT_ELEMENTS         4159
 #define IDS_RIBBON_VIEW_DATA            4161
 #define IDS_RIBBON_VIEW_DEBUG           4162
 #define IDS_RIBBON_VIEW_ZOOMIN          4163
@@ -473,9 +475,11 @@
 #define ID_VIEW_PARTS                   5427
 #define ID_FILE_PRINTFULL               5935
 #define IDD_EXPORTIMAGE                 6000
-#define IDD_DIALOG3                     6006
 #define IDD_SELECTELEMENTS              6006
 #define IDC_PREVIEW                     8000
+#define IDC_LIST1                       8001
+#define IDC_COMBOBOXEX1                 8004
+#define IDC_LIST3                       8005
 
 // Next default values for new objects
 // 
@@ -483,7 +487,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        6008
 #define _APS_NEXT_COMMAND_VALUE         7002
-#define _APS_NEXT_CONTROL_VALUE         8001
+#define _APS_NEXT_CONTROL_VALUE         8006
 #define _APS_NEXT_SYMED_VALUE           9000
 #endif
 #endif

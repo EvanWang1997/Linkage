@@ -498,8 +498,9 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CA
 CAPTION "Select Elements"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,199,299,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,253,299,50,14
+    DEFPUSHBUTTON   "Select",IDOK,199,300,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,253,300,50,14
+    CONTROL         "",IDC_LIST3,"SysListView32",LVS_REPORT | LVS_NOLABELWRAP | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,296,276
 END
 
 
@@ -509,8 +510,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,3,7,0
- PRODUCTVERSION 3,3,7,0
+ FILEVERSION 3,3,8,0
+ PRODUCTVERSION 3,3,8,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -526,12 +527,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.3.7.0"
+            VALUE "FileVersion", "3.3.8.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2016 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.3.7.0"
+            VALUE "ProductVersion", "3.3.8.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -825,6 +826,26 @@ BEGIN
     ID_EDIT_SELECT_ALL      "Select all links and connectors.\nSelect All"
     ID_EDIT_UNDO            "Undo the last action.\nUndo"
     ID_EDIT_REDO            "Redo the previously undone action.\nRedo"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_RIBBON_PASTE        "Paste"
+    IDS_RIBBON_CUT          "Cut"
+    IDS_RIBBON_COPY         "Copy"
+    IDS_RIBBON_SELECTALL    "Select All"
+    IDS_RIBBON_WINDOW       "Window\nw"
+    IDS_RIBBON_WINDOWS      "Windows\ni"
+    IDS_RIBBON_STYLE        "Style"
+    IDS_RIBBON_STYLE_TIP    "Modify Visual Style"
+    IDS_RIBBON_STYLE_DESC   "Choose one of the Office 2007 themes"
+    IDS_RIBBON_STATUSBAR    "Status Bar"
+    IDS_RIBBON_VIEW         "View"
+    IDS_RIBBON_PROPERTIES   "Element"
+    IDS_RIBBON_CONNECTPROPERTIES "Connector"
+    IDS_RIBBON_CAPTIONBAR   "Caption Bar"
+    IDS_RIBBON_SELECTELEMENTS "Select Elements"
+    ID_EDIT_SELECT_ELEMENTS "Select links and connectors from a list.\nSelect Elements"
 END
 
 STRINGTABLE
@@ -1147,24 +1168,6 @@ BEGIN
     IDS_RIBBON_EXIT         "E&xit"
     IDS_RIBBON_HOME         "&Home"
     IDS_RIBBON_CLIPBOARD    "Selection\nd"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_RIBBON_PASTE        "Paste"
-    IDS_RIBBON_CUT          "Cut"
-    IDS_RIBBON_COPY         "Copy"
-    IDS_RIBBON_SELECTALL    "Select All"
-    IDS_RIBBON_WINDOW       "Window\nw"
-    IDS_RIBBON_WINDOWS      "Windows\ni"
-    IDS_RIBBON_STYLE        "Style"
-    IDS_RIBBON_STYLE_TIP    "Modify Visual Style"
-    IDS_RIBBON_STYLE_DESC   "Choose one of the Office 2007 themes"
-    IDS_RIBBON_STATUSBAR    "Status Bar"
-    IDS_RIBBON_VIEW         "View"
-    IDS_RIBBON_PROPERTIES   "Element"
-    IDS_RIBBON_CONNECTPROPERTIES "Connector"
-    IDS_RIBBON_CAPTIONBAR   "Caption Bar"
 END
 
 STRINGTABLE

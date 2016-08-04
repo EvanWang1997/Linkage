@@ -29,6 +29,7 @@
 #include "DXFFile.h"
 #include "GearRatioDialog.h"
 #include "ExportImageSettingsDialog.h"
+#include "SelectElementsDialog.h"
 
 #include <algorithm>
 #include <vector>
@@ -212,6 +213,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_LOCK, &CLinkageView::OnUpdateEditLock)
 	ON_COMMAND(ID_EDIT_SELECT_ALL, &CLinkageView::OnEditSelectall)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SELECT_ALL, &CLinkageView::OnUpdateSelectall)
+	ON_COMMAND(ID_EDIT_SELECT_ELEMENTS, &CLinkageView::OnEditSelectElements)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_SELECT_ELEMENTS, &CLinkageView::OnUpdateSelectElements)
 
 	ON_COMMAND(ID_EDIT_SPLIT, &CLinkageView::OnEditSplit)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SPLIT, &CLinkageView::OnUpdateEditSplit)
@@ -4135,6 +4138,26 @@ void CLinkageView::OnEditSelectall()
 }
 
 void CLinkageView::OnUpdateSelectall( CCmdUI *pCmdUI )
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( m_bAllowEdit && !m_bSimulating && !pDoc->IsEmpty() );
+}
+
+void CLinkageView::OnEditSelectElements()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	CSelectElementsDialog dlg;
+	pDoc->FillElementList( dlg.m_AllElements );
+	if( dlg.DoModal() == IDOK )
+	{
+		InvalidateRect( 0 );
+	}
+}
+
+void CLinkageView::OnUpdateSelectElements( CCmdUI *pCmdUI )
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);

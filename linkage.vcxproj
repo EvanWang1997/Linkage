@@ -772,6 +772,7 @@ exit 0
     <ClInclude Include="linkageView.h" />
     <ClInclude Include="LinkPropertiesDialog.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MyCheckListBox.h" />
     <ClInclude Include="MyDialog.h" />
     <ClInclude Include="MyMFCRibbonGallery.h" />
     <ClInclude Include="NullableColor.h" />
@@ -910,6 +911,7 @@ exit 0
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="MyCheckListBox.cpp" />
     <ClCompile Include="MyDialog.cpp" />
     <ClCompile Include="PointDialog.cpp" />
     <ClCompile Include="PopupGallery.cpp" />

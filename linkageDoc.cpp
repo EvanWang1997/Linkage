@@ -4853,6 +4853,27 @@ void CLinkageDoc::RemoveGearRatio( CConnector *pGearConnector, CLink *pGearLink 
 	}
 }
 
+void CLinkageDoc::FillElementList( ElementList &Elements )
+{
+	POSITION Position = m_Links.GetHeadPosition();
+	while( Position != 0 )
+	{
+		CLink *pLink = m_Links.GetNext( Position );
+		if( pLink == 0 )
+			continue;
+		Elements.AddTail( new CElementItem( pLink ) );
+	}
+
+	Position = m_Connectors.GetHeadPosition();
+	while( Position != NULL )
+	{
+		CConnector* pConnector = m_Connectors.GetNext( Position );
+		if( pConnector == 0 )
+			continue;
+		Elements.AddTail( new CElementItem( pConnector ) );
+	}
+}
+
 void CLinkageDoc::FastenThese( CConnector *pFastenThis, CLink *pFastenToThis )
 {
 	Unfasten( pFastenThis );

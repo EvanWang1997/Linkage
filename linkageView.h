@@ -408,6 +408,8 @@ public:
 	afx_msg void OnEditLock();
 	afx_msg void OnEditSelectall();
 	afx_msg void OnUpdateSelectall( CCmdUI *pCmdUI );
+	afx_msg void OnEditSelectElements();
+	afx_msg void OnUpdateSelectElements( CCmdUI *pCmdUI );
 
 
 	afx_msg void OnAlignHorizontal();
