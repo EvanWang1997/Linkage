@@ -1092,6 +1092,20 @@ bool CLink::GetGearRadii( const GearConnectionList &ConnectionList, std::list<do
 	return RadiusList.size() > 0;
 }
 
+double CLink::GetLinkLength( CConnector *pFromConnector, CConnector *pToConnector )
+{
+	// ADD TRIANGLE STUFF HERE IN The FUTURE!
+	// ADD TRIANGLE STUFF HERE IN The FUTURE!
+	// ADD TRIANGLE STUFF HERE IN The FUTURE!
+	// ADD TRIANGLE STUFF HERE IN The FUTURE!
+	// ADD TRIANGLE STUFF HERE IN The FUTURE!
+
+
+
+	return GetActuatedConnectorDistance( pFromConnector, pToConnector );
+}
+
+
 double CLink::GetLargestGearRadius( const GearConnectionList &ConnectionList, CConnector **ppGearConnector )
 {
 	CConnector *pGearConnector = GetGearConnector();

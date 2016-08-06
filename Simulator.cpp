@@ -723,7 +723,7 @@ class CSimulatorImplementation
 				return false;
 
 			double r = Distance( pFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
-			r = pLink->GetActuatedConnectorDistance( pFixedConnector, pCommonConnector );
+			r = pLink->GetLinkLength( pFixedConnector, pCommonConnector );
  			CFCircle Circle( pFixedConnector->GetTempPoint(), r );
 
 			bHit = bHit2 = CommonCircle.CircleIntersection( Circle, &Intersect, &Intersect2 );
@@ -970,7 +970,7 @@ class CSimulatorImplementation
 				return false;
 
 			double r = Distance( pFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
-			r = pLink->GetActuatedConnectorDistance( pFixedConnector, pCommonConnector );
+			r = pLink->GetLinkLength( pFixedConnector, pCommonConnector );
  			CFCircle Circle( pFixedConnector->GetTempPoint(), r );
 			Intersects( LimitLine, Circle, Intersect, Intersect2, bHit, bHit2, false, false );
  		}
@@ -1035,7 +1035,7 @@ class CSimulatorImplementation
 		 */
 
 		double r;   // = Distance( pFixedConnector->GetOriginalPoint(), pSlider->GetOriginalPoint() );
-		r = pLink->GetActuatedConnectorDistance( pFixedConnector, pSlider );
+		r = pLink->GetLinkLength( pFixedConnector, pSlider );
  		CFCircle Circle( pFixedConnector->GetTempPoint(), r );
 
 		CFPoint Intersect;
@@ -1206,88 +1206,6 @@ class CSimulatorImplementation
 
 		*/
 
-#if 0
-
-		/*
-		 * Rotate the "this" Link so that the slider it on the segment between
-		 * the limit connectors. The other link is fixed and is not changed.
-		 *
-		 * The "this" Link will not have proper temp locations for all
-		 * connectors yet, only the fixed one. It is in an odd screwed up state
-		 * at the moment but will be fixed shortly.
-		 */
-
- 		CFCircle Circle( pFixedConnector->GetTempPoint(), pSlider->GetTempPoint() );
-		Circle.r = Distance( pSlider->GetTempPoint(), pFixedConnector->GetTempPoint() );
-
-		CFPoint Offset = pFixedConnector->GetTempPoint() - pFixedConnector->GetOriginalPoint();
-
- 		CFPoint Intersect;
- 		CFPoint Intersect2;
-
-		if( pSlider->GetSlideRadius() == 0 )
-		{
- 			CConnector *pLimit1 = 0;
- 			CConnector *pLimit2 = 0;
- 			pSlider->GetSlideLimits( pLimit1, pLimit2 );
-
- 			// The limits need to be offset by the offset of the fixed connector
- 			// before they can be used. Offset the limit line to accomplish this.
-
- 			CFLine LimitLine( pLimit1->GetOriginalPoint(), pLimit2->GetOriginalPoint() );
- 			LimitLine += Offset;
-
- 			bool bHit = false;
- 			bool bHit2 = false;
-
-			Intersects( LimitLine, Circle, Intersect, Intersect2, bHit, bHit2, false, false );
-
-			if( !bHit && !bHit2 )
-				return false;
-
-			if( !bHit2 )
-				Intersect2 = Intersect;
-			else if( !bHit )
-				Intersect = Intersect2;
-		}
-		else
-		{
-			CFArc TheArc;
-			if( !pSlider->GetSliderArc( TheArc, true ) )
-				return false;
-
-			TheArc.x += Offset.x;
-			TheArc.y += Offset.y;
-
-			if( !TheArc.CircleIntersection( Circle, &Intersect, &Intersect2 ) )
-				return false;
-
-			if( !TheArc.PointOnArc( Intersect2 ) )
-			{
-				Intersect2 = Intersect;
-				if( !TheArc.PointOnArc( Intersect ) )
-					return false;
-			}
-		}
-
-		// No momentum for this calculation.
-		// The intersection point is the point of intersection if the slider were
-		// in it's original location. it is not the new slider point.
-
-		double d1 = Distance( pSlider->GetTempPoint(), Intersect );
-		double d2 = Distance( pSlider->GetTempPoint(), Intersect2 );
-
-		if( d2 < d1 )
-			Intersect = Intersect2;
-
-		double Angle = GetAngle( pFixedConnector->GetTempPoint(), pSlider->GetTempPoint(), Intersect );
-		Angle = GetClosestAngle( pFixedConnector->GetRotationAngle(), Angle );
-		pFixedConnector->SetRotationAngle( Angle );
-		if( !pLink->RotateAround( pFixedConnector ) )
-			return false;
-
-#endif
-
 		return true;
 	}
 
@@ -1446,11 +1364,8 @@ class CSimulatorImplementation
 			}
 		}
 
-		double r1 = Distance( pFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
-		double r2 = Distance( pOtherFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
-
-		r1 = pLink->GetActuatedConnectorDistance( pFixedConnector, pCommonConnector );
-		r2 = pOtherToRotate->GetActuatedConnectorDistance( pOtherFixedConnector, pCommonConnector );
+		double r1 = pLink->GetLinkLength( pFixedConnector, pCommonConnector );
+		double r2 = pOtherToRotate->GetLinkLength( pOtherFixedConnector, pCommonConnector );
 
 		CFCircle Circle1( pFixedConnector->GetTempPoint(), r1 );
 		CFCircle Circle2( pOtherFixedConnector->GetTempPoint(), r2 );
@@ -1492,126 +1407,6 @@ class CSimulatorImplementation
 		return true;
 	}
 
-	#if 0
-
-	bool JoinToLink( CLink *pLink, CConnector *pFixedConnector, CConnector *pCommonConnector, CLink *pOtherToRotate )
-	{
-		/*
-		 * Rotate the pLink and the other Link so that they are still
-		 * connected. The pLink has only one connection that is in a new
-		 * temp location, pFixedConnector, and the other Link needs to have a
-		 * fixed connector of some sort too (that is not an input!).
-		 *
-		 * The pLink will not have proper temp locations for all
-		 * connectors yet, only the fixed one. It is in an odd screwed up state
-		 * at the moment but will be fixed shortly.
-		 */
-
-		CConnector *pOtherFixedConnector = pOtherToRotate->GetFixedConnector();
-		if( pOtherFixedConnector == 0 )
-		{
-			if( pOtherToRotate->GetFixedConnectorCount() == 0 )
-				return true; // Maybe it can be dealt with later in processing by another chain of Links.
-			else
-				return false;
-		}
-		if( pOtherFixedConnector->IsInput() )
-			return false;
-
-	//	CConnector* pCommonConnector = GetCommonConnector( this, pOtherToRotate );
-	//	if( pCommonConnector == 0 )
-	//		return false;
-
-		// "this" link could be connected to something that can't move. Check to make
-		// sure but don't otherwise move anything else. Check all Links connected to
-		// this other than the pOtherToRotate Link and if any of them have fixed connectors,
-		// return immediately.
-		for( POSITION Position = pLink->GetConnectorList()->GetHeadPosition(); Position != 0; )
-		{
-			CConnector* pTestConnector = pLink->GetConnectorList()->GetNext( Position );
-			if( pTestConnector == 0 || pTestConnector == pFixedConnector || pTestConnector == pFixedConnector )
-				continue;
-			for( POSITION Position2 = pTestConnector->GetLinkList()->GetHeadPosition(); Position2 != 0; )
-			{
-				CLink *pTestLink = pTestConnector->GetLinkList()->GetNext( Position2 );
-				if( pTestLink == 0 || pTestLink == pLink || pTestLink == pOtherToRotate )
-					continue;
-				if( pTestLink->GetFixedConnectorCount() != 0 )
-				{
-					pCommonConnector->SetPositionValid( false );
-					return false;
-				}
-			}
-		}
-
-		// pOtherToRotate could be connected to something that can't move. Check to make
-		// sure but don't otherwise move anything else. Check all Links connected to
-		// pOtherToRotate other than this Link and if any of them have fixed connectors,
-		// return immediately.
-		for( POSITION Position = pOtherToRotate->GetConnectorList()->GetHeadPosition(); Position != 0; )
-		{
-			CConnector* pTestConnector =  pOtherToRotate->GetConnectorList()->GetNext( Position );
-			if( pTestConnector == 0 || pTestConnector == pOtherFixedConnector || pTestConnector == pFixedConnector )
-				continue;
-			for( POSITION Position2 = pTestConnector->GetLinkList()->GetHeadPosition(); Position2 != 0; )
-			{
-				CLink *pTestLink = pTestConnector->GetLinkList()->GetNext( Position2 );
-				if( pTestLink == 0 || pTestLink == pLink || pTestLink == pOtherToRotate )
-					continue;
-				if( pTestLink->GetFixedConnectorCount() != 0 )
-				{
-					pCommonConnector->SetPositionValid( false );
-					return false;
-				}
-			}
-		}
-
-		double r1 = Distance( pFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
-		double r2 = Distance( pOtherFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
-
-		r1 = pLink->GetActuatedConnectorDistance( pFixedConnector, pCommonConnector );
-		r2 = pOtherToRotate->GetActuatedConnectorDistance( pOtherFixedConnector, pCommonConnector );
-
-		CFCircle Circle1( pFixedConnector->GetTempPoint(), r1 );
-		CFCircle Circle2( pOtherFixedConnector->GetTempPoint(), r2 );
-
-		CFPoint Intersect;
-		CFPoint Intersect2;
-
-		if( !Circle1.CircleIntersection( Circle2, &Intersect, &Intersect2 ) )
-			return false;
-
-		// Try to give the point momentum by determining where it would be if
-		// it moved from a previous point through it's current point to some
-		// new point. Use that new point as the basis for selecting the new
-		// location.
-
-		CFLine Line( pCommonConnector->GetPreviousPoint(), pCommonConnector->GetPoint() );
-		Line.SetDistance( Line.GetDistance() * 1.1 );
-		CFPoint SuggestedPoint = Line.GetEnd();
-
-		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );
-		double d2 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect2 );
-
-		if( d2 < d1 )
-			Intersect = Intersect2;
-
-		double Angle = GetAngle( pFixedConnector->GetTempPoint(), Intersect, pFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
-		Angle = GetClosestAngle( pFixedConnector->GetRotationAngle(), Angle );
-		pFixedConnector->SetRotationAngle( Angle );
-		if( !pLink->RotateAround( pFixedConnector ) )
-			return false;
-		pCommonConnector->SetTempFixed( false ); // needed so it can be rotated again.
-		pLink->IncrementMoveCount( -1 ); // Don't count that one twice.
-		Angle = GetAngle( pOtherFixedConnector->GetTempPoint(), Intersect, pOtherFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
-		Angle = GetClosestAngle( pOtherFixedConnector->GetRotationAngle(), Angle );
-		pOtherFixedConnector->SetRotationAngle( Angle );
-		if( !pOtherToRotate->RotateAround( pOtherFixedConnector ) )
-			return false;
-
-		return true;
-	}
-	#endif
 
 	int GetLinkTriangles( CLink *pLink, CList<LinkList*> &Triangles )
 	{

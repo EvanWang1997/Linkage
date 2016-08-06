@@ -304,6 +304,8 @@
 #define IDS_RIBBON_PRINTING             4932
 #define IDS_RIBBON_PRINTOPTIONS         4933
 #define IDS_RIBBON_PRINTFULL            4934
+#define IDS_RIBBON_MEET                 4935
+#define ID_ALIGN_MEET                   4936
 #define IDS_SAMPLE_SIMPLE               5011
 #define IDS_SAMPLE_JANSEN               5012
 #define IDS_SAMPLE_KLANN                5013

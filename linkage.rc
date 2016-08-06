@@ -911,7 +911,7 @@ BEGIN
     IDS_RIBBON_GRIDSNAP     "Grid"
     ID_HELP_ABOUT_TIP       "About"
     ID_HELP_ABOUT_DESCRIPTION "Show version information about this program."
-    IDS_RIBBON_ANGLES       "Angles"
+    IDS_RIBBON_ANGLES       "Hints"
 END
 
 STRINGTABLE
@@ -979,6 +979,8 @@ BEGIN
     IDS_RIBBON_CONFIG       "&Configuration"
     IDS_RIBBON_ALIGNBUTTON  "Align"
     ID_ALIGN_ALIGNBUTTON    "Select from a variety of alignment actions to perform on the selected elements.\nAlign"
+    IDS_RIBBON_MEET	        "Rotate To Meet"
+    ID_ALIGN_MEET           "Rotate the two middle connectors around the outer connectors to be in the same place.\nRotate To Meet"
 END
 
 STRINGTABLE
@@ -1060,7 +1062,7 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_VIEW_ANGLES          "Show right angle, rectangle, and parallelogram hint lines during selection.\nAngles"
+    ID_VIEW_ANGLES          "Show right angle, rectangle, and parallelogram hint lines during selection.\nHints"
     ID_EDIT_SLIDE           "Attach the selected slider to the selected connectors to slide between them.\nSlide"
 END
 

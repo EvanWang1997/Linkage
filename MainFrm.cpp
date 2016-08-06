@@ -444,6 +444,7 @@ void CMainFrame::CreateAlignPanel( CMFCRibbonCategory* pCategory )
 	AppendMenuItem( pAlignButton, IDS_RIBBON_EVENSPACE, ID_ALIGN_EVENSPACE, 65 );
 	AppendMenuItem( pAlignButton, IDS_RIBBON_FLIPH, ID_ALIGN_FLIPH, 60 );
 	AppendMenuItem( pAlignButton, IDS_RIBBON_FLIPV, ID_ALIGN_FLIPV, 61 );
+	AppendMenuItem( pAlignButton, IDS_RIBBON_MEET, ID_ALIGN_MEET, 93 );
 
 	// The menu is only needed in order to make the button work properly.
 	// Without the menu, clicking on the icon in the button will not display

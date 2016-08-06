@@ -103,6 +103,7 @@ public:
 	bool RotateSelected( CFPoint CenterPoint, double Angle );
 	bool StretchSelected( CFRect OriginalRect, CFRect NewRect, _Direction Direction );
 	bool StretchSelected( double Percentage );
+	bool MeetSelected( void );
 	bool MoveCapturedController( CFPoint Point );
 	bool FixupSliderLocations( void );
 	bool FixupGearConnections( void );
@@ -215,6 +216,7 @@ public:
 	bool IsSelectionMeshableGears( void ) { return m_bSelectionMeshable; }
 	bool IsSelectionLockable( void ) { return m_bSelectionLockable; }
 	bool IsSelectionMakeAnchor( void ) { return m_bSelectionMakeAnchor; }
+	bool IsSelectionMeetable( void ) { return m_bSelectionMeetable; }
 
 	void GetSnapLines( CFLine &Line1, CFLine &Line2 ) { Line1 = m_SnapLine[0]; Line2 = m_SnapLine[1]; }
 	
@@ -283,6 +285,7 @@ private:
 	bool m_bSelectionMeshable;
 	bool m_bSelectionLockable;
 	bool m_bSelectionMakeAnchor;
+	bool m_bSelectionMeetable;
 
 	bool CheckMeshableGears( void );
 	bool CheckMeshableGears( CLink *pGear1, CLink *pGear2 );

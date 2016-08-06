@@ -244,7 +244,12 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_ALIGN_FLIPH, &CLinkageView::OnUpdateFlipHorizontal)
 	ON_COMMAND(ID_ALIGN_FLIPV, &CLinkageView::OnFlipVertical)
 	ON_UPDATE_COMMAND_UI(ID_ALIGN_FLIPV, &CLinkageView::OnUpdateFlipVertical)
+	ON_COMMAND(ID_ALIGN_MEET, &CLinkageView::OnRotateToMeet)
+	ON_UPDATE_COMMAND_UI(ID_ALIGN_MEET, &CLinkageView::OnUpdateRotateToMeet)
 
+
+
+	
 	ON_COMMAND(ID_VIEW_LABELS, &CLinkageView::OnViewLabels)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_LABELS, &CLinkageView::OnUpdateViewLabels)
 	ON_COMMAND(ID_VIEW_ANGLES, &CLinkageView::OnViewAngles)
@@ -1185,7 +1190,7 @@ void CLinkageView::DrawData( CRenderer *pRenderer )
 	pRenderer->SelectObject( pOriginalFont, UnscaledUnits( m_UsingFontHeight ) );
 }
 
-void CLinkageView::DrawAlignmentLines( CRenderer *pRenderer )
+void CLinkageView::DrawAlignmentHintLines( CRenderer *pRenderer )
 {
 	if( m_MouseAction != ACTION_NONE )
 		return;
@@ -1234,11 +1239,59 @@ void CLinkageView::DrawAlignmentLines( CRenderer *pRenderer )
 		Points[Counter] = pConnector->GetPoint();
 		pRenderer->LineTo( Scale( Points[Counter] ) );
 	}
+
 	// Finish drawing the polygon when it is a rectangle.
+	// Also draw the rotating hint arrow.
 	if( PointCount == 4 )
+	{
 		pRenderer->LineTo( Scale( Points[0] ) );
 
+		CFCircle Circle1( Points[0], Distance( Points[0], Points[1] ) );
+		CFCircle Circle2( Points[3], Distance( Points[3], Points[2] ) );
+
+		CFPoint Intersect;
+		CFPoint Intersect2;
+
+		if( Circle1.CircleIntersection( Circle2, &Intersect, &Intersect2 ) )
+		{
+			CFPoint SuggestedPoint = ( Points[1] + Points[2] ) / 2;
+
+			double d1 = Distance( SuggestedPoint, Intersect );
+			double d2 = Distance( SuggestedPoint, Intersect2 );
+
+			if( d2 < d1 )
+				Intersect = Intersect2;
+
+			CFArc HintArc( Intersect, Unscale( m_ConnectorRadius ), Intersect, Intersect );
+
+			pRenderer->Arc( Scale( HintArc ) );
+
+			CFLine ArrowLine1( Points[1], Intersect );
+			CFLine ArrowLine2( Points[2], Intersect );
+			ArrowLine1.SetDistance( ArrowLine1.GetDistance() - Unscale( m_ConnectorRadius ) );
+			ArrowLine2.SetDistance( ArrowLine2.GetDistance() - Unscale( m_ConnectorRadius ) );
+			ArrowLine1 = Scale( ArrowLine1 );
+			ArrowLine2 = Scale( ArrowLine2 );
+			pRenderer->DrawArrow( ArrowLine1.GetStart(), ArrowLine1.GetEnd(), UnscaledUnits( 5 ), UnscaledUnits( 9 ) );
+			pRenderer->DrawArrow( ArrowLine2.GetStart(), ArrowLine2.GetEnd(), UnscaledUnits( 5 ), UnscaledUnits( 9 ) );
+
+			//CFLine ArrowLine1( Points[1], Points[2] );
+			//CFLine ArrowLine2( Points[2], Points[1] );
+			//ArrowLine1.SetDistance( ArrowLine1.GetDistance() / 2 );
+			//ArrowLine2.SetDistance( ArrowLine2.GetDistance() / 2 );
+
+			//ArrowLine1 = Scale( ArrowLine1 );
+			//ArrowLine2 = Scale( ArrowLine2 );
+
+			//pRenderer->DrawArrow( ArrowLine1.GetStart(), ArrowLine1.GetEnd(), UnscaledUnits( 5 ), UnscaledUnits( 9 ) );
+			//pRenderer->DrawArrow( ArrowLine2.GetStart(), ArrowLine2.GetEnd(), UnscaledUnits( 5 ), UnscaledUnits( 9 ) );
+
+		}
+	}
+
 	double Angle = GetAngle( Points[1], Points[0], Points[2] );
+	if( Angle < 0 )
+		Angle += 360;
 
 	if( PointCount == 3 ) // && fabs( Angle ) >= 0.5 && fabs( Angle ) < 359.5 )
 	{
@@ -1785,7 +1838,7 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 	DrawSnapLines( pRenderer );
 
 	if( m_bShowAngles )
-		DrawAlignmentLines( pRenderer );
+		DrawAlignmentHintLines( pRenderer );
 
 	if( m_bShowDebug )
 		DrawDebugItems( pRenderer );
@@ -4213,6 +4266,21 @@ void CLinkageView::OnUpdateFlipVertical( CCmdUI *pCmdUI )
 	if( pDoc->GetSelectedLinkCount( true ) > 0 )
 		Selected += 2;
 	pCmdUI->Enable( !m_bSimulating && Selected > 1 && m_bAllowEdit );
+}
+
+void CLinkageView::OnRotateToMeet()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pDoc->MeetSelected();
+	UpdateForDocumentChange();
+}
+
+void CLinkageView::OnUpdateRotateToMeet( CCmdUI *pCmdUI )
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionMeetable() && m_bAllowEdit );
 }
 
 void CLinkageView::OnAlignVertical()
@@ -8357,7 +8425,7 @@ void CLinkageView::ShowSelectedElementCoordinates( void )
 			}
 			double Angle = GetAngle( pConnector1->GetOriginalPoint(), pConnector0->GetOriginalPoint(), pConnector2->GetOriginalPoint() );
 			if( Angle > 180 )
-				Angle = 360 - Angle;
+				Angle = Angle - 360;
 			Text.Format( "%.4lf", Angle );
 			break;
 		}

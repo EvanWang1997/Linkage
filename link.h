@@ -55,6 +55,13 @@ class CGearConnection
 
 typedef CList< class CGearConnection*, class CGearConnection* > GearConnectionList;
 
+class CLinkTriangleConnection
+{
+	public:
+	CConnector *pOriginalConnector;
+	CConnector *pReplacementConnector;
+};
+
 class CLink : public CElement
 {
 	public:
@@ -147,6 +154,7 @@ class CLink : public CElement
 	CConnector *GetConnector( int Index ) const;
 	int GetConnectedSliderCount( void ) { return m_ConnectedSliders.GetCount(); }
 	CConnector *GetConnectedSlider( int Index );
+	double GetLinkLength( CConnector *pFromConnector, CConnector *pToConnector );
 
 	// GetActuatedConnectorDistance will return the distance between the original
 	// locations of the connectors except for when one is being moved with 
@@ -187,7 +195,10 @@ class CLink : public CElement
 	int m_HullCount;
 	bool m_bLocked;
 
+	bool m_bLinkTriangle;
+
 	CConnector m_StrokeConnector;
+	CList<CLinkTriangleConnection> m_LinkTriangleConections;
 	
 	int GetInputConnectorCount( void );
 };

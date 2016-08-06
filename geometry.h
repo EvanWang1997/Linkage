@@ -45,6 +45,8 @@ class CFPoint
 		{ return CFPoint( x - Right.x, y - Right.y ); }
 	_inline CFPoint operator+( const CFPoint &Right )
 		{ return CFPoint( x + Right.x, y + Right.y ); }
+	_inline CFPoint operator/( const double f )
+		{ return CFPoint( x / f, y / f ); }
 	_inline void operator-=( const CFPoint &Right )
 		{ x -= Right.x; y -= Right.y; }
 	_inline bool operator==( const CFPoint &Right ) const

@@ -1505,6 +1505,223 @@ bool CLinkageDoc::StretchSelected( CFRect OriginalRect, CFRect NewRect, _Directi
 	return true;
 }
 
+bool CLinkageDoc::MeetSelected( void )
+{
+	if( !m_bSelectionMeetable )
+		return false;
+
+	CFPoint Points[4];
+	Points[0] = GetSelectedConnector( 0 )->GetOriginalPoint();
+	Points[1] = GetSelectedConnector( 1 )->GetOriginalPoint();
+	Points[2] = GetSelectedConnector( 2 )->GetOriginalPoint();
+	Points[3] = GetSelectedConnector( 3 )->GetOriginalPoint();
+
+	CFCircle Circle1( Points[0], Distance( Points[0], Points[1] ) );
+	CFCircle Circle2( Points[3], Distance( Points[3], Points[2] ) );
+
+	CFPoint Intersect;
+	CFPoint Intersect2;
+
+	if( Circle1.CircleIntersection( Circle2, &Intersect, &Intersect2 ) )
+		m_bSelectionMeetable = true;
+	{
+		CFPoint SuggestedPoint = ( Points[1] + Points[2] ) / 2;
+
+		double d1 = Distance( SuggestedPoint, Intersect );
+		double d2 = Distance( SuggestedPoint, Intersect2 );
+
+		if( d2 < d1 )
+			Intersect = Intersect2;
+
+		GetSelectedConnector( 1 )->SetPoint( Intersect );
+		GetSelectedConnector( 2 )->SetPoint( Intersect );
+	}	
+
+	#if 0
+
+
+	CFPoint AveragePoint;
+	CFPoint LockedPoint;
+	int Counter = 0;
+	bool bInput = false;
+	bool bAnchor = false;
+	bool bIsSlider = false;
+	CFPoint ForcePoint;
+	int Sliders = 0;
+	int CombinedState = 0;
+	unsigned int CombinedLayers = 0;
+	int LockedLinks = 0;
+	CConnector *pLockedConnector = 0;
+	int Connectors = m_SelectedConnectors.GetCount();
+
+	POSITION Position = m_SelectedConnectors.GetHeadPosition();
+	CConnector *pKeepConnector = m_SelectedConnectors.GetAt( Position );
+
+	for( ; Position != NULL; )
+	{
+		CConnector* pConnector = m_SelectedConnectors.GetNext( Position );
+		if( pConnector == 0 || !pConnector->IsSelected() )
+			continue;
+
+		POSITION Position2 = pConnector->GetLinkList()->GetHeadPosition();
+		while( Position2 != 0 )
+		{
+			CLink *pLink = pConnector->GetLinkList()->GetNext( Position2 );
+			if( pLink == 0 || !pLink->IsLocked() )
+				continue;
+			++LockedLinks;
+			pLockedConnector = pConnector;
+			LockedPoint = pLockedConnector->GetOriginalPoint();
+		}
+
+		bInput |= pConnector->IsInput();
+		bAnchor |= pConnector->IsAnchor();
+		bIsSlider |= pConnector->IsSlider();
+
+		if( pConnector->IsSlider() )
+		{
+			++Sliders;
+			pKeepConnector = pConnector;
+		}
+	}
+
+	if( Sliders > 1 )
+		return false;
+
+	if( LockedLinks > 1 )
+		return false;
+
+	if( m_SelectedLinks.GetCount() > 0 && Sliders > 0 )
+		return false;
+
+	if( pKeepConnector->IsSlider() && LockedLinks > 0 && pLockedConnector != pKeepConnector )
+		return false;
+
+	if( bSaveUndoState )
+		PushUndo();
+
+	Position = m_SelectedConnectors.GetHeadPosition();
+
+	for( Counter = 0; Position != NULL; ++Counter )
+	{
+		CConnector* pConnector = m_SelectedConnectors.GetNext( Position );
+		if( pConnector == 0 || !pConnector->IsSelected() )
+			continue;
+
+		CombinedLayers |= pConnector->GetLayers();
+
+		AveragePoint += pConnector->GetOriginalPoint();
+
+		// After this is stuff to be done to the links that are being deleted.
+		if( pConnector == pKeepConnector )
+			continue;
+
+		POSITION Position2 = pConnector->GetLinkList()->GetHeadPosition();
+		while( Position2 != 0 )
+		{
+			CLink *pLink = pConnector->GetLinkList()->GetNext( Position2 );
+			if( pLink == 0 )
+				continue;
+
+			pLink->RemoveConnector( pConnector );
+			pLink->AddConnector( pKeepConnector );
+			pKeepConnector->AddLink( pLink );
+		}
+
+		m_Connectors.Remove( pConnector );
+		m_IdentifiedConnectors.ClearBit( pConnector->GetIdentifier() );
+		delete pConnector;
+	}
+
+	/*
+	 * Check for sliding connectors that have any of the joined conectors as their limits. Change the limits to use the new joined connector.
+	 * IMPORTANT: The joined connectors are all deleted except for the one being kept. The pointers are stil available but are not pointing to
+	 * any valid memory!
+	 */
+	Position = m_Connectors.GetHeadPosition();
+	while( Position != NULL )
+	{
+		CConnector *pConnector = m_Connectors.GetNext( Position );
+		if( pConnector == NULL )
+			continue;
+
+		CConnector *pLimit1 = NULL;
+		CConnector *pLimit2 = NULL;
+
+		if( pConnector->GetSlideLimits( pLimit1, pLimit2 ) )
+		{
+			if( pLimit1->IsSelected() && pLimit2->IsSelected() )
+			{
+				pConnector->SlideBetween();
+				continue;
+			}
+
+			POSITION Position2 = m_SelectedConnectors.GetHeadPosition();
+
+			while( Position2 != NULL )
+			{
+				CConnector* pTestConnector = m_SelectedConnectors.GetNext( Position2 );
+				if( pTestConnector == 0 || !pTestConnector->IsSelected() || pTestConnector == pKeepConnector )
+					continue;
+
+				if( pLimit1 == pTestConnector )
+					pLimit1 = pKeepConnector;
+				else if( pLimit2 == pTestConnector )
+					pLimit2 = pKeepConnector;
+				else
+					continue;
+
+				pConnector->SlideBetween( pLimit1, pLimit2 );
+			}
+		}
+	}
+
+	AveragePoint.x /= Counter;
+	AveragePoint.y /= Counter;
+
+	if( pLockedConnector != 0 )
+		AveragePoint = LockedPoint;
+
+	if( !pKeepConnector->IsSlider() )
+		pKeepConnector->SetPoint( AveragePoint );
+
+	pKeepConnector->SetAsInput( bInput );
+	pKeepConnector->SetAsAnchor( bAnchor );
+	pKeepConnector->SetLayers( CombinedLayers );
+
+	m_SelectedConnectors.RemoveAll();
+	m_SelectedConnectors.AddHead( pKeepConnector );
+
+	/*
+	 * Now that all connectors are joined, join the new single connector to all of the selected links.
+	 */
+	if( m_SelectedLinks.GetCount() )
+	{
+		Position = m_SelectedLinks.GetHeadPosition();
+		while( Position != 0 )
+		{
+			CLink *pLink = m_SelectedLinks.GetNext( Position );
+			if( pLink == 0 )
+				continue;
+			pLink->AddConnector( pKeepConnector );
+			pKeepConnector->AddLink( pLink );
+		}
+	}
+
+	#endif
+
+	NormalizeConnectorLinks();
+
+	SetSelectedModifiableCondition();
+
+	FixupSliderLocations();
+
+    SetModifiedFlag( true );
+
+	return true;
+}
+
+
 bool CLinkageDoc::MoveCapturedController( CFPoint Point )
 {
 	CFPoint Temp = m_pCapturedController->GetOriginalPoint();
@@ -3939,6 +4156,25 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 	m_bSelectionLineable = SelectedRealLinks == 0 && SelectedConnectors >= 3;
 	m_AlignConnectorCount = SelectedRealLinks > 0 ? 0 : SelectedConnectors;
 	m_bSelectionUnfastenable = FastenedCount > 0;
+
+	m_bSelectionMeetable = false;
+	if( SelectedRealLinks == 0 && SelectedConnectors == 4 && GetSelectedConnectorCount() == 4 )
+	{
+		CFPoint Points[4];
+		Points[0] = GetSelectedConnector( 0 )->GetOriginalPoint();
+		Points[1] = GetSelectedConnector( 1 )->GetOriginalPoint();
+		Points[2] = GetSelectedConnector( 2 )->GetOriginalPoint();
+		Points[3] = GetSelectedConnector( 3 )->GetOriginalPoint();
+
+		CFCircle Circle1( Points[0], Distance( Points[0], Points[1] ) );
+		CFCircle Circle2( Points[3], Distance( Points[3], Points[2] ) );
+
+		CFPoint Intersect;
+		CFPoint Intersect2;
+
+		if( Circle1.CircleIntersection( Circle2, &Intersect, &Intersect2 ) )
+			m_bSelectionMeetable = true;
+	}
 
 	m_bSelectionFastenable = false;
 	if( SelectedDrawingElements > 0 && SelectedMechanismLinks == 1 )
