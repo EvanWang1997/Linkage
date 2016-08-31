@@ -8071,11 +8071,11 @@ void CLinkageView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 	{
 		case '-':
 		case '_':
-			OnViewZoomin();
+			OnViewZoomout();
 			break;
 		case '+':
 		case '=':
-			OnViewZoomout();
+			OnViewZoomin();
 			break;
 	}
 	CView::OnChar(nChar, nRepCnt, nFlags);

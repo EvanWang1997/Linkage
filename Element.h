@@ -78,12 +78,12 @@ class CElement
 	CNullableColor GetColor( void ) { return m_Color; }
 	void SetColor( CNullableColor Color ) { m_Color = Color; }
 
-	CElementItem * GetFastenedTo( void ) { return m_pFastenedTo.GetElement() == 0 ? 0 : &m_pFastenedTo; }
-	CLink * GetFastenedToLink( void ) { return m_pFastenedTo.GetLink() == 0 ? 0 : m_pFastenedTo.GetLink(); }
-	CConnector * GetFastenedToConnector( void ) { return m_pFastenedTo.GetConnector() == 0 ? 0 : m_pFastenedTo.GetConnector(); }
+	CElementItem * GetFastenedTo( void ) { return m_FastenedTo.GetElement() == 0 ? 0 : &m_FastenedTo; }
+	CLink * GetFastenedToLink( void ) { return m_FastenedTo.GetLink() == 0 ? 0 : m_FastenedTo.GetLink(); }
+	CConnector * GetFastenedToConnector( void ) { return m_FastenedTo.GetConnector() == 0 ? 0 : m_FastenedTo.GetConnector(); }
 	void UnfastenTo( void );
-	void FastenTo( CLink *pFastenLink ) { m_pFastenedTo = pFastenLink; }
-	void FastenTo( CConnector *pFastenConnector ) { m_pFastenedTo = pFastenConnector; }
+	void FastenTo( CLink *pFastenLink ) { m_FastenedTo = pFastenLink; }
+	void FastenTo( CConnector *pFastenConnector ) { m_FastenedTo = pFastenConnector; }
 
 	ElementList* GetFastenedElementList( void ) { return &m_FastenedElements; }
 	void AddFastenConnector( class CConnector *pConnector );
@@ -102,7 +102,7 @@ class CElement
 	bool m_bMeasurementElement;
 	bool m_bPositionValid; // True until there is some sort of binding problem
 	CNullableColor m_Color;
-	CElementItem m_pFastenedTo;
+	CElementItem m_FastenedTo;
 	ElementList m_FastenedElements;
 };
 

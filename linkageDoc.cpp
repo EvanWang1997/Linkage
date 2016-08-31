@@ -1448,6 +1448,8 @@ bool CLinkageDoc::StretchSelected( double Percentage )
 
 bool CLinkageDoc::StretchSelected( CFRect OriginalRect, CFRect NewRect, _Direction Direction )
 {
+	PushUndo();
+
 	POSITION Position = m_Connectors.GetHeadPosition();
 	while( Position != 0 )
 	{
