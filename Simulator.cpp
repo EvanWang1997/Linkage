@@ -344,6 +344,9 @@ class CSimulatorImplementation
 							TotalManualControlDistance += ActuatorDifference;
 						}
 					}
+
+					if( pLink->GetFixedConnectorCount() > 1 )
+						pLink->GetConnector( 1 )->SetPositionValid( false );
 				}
 
 				bResult = MoveSimulation( pDoc );
