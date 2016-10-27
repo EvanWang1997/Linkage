@@ -181,6 +181,8 @@
 #define ID_FILE_SAVEVIDEO               4198
 #define IDS_RIBBON_SAVEVIDEO            4199
 #define IDB_INSERT_POPUP_GALLERY2       4200
+#define ID_EDIT_MOMENTUM				4201
+#define IDS_RIBBON_MOMENTUM				4202
 #define ID_MECHANISM_RESET              4771
 #define ID_MECHANISM_SIMULATE           4772
 #define ID_EDIT_COMBINE                 4774

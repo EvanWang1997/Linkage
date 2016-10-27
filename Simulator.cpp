@@ -3,6 +3,9 @@
 #include "linkageDoc.h"
 #include "DebugItem.h"
 
+static const double NO_MOMENTUM = 1.0;
+static const double MOMENTUM = 2.5;
+
 extern CDebugItemList DebugItemList;
 
 #define SWAP(x,y) do \
@@ -20,6 +23,7 @@ class CSimulatorImplementation
 	long m_SimulationStep;
 //	int m_DesiredSimulationStep;
 	bool m_bSimulationValid;
+	bool m_bUseIncreasedMomentum = false;
 
 	CSimulatorImplementation()
 	{
@@ -29,6 +33,11 @@ class CSimulatorImplementation
 
 	~CSimulatorImplementation()
 	{
+	}
+
+	void Options( bool bUseIncreasedMomentum )
+	{
+		m_bUseIncreasedMomentum = bUseIncreasedMomentum;
 	}
 
 	bool IsSimulationValid( void ) { return m_bSimulationValid; }
@@ -1087,8 +1096,9 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine TestLine( pSlider->GetPreviousPoint(), pSlider->GetPoint() );
-		TestLine.SetDistance( TestLine.GetDistance() * 1.1 );
+		TestLine.SetDistance( TestLine.GetDistance() * ( m_bUseIncreasedMomentum ? MOMENTUM : NO_MOMENTUM ) );
 		CFPoint SuggestedPoint = TestLine.GetEnd();
+
 
 		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );
 		double d2 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect2 );
@@ -1162,9 +1172,6 @@ class CSimulatorImplementation
 		// Get a line through the new location of the link slide limits.
 		CFLine NewSlideLine( pLimit1->GetPoint(), pLimit2->GetPoint() );
 
-		DebugItemList.AddTail( new CDebugItem( ConnectedLine ) );
-		DebugItemList.AddTail( new CDebugItem( NewSlideLine ) );
-
 		// Get the change in angle from the original to the new slide limit line.
 		double ChangeAngle = NewSlideLine.GetAngle() - SlideLine.GetAngle();
 
@@ -1178,20 +1185,15 @@ class CSimulatorImplementation
 		// Change the connected slider limit line to be the proper new angle.
 		ConnectedLine.m_End.RotateAround( ConnectedLine.m_Start, ChangeAngle );
 
-		DebugItemList.AddTail( new CDebugItem( ConnectedLine ) );
-
 		// Get the intersection of the connected slider limits and the link slider limits.
 		if( !Intersects( ConnectedLine, NewSlideLine, Intersect ) )
 			return false;
-
-		DebugItemList.AddTail( new CDebugItem( Intersect ) );
 
 		// Find the location of the slider on the link based on its distance from the intersection and being on the new limit line.
 		// Use the NewSlideLine to measure this because it is already at the proper angle.
 		NewSlideLine -= NewSlideLine.m_Start;
 		NewSlideLine += Intersect;
 		NewSlideLine.SetDistance( IntersectToSlider );
-		DebugItemList.AddTail( new CDebugItem( NewSlideLine ) );
 
 		ChangeAngle = GetClosestAngle( pSlider1->GetRotationAngle(), ChangeAngle );
 		pSlider1->SetRotationAngle( ChangeAngle );
@@ -1385,7 +1387,7 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine Line( pCommonConnector->GetPreviousPoint(), pCommonConnector->GetPoint() );
-		Line.SetDistance( Line.GetDistance() * 1.1 );
+		Line.SetDistance( Line.GetDistance() * ( m_bUseIncreasedMomentum ? MOMENTUM : NO_MOMENTUM ) );
 		CFPoint SuggestedPoint = Line.GetEnd();
 
 		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );
@@ -1709,7 +1711,7 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine Line( pCommonConnector->GetPreviousPoint(), pCommonConnector->GetPoint() );
-		Line.SetDistance( Line.GetDistance() * 1.1 );
+		Line.SetDistance( Line.GetDistance() * ( m_bUseIncreasedMomentum ? MOMENTUM : NO_MOMENTUM ) );
 		CFPoint SuggestedPoint = Line.GetEnd();
 
 		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );
@@ -2214,3 +2216,11 @@ bool CSimulator::IsSimulationValid( void )
 		return false;
 	return m_pImplementation->IsSimulationValid();
 }
+
+void CSimulator::Options( bool bUseIncreasedMomentum )
+{
+	if( m_pImplementation == 0 )
+		return;
+	m_pImplementation->Options( bUseIncreasedMomentum );
+}
+

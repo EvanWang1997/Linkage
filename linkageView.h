@@ -146,6 +146,7 @@ private:
 	bool m_bShowLargeFont;
 	bool m_bShowGrid;
 	bool m_bShowParts;
+	bool m_bUseMoreMomentum;
 	double m_Zoom;
 	double m_ScreenZoom;
 	CFPoint m_ScrollPosition;
@@ -454,6 +455,8 @@ public:
 	afx_msg void OnViewParts();
 	afx_msg void OnUpdateViewGrid(CCmdUI *pCmdUI);
 	afx_msg void OnViewGrid();
+	afx_msg void OnUpdateMoreMomentum(CCmdUI *pCmdUI);
+	afx_msg void OnMoreMomentum();
 	afx_msg void OnUpdateViewLargeFont(CCmdUI *pCmdUI);
 	afx_msg void OnViewLargeFont();
 	afx_msg void OnViewDebug();

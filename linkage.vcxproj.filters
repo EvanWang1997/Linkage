@@ -264,6 +264,9 @@
     <ClInclude Include="MyCheckListBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="simplegif.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\banner.bmp">

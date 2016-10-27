@@ -785,6 +785,7 @@ exit 0
     <ClInclude Include="SampleGallery.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="SelectElementsDialog.h" />
+    <ClInclude Include="simplegif.h" />
     <ClInclude Include="Simulator.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="stdbool.h" />

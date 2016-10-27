@@ -78,6 +78,8 @@ static const int CONNECTORRADIUS = 5;
 static const int CONNECTORTRIANGLE = 6;
 static const int ANCHORBASE = 4;
 
+static const char* SETTINGS = "Settings";
+
 #ifdef _DEBUG
 //#define new DEBUG_NEW
 #undef THIS_FILE
@@ -258,6 +260,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SNAP, &CLinkageView::OnUpdateEditSnap)
 	ON_COMMAND(ID_EDIT_GRIDSNAP, &CLinkageView::OnEditGridSnap)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_GRIDSNAP, &CLinkageView::OnUpdateEditGridSnap)
+	ON_COMMAND(ID_EDIT_MOMENTUM, &CLinkageView::OnMoreMomentum)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_MOMENTUM, &CLinkageView::OnUpdateMoreMomentum)
 
 	ON_COMMAND(ID_EDIT_AUTOJOIN, &CLinkageView::OnEditAutoJoin)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_AUTOJOIN, &CLinkageView::OnUpdateEditAutoJoin)
@@ -376,6 +380,7 @@ CLinkageView::CLinkageView()
 	m_bShowAnicrop = false;
 	m_bShowLargeFont = false;
 	m_bShowGrid = false;
+	m_bUseMoreMomentum = false;
 	m_ScreenZoom = 1;
 	m_ScrollPosition.SetPoint( 0, 0 );
 	m_ScreenScrollPosition.SetPoint( 0, 0 );
@@ -435,26 +440,27 @@ CLinkageView::CLinkageView()
 	CWinApp *pApp = AfxGetApp();
 	if( pApp != 0 )
 	{
-		m_bShowLabels = pApp->GetProfileInt( "Settings", "Showlabels", 1 ) != 0;
-		m_bShowAngles = pApp->GetProfileInt( "Settings", "Showangles", 1 ) != 0;
-		m_bShowDebug = pApp->GetProfileInt( "Settings", "Showdebug", 0 ) != 0;
-		m_bShowBold = pApp->GetProfileInt( "Settings", "Showdata", 0 ) != 0;
-		m_bShowData = pApp->GetProfileInt( "Settings", "ShowBold", 0 ) != 0;
-		m_bSnapOn = pApp->GetProfileInt( "Settings", "Snapon", 1 ) != 0;
-		m_bGridSnap = pApp->GetProfileInt( "Settings", "Gridsnap", 1 ) != 0;
-		m_bAutoJoin = pApp->GetProfileIntA( "Settings", "AutoJoin", 1 ) != 0;
-		m_bNewLinksSolid = pApp->GetProfileInt( "Settings", "Newlinkssolid", 0 ) != 0;
-		m_bShowAnicrop = pApp->GetProfileInt( "Settings", "Showanicrop", 0 ) != 0;
-		m_bShowLargeFont = pApp->GetProfileInt( "Settings", "Showlargefont", 0 ) != 0;
-		m_bPrintFullSize = pApp->GetProfileInt( "Settings", "PrintFullSize", 0 ) != 0;
-		m_bShowGrid = pApp->GetProfileInt( "Settings", "ShowGrid", 0 ) != 0;
-		m_bShowParts = pApp->GetProfileInt( "Settings", "ShowParts", 0 ) != 0;
+		m_bShowLabels = pApp->GetProfileInt( SETTINGS, "Showlabels", 1 ) != 0;
+		m_bShowAngles = pApp->GetProfileInt( SETTINGS, "Showangles", 1 ) != 0;
+		m_bShowDebug = pApp->GetProfileInt( SETTINGS, "Showdebug", 0 ) != 0;
+		m_bShowBold = pApp->GetProfileInt( SETTINGS, "Showdata", 0 ) != 0;
+		m_bShowData = pApp->GetProfileInt( SETTINGS, "ShowBold", 0 ) != 0;
+		m_bSnapOn = pApp->GetProfileInt( SETTINGS, "Snapon", 1 ) != 0;
+		m_bGridSnap = pApp->GetProfileInt( SETTINGS, "Gridsnap", 1 ) != 0;
+		m_bAutoJoin = pApp->GetProfileIntA( SETTINGS, "AutoJoin", 1 ) != 0;
+		m_bNewLinksSolid = pApp->GetProfileInt( SETTINGS, "Newlinkssolid", 0 ) != 0;
+		m_bShowAnicrop = pApp->GetProfileInt( SETTINGS, "Showanicrop", 0 ) != 0;
+		m_bShowLargeFont = pApp->GetProfileInt( SETTINGS, "Showlargefont", 0 ) != 0;
+		m_bPrintFullSize = pApp->GetProfileInt( SETTINGS, "PrintFullSize", 0 ) != 0;
+		m_bShowGrid = pApp->GetProfileInt( SETTINGS, "ShowGrid", 0 ) != 0;
+		m_bShowParts = pApp->GetProfileInt( SETTINGS, "ShowParts", 0 ) != 0;
+		m_bUseMoreMomentum = pApp->GetProfileInt( SETTINGS, "MoreMomentum", 0 ) != 0;
 		m_bAllowEdit = !m_bShowParts;
 		GetSetGroundDimensionVisbility( false );
-		m_bShowDimensions = pApp->GetProfileInt( "Settings", "Showdimensions", 0 ) != 0;
-		m_bShowGroundDimensions = pApp->GetProfileInt( "Settings", "Showgrounddimensions", 1 ) != 0;
-		m_SelectedEditLayers = (unsigned int)pApp->GetProfileInt( "Settings", "EditLayers", 0xFFFFFFFF );
-		m_SelectedViewLayers = (unsigned int)pApp->GetProfileInt( "Settings", "ViewLayers", 0xFFFFFFFF );
+		m_bShowDimensions = pApp->GetProfileInt( SETTINGS, "Showdimensions", 0 ) != 0;
+		m_bShowGroundDimensions = pApp->GetProfileInt( SETTINGS, "Showgrounddimensions", 1 ) != 0;
+		m_SelectedEditLayers = (unsigned int)pApp->GetProfileInt( SETTINGS, "EditLayers", 0xFFFFFFFF );
+		m_SelectedViewLayers = (unsigned int)pApp->GetProfileInt( SETTINGS, "ViewLayers", 0xFFFFFFFF );
 
 		m_Rotate0 = pApp->LoadIcon( IDI_ICON5 );
 		m_Rotate1 = pApp->LoadIcon( IDI_ICON1 );
@@ -488,13 +494,13 @@ void CLinkageView::GetSetGroundDimensionVisbility( bool bSave )
 
 	if( bSave )
 	{
-		pApp->WriteProfileInt( "Settings", ShowDimensionsName, m_bShowDimensions ? 1 : 0  );
-		pApp->WriteProfileInt( "Settings", ShowGroundDimensionsName, m_bShowGroundDimensions ? 1 : 0  );
+		pApp->WriteProfileInt( SETTINGS, ShowDimensionsName, m_bShowDimensions ? 1 : 0  );
+		pApp->WriteProfileInt( SETTINGS, ShowGroundDimensionsName, m_bShowGroundDimensions ? 1 : 0  );
 	}
 	else
 	{
-		m_bShowDimensions = pApp->GetProfileInt( "Settings", ShowDimensionsName, 0 ) != 0;
-		m_bShowGroundDimensions = pApp->GetProfileInt( "Settings", ShowGroundDimensionsName, 1 ) != 0;
+		m_bShowDimensions = pApp->GetProfileInt( SETTINGS, ShowDimensionsName, 0 ) != 0;
+		m_bShowGroundDimensions = pApp->GetProfileInt( SETTINGS, ShowGroundDimensionsName, 1 ) != 0;
 	}
 }
 
@@ -518,23 +524,24 @@ void CLinkageView::SaveSettings( void )
 	if( pApp == 0 )
 		return;
 
-	pApp->WriteProfileInt( "Settings", "Showlabels", m_bShowLabels ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "Showangles", m_bShowAngles ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "Showdebug", m_bShowDebug ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "ShowBold", m_bShowBold ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "Showdata", m_bShowData ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "Snapon", m_bSnapOn ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "Gridsnap", m_bGridSnap ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "AutoJoin", m_bAutoJoin ? 1 : 0 );
-	pApp->WriteProfileInt( "Settings", "Newlinkssolid", m_bNewLinksSolid ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "Showanicrop", m_bShowAnicrop ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "Showlargefont", m_bShowLargeFont ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "ShowGrid", m_bShowGrid ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "ShowParts", m_bShowParts ? 1 : 0  );
-	pApp->WriteProfileInt( "Settings", "PrintFullSize", m_bPrintFullSize ? 1 : 0 );
+	pApp->WriteProfileInt( SETTINGS, "Showlabels", m_bShowLabels ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "Showangles", m_bShowAngles ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "Showdebug", m_bShowDebug ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "ShowBold", m_bShowBold ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "Showdata", m_bShowData ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "Snapon", m_bSnapOn ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "Gridsnap", m_bGridSnap ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "AutoJoin", m_bAutoJoin ? 1 : 0 );
+	pApp->WriteProfileInt( SETTINGS, "Newlinkssolid", m_bNewLinksSolid ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "Showanicrop", m_bShowAnicrop ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "Showlargefont", m_bShowLargeFont ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "ShowGrid", m_bShowGrid ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "MoreMomentum", m_bUseMoreMomentum ? 1 : 0 );
+	pApp->WriteProfileInt( SETTINGS, "ShowParts", m_bShowParts ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "PrintFullSize", m_bPrintFullSize ? 1 : 0 );
 	GetSetGroundDimensionVisbility( true );
-	pApp->WriteProfileInt( "Settings", "EditLayers", (int)m_SelectedEditLayers  );
-	pApp->WriteProfileInt( "Settings", "ViewLayers", (int)m_SelectedViewLayers );
+	pApp->WriteProfileInt( SETTINGS, "EditLayers", (int)m_SelectedEditLayers  );
+	pApp->WriteProfileInt( SETTINGS, "ViewLayers", (int)m_SelectedViewLayers );
 }
 
 CLinkageView::~CLinkageView()
@@ -3438,6 +3445,7 @@ void CLinkageView::StartMechanismSimulate( enum _SimulationControl SimulationCon
 	pDoc->Reset( true );
 
 	m_Simulator.Reset();
+	m_Simulator.Options( m_bUseMoreMomentum );
 	m_bSimulating = true;
 	m_SimulationControl = SimulationControl;
 	m_SimulationSteps = 0;
@@ -4723,6 +4731,19 @@ void CLinkageView::OnViewLargeFont()
 void CLinkageView::OnUpdateViewGrid(CCmdUI *pCmdUI)
 {
 	pCmdUI->SetCheck( m_bShowGrid );
+	pCmdUI->Enable( !m_bSimulating );
+}
+
+void CLinkageView::OnMoreMomentum()
+{
+	m_bUseMoreMomentum = !m_bUseMoreMomentum;
+	SaveSettings();
+	InvalidateRect( 0 );
+}
+
+void CLinkageView::OnUpdateMoreMomentum(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck( m_bUseMoreMomentum );
 	pCmdUI->Enable( !m_bSimulating );
 }
 

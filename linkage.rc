@@ -510,8 +510,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,3,9,0
- PRODUCTVERSION 3,3,9,0
+ FILEVERSION 3,3,10,0
+ PRODUCTVERSION 3,3,10,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -527,12 +527,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.3.9.0"
+            VALUE "FileVersion", "3.3.10.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2016 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.3.9.0"
+            VALUE "ProductVersion", "3.3.10.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -712,7 +712,9 @@ END
 STRINGTABLE
 BEGIN
     IDS_RIBBON_VIEW_GRID    "Show Grid"
-    ID_VIEW_GRID            "Display an automatically sized grid.\nShowGrid"
+	IDS_RIBBON_MOMENTUM		"Use Momentum"
+    ID_VIEW_GRID            "Display an automatically sized grid.\nShow Grid"
+	ID_EDIT_MOMENTUM		"Give moving parts momentum.\Use Momentum"
     IDS_RIBBON_VIEW_PARTS   "Parts List"
     ID_VIEW_PARTS           "Display the mechanism as separate parts.\nParts List"
 END
