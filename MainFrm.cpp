@@ -8,6 +8,7 @@
 #include "AboutDialog.h"
 #include "LinkageDoc.h"
 #include "resource.h"
+#include "MyMFCRibbonCategory.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -598,11 +599,26 @@ void CMainFrame::CreateHelpButtons( void )
 	m_wndRibbonBar.AddToTabs( pHelpButton );
 }
 
-static CMFCRibbonCategory *CreateCategory( CMyMFCRibbonBar *pRibbonBar, UINT StringId )
+CMFCRibbonCategory* CMainFrame::CreateCategory( CMyMFCRibbonBar *pRibbonBar, UINT StringId )
 {
+	static CMyMFCRibbonCategory *pFirstCategory = 0;
 	CValidatedString strTemp;
 	strTemp.LoadString(StringId);
-	return pRibbonBar->AddCategory(strTemp, IDB_FILESMALL, IDB_FILELARGE, CSize( 16, 16 ), CSize( 32, 32 ));
+	CMFCRibbonCategory* pCat = pRibbonBar->AddCategory(strTemp, 0, 0, CSize( 0, 0 ), CSize( 0, 0 ));
+	if( pCat != 0 )
+	{
+		CMyMFCRibbonCategory *pMainCat = (CMyMFCRibbonCategory*)m_wndRibbonBar.GetMainCategory();
+		if( pMainCat != 0 )
+			((CMyMFCRibbonCategory*)pCat)->SetImageResources( pMainCat );
+		else if( pFirstCategory != 0 )
+			((CMyMFCRibbonCategory*)pCat)->SetImageResources( pFirstCategory );
+		else
+		{
+			((CMyMFCRibbonCategory*)pCat)->SetImageResources( IDB_FILESMALL, IDB_FILELARGE, CSize( 16, 16 ), CSize( 32, 32 ) );
+			pFirstCategory = (CMyMFCRibbonCategory*)pCat;
+		}
+	}
+	return pCat;
 }
 
 void CMainFrame::CreateQuickAccessCommands( void )

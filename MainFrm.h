@@ -14,18 +14,13 @@
 
 #pragma once
 #include "Resource.h"
+#include "MyMFCRibbonBar.h"
 
 //class COutlookBar : public CMFCOutlookBar
 //{
 //	virtual BOOL AllowShowOnPaneMenu() const { return TRUE; }
 //	virtual void GetPaneName(CString& strName) const { BOOL bNameValid = strName.LoadString(IDS_OUTLOOKBAR); ASSERT(bNameValid); }
 //};
-
-class CMyMFCRibbonBar : public CMFCRibbonBar
-{
-	public:
-	void SetPrintPreviewMode( BOOL bSet = 1 ) { CMFCRibbonBar::SetPrintPreviewMode( bSet ); }
-};
 
 class CMainFrame : public CFrameWndEx
 {
@@ -62,6 +57,7 @@ protected:  // control bar embedded members
 
 private:
 	void CreateMainCategory( void );
+	CMFCRibbonCategory *CreateCategory( CMyMFCRibbonBar *pRibbonBar, UINT StringId );
 	void CreateHomeCategory( void );
 	void CreatePrintingCategory( void );
 	void CreateQuickAccessCommands( void );

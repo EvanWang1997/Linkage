@@ -118,6 +118,12 @@
     <ClCompile Include="MyCheckListBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MyMFCRibbonCategory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MyMFCRibbonBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDialog.h">
@@ -267,6 +273,12 @@
     <ClInclude Include="simplegif.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MyMFCRibbonCategory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MyMFCRibbonBar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\banner.bmp">
@@ -376,6 +388,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\icon9.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\filesmallscaled150.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

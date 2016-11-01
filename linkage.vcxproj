@@ -774,6 +774,8 @@ exit 0
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MyCheckListBox.h" />
     <ClInclude Include="MyDialog.h" />
+    <ClInclude Include="MyMFCRibbonBar.h" />
+    <ClInclude Include="MyMFCRibbonCategory.h" />
     <ClInclude Include="MyMFCRibbonGallery.h" />
     <ClInclude Include="NullableColor.h" />
     <ClInclude Include="PointDialog.h" />
@@ -914,6 +916,8 @@ exit 0
     </ClCompile>
     <ClCompile Include="MyCheckListBox.cpp" />
     <ClCompile Include="MyDialog.cpp" />
+    <ClCompile Include="MyMFCRibbonBar.cpp" />
+    <ClCompile Include="MyMFCRibbonCategory.cpp" />
     <ClCompile Include="PointDialog.cpp" />
     <ClCompile Include="PopupGallery.cpp" />
     <ClCompile Include="quickxml.cpp" />
@@ -952,6 +956,7 @@ exit 0
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\filesmallscaled150.bmp" />
     <Image Include="res\icon9.ico" />
     <Image Include="res\popup_gallery_2.bmp" />
   </ItemGroup>

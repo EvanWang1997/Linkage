@@ -181,8 +181,8 @@
 #define ID_FILE_SAVEVIDEO               4198
 #define IDS_RIBBON_SAVEVIDEO            4199
 #define IDB_INSERT_POPUP_GALLERY2       4200
-#define ID_EDIT_MOMENTUM				4201
-#define IDS_RIBBON_MOMENTUM				4202
+#define ID_EDIT_MOMENTUM                4201
+#define IDS_RIBBON_MOMENTUM             4202
 #define ID_MECHANISM_RESET              4771
 #define ID_MECHANISM_SIMULATE           4772
 #define ID_EDIT_COMBINE                 4774
@@ -480,6 +480,7 @@
 #define ID_FILE_PRINTFULL               5935
 #define IDD_EXPORTIMAGE                 6000
 #define IDD_SELECTELEMENTS              6006
+#define IDB_BITMAP7                     6008
 #define IDC_PREVIEW                     8000
 #define IDC_LIST1                       8001
 #define IDC_COMBOBOXEX1                 8004
@@ -489,7 +490,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6008
+#define _APS_NEXT_RESOURCE_VALUE        6009
 #define _APS_NEXT_COMMAND_VALUE         7002
 #define _APS_NEXT_CONTROL_VALUE         8006
 #define _APS_NEXT_SYMED_VALUE           9000

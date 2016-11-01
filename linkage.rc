@@ -118,6 +118,8 @@ IDB_PLAY                BITMAP                  "res\\play.bmp"
 
 IDB_BITMAP3             BITMAP                  "res\\bitmap3.bmp"
 
+IDB_BITMAP7             BITMAP                  "res\\filesmallscaled150.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -712,11 +714,23 @@ END
 STRINGTABLE
 BEGIN
     IDS_RIBBON_VIEW_GRID    "Show Grid"
-	IDS_RIBBON_MOMENTUM		"Use Momentum"
     ID_VIEW_GRID            "Display an automatically sized grid.\nShow Grid"
-	ID_EDIT_MOMENTUM		"Give moving parts momentum.\Use Momentum"
     IDS_RIBBON_VIEW_PARTS   "Parts List"
     ID_VIEW_PARTS           "Display the mechanism as separate parts.\nParts List"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_RIBBON_RIGHTANGLE   "Right Angle"
+    IDS_RIBBON_RECTANGLE    "Rectangle"
+    IDS_RIBBON_PARALLELOGRAM "Parallelogram"
+    IDS_RIBBON_HORIZONTAL   "Horizontal"
+    IDS_RIBBON_VERTICAL     "Vertical"
+    IDS_RIBBON_LINEUP       "Line Up"
+    ID_FILE_SAVEVIDEO       "Export a video of the mechanism movement.\nCExport Video"
+    IDS_RIBBON_SAVEVIDEO    "Export Video..."
+    ID_EDIT_MOMENTUM        "Give moving parts momentum.\\Use Momentum"
+    IDS_RIBBON_MOMENTUM     "Use Momentum"
 END
 
 STRINGTABLE
@@ -946,18 +960,6 @@ BEGIN
     ID_FILE_PRINT           "Print the active document.\nPrint"
     ID_FILE_PRINT_DIRECT    "Print the active document using current options.\nQuick Print"
     ID_FILE_PRINT_PREVIEW   "Display full pages.\nPrint Preview"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_RIBBON_RIGHTANGLE   "Right Angle"
-    IDS_RIBBON_RECTANGLE    "Rectangle"
-    IDS_RIBBON_PARALLELOGRAM "Parallelogram"
-    IDS_RIBBON_HORIZONTAL   "Horizontal"
-    IDS_RIBBON_VERTICAL     "Vertical"
-    IDS_RIBBON_LINEUP       "Line Up"
-    ID_FILE_SAVEVIDEO       "Export a video of the mechanism movement.\nCExport Video"
-    IDS_RIBBON_SAVEVIDEO    "Export Video..."
 END
 
 STRINGTABLE
