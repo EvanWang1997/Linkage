@@ -1539,185 +1539,9 @@ bool CLinkageDoc::MeetSelected( void )
 		GetSelectedConnector( 2 )->SetPoint( Intersect );
 	}	
 
-	#if 0
-
-
-	CFPoint AveragePoint;
-	CFPoint LockedPoint;
-	int Counter = 0;
-	bool bInput = false;
-	bool bAnchor = false;
-	bool bIsSlider = false;
-	CFPoint ForcePoint;
-	int Sliders = 0;
-	int CombinedState = 0;
-	unsigned int CombinedLayers = 0;
-	int LockedLinks = 0;
-	CConnector *pLockedConnector = 0;
-	int Connectors = m_SelectedConnectors.GetCount();
-
-	POSITION Position = m_SelectedConnectors.GetHeadPosition();
-	CConnector *pKeepConnector = m_SelectedConnectors.GetAt( Position );
-
-	for( ; Position != NULL; )
-	{
-		CConnector* pConnector = m_SelectedConnectors.GetNext( Position );
-		if( pConnector == 0 || !pConnector->IsSelected() )
-			continue;
-
-		POSITION Position2 = pConnector->GetLinkList()->GetHeadPosition();
-		while( Position2 != 0 )
-		{
-			CLink *pLink = pConnector->GetLinkList()->GetNext( Position2 );
-			if( pLink == 0 || !pLink->IsLocked() )
-				continue;
-			++LockedLinks;
-			pLockedConnector = pConnector;
-			LockedPoint = pLockedConnector->GetOriginalPoint();
-		}
-
-		bInput |= pConnector->IsInput();
-		bAnchor |= pConnector->IsAnchor();
-		bIsSlider |= pConnector->IsSlider();
-
-		if( pConnector->IsSlider() )
-		{
-			++Sliders;
-			pKeepConnector = pConnector;
-		}
-	}
-
-	if( Sliders > 1 )
-		return false;
-
-	if( LockedLinks > 1 )
-		return false;
-
-	if( m_SelectedLinks.GetCount() > 0 && Sliders > 0 )
-		return false;
-
-	if( pKeepConnector->IsSlider() && LockedLinks > 0 && pLockedConnector != pKeepConnector )
-		return false;
-
-	if( bSaveUndoState )
-		PushUndo();
-
-	Position = m_SelectedConnectors.GetHeadPosition();
-
-	for( Counter = 0; Position != NULL; ++Counter )
-	{
-		CConnector* pConnector = m_SelectedConnectors.GetNext( Position );
-		if( pConnector == 0 || !pConnector->IsSelected() )
-			continue;
-
-		CombinedLayers |= pConnector->GetLayers();
-
-		AveragePoint += pConnector->GetOriginalPoint();
-
-		// After this is stuff to be done to the links that are being deleted.
-		if( pConnector == pKeepConnector )
-			continue;
-
-		POSITION Position2 = pConnector->GetLinkList()->GetHeadPosition();
-		while( Position2 != 0 )
-		{
-			CLink *pLink = pConnector->GetLinkList()->GetNext( Position2 );
-			if( pLink == 0 )
-				continue;
-
-			pLink->RemoveConnector( pConnector );
-			pLink->AddConnector( pKeepConnector );
-			pKeepConnector->AddLink( pLink );
-		}
-
-		m_Connectors.Remove( pConnector );
-		m_IdentifiedConnectors.ClearBit( pConnector->GetIdentifier() );
-		delete pConnector;
-	}
-
-	/*
-	 * Check for sliding connectors that have any of the joined conectors as their limits. Change the limits to use the new joined connector.
-	 * IMPORTANT: The joined connectors are all deleted except for the one being kept. The pointers are stil available but are not pointing to
-	 * any valid memory!
-	 */
-	Position = m_Connectors.GetHeadPosition();
-	while( Position != NULL )
-	{
-		CConnector *pConnector = m_Connectors.GetNext( Position );
-		if( pConnector == NULL )
-			continue;
-
-		CConnector *pLimit1 = NULL;
-		CConnector *pLimit2 = NULL;
-
-		if( pConnector->GetSlideLimits( pLimit1, pLimit2 ) )
-		{
-			if( pLimit1->IsSelected() && pLimit2->IsSelected() )
-			{
-				pConnector->SlideBetween();
-				continue;
-			}
-
-			POSITION Position2 = m_SelectedConnectors.GetHeadPosition();
-
-			while( Position2 != NULL )
-			{
-				CConnector* pTestConnector = m_SelectedConnectors.GetNext( Position2 );
-				if( pTestConnector == 0 || !pTestConnector->IsSelected() || pTestConnector == pKeepConnector )
-					continue;
-
-				if( pLimit1 == pTestConnector )
-					pLimit1 = pKeepConnector;
-				else if( pLimit2 == pTestConnector )
-					pLimit2 = pKeepConnector;
-				else
-					continue;
-
-				pConnector->SlideBetween( pLimit1, pLimit2 );
-			}
-		}
-	}
-
-	AveragePoint.x /= Counter;
-	AveragePoint.y /= Counter;
-
-	if( pLockedConnector != 0 )
-		AveragePoint = LockedPoint;
-
-	if( !pKeepConnector->IsSlider() )
-		pKeepConnector->SetPoint( AveragePoint );
-
-	pKeepConnector->SetAsInput( bInput );
-	pKeepConnector->SetAsAnchor( bAnchor );
-	pKeepConnector->SetLayers( CombinedLayers );
-
-	m_SelectedConnectors.RemoveAll();
-	m_SelectedConnectors.AddHead( pKeepConnector );
-
-	/*
-	 * Now that all connectors are joined, join the new single connector to all of the selected links.
-	 */
-	if( m_SelectedLinks.GetCount() )
-	{
-		Position = m_SelectedLinks.GetHeadPosition();
-		while( Position != 0 )
-		{
-			CLink *pLink = m_SelectedLinks.GetNext( Position );
-			if( pLink == 0 )
-				continue;
-			pLink->AddConnector( pKeepConnector );
-			pKeepConnector->AddLink( pLink );
-		}
-	}
-
-	#endif
-
 	NormalizeConnectorLinks();
-
 	SetSelectedModifiableCondition();
-
 	FixupSliderLocations();
-
     SetModifiedFlag( true );
 
 	return true;
@@ -4078,7 +3902,7 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 			if( pConnector->GetFastenedElementList()->GetCount() > 0 )
 				++FastenedCount;
 
-			if( pConnector->IsAnchor() && pConnector->IsAnchor() && !pConnector->IsInput() )
+			if( pConnector->IsAnchor() && !pConnector->IsInput() )
 			{
 				++GearFastenToCount;
 				pFastenToConnector = pConnector;
@@ -4181,7 +4005,7 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 	m_bSelectionFastenable = false;
 	if( SelectedDrawingElements > 0 && SelectedMechanismLinks == 1 )
 		m_bSelectionFastenable = true;
-	else if( SelectedGears >= 1 && ( SelectedMechanismLinks - SelectedGears ) == 1 && GearFastenToCount == 1 )
+	else if( SelectedGears == 1 && ( SelectedMechanismLinks - SelectedGears ) == 1 && GearFastenToCount == 1 )
 	{
 		m_bSelectionFastenable = true;
 		Position = m_Links.GetHeadPosition();
@@ -4211,6 +4035,14 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 				}
 			}
 		}
+	}
+	else if( SelectedGears == 1 && SelectedMechanismLinks == 1 && SelectedConnectors == 0 )
+	         //&& SelectedConnectors == 1 && GetSelectedLink( 0, false ) != 0 
+			 //&& pFastenToConnector == GetSelectedLink( 0, false )->GetConnector( 0 ) )
+	{
+		CConnector *pConnector = GetSelectedLink( 0, false )->GetConnector( 0 );
+		if( pConnector->IsAnchor() && !pConnector->IsInput() )
+			m_bSelectionFastenable = true;
 	}
 
 	m_bSelectionMeshable = CheckMeshableGears();
@@ -4762,7 +4594,7 @@ bool CLinkageDoc::FastenSelected( void )
 			bFastenDrawingElements = true;
 		else
 		{
-			DrawingFastenToCount += 2; // A single connector it too many to fasten to so just increment this by 2.
+			DrawingFastenToCount += 2; // A single connector is too many to fasten to so just increment this by 2.
 
 			pGearFastenToConnector = pConnector;
 			++GearFastenToCount;
@@ -4801,6 +4633,9 @@ bool CLinkageDoc::FastenSelected( void )
 		if( GearFastenToCount > 1 )
 			return false;
 
+		if( DrawingFastenToCount == 1 && pDrawingFastenTo != 0 && pDrawingFastenTo->IsGear() && pDrawingFastenTo->GetConnector( 0 )->IsAnchor() && !pDrawingFastenTo->GetConnector( 0 )->IsInput() )
+			pGearFastenToConnector = pDrawingFastenTo->GetConnector( 0 );
+
 		PushUndo();
 
 		Position = m_Links.GetHeadPosition();
@@ -4812,7 +4647,7 @@ bool CLinkageDoc::FastenSelected( void )
 
 			if( pGearFastenToConnector != 0 )
 				FastenThese( pLink, pGearFastenToConnector );
-			else
+			else if( pGearFastenToLink != 0 )
 				FastenThese( pLink, pGearFastenToLink );
 		}
 	}

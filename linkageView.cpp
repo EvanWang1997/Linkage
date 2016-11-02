@@ -8346,12 +8346,22 @@ void CLinkageView::ShowSelectedElementCoordinates( void )
 		else
 		{
 			CString Temp;
-			Temp.Format( "%.4lf", Size1 );
-			Temp.TrimRight( ".0" );
+			if( floor( Size1 ) == Size1 )
+				Temp.Format( "%d", (int)Size1 );
+			else
+			{
+				Temp.Format( "%.4lf", Size1 );
+				Temp.TrimRight( "0" );
+			}
 			Text = Temp;
 			Text += ":";
-			Temp.Format( "%.4lf", Size2 );
-			Temp.TrimRight( ".0" );
+			if( floor( Size2 ) == Size2 )
+				Temp.Format( "%d", (int)Size2 );
+			else
+			{
+				Temp.Format( "%.4lf", Size2 );
+				Temp.TrimRight( "0" );
+			}
 			Text += Temp;
 			pEditBox->SetEditText( Text );
 		}
