@@ -118,6 +118,8 @@ IDB_PLAY                BITMAP                  "res\\play.bmp"
 
 IDB_BITMAP3             BITMAP                  "res\\bitmap3.bmp"
 
+IDB_BITMAP7             BITMAP                  "res\\filesmallscaled150.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -296,7 +298,7 @@ BEGIN
     "R",            ID_SIMULATION_RUN,      VIRTKEY, NOINVERT
     "S",            ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
     VK_ESCAPE,      ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
-    "G",            ID_EDIT_MAKEANCHOR,     VIRTKEY, NOINVERT 
+    "G",            ID_EDIT_MAKEANCHOR,     VIRTKEY, NOINVERT
 END
 
 
@@ -493,6 +495,16 @@ BEGIN
     CONTROL         "",IDC_PREVIEW,"Static",SS_BLACKRECT,14,7,713,401
 END
 
+IDD_SELECTELEMENTS DIALOGEX 0, 0, 310, 320
+STYLE DS_LOCALEDIT | DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Elements"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "Select",IDOK,199,300,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,253,300,50,14
+    CONTROL         "",IDC_LIST3,"SysListView32",LVS_REPORT | LVS_NOLABELWRAP | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,7,296,276
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -500,8 +512,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,3,7,0
- PRODUCTVERSION 3,3,7,0
+ FILEVERSION 3,3,11,0
+ PRODUCTVERSION 3,3,11,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -517,12 +529,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.3.7.0"
+            VALUE "FileVersion", "3.3.11.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2016 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.3.7.0"
+            VALUE "ProductVersion", "3.3.11.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -619,6 +631,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 431
     END
+
+    IDD_SELECTELEMENTS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 303
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 313
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -668,6 +688,11 @@ BEGIN
     0
 END
 
+IDD_SELECTELEMENTS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -689,9 +714,23 @@ END
 STRINGTABLE
 BEGIN
     IDS_RIBBON_VIEW_GRID    "Show Grid"
-    ID_VIEW_GRID            "Display an automatically sized grid.\nShowGrid"
+    ID_VIEW_GRID            "Display an automatically sized grid.\nShow Grid"
     IDS_RIBBON_VIEW_PARTS   "Parts List"
     ID_VIEW_PARTS           "Display the mechanism as separate parts.\nParts List"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_RIBBON_RIGHTANGLE   "Right Angle"
+    IDS_RIBBON_RECTANGLE    "Rectangle"
+    IDS_RIBBON_PARALLELOGRAM "Parallelogram"
+    IDS_RIBBON_HORIZONTAL   "Horizontal"
+    IDS_RIBBON_VERTICAL     "Vertical"
+    IDS_RIBBON_LINEUP       "Line Up"
+    ID_FILE_SAVEVIDEO       "Export a video of the mechanism movement.\nCExport Video"
+    IDS_RIBBON_SAVEVIDEO    "Export Video..."
+    ID_EDIT_MOMENTUM        "Give moving parts momentum.\\Use Momentum"
+    IDS_RIBBON_MOMENTUM     "Use Momentum"
 END
 
 STRINGTABLE
@@ -807,6 +846,26 @@ END
 
 STRINGTABLE
 BEGIN
+    IDS_RIBBON_PASTE        "Paste"
+    IDS_RIBBON_CUT          "Cut"
+    IDS_RIBBON_COPY         "Copy"
+    IDS_RIBBON_SELECTALL    "Select All"
+    IDS_RIBBON_WINDOW       "Window\nw"
+    IDS_RIBBON_WINDOWS      "Windows\ni"
+    IDS_RIBBON_STYLE        "Style"
+    IDS_RIBBON_STYLE_TIP    "Modify Visual Style"
+    IDS_RIBBON_STYLE_DESC   "Choose one of the Office 2007 themes"
+    IDS_RIBBON_STATUSBAR    "Status Bar"
+    IDS_RIBBON_VIEW         "View"
+    IDS_RIBBON_PROPERTIES   "Element"
+    IDS_RIBBON_CONNECTPROPERTIES "Connector"
+    IDS_RIBBON_CAPTIONBAR   "Caption Bar"
+    IDS_RIBBON_SELECTELEMENTS "Select Elements"
+    ID_EDIT_SELECT_ELEMENTS "Select links and connectors from a list.\nSelect Elements"
+END
+
+STRINGTABLE
+BEGIN
     IDS_RIBBON_ZOOM         "Zoom"
     IDS_RIBBON_ZOOMFIT      "Fit"
     IDS_RIBBON_SNAP         "Element"
@@ -842,6 +901,8 @@ BEGIN
     IDS_RIBBON_PRINTING     "&Printing"
     IDS_RIBBON_PRINTOPTIONS "Options"
     IDS_RIBBON_PRINTFULL    "Actual Size"
+    IDS_RIBBON_MEET         "Rotate To Meet"
+    ID_ALIGN_MEET           "Rotate the two middle connectors around the outer connectors to be in the same place.\nRotate To Meet"
 END
 
 STRINGTABLE
@@ -868,7 +929,7 @@ BEGIN
     IDS_RIBBON_GRIDSNAP     "Grid"
     ID_HELP_ABOUT_TIP       "About"
     ID_HELP_ABOUT_DESCRIPTION "Show version information about this program."
-    IDS_RIBBON_ANGLES       "Angles"
+    IDS_RIBBON_ANGLES       "Hints"
 END
 
 STRINGTABLE
@@ -899,18 +960,6 @@ BEGIN
     ID_FILE_PRINT           "Print the active document.\nPrint"
     ID_FILE_PRINT_DIRECT    "Print the active document using current options.\nQuick Print"
     ID_FILE_PRINT_PREVIEW   "Display full pages.\nPrint Preview"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_RIBBON_RIGHTANGLE   "Right Angle"
-    IDS_RIBBON_RECTANGLE    "Rectangle"
-    IDS_RIBBON_PARALLELOGRAM "Parallelogram"
-    IDS_RIBBON_HORIZONTAL   "Horizontal"
-    IDS_RIBBON_VERTICAL     "Vertical"
-    IDS_RIBBON_LINEUP       "Line Up"
-    ID_FILE_SAVEVIDEO       "Export a video of the mechanism movement.\nCExport Video"
-    IDS_RIBBON_SAVEVIDEO    "Export Video..."
 END
 
 STRINGTABLE
@@ -1017,7 +1066,7 @@ END
 
 STRINGTABLE
 BEGIN
-    ID_VIEW_ANGLES          "Show right angle, rectangle, and parallelogram hint lines during selection.\nAngles"
+    ID_VIEW_ANGLES          "Show right angle, rectangle, and parallelogram hint lines during selection.\nHints"
     ID_EDIT_SLIDE           "Attach the selected slider to the selected connectors to slide between them.\nSlide"
 END
 
@@ -1025,7 +1074,7 @@ STRINGTABLE
 BEGIN
     ID_VIEW_DATA            "Show position and length information for the links and connectors.\nShow Data"
     ID_VIEW_DEBUG           "Show debugging information such as possible rotations of various links and connectors.\nDebug"
-    ID_EDIT_SNAP            "Snap to align with connectors.\Element Snap"
+    ID_EDIT_SNAP            "Snap to align with connectors.\\Element Snap"
 END
 
 STRINGTABLE
@@ -1125,24 +1174,6 @@ BEGIN
     IDS_RIBBON_EXIT         "E&xit"
     IDS_RIBBON_HOME         "&Home"
     IDS_RIBBON_CLIPBOARD    "Selection\nd"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_RIBBON_PASTE        "Paste"
-    IDS_RIBBON_CUT          "Cut"
-    IDS_RIBBON_COPY         "Copy"
-    IDS_RIBBON_SELECTALL    "Select All"
-    IDS_RIBBON_WINDOW       "Window\nw"
-    IDS_RIBBON_WINDOWS      "Windows\ni"
-    IDS_RIBBON_STYLE        "Style"
-    IDS_RIBBON_STYLE_TIP    "Modify Visual Style"
-    IDS_RIBBON_STYLE_DESC   "Choose one of the Office 2007 themes"
-    IDS_RIBBON_STATUSBAR    "Status Bar"
-    IDS_RIBBON_VIEW         "View"
-    IDS_RIBBON_PROPERTIES   "Element"
-    IDS_RIBBON_CONNECTPROPERTIES "Connector"
-    IDS_RIBBON_CAPTIONBAR   "Caption Bar"
 END
 
 STRINGTABLE

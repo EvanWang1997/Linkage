@@ -598,7 +598,7 @@ exit 0
       </HeaderFileName>
     </Midl>
     <ClCompile>
-      <Optimization>Full</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
@@ -772,7 +772,10 @@ exit 0
     <ClInclude Include="linkageView.h" />
     <ClInclude Include="LinkPropertiesDialog.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MyCheckListBox.h" />
     <ClInclude Include="MyDialog.h" />
+    <ClInclude Include="MyMFCRibbonBar.h" />
+    <ClInclude Include="MyMFCRibbonCategory.h" />
     <ClInclude Include="MyMFCRibbonGallery.h" />
     <ClInclude Include="NullableColor.h" />
     <ClInclude Include="PointDialog.h" />
@@ -783,6 +786,8 @@ exit 0
     <ClInclude Include="ConnectorPropertiesDialog.h" />
     <ClInclude Include="SampleGallery.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="SelectElementsDialog.h" />
+    <ClInclude Include="simplegif.h" />
     <ClInclude Include="Simulator.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="stdbool.h" />
@@ -909,7 +914,10 @@ exit 0
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="MyCheckListBox.cpp" />
     <ClCompile Include="MyDialog.cpp" />
+    <ClCompile Include="MyMFCRibbonBar.cpp" />
+    <ClCompile Include="MyMFCRibbonCategory.cpp" />
     <ClCompile Include="PointDialog.cpp" />
     <ClCompile Include="PopupGallery.cpp" />
     <ClCompile Include="quickxml.cpp" />
@@ -917,6 +925,7 @@ exit 0
     <ClCompile Include="ConnectorPropertiesDialog.cpp" />
     <ClCompile Include="SampleGallery.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="SelectElementsDialog.cpp" />
     <ClCompile Include="Simulator.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -947,6 +956,7 @@ exit 0
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\filesmallscaled150.bmp" />
     <Image Include="res\icon9.ico" />
     <Image Include="res\popup_gallery_2.bmp" />
   </ItemGroup>

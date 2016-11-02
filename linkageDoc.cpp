@@ -1448,6 +1448,8 @@ bool CLinkageDoc::StretchSelected( double Percentage )
 
 bool CLinkageDoc::StretchSelected( CFRect OriginalRect, CFRect NewRect, _Direction Direction )
 {
+	PushUndo();
+
 	POSITION Position = m_Connectors.GetHeadPosition();
 	while( Position != 0 )
 	{
@@ -1504,6 +1506,47 @@ bool CLinkageDoc::StretchSelected( CFRect OriginalRect, CFRect NewRect, _Directi
     SetModifiedFlag( true );
 	return true;
 }
+
+bool CLinkageDoc::MeetSelected( void )
+{
+	if( !m_bSelectionMeetable )
+		return false;
+
+	CFPoint Points[4];
+	Points[0] = GetSelectedConnector( 0 )->GetOriginalPoint();
+	Points[1] = GetSelectedConnector( 1 )->GetOriginalPoint();
+	Points[2] = GetSelectedConnector( 2 )->GetOriginalPoint();
+	Points[3] = GetSelectedConnector( 3 )->GetOriginalPoint();
+
+	CFCircle Circle1( Points[0], Distance( Points[0], Points[1] ) );
+	CFCircle Circle2( Points[3], Distance( Points[3], Points[2] ) );
+
+	CFPoint Intersect;
+	CFPoint Intersect2;
+
+	if( Circle1.CircleIntersection( Circle2, &Intersect, &Intersect2 ) )
+		m_bSelectionMeetable = true;
+	{
+		CFPoint SuggestedPoint = ( Points[1] + Points[2] ) / 2;
+
+		double d1 = Distance( SuggestedPoint, Intersect );
+		double d2 = Distance( SuggestedPoint, Intersect2 );
+
+		if( d2 < d1 )
+			Intersect = Intersect2;
+
+		GetSelectedConnector( 1 )->SetPoint( Intersect );
+		GetSelectedConnector( 2 )->SetPoint( Intersect );
+	}	
+
+	NormalizeConnectorLinks();
+	SetSelectedModifiableCondition();
+	FixupSliderLocations();
+    SetModifiedFlag( true );
+
+	return true;
+}
+
 
 bool CLinkageDoc::MoveCapturedController( CFPoint Point )
 {
@@ -3859,7 +3902,7 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 			if( pConnector->GetFastenedElementList()->GetCount() > 0 )
 				++FastenedCount;
 
-			if( pConnector->IsAnchor() && pConnector->IsAnchor() && !pConnector->IsInput() )
+			if( pConnector->IsAnchor() && !pConnector->IsInput() )
 			{
 				++GearFastenToCount;
 				pFastenToConnector = pConnector;
@@ -3940,10 +3983,29 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 	m_AlignConnectorCount = SelectedRealLinks > 0 ? 0 : SelectedConnectors;
 	m_bSelectionUnfastenable = FastenedCount > 0;
 
+	m_bSelectionMeetable = false;
+	if( SelectedRealLinks == 0 && SelectedConnectors == 4 && GetSelectedConnectorCount() == 4 )
+	{
+		CFPoint Points[4];
+		Points[0] = GetSelectedConnector( 0 )->GetOriginalPoint();
+		Points[1] = GetSelectedConnector( 1 )->GetOriginalPoint();
+		Points[2] = GetSelectedConnector( 2 )->GetOriginalPoint();
+		Points[3] = GetSelectedConnector( 3 )->GetOriginalPoint();
+
+		CFCircle Circle1( Points[0], Distance( Points[0], Points[1] ) );
+		CFCircle Circle2( Points[3], Distance( Points[3], Points[2] ) );
+
+		CFPoint Intersect;
+		CFPoint Intersect2;
+
+		if( Circle1.CircleIntersection( Circle2, &Intersect, &Intersect2 ) )
+			m_bSelectionMeetable = true;
+	}
+
 	m_bSelectionFastenable = false;
 	if( SelectedDrawingElements > 0 && SelectedMechanismLinks == 1 )
 		m_bSelectionFastenable = true;
-	else if( SelectedGears >= 1 && ( SelectedMechanismLinks - SelectedGears ) == 1 && GearFastenToCount == 1 )
+	else if( SelectedGears == 1 && ( SelectedMechanismLinks - SelectedGears ) == 1 && GearFastenToCount == 1 )
 	{
 		m_bSelectionFastenable = true;
 		Position = m_Links.GetHeadPosition();
@@ -3973,6 +4035,14 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 				}
 			}
 		}
+	}
+	else if( SelectedGears == 1 && SelectedMechanismLinks == 1 && SelectedConnectors == 0 )
+	         //&& SelectedConnectors == 1 && GetSelectedLink( 0, false ) != 0 
+			 //&& pFastenToConnector == GetSelectedLink( 0, false )->GetConnector( 0 ) )
+	{
+		CConnector *pConnector = GetSelectedLink( 0, false )->GetConnector( 0 );
+		if( pConnector->IsAnchor() && !pConnector->IsInput() )
+			m_bSelectionFastenable = true;
 	}
 
 	m_bSelectionMeshable = CheckMeshableGears();
@@ -4219,16 +4289,16 @@ bool CLinkageDoc::SetSelectedElementCoordinates( const char *pCoordinateString )
 	double xValue = 0.0;
 	double yValue = 0.0;
 	char Dummy1;
-	char PercentSign;
+	char Modifier;
 	int CoordinateCount = 0;
-	double Percentage = 0.0;
+	double Value = 0.0;
 
 	int SelectedConnectorCount = GetSelectedConnectorCount();
 	int SelectedLinkCount = GetSelectedLinkCount( true );
 	CConnector *pConnector = (CConnector*)GetSelectedConnector( 0 );
 
-	CoordinateCount = sscanf_s( (const char*)Text, "%lf %c%c", &Percentage, &PercentSign, 1, &Dummy1, 1 );
-	if( CoordinateCount == 2 && PercentSign == '%' )
+	CoordinateCount = sscanf_s( (const char*)Text, "%lf %c%c", &Value, &Modifier, 1, &Dummy1, 1 );
+	if( CoordinateCount == 2 && Modifier == '%' )
 	{
 		if( SelectedConnectorCount == 2 && SelectedLinkCount == 0 )
 		{
@@ -4239,7 +4309,7 @@ bool CLinkageDoc::SetSelectedElementCoordinates( const char *pCoordinateString )
 			if( IsLinkLocked( pConnector ) )
 				return false;
 			CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
-			Line.SetDistance( Line.GetDistance() * Percentage / 100 );
+			Line.SetDistance( Line.GetDistance() * Value / 100 );
 			PushUndo();
 			pConnector2->SetPoint( Line.GetEnd() );
 		}
@@ -4248,15 +4318,25 @@ bool CLinkageDoc::SetSelectedElementCoordinates( const char *pCoordinateString )
 			CLink *pLink = GetSelectedLink( 0, false );
 			if( pLink != 0 && pLink->GetConnectorCount() == 2 && !pLink->IsLocked() )
 			{
-				if( ChangeLinkLength( pLink, Percentage, true ) )
+				if( ChangeLinkLength( pLink, Value, true ) )
 					return true;
 			}
 		}
 		else
 		{
 			// Scale
-			StretchSelected( Percentage );
+			StretchSelected( Value );
 		}
+		return true;
+	}
+	else if( CoordinateCount == 2 && ( Modifier == 'd' || Modifier == 'D' ) )
+	{
+		CFRect BoundingRect;
+		GetDocumentArea( BoundingRect, true );
+		PushUndo();
+		RotateSelected( BoundingRect.GetCenter(), Value );
+		FinishChangeSelected();
+		SetModifiedFlag( true );
 		return true;
 	}
 
@@ -4514,7 +4594,7 @@ bool CLinkageDoc::FastenSelected( void )
 			bFastenDrawingElements = true;
 		else
 		{
-			DrawingFastenToCount += 2; // A single connector it too many to fasten to so just increment this by 2.
+			DrawingFastenToCount += 2; // A single connector is too many to fasten to so just increment this by 2.
 
 			pGearFastenToConnector = pConnector;
 			++GearFastenToCount;
@@ -4553,6 +4633,9 @@ bool CLinkageDoc::FastenSelected( void )
 		if( GearFastenToCount > 1 )
 			return false;
 
+		if( DrawingFastenToCount == 1 && pDrawingFastenTo != 0 && pDrawingFastenTo->IsGear() && pDrawingFastenTo->GetConnector( 0 )->IsAnchor() && !pDrawingFastenTo->GetConnector( 0 )->IsInput() )
+			pGearFastenToConnector = pDrawingFastenTo->GetConnector( 0 );
+
 		PushUndo();
 
 		Position = m_Links.GetHeadPosition();
@@ -4564,7 +4647,7 @@ bool CLinkageDoc::FastenSelected( void )
 
 			if( pGearFastenToConnector != 0 )
 				FastenThese( pLink, pGearFastenToConnector );
-			else
+			else if( pGearFastenToLink != 0 )
 				FastenThese( pLink, pGearFastenToLink );
 		}
 	}
@@ -4850,6 +4933,27 @@ void CLinkageDoc::RemoveGearRatio( CConnector *pGearConnector, CLink *pGearLink 
 			m_GearConnectionList.RemoveAt( CurrentPosition );
 			delete pTestGearConnection;
 		}
+	}
+}
+
+void CLinkageDoc::FillElementList( ElementList &Elements )
+{
+	POSITION Position = m_Links.GetHeadPosition();
+	while( Position != 0 )
+	{
+		CLink *pLink = m_Links.GetNext( Position );
+		if( pLink == 0 )
+			continue;
+		Elements.AddTail( new CElementItem( pLink ) );
+	}
+
+	Position = m_Connectors.GetHeadPosition();
+	while( Position != NULL )
+	{
+		CConnector* pConnector = m_Connectors.GetNext( Position );
+		if( pConnector == 0 )
+			continue;
+		Elements.AddTail( new CElementItem( pConnector ) );
 	}
 }
 

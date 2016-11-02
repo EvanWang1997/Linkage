@@ -8,6 +8,7 @@
 #include "AboutDialog.h"
 #include "LinkageDoc.h"
 #include "resource.h"
+#include "MyMFCRibbonCategory.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -223,6 +224,7 @@ void CMainFrame::CreateClipboardPanel( CMFCRibbonCategory* pCategory )
 	AddRibbonButton( pPanelClipboard, IDS_RIBBON_CUT, ID_EDIT_CUT, 21, SMALL );
 	AddRibbonButton( pPanelClipboard, IDS_RIBBON_COPY, ID_EDIT_COPY, 22, SMALL );
 	AddRibbonButton( pPanelClipboard, IDS_RIBBON_SELECTALL, ID_EDIT_SELECT_ALL, 44, SMALL );
+	AddRibbonButton( pPanelClipboard, IDS_RIBBON_SELECTELEMENTS, ID_EDIT_SELECT_ELEMENTS, 90, LARGE );
 }
 
 void CMainFrame::CreateViewPanel( CMFCRibbonCategory* pCategory )
@@ -251,6 +253,7 @@ void CMainFrame::CreateViewPanel( CMFCRibbonCategory* pCategory )
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_SOLIDLINKS, ID_VIEW_SOLIDLINKS, 75 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_GRID, ID_VIEW_GRID, 85 );
 	//AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_PARTS, ID_VIEW_PARTS, 86 );
+	AppendMenuItem( pDetailsButton, IDS_RIBBON_MOMENTUM, ID_EDIT_MOMENTUM, 94 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_DEBUG, ID_VIEW_DEBUG, 81 );
 
 	// The menu is only needed in order to make the button work properly.
@@ -443,6 +446,7 @@ void CMainFrame::CreateAlignPanel( CMFCRibbonCategory* pCategory )
 	AppendMenuItem( pAlignButton, IDS_RIBBON_EVENSPACE, ID_ALIGN_EVENSPACE, 65 );
 	AppendMenuItem( pAlignButton, IDS_RIBBON_FLIPH, ID_ALIGN_FLIPH, 60 );
 	AppendMenuItem( pAlignButton, IDS_RIBBON_FLIPV, ID_ALIGN_FLIPV, 61 );
+	AppendMenuItem( pAlignButton, IDS_RIBBON_MEET, ID_ALIGN_MEET, 93 );
 
 	// The menu is only needed in order to make the button work properly.
 	// Without the menu, clicking on the icon in the button will not display
@@ -595,11 +599,26 @@ void CMainFrame::CreateHelpButtons( void )
 	m_wndRibbonBar.AddToTabs( pHelpButton );
 }
 
-static CMFCRibbonCategory *CreateCategory( CMyMFCRibbonBar *pRibbonBar, UINT StringId )
+CMFCRibbonCategory* CMainFrame::CreateCategory( CMyMFCRibbonBar *pRibbonBar, UINT StringId )
 {
+	static CMyMFCRibbonCategory *pFirstCategory = 0;
 	CValidatedString strTemp;
 	strTemp.LoadString(StringId);
-	return pRibbonBar->AddCategory(strTemp, IDB_FILESMALL, IDB_FILELARGE, CSize( 16, 16 ), CSize( 32, 32 ));
+	CMFCRibbonCategory* pCat = pRibbonBar->AddCategory(strTemp, 0, 0, CSize( 0, 0 ), CSize( 0, 0 ));
+	if( pCat != 0 )
+	{
+		CMyMFCRibbonCategory *pMainCat = (CMyMFCRibbonCategory*)m_wndRibbonBar.GetMainCategory();
+		if( pMainCat != 0 )
+			((CMyMFCRibbonCategory*)pCat)->SetImageResources( pMainCat );
+		else if( pFirstCategory != 0 )
+			((CMyMFCRibbonCategory*)pCat)->SetImageResources( pFirstCategory );
+		else
+		{
+			((CMyMFCRibbonCategory*)pCat)->SetImageResources( IDB_FILESMALL, IDB_FILELARGE, CSize( 16, 16 ), CSize( 32, 32 ) );
+			pFirstCategory = (CMyMFCRibbonCategory*)pCat;
+		}
+	}
+	return pCat;
 }
 
 void CMainFrame::CreateQuickAccessCommands( void )

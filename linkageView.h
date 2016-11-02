@@ -146,6 +146,7 @@ private:
 	bool m_bShowLargeFont;
 	bool m_bShowGrid;
 	bool m_bShowParts;
+	bool m_bUseMoreMomentum;
 	double m_Zoom;
 	double m_ScreenZoom;
 	CFPoint m_ScrollPosition;
@@ -262,7 +263,7 @@ private:
 	void DrawFasteners( CRenderer* pRenderer, unsigned int OnLayers, CElement *pElement );
 	void DrawSliderTrack( CRenderer* pRenderer, unsigned int OnLayers, CConnector* pConnector );
 	void DrawSnapLines( CRenderer *pRenderer );
-	void DrawAlignmentLines( CRenderer *pRenderer );
+	void DrawAlignmentHintLines( CRenderer *pRenderer );
 	void DrawData( CRenderer *pRenderer );
 	void DrawAnicrop( CRenderer *pRenderer );
 	void DrawRuler( CRenderer *pRenderer );
@@ -408,6 +409,10 @@ public:
 	afx_msg void OnEditLock();
 	afx_msg void OnEditSelectall();
 	afx_msg void OnUpdateSelectall( CCmdUI *pCmdUI );
+	afx_msg void OnEditSelectElements();
+	afx_msg void OnUpdateSelectElements( CCmdUI *pCmdUI );
+	afx_msg void OnRotateToMeet();
+	afx_msg void OnUpdateRotateToMeet( CCmdUI *pCmdUI );
 
 
 	afx_msg void OnAlignHorizontal();
@@ -450,6 +455,8 @@ public:
 	afx_msg void OnViewParts();
 	afx_msg void OnUpdateViewGrid(CCmdUI *pCmdUI);
 	afx_msg void OnViewGrid();
+	afx_msg void OnUpdateMoreMomentum(CCmdUI *pCmdUI);
+	afx_msg void OnMoreMomentum();
 	afx_msg void OnUpdateViewLargeFont(CCmdUI *pCmdUI);
 	afx_msg void OnViewLargeFont();
 	afx_msg void OnViewDebug();

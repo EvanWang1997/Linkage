@@ -34,6 +34,7 @@ public:
 	bool Reset( void );
 	int GetSimulationSteps( CLinkageDoc *pDoc );
 	bool IsSimulationValid( void );
+	void Options( bool bUseIncreasedMomentum );
 
 private:
 	class CSimulatorImplementation *m_pImplementation;

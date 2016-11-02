@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Element.h"
+#include "linkageDoc.h"
 
 CElement::CElement(void)
 {
@@ -7,6 +8,7 @@ CElement::CElement(void)
 	m_Layers = 0;
 	m_bMeasurementElement = false;
 	m_bPositionValid = true;
+	m_FastenedTo = CElementItem();
 }
 
 CElement::~CElement(void)
@@ -22,6 +24,7 @@ CElement::CElement( const CElement &ExistingElement )
 	m_bMeasurementElement = ExistingElement.m_bMeasurementElement;
 	m_bPositionValid = ExistingElement.m_bPositionValid;
 	m_Color = ExistingElement.m_Color;
+	m_FastenedTo = CElementItem();
 	// The fastening is not copied because that seems just wrong - someother element can't be fastened to more than one element at a time.
 }
 
@@ -58,6 +61,15 @@ void CElement::UnfastenTo( void )
 	CElementItem *pItem = GetFastenedTo();
 	if( pItem != 0 && pItem->GetElement() != 0 )
 		pItem->GetElement()->RemoveFastenElement( this );
-	m_pFastenedTo = CElementItem();
+	m_FastenedTo = CElementItem();
 }
+
+CString CElement::GetTypeString( void )
+{
+	bool bDrawingLayer = GetLayers() & CLinkageDoc::DRAWINGLAYER;
+	if( IsMeasurementElement() )
+		return "Measurement";
+	return IsConnector() ? ( bDrawingLayer ? "Point" : "Connector" ) : ( bDrawingLayer ? "Line" : "Link" );
+}
+
 
