@@ -177,6 +177,20 @@ class CFArc : public CFCircle
 
 	bool PointOnArc( CFPoint &Point );
 
+	double AngleSpan( void )
+	{
+		double Angle = GetStartAngle();
+		double EndAngle = GetEndAngle();
+		if( Angle == EndAngle )
+			Angle = 0;
+		else if( Angle > EndAngle )
+			Angle = ( ( 360 - Angle ) + EndAngle ) / 2;
+		else
+			Angle = ( EndAngle - Angle ) / 2;
+		return Angle;
+	}
+
+
 	CFPoint m_Start;
 	CFPoint m_End;
 };

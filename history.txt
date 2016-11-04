@@ -314,6 +314,11 @@ Received some feature requests recently. These are some NOT YET ADDED:
 7/17/2016 12:01 PM: Fixed bug in arrowhead drawing decision code - it was using the virtual line length, not pixel length, to determine if the line is too short to have arrow heads.
 7/27/2016 11:02 PM: Change to let shift and control keys enable snapping if all snapping is turned off.
 10/24/2016 1:47 PM: Added a test to make sure that the connectors of an actuator are not both fixed when the actuator length is calculated.
+11/3/2016 3:04 PM: Added rotattion setting capability to the tool bar coordinate/dimension text box.
+11/3/2016 3:04 PM: Changed how slider fixup works with curved slider paths fixing a bug in that code as well.
+11/3/2016 3:04 PM: Change code to remember rotation center point after rotating selected elements using the coordinates text box.
+
+
 
 
 

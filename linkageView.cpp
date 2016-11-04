@@ -2619,7 +2619,7 @@ bool CLinkageView::SelectAdjustmentControl( UINT nFlags, CFPoint Point )
 	}
 }
 
-void CLinkageView::MarkSelection( bool bSelectionChanged )
+void CLinkageView::MarkSelection( bool bSelectionChanged, bool bUpdateRotationCenter )
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -2631,8 +2631,9 @@ void CLinkageView::MarkSelection( bool bSelectionChanged )
 			m_VisibleAdjustment = ADJUSTMENT_STRETCH;
 			m_SelectionContainerRect = GetDocumentArea( false, true );
 			m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
-			m_SelectionRotatePoint.SetPoint( ( m_SelectionContainerRect.left + m_SelectionContainerRect.right ) / 2,
-												( m_SelectionContainerRect.top + m_SelectionContainerRect.bottom ) / 2 );
+			if( bUpdateRotationCenter )
+				m_SelectionRotatePoint.SetPoint( ( m_SelectionContainerRect.left + m_SelectionContainerRect.right ) / 2,
+													( m_SelectionContainerRect.top + m_SelectionContainerRect.bottom ) / 2 );
 		}
 		else
 			m_bChangeAdjusters = true;
@@ -8481,6 +8482,8 @@ void CLinkageView::OnViewCoordinates()
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
+	bool bUpdateRotationCenter = true;
+
 	if( pDoc->IsSelectionMeshableGears() )
 	{
 		double Size1 = 0;
@@ -8499,8 +8502,13 @@ void CLinkageView::OnViewCoordinates()
 	}
 	else
 	{
-		if( !pDoc->SetSelectedElementCoordinates( Text ) )
+		CLinkageDoc::_CoordinateChange Result = pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, Text  );
+		if( Result == CLinkageDoc::_CoordinateChange::NONE )
 			return;
+
+		if( Result == CLinkageDoc::_CoordinateChange::ROTATION )
+			bUpdateRotationCenter = false;
+
 	}
 
 	ShowSelectedElementCoordinates();
@@ -8508,7 +8516,7 @@ void CLinkageView::OnViewCoordinates()
 	m_SelectionContainerRect = GetDocumentArea( false, true );
 	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
 
-	UpdateForDocumentChange();
+	UpdateForDocumentChange( bUpdateRotationCenter );
 }
 
 void CLinkageView::OnUpdateViewCoordinates( CCmdUI *pCmdUI )
@@ -8750,10 +8758,10 @@ void CLinkageView::OnSelectSample (UINT ID )
 	}
 }
 
-void CLinkageView::UpdateForDocumentChange( void )
+void CLinkageView::UpdateForDocumentChange( bool bUpdateRotationCenter )
 {
 	SetScrollExtents();
-	MarkSelection( true );
+	MarkSelection( true, bUpdateRotationCenter );
 	ShowSelectedElementCoordinates();
 	InvalidateRect( 0 );
 }

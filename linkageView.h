@@ -199,7 +199,7 @@ private:
 	bool m_bShowSelection;
 	
 	CFPoint AdjustClientAreaPoint( CPoint );
-	void MarkSelection( bool bSelectionChanged );
+	void MarkSelection( bool bSelectionChanged, bool bUpdateRotationCenter = true );
 	CPoint GetDefaultUnscalePoint( void );
 	
 	double UnscaledUnits( double Count );
@@ -338,7 +338,7 @@ private:
 
 	void SetPrinterOrientation( void );
 
-	void UpdateForDocumentChange( void );
+	void UpdateForDocumentChange( bool bUpdateRotationCenter = true );
 
 // Generated message map functions
 protected:

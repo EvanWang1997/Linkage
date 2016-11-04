@@ -35,6 +35,7 @@ class CLinkageDoc : public CDocument
 	public:
 
 	enum _Direction{ HORIZONTAL, VERTICAL, INLINE, INLINESPACED, FLIPHORIZONTAL, FLIPVERTICAL, DIAGONAL };
+	enum _CoordinateChange{ NONE, DISTANCE, ROTATION, SCALE, OTHER };
 
 	static const unsigned int DRAWINGLAYER = 0x00000001;
 	static const unsigned int MECHANISMLAYER = 0x00000010;
@@ -117,7 +118,7 @@ public:
 	int GetSelectedLinkCount( bool bOnlyWithMultipleConnectors );
 	CLink *GetSelectedLink( int Index, bool bOnlyWithMultipleConnectors );
 	bool IsAnySelected( void );
-	bool SetSelectedElementCoordinates( const char *pCoordinateString );
+	_CoordinateChange SetSelectedElementCoordinates( CFPoint *pRotationCenterPoint, const char *pCoordinateString );
 
 	enum _SelectDirection { NEXT, PREVIOUS };
 	bool SelectNext( _SelectDirection SelectDirection );

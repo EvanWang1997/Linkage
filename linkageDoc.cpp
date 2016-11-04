@@ -1953,27 +1953,22 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector )
 			if( !pConnector->GetSliderArc( TheArc, true ) )
 				return false;
 
-			CFLine Ray( CFPoint( TheArc.x, TheArc.y ), pConnector->GetOriginalPoint() );
-			CFLine LimitLine( TheArc.GetStart(), TheArc.GetEnd() );
-			CFPoint Intersection;
-			if( !Intersects( Ray, LimitLine, Intersection ) )
-				return false;
-
-			double DistanceRatio = TheArc.GetStart().DistanceToPoint( Intersection ) / LimitLine.GetDistance();
-			CFPoint ConnectorPoint = pConnector->GetPoint();
+			double OriginalAngleSpan = TheArc.AngleSpan();
+			TheArc.m_End = pConnector->GetOriginalPoint();
+			double OriginalAngle = TheArc.AngleSpan();
 
 			// Now use the new arc.
 			if( !pConnector->GetSliderArc( TheArc, false ) )
 				return false;
 
-			double StartAngle = GetAngle( CFPoint( TheArc.x, TheArc.y ), TheArc.m_Start );
-			double EndAngle = GetAngle( CFPoint( TheArc.x, TheArc.y ), TheArc.m_End );
-			if( EndAngle < StartAngle )
-				EndAngle += 360.0;
-			double Angle = StartAngle + ( ( EndAngle - StartAngle ) * DistanceRatio );
+			double NewAngleSpan = TheArc.AngleSpan();
+			double NewAngle = OriginalAngle * ( NewAngleSpan / OriginalAngleSpan );
+			
 
-			ConnectorPoint.SetPoint( CFPoint( TheArc.x, TheArc.y ), fabs( TheArc.r ), Angle );
-			pConnector->SetIntermediatePoint( ConnectorPoint );
+			CFPoint NewPoint( TheArc.GetStart() );
+			NewPoint.RotateAround( TheArc.GetCenter(), NewAngle * 2 ); // I have no idea why *2 is needed here, but it works.
+
+			pConnector->SetIntermediatePoint( NewPoint );
 		}
 	}
 	else //if( pConnector->IsSelected() || pConnector->IsLinkSelected() )
@@ -4280,7 +4275,7 @@ bool CLinkageDoc::ChangeLinkLength( CLink *pLink, double Value, bool bPercentage
 	return true;
 }
 
-bool CLinkageDoc::SetSelectedElementCoordinates( const char *pCoordinateString )
+CLinkageDoc::_CoordinateChange CLinkageDoc::SetSelectedElementCoordinates( CFPoint *pRotationCenterPoint, const char *pCoordinateString )
 {
 	CString Text = pCoordinateString;
 
@@ -4305,9 +4300,9 @@ bool CLinkageDoc::SetSelectedElementCoordinates( const char *pCoordinateString )
 			// Distance
 			CConnector *pConnector2 = (CConnector*)GetSelectedConnector( 1 );
 			if( pConnector == 0 || pConnector2 == 0 )
-				return false;
+				return _CoordinateChange::NONE;
 			if( IsLinkLocked( pConnector ) )
-				return false;
+				return _CoordinateChange::NONE;
 			CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
 			Line.SetDistance( Line.GetDistance() * Value / 100 );
 			PushUndo();
@@ -4319,31 +4314,32 @@ bool CLinkageDoc::SetSelectedElementCoordinates( const char *pCoordinateString )
 			if( pLink != 0 && pLink->GetConnectorCount() == 2 && !pLink->IsLocked() )
 			{
 				if( ChangeLinkLength( pLink, Value, true ) )
-					return true;
+					return _CoordinateChange::DISTANCE;
 			}
 		}
 		else
 		{
 			// Scale
 			StretchSelected( Value );
+			return _CoordinateChange::SCALE;
 		}
-		return true;
+		return _CoordinateChange::OTHER;
 	}
 	else if( CoordinateCount == 2 && ( Modifier == 'd' || Modifier == 'D' ) )
 	{
 		CFRect BoundingRect;
 		GetDocumentArea( BoundingRect, true );
 		PushUndo();
-		RotateSelected( BoundingRect.GetCenter(), Value );
+		RotateSelected( pRotationCenterPoint == 0 ? BoundingRect.GetCenter() : *pRotationCenterPoint, Value );
 		FinishChangeSelected();
 		SetModifiedFlag( true );
-		return true;
+		return _CoordinateChange::ROTATION;
 	}
 
 	CoordinateCount = sscanf_s( (const char*)Text, "%lf , %lf%c", &xValue, &yValue, &Dummy1, 1 );
 
 	if( CoordinateCount < 1 || CoordinateCount > 2 )
-		return false;
+		return _CoordinateChange::NONE;
 
 	double Angle = xValue;
 
@@ -4357,55 +4353,58 @@ bool CLinkageDoc::SetSelectedElementCoordinates( const char *pCoordinateString )
 		{
 			CLink *pLink = GetSelectedLink( 0, false );
 			if( pLink == 0 || pLink->GetConnectorCount() != 2 || pLink->IsLocked() )
-				return false;
+				return _CoordinateChange::NONE;
 
-			return ChangeLinkLength( pLink, xValue, false );
+			if( ChangeLinkLength( pLink, xValue, false ) )
+				return _CoordinateChange::DISTANCE;
+			else
+				return _CoordinateChange::NONE;
 		}
-		return false;
+		return _CoordinateChange::NONE;
 	}
 
 	int ExpectedCoordinateCount = SelectedConnectorCount == 1 ? 2 : 1;
 
 	if( CoordinateCount != ExpectedCoordinateCount )
-		return false;
+		return _CoordinateChange::NONE;
 
 	if( CoordinateCount == 2 )
 	{
 		if( IsLinkLocked( pConnector ) )
-			return false;
+			return _CoordinateChange::NONE;
 		PushUndo();
 		pConnector->SetPoint( CFPoint( xValue, yValue ) );
-		return true;
+		return _CoordinateChange::OTHER;
 	}
 	else if( SelectedConnectorCount == 2 )
 	{
 		// Distance
 		CConnector *pConnector2 = (CConnector*)GetSelectedConnector( 1 );
 		if( pConnector2 == 0 )
-			return false;
+			return _CoordinateChange::NONE;
 		if( IsLinkLocked( pConnector2 ) )
-			return false;
+			return _CoordinateChange::NONE;
 		CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
 		Line.SetDistance( xValue );
 		PushUndo();
 		pConnector2->SetPoint( Line.GetEnd() );
-		return true;
+		return _CoordinateChange::DISTANCE;
 	}
 	else if( SelectedConnectorCount == 3 )
 	{
 		// Angle
 		CConnector *pConnector2 = GetSelectedConnector( 2 );
 		if( pConnector2 != 0 && pConnector2->IsSlider() )
-			return false;
+			return _CoordinateChange::NONE;
 		if( IsLinkLocked( pConnector2 ) )
-			return false;
+			return _CoordinateChange::NONE;
 
 		PushUndo();
 		MakeSelectedAtAngle( Angle );
-		return true;
+		return _CoordinateChange::OTHER;
 	}
 
-	return false;
+	return _CoordinateChange::NONE;
 }
 
 CLink *CLinkageDoc::GetSelectedLink( int Index, bool bOnlyWithMultipleConnectors )
