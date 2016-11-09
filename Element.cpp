@@ -51,6 +51,11 @@ void CElement::RemoveFastenElement( class CElement *pElement )
 		if( pItem->GetElement() == pElement || pElement == 0 )
 		{
 			m_FastenedElements.RemoveAt( DeletePosition );
+
+//			pItem->GetElement()->RemoveFastenElement( this );
+			if( pItem->GetElement()->GetFastenedTo() != 0 && this == pItem->GetElement()->GetFastenedTo()->GetElement() )
+				pItem->GetElement()->UnfastenTo();
+
 			break;
 		}
 	}

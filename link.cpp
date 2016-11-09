@@ -529,13 +529,13 @@ void CLink::RemoveConnector( CConnector* pConnector )
 	{
 		m_Connectors.RemoveAll();
 		m_ConnectedSliders.RemoveAll();
-		m_FastenedElements.RemoveAll();
+		//m_FastenedElements.RemoveAll();
 	}
 	else
 	{
 		m_Connectors.Remove( pConnector );
 		m_ConnectedSliders.Remove( pConnector );
-		m_FastenedElements.Remove( (CElement*)pConnector );
+		//m_FastenedElements.Remove( (CElement*)pConnector );
 	}
 }
 
@@ -791,9 +791,17 @@ void CLink::SetActuator( bool bActuator )
 			return;
 		CConnector* pConnector2 = m_Connectors.GetNext( Position );
 
-		m_StrokeConnector.SetLayers( GetLayers() );
+		CAdjuster *pAdjuster = GetAdjuster();
+		if( pAdjuster != 0 )
+		{
+			pAdjuster->SetParent( this );
+			pAdjuster->SetSlideLimits( pConnector1, pConnector2 );
+			pAdjuster->SetShowOnParentSelect( true );
+		}
 
-		m_StrokeConnector.AddLink( this );
+		//m_StrokeConnector.SetLayers( GetLayers() );
+
+		//m_StrokeConnector.AddLink( this );
 
 		CFLine Line( pConnector1->GetPoint(), pConnector2->GetPoint() );
 		m_ActuatorCPM = 15;
@@ -900,7 +908,7 @@ void CLink::UpdateFromController( void )
 	if( pConnector1 == 0 )
 		return;
 
-	CFLine Line( pConnector1->GetPoint(), m_StrokeConnector.GetPoint() );
+	CFLine Line( pConnector1->GetPoint(), m_Adjuster.GetPoint() );
 
 	SetStroke( Line.GetDistance() );
 }
@@ -910,23 +918,9 @@ void CLink::UpdateController( void )
 	if( !IsActuator() )
 		return;
 
-	// Always keep the throw connector sliding between the two ends of the link.
-	POSITION Position = m_Connectors.GetHeadPosition();
-	if( Position == 0 )
-		return;
-
-	CConnector* pConnector1 = m_Connectors.GetNext( Position );
-	if( Position == 0 )
-		return;
-
-	CConnector* pConnector2 = m_Connectors.GetNext( Position );
-
-	m_StrokeConnector.SlideBetween( pConnector1, pConnector2 );
-
 	CFPoint Point;
 	GetStrokePoint( Point );
-	m_StrokeConnector.MovePoint( Point );
-	m_StrokeConnector.SetPoint( Point );
+	m_Adjuster.SetPoint( Point );
 }
 
 void CLink::MakePermanent( void )

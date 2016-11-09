@@ -1814,9 +1814,21 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 		CLink* pLink = pLinkList->GetNext( Position );
 		if( pLink != 0 )
 		{
-			CConnector *pConnector = pLink->GetStrokeConnector( 0 );
+			CAdjuster *pAdjuster = pLink->GetAdjuster();
+			if( pAdjuster != 0 )
+				DrawAdjuster( pRenderer, m_SelectedViewLayers, pAdjuster );
+		}
+	}
+
+	Position = pConnectors->GetHeadPosition();
+	while( Position != NULL )
+	{
+		CConnector* pConnector = pConnectors->GetNext( Position );
+		if( pConnector != 0 )
+		{
+			CAdjuster *pAdjuster = pConnector->GetAdjuster();
 			if( pConnector != 0 )
-				DrawConnector( pRenderer, m_SelectedViewLayers, pConnector, m_bShowLabels, false, false, false, true );
+				DrawAdjuster( pRenderer, m_SelectedViewLayers, pAdjuster );
 		}
 	}
 
@@ -2860,7 +2872,7 @@ void CLinkageView::OnMouseMoveDrag(UINT nFlags, CFPoint point)
 	if( m_bAllowEdit )
 	{
 		if( pDoc->MoveSelected( AdjustedPoint, bElementSnap, bGridSnap,  GapDistance / pDoc->GetUnitScale(),  GapDistance / pDoc->GetUnitScale(), Unscale( PIXEL_SNAP_DISTANCE ), ReferencePoint ) )
-		InvalidateRect( 0 );
+			InvalidateRect( 0 );
 	}
 
 	SetLocationAsStatus( ReferencePoint );
@@ -5278,7 +5290,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 	if( ( pConnector->GetLayers() & OnLayers ) == 0 )
 		return;
 
-	// Draw only the connector in the proper fashioni
+	// Draw only the connector in the proper fashion
 	CPen Pen;
 	CPen BlackPen( PS_SOLID, 1, RGB( 0, 0, 0 ) );
 	CPen* pOldPen = 0;
@@ -5286,11 +5298,23 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 	CBrush *pOldBrush = 0;
 	COLORREF Color;
 	bool bSkipConnectorDraw = false;
+	bool bLinkSelected = false;
+
+	POSITION Position = pConnector->GetLinkList()->GetHeadPosition();
+	while( Position != 0 )
+	{
+		CLink* pLink = pConnector->GetLinkList()->GetNext( Position );
+		if( pLink != 0 )
+		{
+			if( pLink->IsSelected() )
+				bLinkSelected = true;
+		}
+	}
 
 	if( !pConnector->IsOnLayers( CLinkageDoc::MECHANISMLAYERS ) )
 	{
 		Color = pConnector->IsAlone() ? pConnector->GetColor() : COLOR_DRAWINGDARK;
-		bSkipConnectorDraw = true;
+		bSkipConnectorDraw = !bControlKnob;
 		POSITION Position = pConnector->GetLinkList()->GetHeadPosition();
 		while( Position != 0 )
 		{
@@ -5399,7 +5423,14 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 
 		if( !pConnector->IsOnLayers( CLinkageDoc::MECHANISMLAYERS ) )
 		{
-			if( pConnector->IsAlone() )
+			if( bControlKnob )
+			{
+				double Radius = m_ConnectorRadius;
+				Radius -= UnscaledUnits( 1 );
+				CFCircle Circle( Point, Radius );
+				pRenderer->Circle( Circle );
+			}
+			else if( pConnector->IsAlone() )
 			{
 				pRenderer->MoveTo( Point.x, Point.y + AdjustYCoordinate( m_ConnectorRadius ) );
 				pRenderer->LineTo( Point.x, Point.y - AdjustYCoordinate( m_ConnectorRadius ) );
@@ -5535,10 +5566,11 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 			Rect.InflateRect( 2 * m_ConnectorRadius, 2 * m_ConnectorRadius );
 
 			CPen GrayPen;
-			GrayPen.CreatePen( PS_SOLID, 1, pDoc->GetLastSelectedConnector() == pConnector ? COLOR_MAJORSELECTION : COLOR_MINORSELECTION ) ;
+			GrayPen.CreatePen( PS_SOLID, 1, COLOR_MINORSELECTION ) ;
 			pRenderer->SelectObject( &GrayPen );
 
-			pRenderer->DrawRect( Rect );
+			if( !bLinkSelected )
+				pRenderer->DrawRect( Rect );
 
 			DrawFasteners( pRenderer, OnLayers, pConnector );
 		}
@@ -5549,6 +5581,83 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 			pRenderer->SelectObject( &GrayPen );
 			pRenderer->Arc( CFArc( Point, m_ConnectorRadius * 2, Point, Point ) );
 		}
+	}
+
+	if( pOldPen != 0 )
+		pRenderer->SelectObject( pOldPen );
+	if( pOldBrush != 0 )
+		pRenderer->SelectObject( pOldBrush );
+}
+
+void CLinkageView::DrawAdjuster( CRenderer* pRenderer, unsigned int OnLayers, CAdjuster* pAdjuster )
+{
+	CElement *pParent = pAdjuster->GetParent();
+
+	if( pParent == 0 || ( pParent->GetLayers() & OnLayers ) == 0 )
+		return;
+
+	if( !pParent->IsSelected() && pAdjuster->IsShowOnParentSelect() )
+		return;
+
+	// Draw only the connector in the proper fashion
+	CPen Pen;
+	CPen BlackPen( PS_SOLID, 1, RGB( 0, 0, 0 ) );
+	CPen* pOldPen = 0;
+	CBrush Brush;
+	CBrush *pOldBrush = 0;
+	COLORREF Color;
+	bool bSkipConnectorDraw = false;
+
+	if( !pParent->IsOnLayers( CLinkageDoc::MECHANISMLAYERS ) )
+		Color = pParent->GetColor();
+	else if( pRenderer->GetColorCount() == 2 )
+		Color = RGB( 0, 0, 0 );
+	else
+		Color = pParent->GetColor();
+
+	CFPoint Point = pAdjuster->GetPoint();
+	Point = Scale( Point );
+	Pen.CreatePen( PS_SOLID, 1, Color );
+
+	if( pAdjuster->IsSelected() )
+		Brush.CreateSolidBrush( COLOR_ADJUSTMENTKNOBS );
+	else
+		Brush.CreateStockObject( NULL_BRUSH );
+
+	pOldPen = pRenderer->SelectObject( &Pen );
+	pOldBrush = pRenderer->SelectObject( &Brush );
+
+	double Radius = m_ConnectorRadius;
+	Radius -= UnscaledUnits( 1 );
+	CFCircle Circle( Point, Radius );
+	pRenderer->Arc( Point.x - Radius, Point.y + AdjustYCoordinate( Radius ), Point.x + Radius, Point.y - AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ) );
+	if( pAdjuster->IsSelected() )
+		pRenderer->Circle( Circle );
+
+	if( m_bShowSelection && pParent->IsSelected() && 0 )
+	{
+		CLinkageDoc* pDoc = GetDocument();
+		ASSERT_VALID(pDoc);
+		CBrush Brush( COLOR_BLACK );
+		static const int BOX_SIZE = 5;
+		int Adjustment = ( BOX_SIZE - 1 ) / 2;
+		CFRect Rect( Point.x - Adjustment,  Point.y + AdjustYCoordinate( Adjustment ),  Point.x + Adjustment,  Point.y - AdjustYCoordinate( Adjustment ) );
+
+		#if defined( LINKAGE_USE_DIRECT2D )
+			// Selection is only shown on-screen and Direct2D makes the rectangle look too small. So enlarge it.
+			Rect.InflateRect( 1, 1 );
+		#endif
+		pRenderer->FillRect( &Rect, &Brush );
+
+		Rect.SetRect( Point.x,  Point.y,  Point.x,  Point.y );
+		//Rect = Scale( Rect );
+		Rect.InflateRect( 2 * m_ConnectorRadius, 2 * m_ConnectorRadius );
+
+		CPen GrayPen;
+		GrayPen.CreatePen( PS_SOLID, 1, COLOR_MINORSELECTION ) ;
+		pRenderer->SelectObject( &GrayPen );
+
+		pRenderer->DrawRect( Rect );
 	}
 
 	if( pOldPen != 0 )

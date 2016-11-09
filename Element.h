@@ -1,6 +1,7 @@
 #pragma once
 
 #include "NullableColor.h"
+#include "Adjuster.h"
 
 class CElementItem
 {
@@ -82,8 +83,10 @@ class CElement
 	CLink * GetFastenedToLink( void ) { return m_FastenedTo.GetLink() == 0 ? 0 : m_FastenedTo.GetLink(); }
 	CConnector * GetFastenedToConnector( void ) { return m_FastenedTo.GetConnector() == 0 ? 0 : m_FastenedTo.GetConnector(); }
 	void UnfastenTo( void );
-	void FastenTo( CLink *pFastenLink ) { m_FastenedTo = pFastenLink; }
-	void FastenTo( CConnector *pFastenConnector ) { m_FastenedTo = pFastenConnector; }
+	void FastenTo( CLink *pFastenLink ) 
+		{ m_FastenedTo = pFastenLink; }
+	void FastenTo( CConnector *pFastenConnector ) 
+		{ m_FastenedTo = pFastenConnector; }
 
 	ElementList* GetFastenedElementList( void ) { return &m_FastenedElements; }
 	void AddFastenConnector( class CConnector *pConnector );
@@ -92,6 +95,8 @@ class CElement
 
 	virtual bool IsLink( void ) = 0;
 	virtual bool IsConnector( void ) = 0;
+
+	virtual CAdjuster *GetAdjuster( void ) { return &m_Adjuster; }
 
 	protected:
 
@@ -104,5 +109,6 @@ class CElement
 	CNullableColor m_Color;
 	CElementItem m_FastenedTo;
 	ElementList m_FastenedElements;
+	CAdjuster m_Adjuster;
 };
 

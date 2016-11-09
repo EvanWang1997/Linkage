@@ -242,6 +242,7 @@ private:
 	
 	void DebugDrawConnector( CRenderer* pRenderer, unsigned int OnLayers, CConnector *pConnector, bool bShowlabels, bool bErase = false, bool bHighlight = false, bool bDrawConnectedLinks = false );
 	void DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, CConnector *pConnector, bool bShowlabels, bool bErase = false, bool bHighlight = false, bool bDrawConnectedLinks = false, bool bControlKnob = false );
+	void DrawAdjuster( CRenderer* pRenderer, unsigned int OnLayers, CAdjuster* pAdjuster );
 	void DrawMotionPath( CRenderer* pRenderer, CConnector* pConnector );
 	void DebugDrawLink( CRenderer* pRenderer, unsigned int OnLayers, CLink *pLink, bool bShowlabels, bool bDrawHighlight = false, bool bDrawFill = false );
 	void DrawLink( CRenderer* pRenderer, const GearConnectionList *pGearConnections, unsigned int OnLayers, CLink *pLink, bool bShowlabels, bool bDrawHighlight = false, bool bDrawFill = false );

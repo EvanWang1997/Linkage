@@ -56,7 +56,7 @@ public:
 	void AddMotionPoint( void );
 	
 	void SetIntermediateDrawCircleRadius( double Radius ) { m_DrawCircleRadius = fabs( Radius ); }
-	void SetDrawCircleRadius( double Radius ) { m_DrawCircleRadius = fabs( Radius ); m_OriginalDrawCircleRadius = fabs( Radius ); }
+	void SetDrawCircleRadius( double Radius );
 	double GetDrawCircleRadius( void ) { return m_DrawCircleRadius; }
 	double GetOriginalDrawCircleRadius( void ) { return m_OriginalDrawCircleRadius; }
 	
@@ -67,6 +67,8 @@ public:
 
 	bool GetSliderArc( CFArc &TheArc, bool bGetOriginal = false );
 
+	void UpdateFromController( void );
+	void UpdateController( void );
 	bool IsLinkSelected( void );
 	bool IsAnchor( void ) { return m_bAnchor; }
 	bool IsInput( void ) { return m_bInput; }
@@ -95,6 +97,7 @@ public:
 	CFPoint * GetMotionPath( int &StartPoint, int &PointCount, int &MaxPoint );
 	bool HasLink( CLink *pLink );
 	bool IsAlone( void );
+	CConnector *GetCircleSizeConnector( int Index );
 	
 	void SlideBetween( class CConnector *pConnector1 = 0, class CConnector *pConnector2 = 0 );
 	

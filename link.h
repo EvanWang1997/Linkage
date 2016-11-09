@@ -148,7 +148,6 @@ class CLink : public CElement
 	void IncrementExtension( double Increment );
 	void SetExtension( double Value );
 	double GetExtendedDistance( void );
-	CConnector *GetStrokeConnector( int Index ) { Index = 0; if( m_bActuator ) return &m_StrokeConnector; else return 0; }
 	void UpdateFromController( void );
 	void UpdateController( void );
 	CConnector *GetConnector( int Index ) const;
@@ -171,6 +170,8 @@ class CLink : public CElement
 	bool RotateAround( CConnector* pConnector );
 	bool FixAll( void );
 	static CConnector* GetCommonConnector( CLink *pLink1, CLink *pLink2 );
+
+	virtual CAdjuster *GetAdjuster( void ) { return IsActuator() ? &m_Adjuster : 0; }
 
 	private:
 	
@@ -197,7 +198,7 @@ class CLink : public CElement
 
 	bool m_bLinkTriangle;
 
-	CConnector m_StrokeConnector;
+	//CConnector m_StrokeConnector;
 	CList<CLinkTriangleConnection> m_LinkTriangleConections;
 	
 	int GetInputConnectorCount( void );

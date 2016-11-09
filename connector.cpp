@@ -43,6 +43,7 @@ void CConnector::Reset( void )
 	m_SlideRadius = 0;
 	m_OriginalSlideRadius = 0;
 	m_Color = RGB( 200, 200, 200 );
+	UpdateController();
 }
 
 CConnector::CConnector()
@@ -121,6 +122,43 @@ int CConnector::GetSelectedLinkCount( void )
 		++Count;
 	}
 	return Count;
+}
+
+void CConnector::UpdateFromController( void )
+{
+	// The controller moved.
+	CAdjuster *pAdjuster = GetAdjuster();
+	if( m_DrawCircleRadius == 0.0 || pAdjuster == 0 )
+		return;
+
+	m_DrawCircleRadius = Distance( GetPoint(), pAdjuster->GetPoint() );
+	if( m_DrawCircleRadius <= 0.0 )
+		m_DrawCircleRadius = 0.001;
+	m_OriginalDrawCircleRadius = m_DrawCircleRadius;
+}
+
+void CConnector::UpdateController( void )
+{
+	CAdjuster *pAdjuster = GetAdjuster();
+	if( m_DrawCircleRadius == 0.0 || pAdjuster == 0 )
+		return;
+
+	CFPoint Center = GetPoint();
+	CFLine LimitLine( Center.x, Center.y, Center.x + 10, Center.y + 10 );
+	LimitLine.SetDistance( m_DrawCircleRadius );
+	m_Adjuster.SetPoint( LimitLine.GetEnd() );
+}
+
+void CConnector::SetDrawCircleRadius( double Radius )
+{
+	CAdjuster *pAdjuster = GetAdjuster();
+	pAdjuster->SetParent( Radius == 0 ? 0 : this );
+	//pAdjuster->SetSlideLimits( this, 0 );
+	pAdjuster->SetShowOnParentSelect( true );
+		
+	m_DrawCircleRadius = fabs( Radius );
+	m_OriginalDrawCircleRadius = fabs( Radius );
+	UpdateController();
 }
 
 void CConnector::RotateAround( CFPoint& Point, double Angle )

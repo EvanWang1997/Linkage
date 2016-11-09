@@ -9,6 +9,7 @@
 #include "link.h"
 #include "bitarray.h"
 #include "ControlWindow.h"
+#include "Adjuster.h"
 
 #if _MSC_VER > 1000
 #pragma once
@@ -253,7 +254,7 @@ private:
 	unsigned int m_SelectedLayers;
 	
 	CConnector *m_pCapturedConnector;
-	CConnector *m_pCapturedController;
+	CAdjuster *m_pCapturedController;
 	CFPoint m_CaptureOffset;
 	
 	bool FindRoomFor( CFRect NeedRect, CFPoint &PlaceHere );

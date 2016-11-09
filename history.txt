@@ -317,6 +317,9 @@ Received some feature requests recently. These are some NOT YET ADDED:
 11/3/2016 3:04 PM: Added rotattion setting capability to the tool bar coordinate/dimension text box.
 11/3/2016 3:04 PM: Changed how slider fixup works with curved slider paths fixing a bug in that code as well.
 11/3/2016 3:04 PM: Change code to remember rotation center point after rotating selected elements using the coordinates text box.
+11/9/2016 3:50 PM: Change to draw a selection rectangle around a connector only when it's link is not selected (to avoid clutter).
+11/9/2016 3:50 PM: Changed code to let any element that should have one, have an adjuster knob, and to only show it when the link or connector (parent) is selected. 
+11/9/2016 3:50 PM: Added adjuster knob to point elements that have a circle radius.
 
 
 
