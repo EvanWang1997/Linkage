@@ -37,6 +37,7 @@ class CRenderer// : public CDC
 	CFPoint GetOffset( void );
 
 	int GetPenSize( int UnscaledSize );
+	double GetUnScaledValue( double Value );
 	
 	CFPoint DrawLine( CFLine Line );
 	CFPoint DrawLine( CFPoint Point1, CFPoint Point2 );

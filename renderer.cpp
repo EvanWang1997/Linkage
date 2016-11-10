@@ -266,7 +266,7 @@ class CRendererImplementation
 		NewColor = RGB( (int)( Red * 255 ), (int)( Green * 255 ), (int)( Blue * 255 ) );
 		CBrush Brush;
 		Brush.CreateSolidBrush( NewColor );
-		CPen Pen( PS_SOLID, (int)min( 1.0 * m_Scale * m_DPIScale, 1.0 ), NewColor );
+		CPen Pen( PS_SOLID | PS_ENDCAP_SQUARE, (int)min( 1.0 * m_Scale * m_DPIScale, 1.0 ), NewColor );
 
 		int ArcDirection = 0;
 
@@ -426,6 +426,11 @@ class CRendererImplementation
 	int GetPenSize( int UnscaledSize )
 	{
 		return (int)max( UnscaledSize * m_Scale * m_DPIScale, 1.0 );
+	}
+	
+	double GetUnScaledValue( double Value )
+	{
+		return Value / m_Scale / m_DPIScale;
 	}
 
 	virtual bool DrawArrow( CFPoint FromPoint, CFPoint ToPoint, double Width, double Length ) = 0;
@@ -677,7 +682,11 @@ class CGDIRenderer : public CRendererImplementation
 		Scale( x1, y1 );
 		Scale( x2, y2 );
 
-		return m_pDC->Ellipse( (int)( x1 ), (int)( y1 ), (int)( x2 ) + 1, (int)( y2 ) + 1 ) != 0;
+		CPen *pOldPen = (CPen*)m_pDC->SelectStockObject( NULL_PEN );
+		bool bResult = m_pDC->Ellipse( (int)( x1 ), (int)( y1 ), (int)( x2 ) + 1, (int)( y2 ) + 1 ) != 0;
+		m_pDC->SelectObject( pOldPen );
+
+		return bResult;
 	}
 
 	bool Arc( CFArc &TheArc )
@@ -817,7 +826,7 @@ class CGDIRenderer : public CRendererImplementation
 			 * Check for non-solid pens and don't scale their width since
 			 * larger pens cannot be non-solid at this time.
 			 */
-			if( LogPen.elpPenStyle != PS_SOLID )
+			if( LogPen.elpPenStyle != PS_SOLID && LogPen.elpPenStyle != ( PS_SOLID | PS_ENDCAP_SQUARE ) )
 			{
 				double Viewport = m_pDC->GetViewportExt().cx;
 				double Window = m_pDC->GetWindowExt().cx;
@@ -825,7 +834,7 @@ class CGDIRenderer : public CRendererImplementation
 
 				LOGBRUSH LogBrush;
 				LogBrush.lbColor = LogPen.elpColor;
-				LogBrush.lbStyle = PS_SOLID;
+				LogBrush.lbStyle = PS_SOLID | PS_ENDCAP_SQUARE;
 
 				const DWORD DashStyle[2] = { (DWORD)( 4 * m_Scale * m_DPIScale ), (DWORD)( 4 * m_Scale * m_DPIScale ) };
 
@@ -896,6 +905,11 @@ class CGDIRenderer : public CRendererImplementation
 	int GetPenSize( int UnscaledSize )
 	{
 		return max( (int)( UnscaledSize * m_Scale * m_DPIScale ), 1 );
+	}
+
+	double GetUnScaledValue( double Value )
+	{
+		return Value / m_Scale / m_DPIScale;
 	}
 
 	bool DrawArrow( CFPoint FromPoint, CFPoint ToPoint, double Width, double Length )
@@ -1179,6 +1193,11 @@ class CNullRenderer : public CRendererImplementation
 	}
 
 	int GetPenSize( int UnscaledSize )
+	{
+		return 0;
+	}
+
+	double GetUnScaledValue( double Value )
 	{
 		return 0;
 	}
@@ -1608,7 +1627,7 @@ class CDXFRenderer : public CRendererImplementation
 			 * Check for non-solid pens and don't scale their width since
 			 * larger pens cannot be non-solid at this time.
 			 */
-			if( LogPen.elpPenStyle != PS_SOLID )
+			if( LogPen.elpPenStyle != PS_SOLID && LogPen.elpPenStyle != ( PS_SOLID | PS_ENDCAP_SQUARE ) )
 			{
 				double Viewport = m_pDC->GetViewportExt().cx;
 				double Window = m_pDC->GetWindowExt().cx;
@@ -1616,7 +1635,7 @@ class CDXFRenderer : public CRendererImplementation
 
 				LOGBRUSH LogBrush;
 				LogBrush.lbColor = LogPen.elpColor;
-				LogBrush.lbStyle = PS_SOLID;
+				LogBrush.lbStyle = PS_SOLID | PS_ENDCAP_SQUARE;
 
 				const DWORD DashStyle[2] = { (DWORD)( 4 * m_Scale * m_DPIScale ), (DWORD)( 4 * m_Scale * m_DPIScale ) };
 
@@ -1669,6 +1688,11 @@ class CDXFRenderer : public CRendererImplementation
 	int GetPenSize( int UnscaledSize )
 	{
 		return max( (int)( UnscaledSize * m_Scale * m_DPIScale ), 1 );
+	}
+
+	double GetUnScaledValue( double Value )
+	{
+		return Value / m_Scale / m_DPIScale;
 	}
 
 	bool DrawArrow( CFPoint FromPoint, CFPoint ToPoint, double Width, double Length )
@@ -2587,7 +2611,7 @@ class CD2DRenderer : public CRendererImplementation
 			 * Check for non-solid pens and don't scale their width since
 			 * larger pens cannot be non-solid at this time.
 			 */
-			if( LogPen.elpPenStyle != PS_SOLID )
+			if( LogPen.elpPenStyle != PS_SOLID && LogPen.elpPenStyle != ( PS_SOLID | PS_ENDCAP_SQUARE ) )
 			{
 				double Viewport = m_pDC->GetViewportExt().cx;
 				double Window = m_pDC->GetWindowExt().cx;
@@ -2595,7 +2619,7 @@ class CD2DRenderer : public CRendererImplementation
 
 				LOGBRUSH LogBrush;
 				LogBrush.lbColor = LogPen.elpColor;
-				LogBrush.lbStyle = PS_SOLID;
+				LogBrush.lbStyle = PS_SOLID | PS_ENDCAP_SQUARE;
 
 				const DWORD DashStyle[2] = { (DWORD)( 4 * m_Scale * m_DPIScale ), (DWORD)( 4 * m_Scale * m_DPIScale ) };
 
@@ -2707,6 +2731,11 @@ class CD2DRenderer : public CRendererImplementation
 	int GetPenSize( int UnscaledSize )
 	{
 		return max( (int)( UnscaledSize * m_Scale * m_DPIScale ), 1 );
+	}
+
+	double GetUnScaledValue( double Value )
+	{
+		return Value / m_Scale / m_DPIScale;
 	}
 
 	bool DrawArrow( CFPoint FromPoint, CFPoint ToPoint, double Width, double Length )
@@ -2945,6 +2974,14 @@ int CRenderer::GetPenSize( int UnscaledSize )
 		return 0;
 
 	return m_pImplementation->GetPenSize( UnscaledSize );
+}
+
+double CRenderer::GetUnScaledValue( double Value )
+{
+	if( m_pImplementation == 0 )
+		return 0;
+
+	return m_pImplementation->GetUnScaledValue( Value );
 }
 
 bool CRenderer::DrawArrow( CFPoint FromPoint, CFPoint ToPoint, double Width, double Length )

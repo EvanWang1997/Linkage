@@ -5566,7 +5566,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 			Rect.InflateRect( 2 * m_ConnectorRadius, 2 * m_ConnectorRadius );
 
 			CPen GrayPen;
-			GrayPen.CreatePen( PS_SOLID, 1, COLOR_MINORSELECTION ) ;
+			GrayPen.CreatePen( PS_SOLID, 1, COLOR_MINORSELECTION );
 			pRenderer->SelectObject( &GrayPen );
 
 			if( !bLinkSelected )
@@ -5599,6 +5599,12 @@ void CLinkageView::DrawAdjuster( CRenderer* pRenderer, unsigned int OnLayers, CA
 	if( !pParent->IsSelected() && pAdjuster->IsShowOnParentSelect() )
 		return;
 
+	if( pAdjuster->IsSelected() )
+		return; // hidden when being dragged.
+
+	if( m_MouseAction != ACTION_NONE )
+		return; // Don't draw if selection is not finished (user hasnt released mouse button yet).
+
 	// Draw only the connector in the proper fashion
 	CPen Pen;
 	CPen BlackPen( PS_SOLID, 1, RGB( 0, 0, 0 ) );
@@ -5630,8 +5636,8 @@ void CLinkageView::DrawAdjuster( CRenderer* pRenderer, unsigned int OnLayers, CA
 	double Radius = m_ConnectorRadius;
 	Radius -= UnscaledUnits( 1 );
 	CFCircle Circle( Point, Radius );
-	pRenderer->Arc( Point.x - Radius, Point.y + AdjustYCoordinate( Radius ), Point.x + Radius, Point.y - AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ) );
-	if( pAdjuster->IsSelected() )
+	//pRenderer->Arc( Point.x - Radius, Point.y + AdjustYCoordinate( Radius ), Point.x + Radius, Point.y - AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ) );
+	//if( pAdjuster->IsSelected() )
 		pRenderer->Circle( Circle );
 
 	if( m_bShowSelection && pParent->IsSelected() && 0 )
@@ -5823,17 +5829,31 @@ void CLinkageView::DrawActuator( CRenderer* pRenderer, unsigned int OnLayers, CL
 	}
 	else
 	{
+		double LineSize = pLink->GetLineSize() * 5;
 		CPen Pen;
-		Pen.CreatePen( PS_SOLID, pLink->GetLineSize() * 5, SecondColor );
+		Pen.CreatePen( PS_SOLID, (int)( LineSize ), SecondColor );
+		CBrush Brush;
+		Brush.CreateSolidBrush( SecondColor );
 		CPen *pOldPen = pRenderer->SelectObject( &Pen );
+		CBrush *pOldBrush = pRenderer->SelectObject( &Brush );
 
 		CFLine NewLine;
 		NewLine = Line;
 		NewLine.SetDistance( pLink->GetStroke() );
-		pRenderer->MoveTo( Scale( NewLine.GetStart() ) );
-		pRenderer->LineTo( Scale( NewLine.GetEnd() ) );
+
+		double Radius = UnscaledUnits( LineSize / 2 );
+		CFCircle Circle( Scale( NewLine.GetStart() ), Radius );
+		pRenderer->Circle( Circle );
+		Circle.SetCircle( Scale( NewLine.GetEnd() ), Radius );
+		pRenderer->Circle( Circle );
+
+		NewLine = Scale( NewLine );
+		NewLine.MoveEnds( Radius, -Radius );
+		pRenderer->MoveTo( NewLine.GetStart() );
+		pRenderer->LineTo( NewLine.GetEnd() );
 
 		pRenderer->SelectObject( pOldPen );
+		pRenderer->SelectObject( pOldBrush );
 	}
 
 	Line.ReverseDirection();
