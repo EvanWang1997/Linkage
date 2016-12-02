@@ -744,7 +744,7 @@ exit 0
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AboutDialog.h" />
-    <ClInclude Include="Adjuster.h" />
+    <ClInclude Include="ControlKnob.h" />
     <ClInclude Include="AngleDialog.h" />
     <ClInclude Include="AnimatedGifFile.h" />
     <ClInclude Include="AviFile.h" />
@@ -827,7 +827,7 @@ exit 0
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutDialog.cpp" />
-    <ClCompile Include="Adjuster.cpp" />
+    <ClCompile Include="ControlKnob.cpp" />
     <ClCompile Include="AngleDialog.cpp" />
     <ClCompile Include="AnimatedGifFile.cpp" />
     <ClCompile Include="AviFile.cpp" />

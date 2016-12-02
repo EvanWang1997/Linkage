@@ -209,7 +209,15 @@ class CFRect
 	_inline void SetRect( CFPoint Point1, CFPoint Point2 )
 		{ top = Point1.y; bottom = Point2.y; left = Point1.x; right = Point2.x; }
 	_inline void InflateRect( double x, double y ) { top -= y; left -= x; bottom += y; right += x; }
-		
+
+	void operator+=( const CFPoint &Point )
+	{
+		top += Point.y;
+		bottom += Point.y;
+		left += Point.x;
+		right += Point.x;
+	}
+
 	bool IsOverlapped( CFRect &Rect );
 	
 	bool IsInsideOf( CFRect &Rect );

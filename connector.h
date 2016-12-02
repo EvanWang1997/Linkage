@@ -36,6 +36,7 @@ public:
 	void Reset( void );
 
 	void Reset( bool bClearMotionPath );
+	virtual CFPoint GetLocation( void ) { return m_Point; }
 	void SetPoint( CFPoint& Point ) { m_Point = Point; m_OriginalPoint = Point; }
 	void SetPoint( double x, double y ) { m_Point.x = x; m_Point.y = y; m_OriginalPoint = m_Point; }
 	void SetIntermediatePoint( CFPoint &Point ) { m_Point = Point; }
@@ -67,8 +68,8 @@ public:
 
 	bool GetSliderArc( CFArc &TheArc, bool bGetOriginal = false );
 
-	void UpdateFromController( void );
-	void UpdateController( void );
+	void UpdateControlKnob( void );
+	void UpdateControlKnob( CFPoint Point );
 	bool IsLinkSelected( void );
 	bool IsAnchor( void ) { return m_bAnchor; }
 	bool IsInput( void ) { return m_bInput; }

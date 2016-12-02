@@ -3,25 +3,25 @@
 #include "Element.h"
 #include "geometry.h"
 
-class CAdjuster
+class CControlKnob
 {
 public:
-	CAdjuster();
-	~CAdjuster();
+	CControlKnob();
+	~CControlKnob();
 
 	CFPoint GetPoint( void );
-	void SetPoint( CFPoint Point );
+	CFPoint SetPoint( CFPoint Point );
 	void SetParent( class CElement *pElement );
 	CElement *GetParent( void );
 	void SetSlideLimits( class CConnector* Point1, class CConnector* Point2 );
 	bool GetSlideLimits( CFPoint &Point1, CFPoint &Point2 );
 	bool IsShowOnParentSelect( void );
 	void SetShowOnParentSelect( bool bValue );
-	bool PointOnAdjuster( CFPoint Point, double TestDistance );
+	bool PointOnControlKnob( CFPoint Point, double TestDistance );
 	void Select( bool bSelect );
 	bool IsSelected( void );
 
 private:
-	class CAdjusterImplementation* m_pImplementation;
+	class CControlKnobImplementation* m_pImplementation;
 };
 

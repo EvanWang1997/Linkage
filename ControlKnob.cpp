@@ -1,12 +1,12 @@
 #include "stdafx.h"
 #include "connector.h"
-#include "Adjuster.h"
+#include "ControlKnob.h"
 #include "geometry.h"
 
-class CAdjusterImplementation
+class CControlKnobImplementation
 {
 	public:
-	CAdjusterImplementation()
+	CControlKnobImplementation()
 	{
 		m_pElement = 0;
 		pLimit1 = 0;
@@ -15,9 +15,31 @@ class CAdjusterImplementation
 		m_bSelected = false;
 	}
 
-	CFPoint GetPoint( void ) { return m_Point; }
-	void SetPoint( CFPoint Point ) { m_Point = Point; }
-	void SetParent( CElement *pElement ) { m_pElement = pElement; }
+	CFPoint GetPoint( void ) 
+	{
+		CFPoint Point = m_RelativePoint + ( m_pElement == 0 ? CPoint() : m_pElement->GetLocation() );
+		return Point;
+	}
+
+	CFPoint SetPoint( CFPoint Point ) 
+	{
+		CFPoint Start;
+		CFPoint End;
+		if( GetSlideLimits( Start, End ) )
+		{
+			CFLine TempLine( Start, End );
+			Point.SnapToLine( TempLine, true, true );
+		}
+		m_Point = Point; 
+		m_RelativePoint = Point - ( m_pElement == 0 ? CPoint() : m_pElement->GetLocation() );
+		return m_Point;
+	}
+
+	void SetParent( CElement *pElement )
+	{
+		m_pElement = pElement;
+	}
+
 	CElement *GetParent( void ) { return m_pElement; }
 	bool IsShowOnParentSelect( void ) { return m_bShowOnParentSelect; }
 	void SetShowOnParentSelect( bool bValue ) { m_bShowOnParentSelect = bValue; }
@@ -38,6 +60,7 @@ class CAdjusterImplementation
 	bool IsSelected( void ) { return m_bSelected; }
 
 	CFPoint m_Point;
+	CFPoint m_RelativePoint;
 	CElement *m_pElement;
 	bool m_bShowOnParentSelect;
 	CConnector *pLimit1;
@@ -46,19 +69,19 @@ class CAdjusterImplementation
 };
 
 
-CAdjuster::CAdjuster()
+CControlKnob::CControlKnob()
 {
-	m_pImplementation = new CAdjusterImplementation;
+	m_pImplementation = new CControlKnobImplementation;
 }
 
-CAdjuster::~CAdjuster()
+CControlKnob::~CControlKnob()
 {
 	if( m_pImplementation != 0 )
 		delete m_pImplementation;
 	m_pImplementation = 0;
 }
 
-void CAdjuster::Select( bool bSelect )
+void CControlKnob::Select( bool bSelect )
 {
 	if( m_pImplementation == 0 )
 		return;
@@ -66,7 +89,7 @@ void CAdjuster::Select( bool bSelect )
 	m_pImplementation->Select( bSelect );
 }
 
-bool CAdjuster::IsSelected( void )
+bool CControlKnob::IsSelected( void )
 {
 	if( m_pImplementation == 0 )
 		return false;
@@ -74,7 +97,7 @@ bool CAdjuster::IsSelected( void )
 	return m_pImplementation->IsSelected();
 }
 
-bool CAdjuster::PointOnAdjuster( CFPoint Point, double TestDistance )
+bool CControlKnob::PointOnControlKnob( CFPoint Point, double TestDistance )
 {
 	if( m_pImplementation == 0 )
 		return false;
@@ -85,42 +108,42 @@ bool CAdjuster::PointOnAdjuster( CFPoint Point, double TestDistance )
 	return Distance <= TestDistance;
 }
 
-CFPoint CAdjuster::GetPoint( void ) 
+CFPoint CControlKnob::GetPoint( void ) 
 {
 	if( m_pImplementation == 0 )
 		return CFPoint();
 	return m_pImplementation->GetPoint();
 }
 
-void CAdjuster::SetPoint( CFPoint Point )
+CFPoint CControlKnob::SetPoint( CFPoint Point )
 {
 	if( m_pImplementation == 0 )
-		return;
-	m_pImplementation->SetPoint( Point );
+		return CFPoint();
+	return m_pImplementation->SetPoint( Point );
 }
 
-void CAdjuster::SetParent( CElement *pElement )
+void CControlKnob::SetParent( CElement *pElement )
 {
 	if( m_pImplementation == 0 )
 		return;
 	m_pImplementation->SetParent( pElement );
 }
 
-CElement *CAdjuster::GetParent( void )
+CElement *CControlKnob::GetParent( void )
 {
 	if( m_pImplementation == 0 )
 		return 0;
 	return m_pImplementation->GetParent();
 }
 
-bool CAdjuster::IsShowOnParentSelect( void ) 
+bool CControlKnob::IsShowOnParentSelect( void ) 
 {
 	if( m_pImplementation == 0 )
 		return false;
 	return m_pImplementation->IsShowOnParentSelect();
 }
 
-void CAdjuster::SetShowOnParentSelect( bool bValue )
+void CControlKnob::SetShowOnParentSelect( bool bValue )
 {
 	if( m_pImplementation == 0 )
 		return;
@@ -128,7 +151,7 @@ void CAdjuster::SetShowOnParentSelect( bool bValue )
 }
 
 /*
-void CAdjuster::SnapToSlideLimits( CFPoint Point1, CFPoint Point2 )
+void CControlKnob::SnapToSlideLimits( CFPoint Point1, CFPoint Point2 )
 {
 	if( m_pImplementation == 0 )
 		return;
@@ -139,7 +162,7 @@ void CAdjuster::SnapToSlideLimits( CFPoint Point1, CFPoint Point2 )
 }
 */
 
-void CAdjuster::SetSlideLimits( class CConnector* Point1, class CConnector* Point2 )
+void CControlKnob::SetSlideLimits( class CConnector* Point1, class CConnector* Point2 )
 {
 	if( m_pImplementation == 0 )
 		return;
@@ -147,7 +170,7 @@ void CAdjuster::SetSlideLimits( class CConnector* Point1, class CConnector* Poin
 	m_pImplementation->SetSlideLimits( Point1, Point2 );
 }
 
-bool CAdjuster::GetSlideLimits( CFPoint &Point1, CFPoint &Point2 )
+bool CControlKnob::GetSlideLimits( CFPoint &Point1, CFPoint &Point2 )
 {
 	if( m_pImplementation == 0 )
 		return false;

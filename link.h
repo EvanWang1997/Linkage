@@ -72,7 +72,7 @@ class CLink : public CElement
 
 	virtual bool IsLink( void ) { return true; }
 	virtual bool IsConnector( void ) { return false; }
-
+	virtual CFPoint GetLocation( void ) { return m_Connectors.GetCount() == 0 ? CFPoint() : m_Connectors.GetHead()->GetPoint(); }
 
 	CString GetIdentifierString( bool bDebugging );
 	ConnectorList* GetConnectorList( void ) { return &m_Connectors; }
@@ -130,6 +130,9 @@ class CLink : public CElement
 	bool IsLocked( void ) { return m_bLocked; }
 	void SetLocked( bool bLocked ) { m_bLocked = bLocked; }
 
+	double GetStartOffset( void ) { return IsActuator() ? m_ActuatorStartOffset : 0; }
+	void SetStartOffset( double Value ) { m_ActuatorStartOffset = Value; }
+
 	bool IsGear( void ) { return m_bGear; }
 	void SetGear( bool bSet ) { m_bGear = bSet; }
 	CConnector *GetGearConnector( void ) const { return m_bGear ? GetConnector( 0 ) : 0; }
@@ -148,8 +151,8 @@ class CLink : public CElement
 	void IncrementExtension( double Increment );
 	void SetExtension( double Value );
 	double GetExtendedDistance( void );
-	void UpdateFromController( void );
-	void UpdateController( void );
+	void UpdateControlKnob( CFPoint Point );
+	void UpdateControlKnob( void );
 	CConnector *GetConnector( int Index ) const;
 	int GetConnectedSliderCount( void ) { return m_ConnectedSliders.GetCount(); }
 	CConnector *GetConnectedSlider( int Index );
@@ -171,7 +174,7 @@ class CLink : public CElement
 	bool FixAll( void );
 	static CConnector* GetCommonConnector( CLink *pLink1, CLink *pLink2 );
 
-	virtual CAdjuster *GetAdjuster( void ) { return IsActuator() ? &m_Adjuster : 0; }
+	virtual CControlKnob *GetControlKnob( void ) { return IsActuator() ? &m_ControlKnob : 0; }
 
 	private:
 	
@@ -195,6 +198,7 @@ class CLink : public CElement
 	CFPoint *m_pHull;
 	int m_HullCount;
 	bool m_bLocked;
+	double m_ActuatorStartOffset;
 
 	bool m_bLinkTriangle;
 

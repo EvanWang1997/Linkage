@@ -2849,6 +2849,16 @@ bool CRenderer::Arc( CFArc &TheArc )
 	return m_pImplementation->Arc( TheArc );
 }
 
+bool CRenderer::Arc( CFCircle &Circle )
+{
+	if( m_pImplementation == 0 )
+		return false;
+
+	CFArc Arc( Circle.GetCenter(), Circle.r, Circle.GetCenter(), Circle.GetCenter() );
+
+	return m_pImplementation->Arc( Arc );
+}
+
 bool CRenderer::Arc( double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, bool bDrawTo )
 {
 	if( m_pImplementation == 0 )

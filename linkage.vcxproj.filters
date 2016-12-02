@@ -124,7 +124,7 @@
     <ClCompile Include="MyMFCRibbonBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Adjuster.cpp">
+    <ClCompile Include="ControlKnob.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -282,7 +282,7 @@
     <ClInclude Include="MyMFCRibbonBar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Adjuster.h">
+    <ClInclude Include="ControlKnob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

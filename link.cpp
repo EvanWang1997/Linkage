@@ -29,6 +29,7 @@ CLink::CLink()
 	m_TempRotationAngle = 0.0;
 	m_Color = RGB( 200, 200, 200 );
 	m_bLocked = false;
+	m_ActuatorStartOffset = 0;
 }
 
 CLink::CLink( const CLink &ExistingLink )
@@ -246,7 +247,6 @@ void CLink::Reset( void )
 		if( pConnector != 0 )
 			pConnector->Reset( false );
 	}
-	UpdateController();
 }
 
 bool CLink::RotateAround( CConnector* pConnector )
@@ -791,12 +791,12 @@ void CLink::SetActuator( bool bActuator )
 			return;
 		CConnector* pConnector2 = m_Connectors.GetNext( Position );
 
-		CAdjuster *pAdjuster = GetAdjuster();
-		if( pAdjuster != 0 )
+		CControlKnob *pControlKnob = GetControlKnob();
+		if( pControlKnob != 0 )
 		{
-			pAdjuster->SetParent( this );
-			pAdjuster->SetSlideLimits( pConnector1, pConnector2 );
-			pAdjuster->SetShowOnParentSelect( true );
+			pControlKnob->SetParent( this );
+			pControlKnob->SetSlideLimits( pConnector1, pConnector2 );
+			pControlKnob->SetShowOnParentSelect( true );
 		}
 
 		//m_StrokeConnector.SetLayers( GetLayers() );
@@ -889,14 +889,26 @@ void CLink::SetStroke( double Stroke )
 	m_ActuatorExtension = 0;
 	m_TempActuatorExtension = 0;
 
-	UpdateController();
+	UpdateControlKnob();
 }
 
-void CLink::UpdateFromController( void )
+void CLink::UpdateControlKnob( void )
 {
-	// The controller moved.
-	if( !m_bActuator )
+	if( !IsActuator() )
 		return;
+
+	CFPoint Point;
+	GetStrokePoint( Point );
+	m_ControlKnob.SetPoint( Point );
+}
+
+void CLink::UpdateControlKnob( CFPoint Point )
+{
+	CControlKnob *pControlKnob = GetControlKnob();
+	if( !IsActuator() || pControlKnob == 0 )
+		return;
+
+	Point = pControlKnob->SetPoint( Point );
 
 	int Count = GetConnectorCount();
 	if( Count != 2 )
@@ -908,19 +920,9 @@ void CLink::UpdateFromController( void )
 	if( pConnector1 == 0 )
 		return;
 
-	CFLine Line( pConnector1->GetPoint(), m_Adjuster.GetPoint() );
+	CFLine Line( pConnector1->GetPoint(), m_ControlKnob.GetPoint() );
 
 	SetStroke( Line.GetDistance() );
-}
-
-void CLink::UpdateController( void )
-{
-	if( !IsActuator() )
-		return;
-
-	CFPoint Point;
-	GetStrokePoint( Point );
-	m_Adjuster.SetPoint( Point );
 }
 
 void CLink::MakePermanent( void )

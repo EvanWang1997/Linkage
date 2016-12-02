@@ -88,7 +88,7 @@ void CLinkageDoc::SetLinkConnector( CLink* pLink, CConnector* pConnector )
 CLinkageDoc::CLinkageDoc()
 {
 	m_pCapturedConnector = 0;
-	m_pCapturedController = 0;
+	m_pCapturedConrolKnob = 0;
 	m_pUndoList = 0;
 	m_pUndoListEnd = 0;
 	m_UndoCount = 0;
@@ -133,7 +133,7 @@ BOOL CLinkageDoc::OnNewDocument()
 	m_SelectedLinks.RemoveAll();
 
 	m_pCapturedConnector = 0;
-	m_pCapturedController = 0;
+	m_pCapturedConrolKnob = 0;
 	m_pUndoList = 0;
 	m_pUndoListEnd = 0;
 	m_UndoCount = 0;
@@ -1016,7 +1016,7 @@ bool CLinkageDoc::ClearSelection( void )
 		pConnector->Select( false );
 	}
 	m_pCapturedConnector = 0;
-	m_pCapturedController = 0;
+	m_pCapturedConrolKnob = 0;
 	m_SelectedConnectors.RemoveAll();
 	m_SelectedLinks.RemoveAll();
 
@@ -1111,7 +1111,7 @@ bool CLinkageDoc::SelectElement( CFRect Rect, double SolidLinkExpansion, bool bM
 			bSelectionChanged |= SelectElement( pConnector );
 	}
 	m_pCapturedConnector = 0;
-	m_pCapturedController = 0;
+	m_pCapturedConrolKnob = 0;
 
 	SetSelectedModifiableCondition();
 
@@ -1186,7 +1186,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 {
 	CConnector* pSelectingConnector = 0;
 	CLink *pSelectingLink = 0;
-	CAdjuster *pSelectingController = 0;
+	CControlKnob *pSelectingControlKnob = 0;
 
 	bSelectionChanged = false;
 	bool bClearExistingSelection = true;
@@ -1201,12 +1201,12 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 		CConnector* pConnector = m_Connectors.GetNext( Position );
 		if( pConnector != 0 && pConnector->IsSelected() )
 		{
-			CAdjuster *pAdjuster = pConnector->GetAdjuster();
-			if( !bMultiSelect && pAdjuster != 0 && pAdjuster->PointOnAdjuster( Point, GrabDistance )
-				&& pAdjuster->IsShowOnParentSelect()
+			CControlKnob *pControlKnob = pConnector->GetControlKnob();
+			if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
+				&& pControlKnob->IsShowOnParentSelect()
 				&& ( pConnector->GetLayers() & m_EditLayers ) != 0 )
 			{
-				pSelectingController = pAdjuster;
+				pSelectingControlKnob = pControlKnob;
 				bClearExistingSelection = false;
 				break;
 			}
@@ -1219,7 +1219,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 		}
 	}
 
-	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingController == 0 )
+	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingControlKnob == 0 )
 	{
 		Position = m_Links.GetHeadPosition();
 		while( Position != NULL )
@@ -1227,13 +1227,13 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			CLink* pLink = m_Links.GetNext( Position );
 			if( pLink != 0 && pLink->IsSelected() )
 			{
-				CAdjuster *pAdjuster = pLink->GetAdjuster();
-				if( !bMultiSelect && pAdjuster != 0 && pAdjuster->PointOnAdjuster( Point, GrabDistance )
-					&& pAdjuster->IsShowOnParentSelect()
+				CControlKnob *pControlKnob = pLink->GetControlKnob();
+				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
+					&& pControlKnob->IsShowOnParentSelect()
 					&& ( pLink->GetLayers() & m_EditLayers ) != 0 )
 				{
 					bClearExistingSelection = false;
-					pSelectingController = pAdjuster;
+					pSelectingControlKnob = pControlKnob;
 					break;
 				}
 				else if( pLink != 0 && pLink->PointOnLink( m_GearConnectionList, Point, GrabDistance, SolidLinkExpansion )
@@ -1253,7 +1253,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 	 * Test for selecting an unselected connector, controller, or link.
 	 */
 
-	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingController == 0 )
+	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingControlKnob == 0 )
 	{
 		Position = m_Links.GetHeadPosition();
 		while( Position != NULL )
@@ -1261,19 +1261,19 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			CLink* pLink = m_Links.GetNext( Position );
 			if( pLink != NULL )
 			{
-				CAdjuster *pAdjuster = pLink->GetAdjuster();
-				if( !bMultiSelect && pAdjuster != 0 && pAdjuster->PointOnAdjuster( Point, GrabDistance )
-				    && !pAdjuster->IsShowOnParentSelect()
+				CControlKnob *pControlKnob = pLink->GetControlKnob();
+				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
+				    && !pControlKnob->IsShowOnParentSelect()
 				    && ( pLink->GetLayers() & m_EditLayers ) != 0 )
 				{
-					pSelectingController = pAdjuster;
+					pSelectingControlKnob = pControlKnob;
 					break;
 				}
 			}
 		}
 	}
 
-	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingController == 0 )
+	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingControlKnob == 0 )
 	{
 		Position = m_Connectors.GetHeadPosition();
 		while( Position != 0 )
@@ -1281,19 +1281,19 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			CConnector* pConnector = m_Connectors.GetNext( Position );
 			if( pConnector != 0 )
 			{
-				CAdjuster *pAdjuster = pConnector->GetAdjuster();
-				if( !bMultiSelect && pAdjuster != 0 && pAdjuster->PointOnAdjuster( Point, GrabDistance )
-				    && !pAdjuster->IsShowOnParentSelect()
+				CControlKnob *pControlKnob = pConnector->GetControlKnob();
+				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
+				    && !pControlKnob->IsShowOnParentSelect()
 				    && ( pConnector->GetLayers() & m_EditLayers ) != 0 )
 				{
-					pSelectingController = pAdjuster;
+					pSelectingControlKnob = pControlKnob;
 					break;
 				}
 			}
 		}
 	}
 
-	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingController == 0 )
+	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingControlKnob == 0 )
 	{
 		Position = m_Connectors.GetHeadPosition();
 		while( Position != 0 )
@@ -1308,7 +1308,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 		}
 	}
 
-	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingController == 0 )
+	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingControlKnob == 0 )
 	{
 		Position = m_Links.GetHeadPosition();
 		while( Position != NULL )
@@ -1326,16 +1326,16 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 		}
 	}
 
-	if( pSelectingController != 0 )
+	if( pSelectingControlKnob != 0 )
 	{			
 		if( bClearExistingSelection )
 			ClearSelection();
 		bSelectionChanged = true;
 
-		m_pCapturedController = pSelectingController;
-		m_pCapturedController->Select( true );
-		m_CaptureOffset.x = Point.x - pSelectingController->GetPoint().x;
-		m_CaptureOffset.y = Point.y - pSelectingController->GetPoint().y;
+		m_pCapturedConrolKnob = pSelectingControlKnob;
+		m_pCapturedConrolKnob->Select( true );
+		m_CaptureOffset.x = Point.x - pSelectingControlKnob->GetPoint().x;
+		m_CaptureOffset.y = Point.y - pSelectingControlKnob->GetPoint().y;
 
 		SetSelectedModifiableCondition();
 
@@ -1373,7 +1373,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			}
 
 			m_pCapturedConnector = 0;
-			m_pCapturedController = 0;
+			m_pCapturedConrolKnob = 0;
 			pSelectingConnector->Select( !pSelectingConnector->IsSelected() );
 			bSelectionChanged = true;
 
@@ -1402,7 +1402,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 	if( pSelectingLink != 0 )
 	{
 		m_pCapturedConnector = 0;
-		m_pCapturedController = 0;
+		m_pCapturedConrolKnob = 0;
 		if( bMultiSelect )
 		{
 			if( pSelectingLink->IsSelected() )
@@ -1593,44 +1593,15 @@ bool CLinkageDoc::MeetSelected( void )
 
 bool CLinkageDoc::MoveCapturedController( CFPoint Point )
 {
-	CFPoint Temp = m_pCapturedController->GetPoint();
-	CFPoint Offset;
-	Offset.x = ( Point.x - m_CaptureOffset.x ) - Temp.x;
-	Offset.y = ( Point.y - m_CaptureOffset.y ) - Temp.y;
-
-	if( Offset.x == 0.0 && Offset.y == 0.0 )
+	if( m_pCapturedConrolKnob == 0 )
 		return false;
 
-	CFPoint ConnectorPoint = m_pCapturedController->GetPoint();
-	ConnectorPoint += Offset;
-	m_pCapturedController->SetPoint( ConnectorPoint );
+	CElement *pElement = m_pCapturedConrolKnob->GetParent();
+	if( pElement == 0 )
+		return false;
 
-	CFPoint Start;
-	CFPoint End;
-	if( m_pCapturedController->GetSlideLimits( Start, End ) )
-	{
-		CFLine TempLine( Start, End );
-		CFPoint ConnectorPoint = m_pCapturedController->GetPoint();
-		ConnectorPoint.SnapToLine( TempLine, true, true );
-		m_pCapturedController->SetPoint( ConnectorPoint );
-	}
+	pElement->UpdateControlKnob( Point );
 
-	CElement *pElement = m_pCapturedController->GetParent();
-	if( pElement != 0 )
-	{
-		if( pElement->IsLink() )
-		{
-			CLink *pLink = (CLink*)pElement;
-			pLink->UpdateFromController();
-		}
-		else
-		{
-			CConnector *pConnector = (CConnector*)pElement;
-			pConnector->UpdateFromController();
-		}
-	}
-
-    SetModifiedFlag( true );
 	return true;
 }
 
@@ -1873,7 +1844,7 @@ bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap
 	m_SnapLine[0].SetLine( 0, 0, 0, 0 );
 	m_SnapLine[1].SetLine( 0, 0, 0, 0 );
 
-	if( m_pCapturedController != 0 )
+	if( m_pCapturedConrolKnob != 0 )
 		return MoveCapturedController( Point );
 
 	if( m_pCapturedConnector == 0 )
@@ -2058,7 +2029,7 @@ bool CLinkageDoc::FixupSliderLocations( void )
 			if( pConnector == 0 )
 				continue;
 
-			pConnector->UpdateController();
+			pConnector->UpdateControlKnob();
 
 			if( !pConnector->IsSlider() )
 				continue;
@@ -2074,7 +2045,7 @@ bool CLinkageDoc::FixupSliderLocations( void )
 			if( pLink == 0 )
 				continue;
 
-			pLink->UpdateController();
+			pLink->UpdateControlKnob();
 		}
 	}
 
@@ -2138,12 +2109,12 @@ bool CLinkageDoc::FinishChangeSelected( void )
 		pConnector->Reset( true );
 	}
 
-	if( m_pCapturedController != 0 )
+	if( m_pCapturedConrolKnob != 0 )
 	{
-		m_pCapturedController->SetPoint( m_pCapturedController->GetPoint() );
-		//m_pCapturedController->Reset( true );
-		m_pCapturedController->Select( false );
-		m_pCapturedController = 0;
+		m_pCapturedConrolKnob->SetPoint( m_pCapturedConrolKnob->GetPoint() );
+		//m_pCapturedConrolKnob->Reset( true );
+		m_pCapturedConrolKnob->Select( false );
+		m_pCapturedConrolKnob = 0;
 	}
 
 	m_SnapLine[0].SetLine( 0, 0, 0, 0 );
@@ -2952,8 +2923,10 @@ bool CLinkageDoc::DeleteConnector( CConnector *pConnector, CLink *pDeletingLink 
 		pLink->RemoveConnector( pConnector );
 	}
 
+	CConnector* pLimit1 = 0;
+	CConnector* pLimit2 = 0;
 	pConnector->RemoveAllLinks();
-	m_IdentifiedConnectors.ClearBit( pConnector->GetIdentifier() );
+	pConnector->SlideBetween();
 
 	Position = m_Connectors.GetHeadPosition();
 	while( Position != NULL )
@@ -2962,8 +2935,6 @@ bool CLinkageDoc::DeleteConnector( CConnector *pConnector, CLink *pDeletingLink 
 		if( pCheckConnector == 0 || pCheckConnector == pConnector )
 			continue;
 
-		CConnector* pLimit1 = 0;
-		CConnector* pLimit2 = 0;
 		if( pCheckConnector->IsSlider() && pCheckConnector->GetSlideLimits( pLimit1, pLimit2 ) )
 		{
 			if( pConnector == pLimit1 || pConnector == pLimit2 )
@@ -2998,7 +2969,7 @@ void CLinkageDoc::NormalizeConnectorLinks( void )
 				continue;
 			if( pCheckConnector->IsSelected() )
 			{
-				pLink->UpdateController();
+				pLink->UpdateControlKnob();
 				break;
 			}
 		}
@@ -3895,7 +3866,7 @@ bool CLinkageDoc::ConnectSliderLimits( bool bTestOnly )
 		CLink *pLink = pUseConnectors[Slider]->GetLinkList()->GetNext( Position );
 		if( pLink == 0 )
 			continue;
-		pLink->UpdateController();
+		pLink->UpdateControlKnob();
 	}
 
     SetModifiedFlag( true );

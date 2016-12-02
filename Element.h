@@ -1,7 +1,7 @@
 #pragma once
 
 #include "NullableColor.h"
-#include "Adjuster.h"
+#include "ControlKnob.h"
 
 class CElementItem
 {
@@ -96,7 +96,10 @@ class CElement
 	virtual bool IsLink( void ) = 0;
 	virtual bool IsConnector( void ) = 0;
 
-	virtual CAdjuster *GetAdjuster( void ) { return &m_Adjuster; }
+	virtual CControlKnob *GetControlKnob( void ) { return &m_ControlKnob; }
+	virtual CFPoint GetLocation( void ) = 0;
+	virtual void UpdateControlKnob( void ) = 0;
+	virtual void UpdateControlKnob( CFPoint Point ) = 0;
 
 	protected:
 
@@ -109,6 +112,6 @@ class CElement
 	CNullableColor m_Color;
 	CElementItem m_FastenedTo;
 	ElementList m_FastenedElements;
-	CAdjuster m_Adjuster;
+	CControlKnob m_ControlKnob;
 };
 

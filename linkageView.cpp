@@ -706,9 +706,11 @@ void CLinkageView::DrawRotationControl( CRenderer *pRenderer, CFRect &Rect, enum
 			Rect.InflateRect( 1, 1 );
 			CFArc Arc( Rect.GetCenter(), 6*m_DPIScale, Rect.TopLeft(), Rect.TopLeft() );
 			pRenderer->SetArcDirection( AD_COUNTERCLOCKWISE );
+			static const double MoveRectForArc = Scale( 2.0 );
 			switch( AdjustmentControl )
 			{
 				case AC_TOP_LEFT:
+					Rect += CFPoint( -MoveRectForArc, -MoveRectForArc );
 					Arc.SetArc( Rect.BottomRight(), Radius, Rect.TopLeft(), Rect.TopLeft() );
 					Arc.m_Start.SetPoint( Arc.x, Arc.y-Radius );
 					Arc.m_End.SetPoint( Arc.x-Radius, Arc.y );
@@ -717,6 +719,7 @@ void CLinkageView::DrawRotationControl( CRenderer *pRenderer, CFRect &Rect, enum
 					pRenderer->DrawArrow( CFPoint( Arc.m_End.x, Arc.m_End.y-ArrowLength ), CFPoint( Arc.m_End.x, Arc.m_End.y+ArrowLength ), ArrowLength, ArrowLength );
 					break;
 				case AC_TOP_RIGHT:
+					Rect += CFPoint( MoveRectForArc, -MoveRectForArc );
 					Arc.SetArc( Rect.BottomLeft(), Radius, Rect.TopLeft(), Rect.TopLeft() );
 					Arc.m_Start.SetPoint( Arc.x+Radius, Arc.y );
 					Arc.m_End.SetPoint( Arc.x, Arc.y-Radius );
@@ -725,6 +728,7 @@ void CLinkageView::DrawRotationControl( CRenderer *pRenderer, CFRect &Rect, enum
 					pRenderer->DrawArrow( CFPoint( Arc.m_End.x+ArrowLength, Arc.m_End.y ), CFPoint( Arc.m_End.x-ArrowLength, Arc.m_End.y ), ArrowLength, ArrowLength );
 					break;
 				case AC_BOTTOM_LEFT:
+					Rect += CFPoint( -MoveRectForArc, MoveRectForArc );
 					Arc.SetArc( Rect.TopRight(), Radius, Rect.TopLeft(), Rect.TopLeft() );
 					Arc.m_Start.SetPoint( Arc.x-Radius, Arc.y );
 					Arc.m_End.SetPoint( Arc.x, Arc.y+Radius );
@@ -733,6 +737,7 @@ void CLinkageView::DrawRotationControl( CRenderer *pRenderer, CFRect &Rect, enum
 					pRenderer->DrawArrow( CFPoint( Arc.m_End.x-ArrowLength, Arc.m_End.y ), CFPoint( Arc.m_End.x+ArrowLength, Arc.m_End.y ), ArrowLength, ArrowLength );
 					break;
 				case AC_BOTTOM_RIGHT:
+					Rect += CFPoint( MoveRectForArc, MoveRectForArc );
 					Arc.SetArc( Rect.TopLeft(), Radius, Rect.TopLeft(), Rect.TopLeft() );
 					Arc.m_Start.SetPoint( Arc.x, Arc.y+Radius );
 					Arc.m_End.SetPoint( Arc.x+Radius, Arc.y );
@@ -1814,9 +1819,9 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 		CLink* pLink = pLinkList->GetNext( Position );
 		if( pLink != 0 )
 		{
-			CAdjuster *pAdjuster = pLink->GetAdjuster();
-			if( pAdjuster != 0 )
-				DrawAdjuster( pRenderer, m_SelectedViewLayers, pAdjuster );
+			CControlKnob *pControlKnob = pLink->GetControlKnob();
+			if( pControlKnob != 0 )
+				DrawControlKnob( pRenderer, m_SelectedViewLayers, pControlKnob );
 		}
 	}
 
@@ -1826,9 +1831,9 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 		CConnector* pConnector = pConnectors->GetNext( Position );
 		if( pConnector != 0 )
 		{
-			CAdjuster *pAdjuster = pConnector->GetAdjuster();
+			CControlKnob *pControlKnob = pConnector->GetControlKnob();
 			if( pConnector != 0 )
-				DrawAdjuster( pRenderer, m_SelectedViewLayers, pAdjuster );
+				DrawControlKnob( pRenderer, m_SelectedViewLayers, pControlKnob );
 		}
 	}
 
@@ -2219,21 +2224,6 @@ void CLinkageView::OnPrint(CDC* pDC, CPrintInfo* pPrintInfo)
 void CLinkageView::OnDraw( CDC* pDC )
 {
 		OnDraw( pDC, 0 );
-
-/*
-TEST CODE FOR BITMAP DRAWING FROM A FILE...
-
-CImage image;
-image.Load(_T("C:\\Users\\David\\Documents\\image.png")); // just change extension to load jpg
-CBitmap bitmap;
-bitmap.Attach(image.Detach());
-
-CDC MemDC;
-MemDC.CreateCompatibleDC( pDC );
-MemDC.SelectObject( &bitmap );
-
-pDC->BitBlt( 0, 0, 300, 300, &MemDC, 0, 0, SRCCOPY );
-*/
 }
 
 void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
@@ -2256,6 +2246,21 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 
     PrepareRenderer( Renderer, 0, &Bitmap, pDC, 1.0, false, 0.0, 1.0, !pDC->IsPrinting(), false, m_bPrintFullSize, pPrintInfo == 0 ? 0 : pPrintInfo->m_nCurPage - 1 );
 
+//TEST CODE FOR BITMAP DRAWING FROM A FILE...
+#if 0
+CImage image;
+image.Load(_T("C:\\Users\\David\\OneDrive\\Pictures\\Screenshots\\2016-11-28 (3).png")); // just change extension to load jpg
+int cx = image.GetWidth();
+int cy = image.GetHeight();
+CBitmap bitmap;
+bitmap.Attach(image.Detach());
+
+CDC MemDC;
+MemDC.CreateCompatibleDC( pDC );
+MemDC.SelectObject( &bitmap );
+
+Renderer.GetDC()->BitBlt( 0, 0, cx, cy, &MemDC, 0, 0, SRCCOPY );
+#endif
 	Renderer.BeginDraw();
 
 	DoDraw( &Renderer );
@@ -2671,6 +2676,9 @@ bool CLinkageView::SelectDocumentItem( UINT nFlags, CFPoint point )
 	if( m_MouseAction != ACTION_NONE )
 		return false;
 
+	if( GetAsyncKeyState( VK_MENU ) & 0x8000 )
+		return false;
+		
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
@@ -2787,7 +2795,7 @@ double CLinkageView::CalculateDefaultGrid( void )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	double GapDistance = Unscale( 20 ) * pDoc->GetUnitScale();
+	double GapDistance = Unscale( 18 ) * pDoc->GetUnitScale();
 
 	// Get the next 1, 5, 10, 50, 100 type of number that is above the
 	// distance we got using a base pixel length. This will be the value
@@ -5589,17 +5597,17 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 		pRenderer->SelectObject( pOldBrush );
 }
 
-void CLinkageView::DrawAdjuster( CRenderer* pRenderer, unsigned int OnLayers, CAdjuster* pAdjuster )
+void CLinkageView::DrawControlKnob( CRenderer* pRenderer, unsigned int OnLayers, CControlKnob* pControlKnob )
 {
-	CElement *pParent = pAdjuster->GetParent();
+	CElement *pParent = pControlKnob->GetParent();
 
 	if( pParent == 0 || ( pParent->GetLayers() & OnLayers ) == 0 )
 		return;
 
-	if( !pParent->IsSelected() && pAdjuster->IsShowOnParentSelect() )
+	if( !pParent->IsSelected() && pControlKnob->IsShowOnParentSelect() )
 		return;
 
-	if( pAdjuster->IsSelected() )
+	if( pControlKnob->IsSelected() )
 		return; // hidden when being dragged.
 
 	if( m_MouseAction != ACTION_NONE )
@@ -5621,11 +5629,11 @@ void CLinkageView::DrawAdjuster( CRenderer* pRenderer, unsigned int OnLayers, CA
 	else
 		Color = pParent->GetColor();
 
-	CFPoint Point = pAdjuster->GetPoint();
+	CFPoint Point = pControlKnob->GetPoint();
 	Point = Scale( Point );
 	Pen.CreatePen( PS_SOLID, 1, Color );
 
-	if( pAdjuster->IsSelected() )
+	if( pControlKnob->IsSelected() )
 		Brush.CreateSolidBrush( COLOR_ADJUSTMENTKNOBS );
 	else
 		Brush.CreateStockObject( NULL_BRUSH );
@@ -5637,7 +5645,7 @@ void CLinkageView::DrawAdjuster( CRenderer* pRenderer, unsigned int OnLayers, CA
 	Radius -= UnscaledUnits( 1 );
 	CFCircle Circle( Point, Radius );
 	//pRenderer->Arc( Point.x - Radius, Point.y + AdjustYCoordinate( Radius ), Point.x + Radius, Point.y - AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ) );
-	//if( pAdjuster->IsSelected() )
+	//if( pControlKnob->IsSelected() )
 		pRenderer->Circle( Circle );
 
 	if( m_bShowSelection && pParent->IsSelected() && 0 )
@@ -5848,14 +5856,22 @@ void CLinkageView::DrawActuator( CRenderer* pRenderer, unsigned int OnLayers, CL
 		pRenderer->Circle( Circle );
 
 		NewLine = Scale( NewLine );
-		NewLine.MoveEnds( Radius, -Radius );
-		pRenderer->MoveTo( NewLine.GetStart() );
-		pRenderer->LineTo( NewLine.GetEnd() );
+		if( NewLine.GetDistance() >= Radius * 2 )
+		{
+			NewLine.MoveEnds( Radius, -Radius );
+			pRenderer->MoveTo( NewLine.GetStart() );
+			pRenderer->LineTo( NewLine.GetEnd() );
+		}
 
 		pRenderer->SelectObject( pOldPen );
 		pRenderer->SelectObject( pOldBrush );
 	}
 
+	double Offset = pLink->GetStartOffset();
+	if( Offset > pLink->GetStroke() )
+		Offset = pLink->GetStroke() - ( Offset - pLink->GetStroke() );
+
+	
 	Line.ReverseDirection();
 	if( pLink->GetCPM() >= 0 )
 		Line.SetDistance( Line.GetDistance() - pLink->GetExtendedDistance() );
@@ -5868,6 +5884,13 @@ void CLinkageView::DrawActuator( CRenderer* pRenderer, unsigned int OnLayers, CL
 
 	pRenderer->MoveTo( Scale( Line.GetStart() ) );
 	pRenderer->LineTo( Scale( Line.GetEnd() ) );
+
+	CPen LinePen;
+	LinePen.CreatePen( PS_SOLID, 1, Color );
+	pRenderer->SelectObject( &LinePen );
+
+	CFCircle StrokePointCircle( Scale( StrokePoint ), m_ConnectorRadius - UnscaledUnits( 1 ) );
+	pRenderer->Arc( StrokePointCircle );
 
 	pRenderer->SelectObject( pOldPen );
 
