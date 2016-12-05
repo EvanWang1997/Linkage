@@ -1695,7 +1695,7 @@ bool CLinkageDoc::CheckForGridSnap( CConnector *pConnector, double SnapDistance,
 }
 
 
-CFPoint CLinkageDoc::CheckForSnap( double SnapDistance, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, CFPoint &ReferencePoint )
+CFPoint CLinkageDoc::CheckForSnap( ConnectorList &SelectedConnectors, double SnapDistance, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, CFPoint &ReferencePoint )
 {
 	CFPoint Adjustment( 0, 0 );
 
@@ -1703,10 +1703,10 @@ CFPoint CLinkageDoc::CheckForSnap( double SnapDistance, bool bElementSnap, bool 
 
 	if( bGridSnap )
 	{
-		POSITION Position = m_Connectors.GetHeadPosition();
+		POSITION Position = SelectedConnectors.GetHeadPosition();
 		while( Position != 0 && !bSnapGrid )
 		{
-			CConnector* pConnector = m_Connectors.GetNext( Position );
+			CConnector* pConnector = SelectedConnectors.GetNext( Position );
 			if( pConnector == 0 )
 				continue;
 
@@ -1736,10 +1736,10 @@ CFPoint CLinkageDoc::CheckForSnap( double SnapDistance, bool bElementSnap, bool 
 		 * one is lined up on the snap connector.
 		 */
 
-		POSITION Position = m_Connectors.GetHeadPosition();
+		POSITION Position = SelectedConnectors.GetHeadPosition();
 		while( Position != 0 && !bSnapItem )
 		{
-			CConnector* pConnector = m_Connectors.GetNext( Position );
+			CConnector* pConnector = SelectedConnectors.GetNext( Position );
 			if( pConnector == 0 || ( pConnector->GetLayers() & m_EditLayers ) == 0 )
 				continue;
 
@@ -1826,13 +1826,16 @@ int CLinkageDoc::BuildSelectedLockGroup( ConnectorList *pLockGroup )
 			break;
 	}
 
+	if( m_pCapturedConnector != 0 )
+		pLockGroup->AddTail( m_pCapturedConnector );
+
 	Position = m_Connectors.GetHeadPosition();
 	while( Position != 0 )
 	{
 		CConnector *pConnector = m_Connectors.GetNext( Position );
 		if( pConnector == 0 )
 			continue;
-		if( LockedConnectors.GetBit( pConnector->GetIdentifier() ) )
+		if( LockedConnectors.GetBit( pConnector->GetIdentifier() ) && pConnector != m_pCapturedConnector )
 			pLockGroup->AddTail( pConnector );
 	}
 
@@ -1917,7 +1920,7 @@ bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap
 	if( bElementSnap || bGridSnap )
 	{
 		CFPoint SnapReference = ReferencePoint;
-		CFPoint Adjustment = CheckForSnap( SnapDistance, bElementSnap, bGridSnap, xGrid, yGrid, SnapReference );
+		CFPoint Adjustment = CheckForSnap( MoveConnectors, SnapDistance, bElementSnap, bGridSnap, xGrid, yGrid, SnapReference );
 
 		if( Adjustment.x != 0 || Adjustment.y != 0 )
 		{
