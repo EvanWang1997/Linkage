@@ -14,7 +14,7 @@ CAboutDialog::CAboutDialog(CWnd* pParent /*=NULL*/)
 	: CMyDialog( pParent, CAboutDialog::IDD )
 {
 	#if defined( LINKAGE_USE_DIRECT2D )
-		CWindowDC DC( this );
+		CWindowDC DC( 0 );
 		int PPI = DC.GetDeviceCaps( LOGPIXELSX );
 		double DPIScale = (double)PPI / 96.0;
 	#else

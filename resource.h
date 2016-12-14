@@ -183,6 +183,20 @@
 #define IDB_INSERT_POPUP_GALLERY2       4200
 #define ID_EDIT_MOMENTUM                4201
 #define IDS_RIBBON_MOMENTUM             4202
+#define ID_DIMENSION_SET                4203
+#define ID_DIMENSION_SETLOCATION        4204
+#define ID_DIMENSION_SETLENGTH          4205
+#define ID_DIMENSION_SETLENGTHP         4206
+#define ID_DIMENSION_ROTATE             4207
+#define ID_DIMENSION_SCALE              4208
+#define ID_DIMENSION_ANGLE              4209
+#define IDS_DIMENSION_SETLOCATION       4214
+#define IDS_DIMENSION_SETLENGTH         4215
+#define IDS_DIMENSION_SETLENGTHP        4216
+#define IDS_DIMENSION_ROTATE            4217
+#define IDS_DIMENSION_SCALE             4218
+#define IDS_DIMENSION_ANGLE             4219
+#define IDS_ALIGN_SET_RATIO				4220
 #define ID_MECHANISM_RESET              4771
 #define ID_MECHANISM_SIMULATE           4772
 #define ID_EDIT_COMBINE                 4774
@@ -481,18 +495,25 @@
 #define IDD_EXPORTIMAGE                 6000
 #define IDD_SELECTELEMENTS              6006
 #define IDB_BITMAP7                     6008
+#define IDD_POSITION                    6009
+#define IDD_LENGTH                      6010
+#define IDD_ROTATE                      6011
+#define IDD_SCALE                       6012
 #define IDC_PREVIEW                     8000
 #define IDC_LIST1                       8001
 #define IDC_COMBOBOXEX1                 8004
 #define IDC_LIST3                       8005
+#define IDC_PROMPT                      8006
+#define IDC_PROMPT1                     8007
+#define IDC_PROMPT2                     8008
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6009
+#define _APS_NEXT_RESOURCE_VALUE        6011
 #define _APS_NEXT_COMMAND_VALUE         7002
-#define _APS_NEXT_CONTROL_VALUE         8006
+#define _APS_NEXT_CONTROL_VALUE         8009
 #define _APS_NEXT_SYMED_VALUE           9000
 #endif
 #endif

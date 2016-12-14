@@ -326,6 +326,8 @@ Received some feature requests recently. These are some NOT YET ADDED:
 12/2/2016 12:36 PM: Added Alt-mouse clicks for creating a selection box even if on top of a link or other element. With Alt key down, nothing is sleected at the moment the button is pressed, only after the button is released to finish the selection box selection.
 12/5/2016 9:08 AM: Test the captured connector first for snapping, before checking the other selected connectors.
 12/5/2016 9:08 AM: Include connectors of locked links in snap testing.
+12/12/2016 3:46 PM: Added dialog box entry for setting lengths, distances, rotating, scaling, etc., to the Align menu. Still working on adding some help text to the dialog boxes.
+
 
 
 

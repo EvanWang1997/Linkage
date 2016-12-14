@@ -102,6 +102,8 @@ public:
 	bool CheckForElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment );
 	bool CheckForSliderSnap( CConnector *pConnector, CFPoint &Adjustment );
 	bool MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, double SnapDistance, CFPoint &ReferencePoint );
+	bool MoveSelected( CFPoint Offset );
+	CString GetSelectedElementCoordinates( void );
 	bool RotateSelected( CFPoint CenterPoint, double Angle );
 	bool StretchSelected( CFRect OriginalRect, CFRect NewRect, _Direction Direction );
 	bool StretchSelected( double Percentage );
@@ -209,7 +211,6 @@ public:
 	bool IsSelectionJoinable( void ) { return m_bSelectionJoinable; }
 	bool IsSelectionSlideable( void ) { return m_bSelectionSlideable; }
 	bool IsSelectionSplittable( void ) { return m_bSelectionSplittable; }
-	bool IsSelectionTriangle( void ) { return m_bSelectionTriangle; }
 	bool IsSelectionRectangle( void ) { return m_bSelectionRectangle; } 
 	bool IsSelectionLineable( void ) { return m_bSelectionLineable; } 
 	int GetAlignConnectorCount( void ) { return m_AlignConnectorCount; }
@@ -219,6 +220,14 @@ public:
 	bool IsSelectionLockable( void ) { return m_bSelectionLockable; }
 	bool IsSelectionMakeAnchor( void ) { return m_bSelectionMakeAnchor; }
 	bool IsSelectionMeetable( void ) { return m_bSelectionMeetable; }
+
+	bool IsSelectionTriangle( void ) { return m_bSelectionTriangle; }
+
+	bool IsSelectionPositionable( void ) { return m_bSelectionPositionable; }
+	bool IsSelectionLengthable( void ) { return m_bSelectionLengthable; }
+	bool IsSelectionRotatable( void ) { return m_bSelectionRotatable; }
+	bool IsSelectionScalable( void ) { return m_bSelectionScalable; }
+
 
 	void GetSnapLines( CFLine &Line1, CFLine &Line2 ) { Line1 = m_SnapLine[0]; Line2 = m_SnapLine[1]; }
 	
@@ -288,6 +297,10 @@ private:
 	bool m_bSelectionLockable;
 	bool m_bSelectionMakeAnchor;
 	bool m_bSelectionMeetable;
+	bool m_bSelectionPositionable;
+	bool m_bSelectionLengthable;
+	bool m_bSelectionRotatable;
+	bool m_bSelectionScalable;
 
 	bool CheckMeshableGears( void );
 	bool CheckMeshableGears( CLink *pGear1, CLink *pGear2 );

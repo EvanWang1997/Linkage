@@ -278,11 +278,44 @@ void CMainFrame::CreateDimensionsPanel( CMFCRibbonCategory* pCategory )
 		pUnitsBox->AddItem( CLinkageDoc::GetUnitsString( CLinkageDoc::INCH ), CLinkageDoc::INCH );
 	}
 
+	// Useful number? ... int Temp = pUnitsBox->GetWidth();
+
 	CMFCRibbonEdit *pEdit = new CMFCRibbonEdit( ID_VIEW_COORDINATES, 96, 0, 53 );
-	pEdit->SetWidth( 106 );
+	pEdit->SetWidth( 104 );
 	pPanelDimensions->Add( pEdit );
 
 	AddRibbonButton( pPanelDimensions, IDS_RIBBON_SET_RATIO, ID_EDIT_SET_RATIO, 79, SMALL );
+	
+		//CMFCRibbonButton* pSetButton = new CMFCRibbonButton( ID_DIMENSION_SET, "Edit", 53 );
+
+
+	//AppendMenuItem( pSetButton, IDS_DIMENSION_SETLOCATION, ID_DIMENSION_SETLOCATION, 79 );
+	//AppendMenuItem( pSetButton, IDS_DIMENSION_SETLENGTH, ID_DIMENSION_SETLENGTH, 79 );
+	//AppendMenuItem( pSetButton, IDS_DIMENSION_ANGLE, ID_DIMENSION_ANGLE, 79 );
+	//AppendMenuItem( pSetButton, IDS_RIBBON_SET_RATIO, ID_EDIT_SET_RATIO, 79 );
+	//AppendMenuItem( pSetButton, IDS_DIMENSION_ROTATE, ID_DIMENSION_ROTATE, 79 );
+	//AppendMenuItem( pSetButton, IDS_DIMENSION_SCALE, ID_DIMENSION_SCALE, 79 );
+
+
+
+
+
+
+
+
+	// The menu is only needed in order to make the button work properly.
+	// Without the menu, clicking on the icon in the button will not display
+	// the menu but clicking the text will.
+	//static CMenu Menu;
+	//Menu.CreatePopupMenu();
+	//pSetButton->SetMenu( Menu.GetSafeHmenu() );
+
+	//pPanelDimensions->Add( pSetButton );
+
+
+
+
+	//AddRibbonButton( pPanelDimensions, IDS_RIBBON_SET_RATIO, ID_EDIT_SET_RATIO, 79, SMALL );
 }
 
 void CMainFrame::CreatePrintPanel( CMFCRibbonCategory* pCategory )
@@ -436,6 +469,8 @@ void CMainFrame::CreateAlignPanel( CMFCRibbonCategory* pCategory )
 
 	CMFCRibbonButton* pAlignButton = new CMFCRibbonButton( ID_ALIGN_ALIGNBUTTON, strTemp, 58, 58 );
 
+	AppendMenuItem( pAlignButton, IDS_DIMENSION_SETLOCATION, ID_DIMENSION_SETLOCATION, 103 );
+	AppendMenuItem( pAlignButton, IDS_DIMENSION_SETLENGTH, ID_DIMENSION_SETLENGTH, 102 );
 	AppendMenuItem( pAlignButton, IDS_RIBBON_SETANGLE, ID_ALIGN_SETANGLE, 66 );
 	AppendMenuItem( pAlignButton, IDS_RIBBON_RIGHTANGLE, ID_ALIGN_RIGHTANGLE, 54 );
 	AppendMenuItem( pAlignButton, IDS_RIBBON_RECTANGLE, ID_ALIGN_RECTANGLE, 55 );
@@ -447,6 +482,9 @@ void CMainFrame::CreateAlignPanel( CMFCRibbonCategory* pCategory )
 	AppendMenuItem( pAlignButton, IDS_RIBBON_FLIPH, ID_ALIGN_FLIPH, 60 );
 	AppendMenuItem( pAlignButton, IDS_RIBBON_FLIPV, ID_ALIGN_FLIPV, 61 );
 	AppendMenuItem( pAlignButton, IDS_RIBBON_MEET, ID_ALIGN_MEET, 93 );
+	AppendMenuItem( pAlignButton, IDS_ALIGN_SET_RATIO, ID_EDIT_SET_RATIO, 101 );
+	AppendMenuItem( pAlignButton, IDS_DIMENSION_ROTATE, ID_DIMENSION_ROTATE, 100 );
+	AppendMenuItem( pAlignButton, IDS_DIMENSION_SCALE, ID_DIMENSION_SCALE, 99 );
 
 	// The menu is only needed in order to make the button work properly.
 	// Without the menu, clicking on the icon in the button will not display
@@ -652,7 +690,7 @@ void CMainFrame::CreateHomeCategory( void )
 	CreateClipboardPanel( pCategoryHome );
 	CreateViewPanel( pCategoryHome );
 	CreateDimensionsPanel( pCategoryHome );
-	CreateInsertPanel( pCategoryHome );
+	//CreateInsertPanel( pCategoryHome );
 	CreateElementPanel( pCategoryHome );
 	CreateAlignPanel( pCategoryHome );
 	CreateSimulationPanel( pCategoryHome );

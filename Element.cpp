@@ -74,7 +74,32 @@ CString CElement::GetTypeString( void )
 	bool bDrawingLayer = GetLayers() & CLinkageDoc::DRAWINGLAYER;
 	if( IsMeasurementElement() )
 		return "Measurement";
-	return IsConnector() ? ( bDrawingLayer ? "Point" : "Connector" ) : ( bDrawingLayer ? "Line" : "Link" );
+
+	if( IsConnector() )
+	{
+		if( bDrawingLayer )
+		{
+			if( ((CConnector*)this)->GetDrawCircleRadius() > 0 )
+				return "Circle";
+			else
+				return "Point";
+		}
+		else if( ((CConnector*)this)->IsAnchor() )
+			return "Anchor";
+		else
+			return "Connector";
+	}
+	else
+	{
+		if( bDrawingLayer )
+			return "Polyline";
+		else if( ((CLink*)this)->IsActuator() )
+			return "Actuator";
+		else if( ((CLink*)this)->IsGear() )
+			return "Gear";
+		else
+			return "Link";
+	}
 }
 
 

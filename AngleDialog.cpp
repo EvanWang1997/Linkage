@@ -12,7 +12,7 @@ IMPLEMENT_DYNAMIC(CAngleDialog, CMyDialog)
 
 CAngleDialog::CAngleDialog(CWnd* pParent /*=NULL*/)
 	: CMyDialog( pParent, CAngleDialog::IDD )
-	, m_Angle(0)
+	, m_Angle(_T(""))
 {
 }
 
@@ -25,14 +25,14 @@ void CAngleDialog::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_EDIT1, m_AngleTextControl);
 
-	if( pDX->m_bSaveAndValidate )
+	//if( pDX->m_bSaveAndValidate )
 		DDX_Text(pDX, IDC_EDIT1, m_Angle);
-	else
-	{
-		CString Text;
-		Text.Format( "%.4lf", m_Angle );
-		m_AngleTextControl.SetWindowTextA( Text );
-	}
+	//else
+	//{
+	//	CString Text;
+	//	Text.Format( "%.4lf", m_Angle );
+	//	m_AngleTextControl.SetWindowTextA( Text );
+	//}
 }
 
 BEGIN_MESSAGE_MAP(CAngleDialog, CMyDialog)

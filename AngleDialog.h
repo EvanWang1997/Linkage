@@ -21,6 +21,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-	double m_Angle;
+	CString m_Angle;
 	CEdit m_AngleTextControl;
 };

@@ -106,7 +106,7 @@ class CLink : public CElement
 	void GetAdjustArea( const GearConnectionList &GearConnections, CFRect &Rect );
 	void GetAveragePoint( const GearConnectionList &GearConnections, CFPoint &Point );
 	bool PointOnLink( const GearConnectionList &GearConnections, CFPoint Point, double TestDistance, double SolidLinkExpandion );
-	int GetConnectorCount( void ) { return m_Connectors.GetCount(); }
+	int GetConnectorCount( void ) { return (int)m_Connectors.GetCount(); }
 	int GetAnchorCount( void );
 	bool CanOnlySlide( CConnector** pLimit1 = 0, CConnector** pLimit2 = 0, CConnector** pSlider1 = 0, CConnector** pSlider2 = 0, bool *pbSlidersOnLink = 0 );
 	CFPoint *ComputeHull( int *Count = 0, bool bUseOriginalPoints = false );
@@ -154,7 +154,7 @@ class CLink : public CElement
 	void UpdateControlKnob( CFPoint Point );
 	void UpdateControlKnob( void );
 	CConnector *GetConnector( int Index ) const;
-	int GetConnectedSliderCount( void ) { return m_ConnectedSliders.GetCount(); }
+	int GetConnectedSliderCount( void ) { return (int)m_ConnectedSliders.GetCount(); }
 	CConnector *GetConnectedSlider( int Index );
 	double GetLinkLength( CConnector *pFromConnector, CConnector *pToConnector );
 

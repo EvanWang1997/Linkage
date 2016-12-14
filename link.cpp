@@ -185,7 +185,7 @@ bool CLink::PointOnLink( const GearConnectionList &GearConnections, CFPoint Poin
 			return true;
 	}
 
-	int Connectors = m_Connectors.GetCount();
+	int Connectors = (int)m_Connectors.GetCount();
 	if( Connectors == 1 )
 		return false;
 

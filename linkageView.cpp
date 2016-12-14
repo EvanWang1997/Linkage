@@ -30,6 +30,10 @@
 #include "GearRatioDialog.h"
 #include "ExportImageSettingsDialog.h"
 #include "SelectElementsDialog.h"
+#include "LocationDialog.h"
+#include "LengthDistanceDialog.h"
+#include "RotateDialog.h"
+#include "ScaleDialog.h"
 
 #include <algorithm>
 #include <vector>
@@ -161,6 +165,28 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 
 	ON_COMMAND(ID_EDIT_SET_RATIO, &CLinkageView::OnEditSetRatio)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SET_RATIO, &CLinkageView::OnUpdateEditSetRatio)
+
+	ON_COMMAND(ID_DIMENSION_SETLOCATION, &CLinkageView::OnEditSetLocation)
+	ON_UPDATE_COMMAND_UI(ID_DIMENSION_SETLOCATION, &CLinkageView::OnUpdateEditSetLocation)
+	ON_COMMAND(ID_DIMENSION_SETLENGTH, &CLinkageView::OnEditSetLength)
+	ON_UPDATE_COMMAND_UI(ID_DIMENSION_SETLENGTH, &CLinkageView::OnUpdateEditSetLength)
+	ON_COMMAND(ID_DIMENSION_ANGLE, &CLinkageView::OnAlignSetAngle)
+	ON_UPDATE_COMMAND_UI(ID_DIMENSION_ANGLE, &CLinkageView::OnUpdateAlignSetAngle)
+	ON_COMMAND(ID_DIMENSION_ROTATE, &CLinkageView::OnEditRotate)
+	ON_UPDATE_COMMAND_UI(ID_DIMENSION_ROTATE, &CLinkageView::OnUpdateEditRotate)
+	ON_COMMAND(ID_DIMENSION_SCALE, &CLinkageView::OnEditScale)
+	ON_UPDATE_COMMAND_UI(ID_DIMENSION_SCALE, &CLinkageView::OnUpdateEditScale)
+
+
+
+
+
+
+
+
+
+
+
 	ON_COMMAND(ID_EDIT_MAKEANCHOR, &CLinkageView::OnEditmakeAnchor)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MAKEANCHOR, &CLinkageView::OnUpdateEditmakeAnchor)
 
@@ -178,6 +204,7 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_ALIGN_ALIGNBUTTON, &CLinkageView::OnUpdateAlignButton)
 	ON_UPDATE_COMMAND_UI(ID_ALIGN_SNAPBUTTON, &CLinkageView::OnUpdateNotSimulating)
 	ON_UPDATE_COMMAND_UI(ID_ALIGN_DETAILSBUTTON, &CLinkageView::OnUpdateNotSimulating)
+	ON_UPDATE_COMMAND_UI(ID_DIMENSION_SET, &CLinkageView::OnUpdateNotSimulating)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTBUTTON, &CLinkageView::OnUpdateEdit)
 
 	ON_COMMAND( ID_FILE_PRINTFULL, OnPrintFull )
@@ -2851,32 +2878,6 @@ void CLinkageView::OnMouseMoveDrag(UINT nFlags, CFPoint point)
 
 	double GapDistance = CalculateDefaultGrid();
 
-#if 0
-
-	double GapDistance = Unscale( 20 ) * pDoc->GetUnitScale();
-
-	// Get the next 1, 5, 10, 50, 100 type of number that is above the
-	// distance we got using a base pixel length. This will be the value
-	// to use for the snap.
-	int Test = (int)( GapDistance * 1000 );
-	int Adjustment = -4;
-	while( Test != 0 )
-	{
-		++Adjustment;
-		Test /= 10;
-	}
-	double NewValue = GapDistance / pow( 10.0, Adjustment );
-	NewValue += .9999;
-	NewValue = (int)( NewValue );
-	if( NewValue > 5.0 )
-		NewValue = 10;
-	else if( NewValue > 1.0 )
-		NewValue = 5;
-	GapDistance = NewValue * pow( 10.0, Adjustment );
-	if( GapDistance < 0.01 )
-		GapDistance = 0.01;
-#endif
-
 	if( m_bAllowEdit )
 	{
 		if( pDoc->MoveSelected( AdjustedPoint, bElementSnap, bGridSnap,  GapDistance / pDoc->GetUnitScale(),  GapDistance / pDoc->GetUnitScale(), Unscale( PIXEL_SNAP_DISTANCE ), ReferencePoint ) )
@@ -3104,15 +3105,23 @@ void CLinkageView::ShowSelectedElementStatus( void )
 	if( pElement == 0 )
 		return;
 
-	CString String;
-	if( pElement->IsLink() )
-		String = "Link ";
-	else if( pElement->IsConnector() )
-		String = "Connector ";
+	//CString String;
+	//if( pElement->IsLink() )
+	//	String = "Link ";
+	//else if( pElement->IsConnector() )
+	//	String = "Connector ";
+	//
+	//String += pElement->GetIdentifierString( m_bShowDebug );
 
+	SetStatusText( GetElementFullDescription( pElement ) );
+}
+
+CString CLinkageView::GetElementFullDescription( CElement *pElement )
+{
+	CString String = pElement->GetTypeString();
+	String += " ";
 	String += pElement->GetIdentifierString( m_bShowDebug );
-
-	SetStatusText( String );
+	return String;
 }
 
 void CLinkageView::OnMouseEndSelect(UINT nFlags, CFPoint point)
@@ -3531,8 +3540,8 @@ void CLinkageView::ConfigureControlWindow( enum _SimulationControl SimulationCon
 			continue;
 		if( SimulationControl == INDIVIDUAL || pConnector->IsAlwaysManual() )
 		{
-			CString String;
-			String.Format( "Connector %s", (const char*)pConnector->GetIdentifierString( m_bShowDebug ) );
+			CString String = GetElementFullDescription( pConnector );
+			//String.Format( "Connector %s", (const char*)pConnector->GetIdentifierString( m_bShowDebug ) );
 			m_ControlWindow.AddControl( 10000 + pConnector->GetIdentifier(), String, 10000 + pConnector->GetIdentifier(), true );
 		}
 	}
@@ -3548,8 +3557,8 @@ void CLinkageView::ConfigureControlWindow( enum _SimulationControl SimulationCon
 			continue;
 		if( SimulationControl == INDIVIDUAL || pLink->IsAlwaysManual() )
 		{
-			CString String;
-			String.Format( "Link %s", pLink->GetIdentifierString( m_bShowDebug ) );
+			CString String = GetElementFullDescription( pLink );
+			//String.Format( "Link %s", pLink->GetIdentifierString( m_bShowDebug ) );
 			m_ControlWindow.AddControl( pLink->GetIdentifier(), String, pLink->GetIdentifier(), false, pLink->GetCPM() >= 0 ? 0.0 : 1.0 );
 		}
 	}
@@ -3724,7 +3733,15 @@ void CLinkageView::OnUpdateAlignButton(CCmdUI *pCmdUI)
 	bool bEnable = pDoc->GetAlignConnectorCount() > 1
 				   || Selected > 1
 				   || pDoc->IsSelectionTriangle()
-				   || pDoc->IsSelectionRectangle();
+				   || pDoc->IsSelectionRectangle()
+				   || pDoc->IsSelectionAdjustable()
+				   || pDoc->IsSelectionLengthable()
+				   || pDoc->IsSelectionLineable()
+				   || pDoc->IsSelectionMeshableGears()
+				   || pDoc->IsSelectionPositionable()
+				   || pDoc->IsSelectionRotatable()
+				   || pDoc->IsSelectionScalable();
+
 
 	pCmdUI->Enable( !m_bSimulating && bEnable && m_bAllowEdit );
 }
@@ -3766,13 +3783,6 @@ void CLinkageView::OnUpdateEditUnfasten(CCmdUI *pCmdUI)
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionUnfastenable() && m_bAllowEdit );
-}
-
-void CLinkageView::OnUpdateEditSetRatio(CCmdUI *pCmdUI)
-{
-	CLinkageDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionMeshableGears() && m_bAllowEdit );
 }
 
 void CLinkageView::OnUpdateEditJoin(CCmdUI *pCmdUI)
@@ -3841,6 +3851,130 @@ void CLinkageView::OnEditUnfasten()
 	ASSERT_VALID(pDoc);
 	pDoc->UnfastenSelected();
 	InvalidateRect( 0 );
+}
+
+
+void CLinkageView::OnUpdateEditSetLocation(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionPositionable() && m_bAllowEdit );
+}
+
+void CLinkageView::OnEditSetLocation()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	double DocumentScale = pDoc->GetUnitScale();
+
+	CLocationDialog dlg;
+	CConnector *pConnector = pDoc->GetSelectedConnector( 0 );
+	if( pConnector == 0 )
+		return;
+
+	dlg.m_PromptText = GetElementFullDescription( pConnector );
+	dlg.m_xPosition = pConnector->GetPoint().x * DocumentScale;
+	dlg.m_yPosition = pConnector->GetPoint().y * DocumentScale;
+	
+	if( dlg.DoModal() == IDOK )
+	{
+		if( dlg.m_xPosition != pConnector->GetPoint().x ||
+		    dlg.m_yPosition != pConnector->GetPoint().y )
+		{
+			pDoc->PushUndo();
+			pConnector->SetPoint( dlg.m_xPosition / DocumentScale, dlg.m_yPosition / DocumentScale );
+			pDoc->SetModifiedFlag( true );
+			SetScrollExtents();
+			InvalidateRect( 0 );
+		}
+	}
+}
+
+void CLinkageView::OnUpdateEditSetLength(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionLengthable() && m_bAllowEdit );
+}
+
+void CLinkageView::OnEditSetLength()
+{
+	CLengthDistanceDialog dlg;
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	dlg.m_Distance = pDoc->GetSelectedElementCoordinates();
+	if( dlg.DoModal() == IDOK )
+	{
+		pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, dlg.m_Distance );
+		UpdateForDocumentChange();
+	}
+}
+
+void CLinkageView::OnUpdateEditSetAngle(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionTriangle() && m_bAllowEdit );
+}
+
+void CLinkageView::OnEditSetAngle()
+{
+	CAngleDialog dlg;
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	dlg.m_Angle = pDoc->GetSelectedElementCoordinates();
+	if( dlg.DoModal() == IDOK )
+	{
+	}
+}
+
+void CLinkageView::OnUpdateEditRotate(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionRotatable() && m_bAllowEdit );
+}
+
+void CLinkageView::OnEditRotate()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	CRotateDialog dlg;
+	dlg.m_Angle = "0.0";
+	if( dlg.DoModal() == IDOK )
+	{
+		CString Temp = dlg.m_Angle + "D";
+		pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, Temp );
+		UpdateForDocumentChange();
+	}
+}
+
+void CLinkageView::OnUpdateEditScale(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionScalable() && m_bAllowEdit );
+}
+
+void CLinkageView::OnEditScale()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	CScaleDialog dlg;
+	dlg.m_Scale = "100";
+	if( dlg.DoModal() == IDOK )
+	{
+		CString Temp = dlg.m_Scale + "%";
+		pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, Temp );
+		UpdateForDocumentChange();
+	}
+}
+
+void CLinkageView::OnUpdateEditSetRatio(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionMeshableGears() && m_bAllowEdit );
 }
 
 void CLinkageView::OnEditSetRatio()
@@ -4377,6 +4511,15 @@ void CLinkageView::OnAlignSetAngle()
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
+	CAngleDialog dlg;
+	dlg.m_Angle = pDoc->GetSelectedElementCoordinates();
+	if( dlg.DoModal() == IDOK )
+	{
+		pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, dlg.m_Angle );
+		UpdateForDocumentChange();
+	}
+
+	/*
 
 	if( !pDoc->IsSelectionTriangle() )
 		return;
@@ -4400,6 +4543,7 @@ void CLinkageView::OnAlignSetAngle()
 		pDoc->MakeSelectedAtAngle( dlg.m_Angle );
 		UpdateForDocumentChange();
 	}
+	*/
 }
 
 void CLinkageView::OnUpdateAlignSetAngle( CCmdUI *pCmdUI )
@@ -6477,7 +6621,7 @@ CFArea CLinkageView::DrawConnectorLinkDimensions( CRenderer* pRenderer, const Ge
 	pRenderer->SetTextAlign( TA_CENTER | TA_TOP );
 	pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
 
-	int ConnectorCount = pLink->GetConnectorList()->GetCount();
+	int ConnectorCount = (int)pLink->GetConnectorList()->GetCount();
 	if( ConnectorCount <= 1 )
 	{
 		CConnector* pConnector = pLink->GetConnector( 0 );
@@ -6576,7 +6720,7 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 
 	CFArea DimensionsArea;
 
-	int ConnectorCount = pLink->GetConnectorList()->GetCount();
+	int ConnectorCount = (int)pLink->GetConnectorList()->GetCount();
 	if( ConnectorCount <= 1 )
 		return DrawConnectorLinkDimensions( pRenderer, pGearConnections, OnLayers, pLink, bDrawLines, bDrawText );
 
@@ -6900,7 +7044,7 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 
 	CPen* pOldPen = 0;
 
-	int Count = pLink->GetConnectorList()->GetCount();
+	int Count = (int)pLink->GetConnectorList()->GetCount();
 
 	if( bDrawHighlight )
 	{
@@ -7989,24 +8133,29 @@ void CLinkageView::OnSimulatePause()
 	}
 }
 
+void CLinkageView::OnSimulateStep( int Direction, bool bBig )
+{
+	m_SimulationSteps = ( Direction > 0 ? 1 : -1 ) * ( bBig ? 10 : 1 );
+}
+
 void CLinkageView::OnSimulateForward()
 {
-	m_SimulationSteps = 1;
+	OnSimulateStep( 1, false );
 }
 
 void CLinkageView::OnSimulateBackward()
 {
-	m_SimulationSteps = -1;
+	OnSimulateStep( -1, false );
 }
 
 void CLinkageView::OnSimulateForwardBig()
 {
-	m_SimulationSteps = 10;
+	OnSimulateStep( 1, true );
 }
 
 void CLinkageView::OnSimulateBackwardBig()
 {
-	m_SimulationSteps = -10;
+	OnSimulateStep( -1, true );
 }
 
 void CLinkageView::OnUpdateSimulatePause(CCmdUI *pCmdUI)
@@ -8263,10 +8412,13 @@ void CLinkageView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	else if( ( GetKeyState( VK_CONTROL ) & 0x8000 ) != 0)
 		ShiftControlPressed = true;
 
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	double Nudge = Unscale( 1.0 / m_DPIScale ) * ( ShiftControlPressed ? 5 : 1 );
+
 	if( nChar == VK_TAB )
 	{
-		CLinkageDoc* pDoc = GetDocument();
-		ASSERT_VALID(pDoc);
 
 		if( pDoc->SelectNext( ShiftControlPressed ? pDoc->PREVIOUS : pDoc->NEXT ) )
 		{
@@ -8276,19 +8428,20 @@ void CLinkageView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	}
 	else if( nChar == VK_LEFT || nChar == VK_RIGHT )
 	{
-		if( nChar == VK_RIGHT )
+		if( m_bSimulating )
+			OnSimulateStep( nChar == VK_RIGHT ? 1 : 0, ShiftControlPressed );
+		else if( m_bAllowEdit )
 		{
-			if( ShiftControlPressed )
-				OnSimulateForwardBig();
-			else
-				OnSimulateForward();
+			pDoc->MoveSelected( CFPoint( nChar == VK_RIGHT ? Nudge : -Nudge, 0 ) );
+			UpdateForDocumentChange();
 		}
-		else
+	}
+	else if( nChar == VK_UP || nChar == VK_DOWN )
+	{
+		if( !m_bSimulating )
 		{
-			if( ShiftControlPressed )
-				OnSimulateBackwardBig();
-			else
-				OnSimulateBackward();
+			pDoc->MoveSelected( CFPoint( 0, nChar == VK_UP ? Nudge : -Nudge ) );
+			UpdateForDocumentChange();
 		}
 	}
 	else
@@ -8444,7 +8597,7 @@ void CLinkageView::OnViewUnits()
 	if( nCurSel < 0 )
 		return;
 
-	DWORD Data = pComboBox->GetItemData( nCurSel );
+	DWORD Data = (DWORD)pComboBox->GetItemData( nCurSel );
 
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -8473,9 +8626,6 @@ void CLinkageView::ShowSelectedElementCoordinates( void )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-//	if( pDoc->GetSelectedLinkCount( true ) > 0 )
-//		return;
-
 	CMFCRibbonBar *pRibbon = ((CFrameWndEx*) AfxGetMainWnd())->GetRibbonBar();
 	if( pRibbon == 0 )
 		return;
@@ -8483,137 +8633,7 @@ void CLinkageView::ShowSelectedElementCoordinates( void )
 	if( pEditBox == 0 )
 		return;
 
-	CString Text;
-
-	if( pDoc->IsSelectionMeshableGears() )
-	{
-		CLink *pLink1 = pDoc->GetSelectedLink( 0, false );
-		CLink *pLink2 = pDoc->GetSelectedLink( 1, false );
-		double Size1 = 0;
-		double Size2 = 0;
-
-		CGearConnection *pConnection = pDoc->GetGearRatio( pLink1, pLink2, &Size1, &Size2 );
-
-		if( pConnection == 0 || Size1 == 0 || Size2 == 0 )
-			pEditBox->SetEditText( "" );
-		else
-		{
-			CString Temp;
-			if( floor( Size1 ) == Size1 )
-				Temp.Format( "%d", (int)Size1 );
-			else
-			{
-				Temp.Format( "%.4lf", Size1 );
-				Temp.TrimRight( "0" );
-			}
-			Text = Temp;
-			Text += ":";
-			if( floor( Size2 ) == Size2 )
-				Temp.Format( "%d", (int)Size2 );
-			else
-			{
-				Temp.Format( "%.4lf", Size2 );
-				Temp.TrimRight( "0" );
-			}
-			Text += Temp;
-			pEditBox->SetEditText( Text );
-		}
-		return;
-	}
-
-	double DocumentScale = pDoc->GetUnitScale();
-
-	CConnector *pConnector0 = 0;
-	CConnector *pConnector1 = 0;
-	CConnector *pConnector2 = 0;
-
-	CLink *pSelectedLink = 0;
-
-	bool bEnableEdit = true;
-
-	int SelectedCount = pDoc->GetSelectedConnectorCount();
-
-	pConnector0 = pDoc->GetSelectedConnector( 0 );
-	if( pConnector0 == 0 )
-	{
-		if( pDoc->GetSelectedLinkCount( false ) != 1 )
-		{
-			pEditBox->SetEditText( "" );
-			return;
-		}
-
-		CLink *pSelectedLink = pDoc->GetSelectedLink( 0, false );
-		if( pSelectedLink == 0 )
-		{
-			pEditBox->SetEditText( "" );
-			return;
-		}
-
-		if( pSelectedLink->GetConnectorCount() != 2 )
-		{
-			pEditBox->SetEditText( "" );
-			return;
-		}
-
-		pConnector0 = pSelectedLink->GetConnector( 0 );
-		pConnector1 = pSelectedLink->GetConnector( 1 );
-
-		SelectedCount = 2;
-	}
-	else
-	{
-		pConnector1 = pDoc->GetSelectedConnector( 1 );
-		pConnector2 = pDoc->GetSelectedConnector( 2 );
-	}
-
-	if( SelectedCount < 1 || SelectedCount > 3 )
-	{
-		pEditBox->SetEditText( "" );
-		return;
-	}
-
-	CFPoint Point0 = pConnector0->GetOriginalPoint();
-	Point0.x *= DocumentScale;
-	Point0.y *= DocumentScale;
-
-	switch( SelectedCount )
-	{
-		case 1:
-		{
-			Text.Format( "%.4lf,%.4lf", Point0.x, Point0.y );
-			break;
-		}
-
-		case 2:
-		{
-			if( pConnector1 == 0 )
-			{
-				pEditBox->SetEditText( "" );
-				return;
-			}
-			CFPoint Point1 = pConnector1->GetOriginalPoint();
-			Point1.x *= DocumentScale;
-			Point1.y *= DocumentScale;
-
-			double distance = Distance( Point0, Point1 );
-			Text.Format( "%.4lf", distance );
-			break;
-		}
-
-		case 3:
-		{
-			if( pConnector1 == 0 || pConnector2 == 0 )
-			{
-				pEditBox->SetEditText( "" );
-				return;
-			}
-			double Angle = GetAngle( pConnector1->GetOriginalPoint(), pConnector0->GetOriginalPoint(), pConnector2->GetOriginalPoint() );
-			if( Angle > 180 )
-				Angle = Angle - 360;
-			Text.Format( "%.4lf", Angle );
-			break;
-		}
-	}
+	CString Text = pDoc->GetSelectedElementCoordinates();
 
 	pEditBox->SetEditText( Text );
 }
@@ -8913,9 +8933,9 @@ void CLinkageView::OnSelectSample (UINT ID )
 void CLinkageView::UpdateForDocumentChange( bool bUpdateRotationCenter )
 {
 	SetScrollExtents();
+	InvalidateRect( 0 );
 	MarkSelection( true, bUpdateRotationCenter );
 	ShowSelectedElementCoordinates();
-	InvalidateRect( 0 );
 }
 
 #if 0

@@ -273,6 +273,7 @@ private:
 	void MovePartsLinkToOrigin( CLink *pPartsLink, CFPoint Origin, GearConnectionList *pGearConnections, bool bRotateToOptimal = true );
 	class CTempLink* GetTemporaryPartsLink( CLink *pLink, CFPoint PartOrigin, GearConnectionList *pGearConnections );
 	class CTempLink* GetTemporaryGroundLink( LinkList *pDocLinks, ConnectorList *pDocConnectors, CFPoint PartOrigin );
+	CString GetElementFullDescription( CElement *pElement );
 	
 	bool StartVideoThread( void );
 
@@ -294,6 +295,7 @@ private:
 	void StepSimulation( enum _SimulationControl SimulationControl );
 	void StartMechanismSimulate( enum _SimulationControl SimulationControl );
 	void StopMechanismSimulate( bool KeepCurrentPositions = false );
+	void OnSimulateStep( int Direction, bool bBig );
 
 	void ConfigureControlWindow( enum _SimulationControl SimulationControl );
 
@@ -366,13 +368,11 @@ public:
 	afx_msg void OnEditFasten();
 	afx_msg void OnUpdateEditUnfasten(CCmdUI *pCmdUI);
 	afx_msg void OnEditUnfasten();
-	afx_msg void OnUpdateEditSetRatio(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateEditJoin(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateEditLock(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateEditCombine(CCmdUI *pCmdUI);
 	afx_msg void OnEditCombine();
 	afx_msg void OnEditConnect();
-	afx_msg void OnEditSetRatio();
 	// afx_msg void OnUpdateEditDeleteselected(CCmdUI *pCmdUI);
 	afx_msg void OnEditDeleteselected();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
@@ -380,6 +380,26 @@ public:
 	afx_msg void OnPrintFull();
 	afx_msg void OnUpdatePrintFull( CCmdUI *pCmdUI );
 	
+	afx_msg void OnEditSetRatio();
+	afx_msg void OnUpdateEditSetRatio(CCmdUI *pCmdUI);
+
+	afx_msg void OnEditSetLocation();
+	afx_msg void OnUpdateEditSetLocation(CCmdUI *pCmdUI);
+	afx_msg void OnEditSetLength();
+	afx_msg void OnUpdateEditSetLength(CCmdUI *pCmdUI);
+	afx_msg void OnEditSetAngle();
+	afx_msg void OnUpdateEditSetAngle(CCmdUI *pCmdUI);
+	afx_msg void OnEditRotate();
+	afx_msg void OnUpdateEditRotate(CCmdUI *pCmdUI);
+	afx_msg void OnEditScale();
+	afx_msg void OnUpdateEditScale(CCmdUI *pCmdUI);
+
+
+
+
+
+
+
 	afx_msg void OnUpdateButtonRun(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateButtonStop(CCmdUI *pCmdUI);
 	afx_msg void OnButtonRun();

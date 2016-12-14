@@ -23,7 +23,7 @@ CFPoint* GetHull( ConnectorList* pConnectors, int &ReturnedPointCount, bool bUse
 {
 	POSITION Position;
 	int Counter;
-	int Count = pConnectors->GetCount();
+	int Count = (int)pConnectors->GetCount();
 	CFPoint* PointArray = new CFPoint[Count];
 	if( PointArray == NULL )
 		return 0;

@@ -129,7 +129,7 @@ void CDXFFile::DXF_Save(const std::string &fpath)
 	{
 		for (int i = 0; i < (int)varDXF.size(); i++)
 		{
-			File.Write( varDXF[i].c_str(), varDXF[i].size() );
+			File.Write( varDXF[i].c_str(), (int)varDXF[i].size() );
 			File.Write( "\r\n", 2 );
 		}
 	}

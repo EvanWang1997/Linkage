@@ -88,7 +88,7 @@ public:
 	CFPoint GetOriginalPoint( void ) { return m_OriginalPoint; }
 	double GetRPM( void ) { return m_RPM; }
 	CString GetIdentifierString( bool bDebugging );
-	int GetLinkCount( void ) { return m_Links.GetCount(); }
+	int GetLinkCount( void ) { return (int)m_Links.GetCount(); }
 	bool PointOnConnector( CFPoint Point, double TestDistance );
 	double GetRotationAngle( void ) { return m_RotationAngle; }
 	double GetTempRotationAngle( void ) { return m_TempRotationAngle; }

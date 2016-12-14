@@ -108,6 +108,9 @@ BOOL CSelectElementsDialog::OnInitDialog()
 		if( pElement == 0 )
 			continue;
 
+		if( pElement->IsLink() && ((CLink*)pElement)->GetConnectorCount() <= 1 && !((CLink*)pElement)->IsGear() )
+			continue; // No links that have just one connector.
+
 		Elements.push_back( pElement );
 	}
 

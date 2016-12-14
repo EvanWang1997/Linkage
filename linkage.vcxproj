@@ -766,12 +766,14 @@ exit 0
     <ClInclude Include="graham.h" />
     <ClInclude Include="helper.h" />
     <ClInclude Include="ImageSelectDialog.h" />
+    <ClInclude Include="LengthDistanceDialog.h" />
     <ClInclude Include="LinePropertiesDialog.h" />
     <ClInclude Include="link.h" />
     <ClInclude Include="linkage.h" />
     <ClInclude Include="linkageDoc.h" />
     <ClInclude Include="linkageView.h" />
     <ClInclude Include="LinkPropertiesDialog.h" />
+    <ClInclude Include="LocationDialog.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MyCheckListBox.h" />
     <ClInclude Include="MyDialog.h" />
@@ -785,8 +787,10 @@ exit 0
     <ClInclude Include="RecordDialog.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ConnectorPropertiesDialog.h" />
+    <ClInclude Include="RotateDialog.h" />
     <ClInclude Include="SampleGallery.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="ScaleDialog.h" />
     <ClInclude Include="SelectElementsDialog.h" />
     <ClInclude Include="simplegif.h" />
     <ClInclude Include="Simulator.h" />
@@ -874,6 +878,7 @@ exit 0
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="ImageSelectDialog.cpp" />
+    <ClCompile Include="LengthDistanceDialog.cpp" />
     <ClCompile Include="LinePropertiesDialog.cpp" />
     <ClCompile Include="link.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -908,6 +913,7 @@ exit 0
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="LinkPropertiesDialog.cpp" />
+    <ClCompile Include="LocationDialog.cpp" />
     <ClCompile Include="MainFrm.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -925,8 +931,10 @@ exit 0
     <ClCompile Include="quickxml.cpp" />
     <ClCompile Include="RecordDialog.cpp" />
     <ClCompile Include="ConnectorPropertiesDialog.cpp" />
+    <ClCompile Include="RotateDialog.cpp" />
     <ClCompile Include="SampleGallery.cpp" />
     <ClCompile Include="renderer.cpp" />
+    <ClCompile Include="ScaleDialog.cpp" />
     <ClCompile Include="SelectElementsDialog.cpp" />
     <ClCompile Include="Simulator.cpp" />
     <ClCompile Include="StdAfx.cpp">
