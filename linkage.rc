@@ -76,7 +76,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_MAINFRAME           ICON                    "C:\\development\\Linkage\\res\\testx.ico"
+IDR_MAINFRAME           ICON                    "res\\testx.ico"
 
 IDR_LINKAGTYPE          ICON                    "res\\LinkageDoc.ico"
 
