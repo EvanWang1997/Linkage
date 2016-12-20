@@ -16,7 +16,7 @@ Open the generated Linkage.sln.
 # Generate the installer
 
     $ cd build
-    $ cpack -G WIX
+    $ cpack -C Release -G WIX
 
 # Code Signing
 The build proces will attempt to sign the code using a code signing certificate. If you happen to have a certificate with my name on it,
