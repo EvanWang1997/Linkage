@@ -236,7 +236,7 @@ line through a to b.
 ---------------------------------------------------------------------*/
 bool Left( CFPoint a, CFPoint b, CFPoint c )
 	{
-	return  Area2( a, b, c ) > 0;
+	return  Area2( a, b, c ) >= 0;
 	}
 
 int AreaSign( CFPoint a, CFPoint b, CFPoint c )
