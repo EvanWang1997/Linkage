@@ -69,16 +69,14 @@ CFPoint* GetHull( ConnectorList* pConnectors, int &ReturnedPointCount, bool bUse
 	);
 
 	/*
-	 * The qsort compare function no longer returns flags for duplicates because the 
-	 * graham function later will catch any duplicates on the hull. if the duplicates
-	 * are removed using the compare function (marking duplicates with a flag) and the 
-	 * following Squash function, an error shows up in some hulls for an unknown reason.
-	 * it seems better to not bother with the buggy and unnecessary code than to try to
-	 * fix it. But I left the code here because it feels wrong to change it; it came from
-	 * someone else, not me.
+	 * There is a bug where some hull shapes with duplicates causes the hull to have concaved areas
+	 * inconsistently (rotating the link causes the hull connectors to change). There was a fix for
+	 * this that removed the duplicate removal and got rid of the Squash() call below. But this caused
+	 * a crash with the scissor lift mechanism so that fix has been removed. Try to fix the original
+	 * hull miscompute bug, maybe by removing duplicates before hull computation.
 	 */
 
-//	Count = Squash( PointArray, Count );
+	Count = Squash( PointArray, Count );
 
 	if( Count <= 1 )
 	{
@@ -143,7 +141,7 @@ int Compare( const void* tpi, const void* tpj )
 		return 1;
 	else
 		{ /* Collinear with P[0] */
-		return 0;
+		// return 0;
 
 		x = fabs( pi->x - pSortPoints[0].x ) - fabs( pj->x - pSortPoints[0].x );
 		y = fabs( pi->y - pSortPoints[0].y ) - fabs( pj->y - pSortPoints[0].y );
