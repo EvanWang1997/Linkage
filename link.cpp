@@ -1139,3 +1139,9 @@ bool CLink::IsGearAnchored( void )
 {
 	return IsGear() && GetFastenedTo() != 0 && GetFastenedTo()->GetConnector() != 0 && GetFastenedTo()->GetConnector()->IsAnchor();
 }
+
+CControlKnob *CLink::GetControlKnob( void ) 
+{
+	UpdateControlKnob();
+	return IsActuator() ? &m_ControlKnob : 0; 
+}
