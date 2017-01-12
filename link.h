@@ -174,7 +174,7 @@ class CLink : public CElement
 	bool FixAll( void );
 	static CConnector* GetCommonConnector( CLink *pLink1, CLink *pLink2 );
 
-	virtual CControlKnob *GetControlKnob( void ) { return IsActuator() ? &m_ControlKnob : 0; }
+	virtual CControlKnob *GetControlKnob( void );
 
 	private:
 	
