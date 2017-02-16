@@ -2693,7 +2693,7 @@ bool CLinkageView::FindDocumentItem( CFPoint Point, CLink *&pFoundLink, CConnect
 
 	CFPoint AdjustedPoint = Unscale( Point );
 
-	double GrabDistance = Unscale( GRAB_DISTANCE );
+	double GrabDistance = Unscale( GRAB_DISTANCE ); // The mouse point has already been adjusted for the DPI so the grab distance is not.
 
 	return pDoc->FindElement( AdjustedPoint, GrabDistance, 0, pFoundLink, pFoundConnector );
 }
@@ -2713,7 +2713,7 @@ bool CLinkageView::SelectDocumentItem( UINT nFlags, CFPoint point )
 
 	CFPoint AdjustedPoint = Unscale( point );
 
-	double GrabDistance = Unscale( GRAB_DISTANCE );
+	double GrabDistance = Unscale( GRAB_DISTANCE ); // The mouse point has already been adjusted for the DPI so the grab distance is not.
 
 	bool bSelectionChanged = false;
 	m_MouseAction = pDoc->SelectElement( AdjustedPoint, GrabDistance, 0, bMultiSelect, bSelectionChanged ) ? ACTION_DRAG : ACTION_NONE;

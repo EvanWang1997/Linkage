@@ -377,7 +377,7 @@ BEGIN
     CONTROL         IDB_BITMAP3,IDC_STATIC,"Static",SS_BITMAP,25,20,32,30
     LTEXT           "Linkage Mechanism Designer and Simulator",IDC_TITLE,80,18,172,12
     LTEXT           "Static",IDC_VERSION,80,30,164,8
-    LTEXT           "Copyright © 2000 - 2016, David M. Rector\nrectorsquid@gmail.com\nwww.linkagesimulator.com",IDC_COPYRIGHT,80,41,164,27
+    LTEXT           "Copyright © 2000 - 2017, David M. Rector\nrectorsquid@gmail.com\nwww.linkagesimulator.com",IDC_COPYRIGHT,80,41,164,27
 END
 
 IDD_START_RECORD DIALOGEX 0, 0, 243, 248
@@ -558,8 +558,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,4,0,0
- PRODUCTVERSION 3,4,0,0
+ FILEVERSION 3,4,1,0
+ PRODUCTVERSION 3,4,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -575,12 +575,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.4.0.0"
+            VALUE "FileVersion", "3.4.1.0"
             VALUE "InternalName", "Linkage"
-            VALUE "LegalCopyright", "Copyright © 2002 - 2016 David Rector"
+            VALUE "LegalCopyright", "Copyright © 2002 - 2017 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.4.0.0"
+            VALUE "ProductVersion", "3.4.1.0"
         END
     END
     BLOCK "VarFileInfo"

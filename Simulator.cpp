@@ -548,10 +548,52 @@ class CSimulatorImplementation
 					bResult = FindLinkTriangleMatch( pLink );
 			}
 			else
-				bResult = pLink->FixAll();
+			{
+				bResult = FixAllIfPossible( pLink );
+			}
 		}
 
 		return bResult;
+	}
+
+	bool FixAllIfPossible( CLink *pLink )
+	{
+		/* 
+		 * Check the link to make sure it is not stretched. Stretching happens
+		 * if some other link is rotated into position and one of the rotated connectors
+		 * tries to move another link that has another fixed connector. I'm not sure
+		 * if this is a recent problem or if the code always needed this test. but it is a bug
+		 * to need this test because one link should not be able to change the position of a
+		 * connector on another if the second link already has a fixed connector. Unless of course
+		 * the new connector position that screws things up is actually in a valid position for
+		 * both links.
+		 */
+
+		CConnector *pFixedConnector = pLink->GetFixedConnector();
+		if( pFixedConnector == 0 )
+			return false;
+
+		CFPoint OriginalFixedPoint = pFixedConnector->GetOriginalPoint();
+		CFPoint FixedPoint = pFixedConnector->GetPoint();
+
+		ConnectorList *pConnectors = pLink->GetConnectorList();
+		if( pConnectors == 0 )
+			return false;
+
+		POSITION Position = pConnectors->GetHeadPosition();
+		while( Position != 0 )
+		{
+			CConnector *pConnector = pConnectors->GetNext( Position );
+			if( pConnector == 0 || !pConnector->IsFixed() || pConnector == pFixedConnector )
+				continue;
+
+			double OriginalDistance = Distance( OriginalFixedPoint, pConnector->GetOriginalPoint() );
+			double distance = Distance( FixedPoint, pConnector->GetPoint() );
+			if( fabs( OriginalDistance - distance ) > 0.0001 )
+				return false;
+		}
+
+		return pLink->FixAll();
 	}
 
 	bool MoveSimulation( CLinkageDoc *pDoc )
@@ -1124,6 +1166,12 @@ class CSimulatorImplementation
 	bool SlideToSlider( CLink *pLink, CConnector *pTargetConnector, CConnector *pTargetLimit1, CConnector *pTargetLimit2 )
 	{
 		if( pLink->IsFixed() )
+			return false;
+
+		if( !pTargetConnector->IsFixed() )
+			return false;
+		
+		if( !pTargetConnector->IsSlider() )
 			return false;
 
 		/*
