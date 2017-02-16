@@ -834,11 +834,12 @@ class CGDIRenderer : public CRendererImplementation
 
 				LOGBRUSH LogBrush;
 				LogBrush.lbColor = LogPen.elpColor;
-				LogBrush.lbStyle = PS_SOLID | PS_ENDCAP_SQUARE;
+				LogBrush.lbStyle = PS_SOLID; // Never change this to anything but PS_SOLID
+				LogBrush.lbHatch = 0;
 
 				const DWORD DashStyle[2] = { (DWORD)( 4 * m_Scale * m_DPIScale ), (DWORD)( 4 * m_Scale * m_DPIScale ) };
 
-				CPen *pPen = new CPen( PS_GEOMETRIC | PS_USERSTYLE, (int)( LogPen.elpWidth * m_Scale * m_DPIScale ), &LogBrush, 2, DashStyle );
+				CPen *pPen = new CPen( PS_GEOMETRIC | PS_USERSTYLE | PS_ENDCAP_SQUARE, (int)( LogPen.elpWidth * m_Scale * m_DPIScale ), &LogBrush, 2, DashStyle );
 
 				m_CreatedPens.AddTail( pPen );
 
@@ -1635,11 +1636,12 @@ class CDXFRenderer : public CRendererImplementation
 
 				LOGBRUSH LogBrush;
 				LogBrush.lbColor = LogPen.elpColor;
-				LogBrush.lbStyle = PS_SOLID | PS_ENDCAP_SQUARE;
+				LogBrush.lbStyle = PS_SOLID; // Never change this to anything but PS_SOLID
+				LogBrush.lbHatch = 0;
 
 				const DWORD DashStyle[2] = { (DWORD)( 4 * m_Scale * m_DPIScale ), (DWORD)( 4 * m_Scale * m_DPIScale ) };
 
-				CPen *pPen = new CPen( PS_GEOMETRIC | PS_USERSTYLE, (int)( LogPen.elpWidth * m_Scale * m_DPIScale ), &LogBrush, 2, DashStyle );
+				CPen *pPen = new CPen( PS_GEOMETRIC | PS_USERSTYLE | PS_ENDCAP_SQUARE, (int)( LogPen.elpWidth * m_Scale * m_DPIScale ), &LogBrush, 2, DashStyle );
 
 				m_CreatedPens.AddTail( pPen );
 
@@ -2619,11 +2621,12 @@ class CD2DRenderer : public CRendererImplementation
 
 				LOGBRUSH LogBrush;
 				LogBrush.lbColor = LogPen.elpColor;
-				LogBrush.lbStyle = PS_SOLID | PS_ENDCAP_SQUARE;
+				LogBrush.lbStyle = PS_SOLID; // Never change this to anything but PS_SOLID
+				LogBrush.lbHatch = 0;
 
 				const DWORD DashStyle[2] = { (DWORD)( 4 * m_Scale * m_DPIScale ), (DWORD)( 4 * m_Scale * m_DPIScale ) };
 
-				CPen *pPen = new CPen( PS_GEOMETRIC | PS_USERSTYLE, (int)( LogPen.elpWidth * m_Scale * m_DPIScale ), &LogBrush, 2, DashStyle );
+				CPen *pPen = new CPen( PS_GEOMETRIC | PS_USERSTYLE | PS_ENDCAP_SQUARE, (int)( LogPen.elpWidth * m_Scale * m_DPIScale ), &LogBrush, 2, DashStyle );
 
 				m_CreatedPens.AddTail( pPen );
 
