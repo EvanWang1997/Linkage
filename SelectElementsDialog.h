@@ -22,6 +22,7 @@ public:
 
 public:
 	ElementList m_AllElements;
+	bool m_bShowDebug;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

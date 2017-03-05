@@ -19,7 +19,7 @@ IMPLEMENT_DYNAMIC(CSelectElementsDialog, CMyDialog)
 CSelectElementsDialog::CSelectElementsDialog(CWnd* pParent /*=NULL*/)
 	: CMyDialog( pParent, IDD_SELECTELEMENTS)
 {
-
+	m_bShowDebug = false;
 }
 
 CSelectElementsDialog::~CSelectElementsDialog()
@@ -124,7 +124,7 @@ BOOL CSelectElementsDialog::OnInitDialog()
 			continue;
 		AddListData( m_ListControl2, Row, 0, "" );
 		AddListData( m_ListControl2, Row, 1, (const char*)pElement->GetTypeString() );
-		CString Name = pElement->GetIdentifierString( false );
+		CString Name = pElement->GetIdentifierString( m_bShowDebug );
 		if( pElement->GetName().IsEmpty() && ( pElement->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) == 0 )
 			Name += "  (unlabeled)";
 

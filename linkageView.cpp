@@ -4366,6 +4366,7 @@ void CLinkageView::OnEditSelectElements()
 	ASSERT_VALID(pDoc);
 
 	CSelectElementsDialog dlg;
+	dlg.m_bShowDebug = m_bShowDebug;
 	pDoc->FillElementList( dlg.m_AllElements );
 	if( dlg.DoModal() == IDOK )
 	{
@@ -5527,9 +5528,12 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 			 * assigned by the user.
 			 */
 			CString &Name = pConnector->GetName();
-			if( !Name.IsEmpty() || ( pConnector->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) != 0 )
+			if( !Name.IsEmpty() || ( pConnector->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) != 0 || m_bShowDebug )
 			{
-				CString& Number = pConnector->GetIdentifierString( m_bShowDebug );
+				CString Number;
+				if( pConnector->IsAlone() && m_bShowDebug )
+					Number = pConnector->GetLink( 0 )->GetIdentifierString( m_bShowDebug ) + "  ";
+				Number += pConnector->GetIdentifierString( m_bShowDebug );
 
 				pRenderer->SetTextAlign( TA_BOTTOM | TA_LEFT );
 				pRenderer->SetBkMode( TRANSPARENT );
@@ -5836,7 +5840,7 @@ void CLinkageView::DebugDrawLink( CRenderer* pRenderer, unsigned int OnLayers, C
 	CustomPen.CreatePen( PS_USERSTYLE, 1, RGB( 0, 0, 0 ) );
 	CPen *pOldPen = pRenderer->SelectObject( &CustomPen );
 
-	if( 1 || pLink->IsGear() )
+	if( pLink->IsGear() || pLink->GetRotationAngle() != 0 )
 	{
 		CFPoint AveragePoint;
 		pLink->GetAveragePoint( *pDoc->GetGearConnections(), AveragePoint );
@@ -7121,7 +7125,7 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 		 * assigned by the user.
 		 */
 		CString &Name = pLink->GetName();
-		if( !Name.IsEmpty() || ( pLink->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) != 0 )
+		if( !Name.IsEmpty() || ( pLink->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) != 0 || m_bShowDebug )
 		{
 			pRenderer->SetBkMode( TRANSPARENT );
 			CString Number = pLink->GetIdentifierString( m_bShowDebug );

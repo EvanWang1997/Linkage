@@ -812,8 +812,10 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 		AppendXMLAttribute( TempString, "slider", pConnector->IsSlider(), pConnector->IsSlider() );
 		AppendXMLAttribute( TempString, "alwaysmanual", pConnector->IsAlwaysManual(), pConnector->IsAlwaysManual() );
 		AppendXMLAttribute( TempString, "drawcircle", pConnector->GetDrawCircleRadius(), pConnector->GetDrawCircleRadius() > 0 );
-		AppendXMLAttribute( TempString, "fastenlink", pConnector->GetFastenedToLink() == 0 ? 0 : pConnector->GetFastenedToLink()->GetIdentifier(), pConnector->GetFastenedToLink() != 0 );
-		AppendXMLAttribute( TempString, "fastenconnector", pConnector->GetFastenedToConnector() == 0 ? 0 : pConnector->GetFastenedToConnector()->GetIdentifier(), pConnector->GetFastenedToConnector() != 0 );
+		bool bIncludeFasten = pConnector->GetFastenedToLink() != 0 && ( pConnector->GetFastenedToLink()->IsSelected() || !bSelectedOnly );
+		AppendXMLAttribute( TempString, "fastenlink", pConnector->GetFastenedToLink() == 0 ? 0 : pConnector->GetFastenedToLink()->GetIdentifier(), bIncludeFasten );
+		bool bIncludeFastenToCon = pConnector->GetFastenedToConnector() != 0 && ( pConnector->GetFastenedToConnector()->IsSelected() || !bSelectedOnly );
+		AppendXMLAttribute( TempString, "fastenconnector", pConnector->GetFastenedToConnector() == 0 ? 0 : pConnector->GetFastenedToConnector()->GetIdentifier(), bIncludeFastenToCon );
 		AppendXMLAttribute( TempString, "slideradius", pConnector->GetSlideRadius(), pConnector->GetSlideRadius() != 0 && pConnector->IsSlider() );
 		AppendXMLAttribute( TempString, "color", (unsigned int)(COLORREF)pConnector->GetColor() );
 		TempString += bSlideLimits ? ">" : "/>";
@@ -951,7 +953,10 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 		while( Position != 0 )
 		{
 			CGearConnection *pGearConnection = m_GearConnectionList.GetNext( Position );
-			if( pGearConnection == 0 )
+			if( pGearConnection == 0 || pGearConnection->m_pGear1 == 0 || pGearConnection->m_pGear2 == 0 )
+				continue;
+
+			if( bSelectedOnly && ( !pGearConnection->m_pGear1->IsSelected() || !pGearConnection->m_pGear2->IsSelected() ) )
 				continue;
 
 			TempString.Format( "\t\t<ratio type=\"%s\" sizeassize=\"%s\">", pGearConnection->m_ConnectionType == pGearConnection->GEARS ? "gears" : "chain", pGearConnection->m_bUseSizeAsRadius ? "true" : "false" );
