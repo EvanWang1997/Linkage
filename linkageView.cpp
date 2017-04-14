@@ -2373,6 +2373,8 @@ Renderer.GetDC()->BitBlt( 0, 0, cx, cy, &MemDC, 0, 0, SRCCOPY );
 		PrepareRenderer( VideoRenderer, &VideoRect, &VideoBitmap, pDC, 4.0, false, 0.0, 1.0, true, true, false, 0 );
 
 		m_Zoom = m_ScreenZoom * m_DPIScale;
+		m_ScrollPosition.x = m_ScreenScrollPosition.x * m_DPIScale;
+		m_ScrollPosition.y = m_ScreenScrollPosition.y * m_DPIScale;
 		double SaveDPIScale = m_DPIScale;
 		m_DPIScale = 1.0;
 
