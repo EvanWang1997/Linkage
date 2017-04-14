@@ -489,7 +489,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			Value = pNode->GetAttribute( "fastenlink" );
 			if( !Value.IsEmpty() )
 			{
-				int FastenToId = atoi( Value ) + OffsetConnectorIdentifer;
+				int FastenToId = atoi( Value ) + OffsetLinkIdentifer;
 				CLink *pFastenToLink = FindLink( FastenToId );
 				if( pFastenToLink != 0 )
 					FastenThese( pLink, pFastenToLink );
