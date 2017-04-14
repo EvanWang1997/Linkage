@@ -327,6 +327,8 @@ Received some feature requests recently. These are some NOT YET ADDED:
 12/5/2016 9:08 AM: Test the captured connector first for snapping, before checking the other selected connectors.
 12/5/2016 9:08 AM: Include connectors of locked links in snap testing.
 12/12/2016 3:46 PM: Added dialog box entry for setting lengths, distances, rotating, scaling, etc., to the Align menu. Still working on adding some help text to the dialog boxes.
+4/13/2017 11:52 AM: Fixed parts list hang bug related to having only one ground connector in the mechanism.
+4/13/2017 11:52 AM: Fixed bug where multiple line coloring is ignored when setting coor for multiple drawing lines.
 
 
 

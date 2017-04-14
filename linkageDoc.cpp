@@ -533,7 +533,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 				Value = pNode->GetAttribute( "fastenlink" );
 			if( !Value.IsEmpty() )
 			{
-				int FastenToId = atoi( Value ) + OffsetConnectorIdentifer;
+				int FastenToId = atoi( Value ) + OffsetLinkIdentifer;
 				CLink *pFastenToLink = FindLink( FastenToId );
 				if( pFastenToLink != 0 )
 					FastenThese( pConnector, pFastenToLink );
@@ -599,7 +599,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 					if( pGearLinkNode->GetText() != "link" )
 						continue;
 					Value = pGearLinkNode->GetAttribute( "id" );
-					int GearLinkIdentifier = atoi( Value ) + OffsetConnectorIdentifer;
+					int GearLinkIdentifier = atoi( Value ) + OffsetLinkIdentifer;
 					Value = pGearLinkNode->GetAttribute( "size" );
 					double Size = atof( Value );
 
@@ -956,7 +956,9 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 			if( pGearConnection == 0 || pGearConnection->m_pGear1 == 0 || pGearConnection->m_pGear2 == 0 )
 				continue;
 
-			if( bSelectedOnly && ( !pGearConnection->m_pGear1->IsSelected() || !pGearConnection->m_pGear2->IsSelected() ) )
+			bool bGear1Selected = pGearConnection->m_pGear1->IsSelected() || pGearConnection->m_pGear1->IsAnySelected();
+			bool bGear2Selected = pGearConnection->m_pGear2->IsSelected() || pGearConnection->m_pGear2->IsAnySelected();
+			if( bSelectedOnly && ( !bGear1Selected || !bGear2Selected ) )
 				continue;
 
 			TempString.Format( "\t\t<ratio type=\"%s\" sizeassize=\"%s\">", pGearConnection->m_ConnectionType == pGearConnection->GEARS ? "gears" : "chain", pGearConnection->m_bUseSizeAsRadius ? "true" : "false" );

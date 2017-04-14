@@ -196,7 +196,7 @@
 #define IDS_DIMENSION_ROTATE            4217
 #define IDS_DIMENSION_SCALE             4218
 #define IDS_DIMENSION_ANGLE             4219
-#define IDS_ALIGN_SET_RATIO				4220
+#define IDS_ALIGN_SET_RATIO             4220
 #define ID_MECHANISM_RESET              4771
 #define ID_MECHANISM_SIMULATE           4772
 #define ID_EDIT_COMBINE                 4774
@@ -512,7 +512,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        6011
-#define _APS_NEXT_COMMAND_VALUE         7002
+#define _APS_NEXT_COMMAND_VALUE         7004
 #define _APS_NEXT_CONTROL_VALUE         8009
 #define _APS_NEXT_SYMED_VALUE           9000
 #endif

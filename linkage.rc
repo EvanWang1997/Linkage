@@ -267,38 +267,42 @@ END
 
 IDR_MAINFRAME ACCELERATORS
 BEGIN
-    VK_RETURN,      ID_ACCELERATOR39004,    VIRTKEY, NOINVERT
+    VK_RETURN,      ID_PROPERTIES_PROPERTIES,    VIRTKEY, NOINVERT
     "A",            ID_EDIT_ADDCONNECTOR,   VIRTKEY, NOINVERT
+    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
     "B",            ID_EDIT_COMBINE,        VIRTKEY, NOINVERT
     "C",            ID_EDIT_CONNECT,        VIRTKEY, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
-    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
-    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
-    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
-    VK_DELETE,      ID_EDIT_DELETESELECTED, VIRTKEY, NOINVERT
+    "D",            ID_VIEW_DIMENSIONS,     VIRTKEY, NOINVERT
     "F",            ID_EDIT_FASTEN,         VIRTKEY, NOINVERT
+    "G",            ID_EDIT_MAKEANCHOR,     VIRTKEY, NOINVERT
     "J",            ID_EDIT_JOIN,           VIRTKEY, NOINVERT
-    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
-    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
-    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
+	"K",			ID_EDIT_LOCK,			VIRTKEY, NOINVERT
     "L",            ID_EDIT_SLIDE,          VIRTKEY, NOINVERT
-    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
-    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
-    "U",            ID_EDIT_UNFASTEN,       VIRTKEY, NOINVERT
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
     "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
-    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     "P",            ID_PROPERTIES_PROPERTIES, VIRTKEY, NOINVERT
+    "R",            ID_SIMULATION_RUN,      VIRTKEY, NOINVERT
+    "S",            ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+	"T",			ID_EDIT_SPLIT,			VIRTKEY, NOINVERT
+    "U",            ID_EDIT_UNFASTEN,       VIRTKEY, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+	"V",			ID_VIEW_ANICROP,		VIRTKEY, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    VK_DELETE,      ID_EDIT_DELETESELECTED, VIRTKEY, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
     VK_TAB,         ID_SELECT_NEXT,         VIRTKEY, NOINVERT
     "<",            ID_SIMULATE_BACKWARD,   ASCII,  NOINVERT
     "[",            ID_SIMULATE_BACKWARD,   ASCII,  NOINVERT
     ">",            ID_SIMULATE_FORWARD,    ASCII,  NOINVERT
     "]",            ID_SIMULATE_FORWARD,    ASCII,  NOINVERT
-    "R",            ID_SIMULATION_RUN,      VIRTKEY, NOINVERT
-    "S",            ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
     VK_ESCAPE,      ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
-    "G",            ID_EDIT_MAKEANCHOR,     VIRTKEY, NOINVERT
 END
 
 
@@ -558,8 +562,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,4,2,0
- PRODUCTVERSION 3,4,2,0
+ FILEVERSION 3,4,5,0
+ PRODUCTVERSION 3,4,5,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -575,12 +579,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.4.2.0"
+            VALUE "FileVersion", "3.4.5.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2017 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.4.2.0"
+            VALUE "ProductVersion", "3.4.5.0"
         END
     END
     BLOCK "VarFileInfo"

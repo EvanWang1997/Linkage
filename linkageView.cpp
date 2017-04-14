@@ -113,6 +113,8 @@ class CTempLink : public CLink
 
 	virtual bool GetGearRadii( const GearConnectionList &ConnectionList, std::list<double> &RadiusList ) const
 	{
+		if( &OriginalLink == this )
+			return false;
 		return OriginalLink.GetGearRadii( ConnectionList, RadiusList );
 	}
 };
@@ -1039,59 +1041,88 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 				return m_DrawingRect;
 			}
 
-			int cx = m_DrawingRect.Width();
-			int cy = m_DrawingRect.Height();
+			double cx = m_DrawingRect.Width() / m_DPIScale;
+			double cy = m_DrawingRect.Height() / m_DPIScale;
 
-			int xMargin = (int)( cx * MarginScale );
-			int yMargin = (int)( cy * MarginScale );
+			double xMargin = cx * MarginScale;
+			double yMargin = cy * MarginScale;
 
 			// Some margin because the dimensions are not done well and we can't predict them just yet.
 			cx -= xMargin;
 			cy -= yMargin;
 
-			CFRect Area = GetDocumentArea();
+			cx -= CONNECTORRADIUS * 2;
+			cy -= CONNECTORRADIUS * 2;
+
+			cx -= 1;
+			cy -= 1;
+
+			double cxOriginal = cx;
+			double cyOriginal = cy;
+
+			/*
+			 * Start with a zoom of 1. The document dimensions are the same as the DPI adjusted pixel dimensions.
+			 * Take the dimensioned document area and the non-dimensioned document area and the difference is how
+			 * much room is need around the undimensioned document for the dimensions IF THERE ARE NO DIAGONAL MEASUREMENT LINES.
+			 * The accuracy of the later calculated zoom is tested for cases where diagonal measurement lines have caused
+			 * an innaccurate result.
+			 */
+			m_Zoom = 1.0;
+
+			CFRect NoDimArea = GetDocumentArea( false );
+			NoDimArea.Normalize();
+			CFRect DimArea = GetDocumentArea( m_bShowDimensions );
+			DimArea.Normalize();
+
+			double nodimwidth = NoDimArea.Width();
+			double dimwidth = DimArea.Width();
+			double WidthDiff = dimwidth - nodimwidth;
+
+			// Take drawing rect and shrink it by the difference between the dimensioned and non-dimensioned document. This 
+			// is a good starting point to determining how much room is needed for the dimension lines.
+			cx -= ( DimArea.Width() - NoDimArea.Width() ) * 1;
+			cy -= ( DimArea.Height() - NoDimArea.Height() ) * 1;
+
+			double xRatio = cx / NoDimArea.Width();
+			double yRatio = cy / NoDimArea.Height();
+			double Ratio = min( xRatio, yRatio );
+				
+			m_Zoom = Ratio;
+
+			/*
+			 * Now that there us a zoom level that might work, check to see if the dimensions actual fit.
+			 * it is possible that the dimensioned document now is too big or too small because of diagonal
+			 * measurement lines. Try to find a better fit bassed on this starting zoom level.
+			 */
+
+			cx = cxOriginal;
+			cy = cyOriginal;
+
+			CFRect Area = GetDocumentArea( m_bShowDimensions );
 			Area.Normalize();
+			xRatio = cx / Area.Width();
+			yRatio = cy / Area.Height();
+			Ratio = min( xRatio, yRatio );
 
-			double xScaleChange = cx / Area.Width();
-			double yScaleChange = cy / Area.Height();
-
-			double ScaleValue = min( xScaleChange, yScaleChange );
-
-			// But screen zoom needs to one of the "standard" zoom
-			// levels that a user would see if they just scrolled in and out.
-// 			m_Zoom = pow( ZOOM_AMOUNT, floor( log( ScaleValue ) / log( ZOOM_AMOUNT ) ) );
-
-			m_Zoom = ScaleValue;
-
-			//m_ConnectorRadius
-
-			CFRect NewArea = GetDocumentArea( false );
-			NewArea.Normalize();
-
-			// 15 times is enought to get the chage ratio up to .99995 during testing.
-			for( int Test = 0; Test < 15; ++Test )
+			int Direction = Ratio - m_Zoom >= 0 ? 1 : -1;
+			while( fabs( Ratio - m_Zoom ) > 0.01 )
 			{
-				// Zoom out to make room for dimensions. This is not exact because the zoom affects the dimension line sizes and positions.
-				CFRect BigArea = GetDocumentArea( m_bShowDimensions );
-				BigArea.Normalize();
+				int NewDirection = Ratio - m_Zoom >= 0 ? 1 : -1;
+				if( NewDirection != Direction )
+					break;
+				double Difference = Ratio - m_Zoom;
+				m_Zoom += Difference * 0.5;
 
-				BigArea.left -= Unscale( 1 );
-				BigArea.right += Unscale( 2 );
-				BigArea.top -= Unscale( 1 );
-				BigArea.bottom += Unscale( 2 );
+				Area = GetDocumentArea( m_bShowDimensions );
+				Area.Normalize();
+				xRatio = cx / Area.Width();
+				yRatio = cy / Area.Height();
+				Ratio = min( xRatio, yRatio );
+			}
 
-				BigArea.left -= Unscale( m_ConnectorRadius );
-				BigArea.right += Unscale( m_ConnectorRadius );
-				BigArea.top -= Unscale( m_ConnectorRadius );
-				BigArea.bottom += Unscale( m_ConnectorRadius );
-
-				double xRatio = NewArea.Width() / BigArea.Width();
-				double yRatio = NewArea.Height() / BigArea.Height();
-				double Ratio = max( xRatio, yRatio );
-
-				m_Zoom *= Ratio;
-
-				NewArea = BigArea;
+			if( bForScreen )
+			{
+				m_Zoom = pow( ZOOM_AMOUNT, floor( log( m_Zoom ) / log( ZOOM_AMOUNT ) ) );
 			}
 
 			Area = GetDocumentArea( m_bShowDimensions );
@@ -1439,18 +1470,6 @@ CFRect CLinkageView::GetDocumentArea( bool bWithDimensions, bool bSelectedOnly )
 
 	CFArea DocumentArea = Rect;
 
-	/*
-	 * The following code is almost useful. It does not work for exporting images because
-	 * the scale of the image is determined after the document area is obtained, but the
-	 * code below uses the scale to figure out a new document area. In other words, the
-	 * code cannot use the document area to pick a scale if the scale is needed to get the
-	 * document area!
-	 *
-	 * An alternative might be to use the document area without the dimension lines and then
-	 * increase the image size to allow room for the dimensions to fit. Then the image export
-	 * might be able to use this, as would the printing process.
-	 */
-
 	DocumentArea.Normalize();
 
 	CRenderer NullRenderer( CRenderer::NULL_RENDERER );
@@ -1463,11 +1482,11 @@ CFRect CLinkageView::GetDocumentArea( bool bWithDimensions, bool bSelectedOnly )
 	}
 	else
 	{
-		if( !bSelectedOnly )
-		{
-			double SolidLinkCornerRadius = Unscale( CONNECTORRADIUS + 3 );
-			DocumentArea.InflateRect( SolidLinkCornerRadius, SolidLinkCornerRadius );
+		//double SolidLinkCornerRadius = Unscale( CONNECTORRADIUS + 3 );
+		//DocumentArea.InflateRect( SolidLinkCornerRadius, SolidLinkCornerRadius );
 
+		if( !bSelectedOnly && bWithDimensions )
+		{
 			LinkList* pLinkList = pDoc->GetLinkList();
 			POSITION Position = pLinkList->GetHeadPosition();
 			while( Position != NULL )
@@ -1492,7 +1511,7 @@ CFRect CLinkageView::GetDocumentArea( bool bWithDimensions, bool bSelectedOnly )
 			DocumentArea += DrawGroundDimensions( &NullRenderer, pDoc, m_SelectedViewLayers, 0, true, true );
 		}
 	}
-	DocumentArea.InflateRect( Unscale( m_ConnectorRadius * 2 ), Unscale( m_ConnectorRadius * 2 ) );
+	//DocumentArea.InflateRect( CONNECTORRADIUS, CONNECTORRADIUS );
 	return DocumentArea.GetRect();
 }
 
@@ -2003,7 +2022,7 @@ CTempLink* CLinkageView::GetTemporaryGroundLink( LinkList *pDocLinks, ConnectorL
 		++Anchors;
 	}
 
-	if( Anchors == 0 ) // Empty or non-functioning mechanism.
+	if( Anchors <= 1 ) // Empty or non-functining mechanism, or there's just one anchor which doesn't need a ground link part. 
 		return 0;
 
 	#if 0 // Always include the ground link.
@@ -5133,28 +5152,11 @@ void CLinkageView::OnMenuZoomfit()
 		return;
 	}
 
-	int cx = m_DrawingRect.Width();
-	int cy = m_DrawingRect.Height();
+	CRenderer NullRenderer( CRenderer::NULL_RENDERER );
+    PrepareRenderer( NullRenderer, 0, 0, 0, 1.0, true, 0.0, 1.0, true, false, m_bPrintFullSize, 0 );
 
-	// Some margin because the dimensions are not done well and we can't predict them just yet.
-	cx -= 20;
-	cy -= 20;
-
-	CFRect Area = GetDocumentArea( m_bShowDimensions );
-
-	// Figure out the Unscaling needed once we are at a zoom level of 1.
-	double xScaleChange = cx / fabs( Area.Width() );
-	double yScaleChange = cy / fabs( Area.Height() );
-
-	double Scale = min( xScaleChange, yScaleChange );
-
-	// But screen zoom needs to one of the "standard" zoom
-	// levels that a user would see if they just srolled in and out.
-	m_ScreenZoom = pow( ZOOM_AMOUNT, floor( log( Scale ) / log( ZOOM_AMOUNT ) ) );
-
-	// Center the mechanism.
-	m_ScreenScrollPosition.x = m_ScreenZoom * ( Area.left + fabs( Area.Width() ) / 2 );
-	m_ScreenScrollPosition.y = m_ScreenZoom * -( Area.top + fabs( Area.Height() ) / 2 );
+	m_ScreenZoom = m_Zoom;
+	m_ScreenScrollPosition = m_ScrollPosition;
 
 	SetScrollExtents();
 	InvalidateRect( 0 );
@@ -7907,6 +7909,7 @@ bool CLinkageView::LineProperties( CLink *pLink )
 				if( pSelectedLink != 0 && pSelectedLink->IsSelected() )
 				{
 					pSelectedLink->SetLineSize( Dialog.m_LineSize );
+					pSelectedLink->SetColor( Dialog.m_Color );
 				}
 			}
 		}
