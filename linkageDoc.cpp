@@ -271,7 +271,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 		return false;
 
 	QuickXMLNode *pRootNode = XMLData.GetFirstChild();
-	if( pRootNode == 0 || !pRootNode->IsLink() || pRootNode->GetText() != "linkage2" )
+	if( pRootNode == 0 || !pRootNode->IsElement() || pRootNode->GetText() != "linkage2" )
 		return false;
 
 	m_SelectedConnectors.RemoveAll();
@@ -291,7 +291,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 	 */
 	for( QuickXMLNode *pNode = pRootNode->GetFirstChild(); pNode != 0; pNode = pNode->GetNextSibling() )
 	{
-		if( !pNode->IsLink() )
+		if( !pNode->IsElement() )
 			continue;
 
 		if( pNode->GetText() == "program" )
@@ -325,7 +325,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 	 */
 	for( QuickXMLNode *pNode = pRootNode->GetFirstChild(); pNode != 0; pNode = pNode->GetNextSibling() )
 	{
-		if( !pNode->IsLink() )
+		if( !pNode->IsElement() )
 			continue;
 
 		if( pNode->GetText() == "connector" )
@@ -391,7 +391,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 	 */
 	for( QuickXMLNode *pNode = pRootNode->GetFirstChild(); pNode != 0; pNode = pNode->GetNextSibling() )
 	{
-		if( !pNode->IsLink() )
+		if( !pNode->IsElement() )
 			continue;
 
 		if( pNode->GetText() == "Link" || pNode->GetText() == "element" )
@@ -475,7 +475,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 
 	for( QuickXMLNode *pNode = pRootNode->GetFirstChild(); pNode != 0; pNode = pNode->GetNextSibling() )
 	{
-		if( !pNode->IsLink() )
+		if( !pNode->IsElement() )
 			continue;
 
 		if( pNode->GetText() == "Link" || pNode->GetText() == "element" )
@@ -512,7 +512,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 	 */
 	for( QuickXMLNode *pNode = pRootNode->GetFirstChild(); pNode != 0; pNode = pNode->GetNextSibling() )
 	{
-		if( !pNode->IsLink() )
+		if( !pNode->IsElement() )
 			continue;
 
 		if( pNode->GetText() == "connector" )
@@ -575,7 +575,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 
 	for( QuickXMLNode *pNode = pRootNode->GetFirstChild(); pNode != 0; pNode = pNode->GetNextSibling() )
 	{
-		if( !pNode->IsLink() )
+		if( !pNode->IsElement() )
 			continue;
 
 		if( pNode->GetText() == "ratios" )
@@ -635,11 +635,21 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 
 	if( pSelectedNode != 0 && bUseSavedSelection && !bSelectAll )
 	{
+		// Make a new selected element list that lets the original list be processed back to front.
+		std::list<QuickXMLNode*> SelectedElementList; 
+
 		// Select connectors based on the <selected> elements so that the selection is in the same order as when originally selected.
 		for( QuickXMLNode *pNode = pSelectedNode->GetFirstChild(); pNode != 0; pNode = pNode->GetNextSibling() )
 		{
-			if( !pNode->IsLink() )
+			if( !pNode->IsElement() )
 				continue;
+
+			SelectedElementList.push_front( pNode );
+		}
+
+		for( std::list<QuickXMLNode*>::iterator it = SelectedElementList.begin(); it != SelectedElementList.end(); ++it )
+		{
+			QuickXMLNode* pNode = *it;
 
 			Value = pNode->GetAttribute( "id" );
 			int TestIdentifier = atoi( Value ) + OffsetLinkIdentifer;

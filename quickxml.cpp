@@ -11,15 +11,15 @@ class QuickXMLNodeImplementation
 	class QuickXMLNode *m_pNext;
 	CString m_NameOrData;
 	CString m_Attributes;
-	bool m_bLink;
+	bool m_bElement;
 };
 
-QuickXMLNode::QuickXMLNode( bool bLink )
+QuickXMLNode::QuickXMLNode( bool bElement )
 {
 	m_pImplementation = new QuickXMLNodeImplementation;
 	if( m_pImplementation != 0 )
 	{
-		m_pImplementation->m_bLink = bLink;
+		m_pImplementation->m_bElement = bElement;
 		m_pImplementation->m_pFirstChild = 0;
 		m_pImplementation->m_pNext = 0;
 	}
@@ -78,10 +78,10 @@ const char *QuickXMLNode::Parse( const char *pText, bool bExpectEndTag )
 		if( *pTagData == '\0' )
 			return 0;
 
-		const char *pLinkData = pText + strspn( pText, " \t\r\n" );
-		if( pLinkData != pTag )
+		const char *pNodeData = pText + strspn( pText, " \t\r\n" );
+		if( pNodeData != pTag )
 		{
-			// Save the data as a data Link
+			// Save the data as a data node
 			QuickXMLNode *pNewNode = new QuickXMLNode( false );
 			pNewNode->m_pImplementation->m_NameOrData.Append( pText, pTag - pText );
 			if( pLastChild == 0 )
@@ -107,7 +107,7 @@ const char *QuickXMLNode::Parse( const char *pText, bool bExpectEndTag )
 		}
 		else
 		{
-			// Get the Link name
+			// Get the node name
 			++pTag;
 			const char * pEnd = pTag + strcspn( pTag, "><" );
 			if( *pEnd == '\0' || *pEnd == '<' )
@@ -123,7 +123,7 @@ const char *QuickXMLNode::Parse( const char *pText, bool bExpectEndTag )
 			CString Tag;
 
 			// Done. Return pointer after this end tag.
-			// Now parse the new Link.
+			// Now parse the new node.
 			QuickXMLNode *pNewNode = new QuickXMLNode( true );
 			pNewNode->m_pImplementation->m_NameOrData.Append( pTag, pNameEnd - pTag );
 			if( pNameEnd != pEnd )
@@ -172,7 +172,7 @@ const char* QuickXMLNode::FindChildDataByName( const char *pName )
 	pNode = pNode->m_pImplementation->m_pFirstChild;
 	while( pNode != 0 )
 	{
-		if( !pNode->m_pImplementation->m_bLink )
+		if( !pNode->m_pImplementation->m_bElement )
 			return pNode->m_pImplementation->m_NameOrData;
 		pNode = pNode->m_pImplementation->m_pNext;
 	}
@@ -187,12 +187,12 @@ class QuickXMLNode* QuickXMLNode::GetFirstChild( void )
 	return m_pImplementation->m_pFirstChild;
 }
 
-bool QuickXMLNode::IsLink( void )
+bool QuickXMLNode::IsElement( void )
 {
 	if( m_pImplementation == 0 )
 		return false;
 
-	return m_pImplementation->m_bLink;
+	return m_pImplementation->m_bElement;
 }
 
 const CString & QuickXMLNode::GetText( void )

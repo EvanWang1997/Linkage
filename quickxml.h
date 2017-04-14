@@ -3,7 +3,7 @@
 class QuickXMLNode
 {
 	public:
-	QuickXMLNode( bool bLink = true );
+	QuickXMLNode( bool bElement = true );
 	~QuickXMLNode();
 	
 	bool Parse( const char *pText );
@@ -12,7 +12,7 @@ class QuickXMLNode
 	const char* FindChildDataByName( const char *pName );
 	class QuickXMLNode* GetFirstChild( void );
 	class QuickXMLNode* GetNextSibling( void );
-	bool IsLink( void );
+	bool IsElement( void );
 	const CString & GetText( void );
 	const CString & GetAttribute( const char *pAttribute );
 	
