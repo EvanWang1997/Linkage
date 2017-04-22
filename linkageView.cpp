@@ -345,6 +345,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 
 	ON_WM_RBUTTONDOWN()
 	ON_WM_RBUTTONUP()
+	ON_WM_MBUTTONDOWN()
+	ON_WM_MBUTTONUP()
 	ON_WM_MOUSEWHEEL()
 	ON_COMMAND(ID_VIEW_ZOOMIN, &CLinkageView::OnViewZoomin)
 	ON_COMMAND(ID_VIEW_ZOOMOUT, &CLinkageView::OnViewZoomout)
@@ -5022,6 +5024,18 @@ void CLinkageView::OnRButtonDown(UINT nFlags, CPoint MousePoint)
 	m_bMouseMovedEnough	= false;
 }
 
+void CLinkageView::OnMButtonDown(UINT nFlags, CPoint MousePoint)
+{
+	CFPoint point = AdjustClientAreaPoint( MousePoint );
+
+	SetCapture();
+	m_bSuperHighlight = 0;
+	m_MouseAction = ACTION_PAN;
+	m_PreviousDragPoint = point;
+	m_DragStartPoint = point;
+	m_bMouseMovedEnough	= false;
+}
+
 void CLinkageView::OnRButtonUp(UINT nFlags, CPoint MousePoint)
 {
 	ReleaseCapture();
@@ -5056,6 +5070,16 @@ void CLinkageView::OnRButtonUp(UINT nFlags, CPoint MousePoint)
 			}
 		}
 	}
+}
+
+void CLinkageView::OnMButtonUp(UINT nFlags, CPoint MousePoint)
+{
+	ReleaseCapture();
+	m_MouseAction = ACTION_NONE;
+	SetScrollExtents();
+
+	if( m_bSimulating )
+		return;
 }
 
 BOOL CLinkageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint MousePoint)
