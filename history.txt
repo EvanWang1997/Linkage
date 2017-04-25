@@ -332,6 +332,7 @@ Received some feature requests recently. These are some NOT YET ADDED:
 4/13/2017 5:56 PM: Improved the algorithm for sizing to fit (on screen, printer or image).
 4/14/2017 2:22 PM: Fixed bug where the undo feature selected element in the opposit order from how they were originally selected, thus making feature that rely onthe order work backwards.
 4/14/2017 2:22 PM: Fixed bug where link-to-gear fastening was not maintained doing a copy-paste.
+4/25/2017 2:00 PM: Added oscillation limit angle to the rotating inputs to let them oscillate like a servo might oscillate.
 
 
 
