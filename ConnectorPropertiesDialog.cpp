@@ -29,6 +29,7 @@ CConnectorPropertiesDialog::CConnectorPropertiesDialog( CWnd* pParent /*=NULL*/ 
 	, m_bSlideRadiusPath(FALSE)
 
 , m_FastenedTo( _T( "" ) )
+, m_LimitAngle(0)
 {
 	m_bAnchor = false;
 	m_bInput = false;
@@ -42,81 +43,84 @@ CConnectorPropertiesDialog::~CConnectorPropertiesDialog()
 
 void CConnectorPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CMyDialog::DoDataExchange( pDX );
-	DDX_Text( pDX, IDC_EDIT1, m_RPM );
-	DDX_Control( pDX, IDC_EDIT1, m_RPMControl );
-	DDX_Control( pDX, IDC_RADIO5, m_RotatingAnchorControl );
-	DDX_Control( pDX, IDC_CHECK2, m_AlwaysManualCheckbox );
-	DDX_Control( pDX, IDC_CHECK1, m_DrawCheckControl );
-	DDX_Control( pDX, IDC_RADIO1, m_ConnectorControl );
-	DDX_Text( pDX, IDC_EDIT3, m_Name );
-	DDX_Control( pDX, IDC_CHECK4, m_SlideRadiusCheck );
-	DDX_Check( pDX, IDC_CHECK4, m_bSlideRadiusPath );
-	DDX_Control( pDX, IDC_EDIT7, m_SlideRadiusControl );
-	DDX_MyDoubleText( pDX, IDC_EDIT7, m_SlideRadius, 4 );
-	DDX_Control( pDX, IDC_SLIDERADIUSMINPROMPT, m_SlideRadiusMinPrompt );
-	DDX_Control( pDX, IDC_SLIDRADIUSMINVALUE, m_SlideRadiusMinControl );
-	DDX_MyDoubleText( pDX, IDC_SLIDRADIUSMINVALUE, m_MinimumSlideRadius, 4 );
-	DDX_Control( pDX, IDC_EDIT2, m_xControl );
-	DDX_Control( pDX, IDC_EDIT4, m_yControl );
-	DDX_Control( pDX, IDC_FASTENEDTO, m_FastenedToControl );
-	DDX_Text( pDX, IDC_FASTENEDTO, m_FastenedTo );
-	DDX_Control( pDX, IDC_COLOR, m_ColorControl );
+	CMyDialog::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT1, m_RPM);
+	DDX_Control(pDX, IDC_EDIT1, m_RPMControl);
+	DDX_Control(pDX, IDC_RADIO5, m_RotatingAnchorControl);
+	DDX_Control(pDX, IDC_CHECK2, m_AlwaysManualCheckbox);
+	DDX_Control(pDX, IDC_CHECK1, m_DrawCheckControl);
+	DDX_Control(pDX, IDC_RADIO1, m_ConnectorControl);
+	DDX_Text(pDX, IDC_EDIT3, m_Name);
+	DDX_Control(pDX, IDC_CHECK4, m_SlideRadiusCheck);
+	DDX_Check(pDX, IDC_CHECK4, m_bSlideRadiusPath);
+	DDX_Control(pDX, IDC_EDIT7, m_SlideRadiusControl);
+	DDX_MyDoubleText(pDX, IDC_EDIT7, m_SlideRadius, 4);
+	DDX_Control(pDX, IDC_SLIDERADIUSMINPROMPT, m_SlideRadiusMinPrompt);
+	DDX_Control(pDX, IDC_SLIDRADIUSMINVALUE, m_SlideRadiusMinControl);
+	DDX_MyDoubleText(pDX, IDC_SLIDRADIUSMINVALUE, m_MinimumSlideRadius, 4);
+	DDX_Control(pDX, IDC_EDIT2, m_xControl);
+	DDX_Control(pDX, IDC_EDIT4, m_yControl);
+	DDX_Control(pDX, IDC_FASTENEDTO, m_FastenedToControl);
+	DDX_Text(pDX, IDC_FASTENEDTO, m_FastenedTo);
+	DDX_Control(pDX, IDC_COLOR, m_ColorControl);
+	DDX_Control(pDX, IDC_EDIT8, m_LimitControl);
+	DDX_Control(pDX, IDC_LIMITPROMPT, m_LimitPrompt);
 
 	int CheckValue;
-	if( pDX->m_bSaveAndValidate )
+	if (pDX->m_bSaveAndValidate)
 	{
-		DDX_Radio( pDX, IDC_RADIO1, m_Property );
-		DDX_Check( pDX, IDC_CHECK1, CheckValue );
+		DDX_Radio(pDX, IDC_RADIO1, m_Property);
+		DDX_Check(pDX, IDC_CHECK1, CheckValue);
 		m_bDrawing = CheckValue != 0;
-		DDX_Check( pDX, IDC_CHECK2, CheckValue );
+		DDX_Check(pDX, IDC_CHECK2, CheckValue);
 		m_bAlwaysManual = CheckValue != 0;
 
 		m_bAnchor = m_Property == 1 || m_Property == 2;
 		m_bInput = m_Property == 2;
 
-		if( !m_bSlideRadiusPath )
+		if (!m_bSlideRadiusPath)
 			m_SlideRadius = 0;
 
-		if( !m_bIsSlider )
+		if (!m_bIsSlider)
 		{
-			DDX_MyDoubleText( pDX, IDC_EDIT2, m_xPosition, 4 );
-			DDX_MyDoubleText( pDX, IDC_EDIT4, m_yPosition, 4 );
+			DDX_MyDoubleText(pDX, IDC_EDIT2, m_xPosition, 4);
+			DDX_MyDoubleText(pDX, IDC_EDIT4, m_yPosition, 4);
 		}
 	}
 	else
 	{
-		DDX_MyDoubleText( pDX, IDC_EDIT2, m_xPosition, 4 );
-		DDX_MyDoubleText( pDX, IDC_EDIT4, m_yPosition, 4 );
+		DDX_MyDoubleText(pDX, IDC_EDIT2, m_xPosition, 4);
+		DDX_MyDoubleText(pDX, IDC_EDIT4, m_yPosition, 4);
 
 		CheckValue = m_bDrawing ? 1 : 0;
-		DDX_Check( pDX, IDC_CHECK1, CheckValue );
+		DDX_Check(pDX, IDC_CHECK1, CheckValue);
 		CheckValue = m_bAlwaysManual ? 1 : 0;
-		DDX_Check( pDX, IDC_CHECK2, CheckValue );
+		DDX_Check(pDX, IDC_CHECK2, CheckValue);
 
 		m_Property = 0;
-		if( m_bAnchor && m_bInput )
+		if (m_bAnchor && m_bInput)
 			m_Property = 2;
-		else if( m_bAnchor )
+		else if (m_bAnchor)
 			m_Property = 1;
 		else
 			m_Property = 0;
-		DDX_Radio( pDX, IDC_RADIO1, m_Property );
+		DDX_Radio(pDX, IDC_RADIO1, m_Property);
 
-		m_SlideRadiusCheck.EnableWindow( m_bIsSlider );
-		m_SlideRadiusCheck.SetCheck( m_bIsSlider && m_SlideRadius != 0 );
-		m_SlideRadiusMinPrompt.EnableWindow( ( m_bIsSlider && m_SlideRadius != 0 ) ? TRUE : FALSE );
-		m_SlideRadiusMinControl.EnableWindow( ( m_bIsSlider && m_SlideRadius != 0 ) ? TRUE : FALSE );
-		m_xControl.EnableWindow( !m_bIsSlider );
-		m_yControl.EnableWindow( !m_bIsSlider );
+		m_SlideRadiusCheck.EnableWindow(m_bIsSlider);
+		m_SlideRadiusCheck.SetCheck(m_bIsSlider && m_SlideRadius != 0);
+		m_SlideRadiusMinPrompt.EnableWindow((m_bIsSlider && m_SlideRadius != 0) ? TRUE : FALSE);
+		m_SlideRadiusMinControl.EnableWindow((m_bIsSlider && m_SlideRadius != 0) ? TRUE : FALSE);
+		m_xControl.EnableWindow(!m_bIsSlider);
+		m_yControl.EnableWindow(!m_bIsSlider);
 	}
 	OnBnClickedRadio();
 	OnBnClickedCheck4();
 
-	if( pDX->m_bSaveAndValidate )
+	if (pDX->m_bSaveAndValidate)
 		m_Color = m_ColorControl.GetColor();
 	else
-		m_ColorControl.SetColor( m_Color );
+		m_ColorControl.SetColor(m_Color);
+	DDX_Text(pDX, IDC_EDIT8, m_LimitAngle);
 }
 
 BEGIN_MESSAGE_MAP(CConnectorPropertiesDialog, CMyDialog)
@@ -134,6 +138,8 @@ END_MESSAGE_MAP()
 void CConnectorPropertiesDialog::OnBnClickedRadio()
 {
 	m_RPMControl.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_LimitControl.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_LimitPrompt.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_AlwaysManualCheckbox.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_DrawCheckControl.EnableWindow( m_ConnectorControl.GetCheck() != 0 ? TRUE : FALSE );
 }

@@ -44,6 +44,8 @@ public:
 	void MovePoint( double x, double y ) { m_TempPoint.x = x; m_TempPoint.y = y; }
 	void MakePermanent( void );
 	void SetRPM( double Value ) { m_RPM = Value; }
+	void SetLimitAngle( double Angle ) { m_LimitAngle = Angle; }
+	double GetLimitAngle( void ) { return m_LimitAngle; }
 	void SetTempFixed( bool bSet ) { m_bTempFixed = bSet; }
 	void SetRotationAngle( double Value ) { m_TempRotationAngle = Value; }
 	void IncrementRotationAngle( double Change );
@@ -128,6 +130,7 @@ private:
 	double m_OriginalDrawCircleRadius;
 	double m_SlideRadius;
 	double m_OriginalSlideRadius;
+	double m_LimitAngle;
 
 	static const int MAX_DRAWING_POINTS = 600;
 	CFPoint m_DrawingPoints[MAX_DRAWING_POINTS];

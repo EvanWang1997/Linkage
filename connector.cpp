@@ -33,6 +33,7 @@ void CConnector::Reset( void )
 	m_bDrawingConnector = false;
 	m_bAlwaysManual = false;
 	m_RPM = 0;
+	m_LimitAngle = 0;
 	m_StartPoint = 0;
 	m_PointCount = 0;
 	m_DrawingPointCounter = 9999;
@@ -311,6 +312,7 @@ CConnector::CConnector( const CConnector &ExistingConnector ) : CElement( Existi
 	m_OriginalPoint = ExistingConnector.m_OriginalPoint;
 	m_Identifier = ExistingConnector.m_Identifier;
 	m_RPM = ExistingConnector.m_RPM;
+	m_LimitAngle = ExistingConnector.m_LimitAngle;
 	m_bInput = ExistingConnector.m_bInput;
 	m_bAnchor = ExistingConnector.m_bAnchor;
 	m_bSelected = ExistingConnector.m_bSelected;

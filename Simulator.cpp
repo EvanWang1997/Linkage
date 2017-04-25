@@ -269,7 +269,19 @@ class CSimulatorImplementation
 
 						if( !pConnector->IsAlwaysManual() )
 						{
-							pConnector->SetRotationAngle( ( ( m_SimulationStep * INTERMEDIATE_STEPS ) - ( IntermediateStep * Direction ) ) * ( -( pConnector->GetRPM() * 0.2 ) / INTERMEDIATE_STEPS ) );
+							double RotationAngle = ( ( m_SimulationStep * INTERMEDIATE_STEPS ) - ( IntermediateStep * Direction ) ) * ( -( pConnector->GetRPM() * 0.2 ) / INTERMEDIATE_STEPS );
+							if( pConnector->GetLimitAngle() > 0 )
+							{
+								int Direction = RotationAngle >= 0 ? 1 : -1;
+								RotationAngle = fabs( RotationAngle );
+								double Limit = pConnector->GetLimitAngle() * 2;
+								int Oscillations = abs( (int)( RotationAngle / Limit ) );
+								RotationAngle -= Oscillations * Limit;
+								if( RotationAngle > pConnector->GetLimitAngle() )
+									RotationAngle = pConnector->GetLimitAngle() - ( RotationAngle - pConnector->GetLimitAngle() );
+								RotationAngle *= Direction;
+							}
+							pConnector->SetRotationAngle( RotationAngle );
 							pConnector->MakeAnglePermenant();
 
 						}

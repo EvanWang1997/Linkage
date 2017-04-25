@@ -5673,7 +5673,21 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 		if( pConnector->IsInput() )
 		{
 			double Radius = ( m_ConnectorRadius + UnscaledUnits( 2 ) );
+			double LimitRadius = ( m_ConnectorRadius + UnscaledUnits( 4 ) );
 			pRenderer->Arc( Point.x - Radius, Point.y + AdjustYCoordinate( Radius ), Point.x + Radius, Point.y - AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ) );
+
+			if( pConnector->GetLimitAngle() > 0 )
+			{
+				CFPoint Start( Point.x, Point.y + AdjustYCoordinate( LimitRadius ) );
+				CFPoint End( Point.x, Point.y + AdjustYCoordinate( LimitRadius ) );
+				if( pConnector->GetRPM() < 0 )
+					End.RotateAround( Point, -pConnector->GetLimitAngle() );
+				else
+					Start.RotateAround( Point, pConnector->GetLimitAngle() );
+
+				CFArc LimitArc( Point, LimitRadius, Start, End );
+				pRenderer->Arc( LimitArc );
+			}
 
 			// Draw a small line to show rotation angle.
 			CFPoint StartPoint( Point.x, Point.y + AdjustYCoordinate( m_ConnectorRadius ) );
@@ -7677,6 +7691,7 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 
 	CConnectorPropertiesDialog Dialog;
 	Dialog.m_RPM = pConnector->GetRPM();
+	Dialog.m_LimitAngle = fabs( pConnector->GetLimitAngle() );
 	Dialog.m_bAnchor = pConnector->IsAnchor();
 	Dialog.m_bInput = pConnector->IsInput();
 	Dialog.m_bDrawing = pConnector->IsDrawing();
@@ -7706,6 +7721,7 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 		pDoc->PushUndo();
 
 		pConnector->SetRPM( Dialog.m_RPM );
+		pConnector->SetLimitAngle( fabs( Dialog.m_LimitAngle ) );
 		bool bNoLongerAnAnchor = pConnector->IsAnchor() && !Dialog.m_bAnchor;
 		pConnector->SetAsAnchor( Dialog.m_bAnchor );
 		pConnector->SetAsInput( Dialog.m_bInput );

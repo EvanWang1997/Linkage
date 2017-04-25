@@ -26,6 +26,7 @@
 #define IDR_POPUP_EDIT                  152
 #define IDC_EDIT1                       1002
 #define IDC_EDIT7                       1003
+#define IDC_EDIT8                       1004
 #define IDC_RADIO1                      1005
 #define IDC_RADIO2                      1006
 #define IDC_RADIO3                      1007
@@ -506,6 +507,7 @@
 #define IDC_PROMPT                      8006
 #define IDC_PROMPT1                     8007
 #define IDC_PROMPT2                     8008
+#define IDC_LIMITPROMPT                 8009
 
 // Next default values for new objects
 // 
@@ -513,7 +515,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        6011
 #define _APS_NEXT_COMMAND_VALUE         7004
-#define _APS_NEXT_CONTROL_VALUE         8009
+#define _APS_NEXT_CONTROL_VALUE         8010
 #define _APS_NEXT_SYMED_VALUE           9000
 #endif
 #endif

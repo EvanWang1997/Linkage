@@ -63,4 +63,7 @@ public:
 	CNullableColor m_Color;
 	afx_msg void OnStnClickedColor();
 	CColorStatic m_ColorControl;
+	double m_LimitAngle;
+	CEdit m_LimitControl;
+	CStatic m_LimitPrompt;
 };
