@@ -399,6 +399,9 @@ bool GetTangents( const CFCircle &Circle1, const CFCircle &Circle2, CFLine &Resu
 
 double GetClosestAngle( double OldAngle, double NewAngle );
 
+double OscillatedAngle( double TotalAngle, double OscillationLimit );
+double OscillatedDistance( double TotalDistance, double OscillationLimit );
+
 #endif
 
 

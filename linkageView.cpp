@@ -3370,8 +3370,10 @@ void CLinkageView::SaveVideoFrame( CRenderer *pRenderer, CRect &CaptureRect )
 
 	if( m_pVideoBitmapQueue == 0 && StartVideoThread() )
 	{
-		m_pVideoBitmapQueue = pVideoBitmap;
-		SetEvent( m_hVideoFrameEvent );
+		m_pAvi->AppendNewFrame( pVideoBitmap, 1 );
+		delete pVideoBitmap;
+		//m_pVideoBitmapQueue = pVideoBitmap;
+		//SetEvent( m_hVideoFrameEvent );
 	}
 	else
 		delete pVideoBitmap;
@@ -5676,8 +5678,11 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 			double LimitRadius = ( m_ConnectorRadius + UnscaledUnits( 4 ) );
 			pRenderer->Arc( Point.x - Radius, Point.y + AdjustYCoordinate( Radius ), Point.x + Radius, Point.y - AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ), Point.x, Point.y + AdjustYCoordinate( Radius ) );
 
+			double MarkingAngle = 0.0;
 			if( pConnector->GetLimitAngle() > 0 )
 			{
+				MarkingAngle = OscillatedAngle( pConnector->GetStartOffset() * pConnector->GetDirection(), pConnector->GetLimitAngle() );
+
 				CFPoint Start( Point.x, Point.y + AdjustYCoordinate( LimitRadius ) );
 				CFPoint End( Point.x, Point.y + AdjustYCoordinate( LimitRadius ) );
 				if( pConnector->GetRPM() < 0 )
@@ -5692,8 +5697,8 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 			// Draw a small line to show rotation angle.
 			CFPoint StartPoint( Point.x, Point.y + AdjustYCoordinate( m_ConnectorRadius ) );
 			CFPoint EndPoint( Point.x, Point.y + AdjustYCoordinate( m_ConnectorRadius + UnscaledUnits( 2 ) ) );
-			StartPoint.RotateAround( Point, -pConnector->GetRotationAngle() );
-			EndPoint.RotateAround( Point, -pConnector->GetRotationAngle() );
+			StartPoint.RotateAround( Point, -( pConnector->GetRotationAngle() + MarkingAngle ) );
+			EndPoint.RotateAround( Point, -( pConnector->GetRotationAngle() + MarkingAngle ) );
 			pRenderer->MoveTo( StartPoint );
 			pRenderer->LineTo( EndPoint );
 		}
@@ -6061,7 +6066,6 @@ void CLinkageView::DrawActuator( CRenderer* pRenderer, unsigned int OnLayers, CL
 	if( Offset > pLink->GetStroke() )
 		Offset = pLink->GetStroke() - ( Offset - pLink->GetStroke() );
 
-	
 	Line.ReverseDirection();
 	if( pLink->GetCPM() >= 0 )
 		Line.SetDistance( Line.GetDistance() - pLink->GetExtendedDistance() );
@@ -7700,6 +7704,7 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 	Dialog.m_yPosition = pConnector->GetPoint().y * DocumentScale;
 	Dialog.m_bIsSlider = pConnector->IsSlider();
 	Dialog.m_SlideRadius = pConnector->GetSlideRadius() * DocumentScale;
+	Dialog.m_StartOffset = fabs( pConnector->GetStartOffset() );
 	Dialog.m_Name = pConnector->GetName();
 	Dialog.m_MinimumSlideRadius = 0;
 	if( pConnector->GetFastenedTo() != 0 && pConnector->GetFastenedTo()->GetElement() != 0 )
@@ -7729,6 +7734,7 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 		pConnector->SetAlwaysManual( Dialog.m_bAlwaysManual );
 		pConnector->SetName( Dialog.m_Name );
 		pConnector->SetColor( Dialog.m_Color );
+		pConnector->SetStartOffset( fabs( fmod( Dialog.m_StartOffset, pConnector->GetLimitAngle() * 2 ) ) );
 
 		if( Dialog.m_xPosition != pConnector->GetPoint().x ||
 		    Dialog.m_yPosition != pConnector->GetPoint().y )

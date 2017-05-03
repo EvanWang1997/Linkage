@@ -352,6 +352,10 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			pConnector->SetDrawCircleRadius( atof( Value ) );
 			Value = pNode->GetAttribute( "rpm" );
 			pConnector->SetRPM( atof( Value ) );
+			Value = pNode->GetAttribute( "limitangle" );
+			pConnector->SetLimitAngle( atof( Value ) );
+			Value = pNode->GetAttribute( "startoffset" );
+			pConnector->SetStartOffset( atof( Value ) );
 			Value = pNode->GetAttribute( "slideradius" );
 			pConnector->SetSlideRadius( atof( Value ) );
 			Value = pNode->GetAttribute( "id" );
@@ -455,6 +459,8 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			pLink->SetCPM( Value.IsEmpty() ? DEFAULT_RPM : atof( Value ) );
 			Value = pNode->GetAttribute( "alwaysmanual" );
 			pLink->SetAlwaysManual( Value == "true" );
+			Value = pNode->GetAttribute( "startoffset" );
+			pLink->SetStartOffset( atof( Value ) );
 			Value = pNode->GetAttribute( "gear" );
 			pLink->SetGear( Value == "true" );
 			Value = pNode->GetAttribute( "color" );
@@ -819,6 +825,8 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 		AppendXMLAttribute( TempString, "draw", pConnector->IsDrawing(), pConnector->IsDrawing() );
 		AppendXMLAttribute( TempString, "measurementelement", pConnector->IsMeasurementElement(), pConnector->IsMeasurementElement() );
 		AppendXMLAttribute( TempString, "rpm", pConnector->GetRPM(), pConnector->IsInput() );
+		AppendXMLAttribute( TempString, "limitangle", pConnector->GetLimitAngle(), pConnector->GetLimitAngle() > 0 && pConnector->IsInput() );
+		AppendXMLAttribute( TempString, "startoffset", pConnector->GetStartOffset(), pConnector->GetLimitAngle() > 0 && pConnector->IsInput() );
 		AppendXMLAttribute( TempString, "slider", pConnector->IsSlider(), pConnector->IsSlider() );
 		AppendXMLAttribute( TempString, "alwaysmanual", pConnector->IsAlwaysManual(), pConnector->IsAlwaysManual() );
 		AppendXMLAttribute( TempString, "drawcircle", pConnector->GetDrawCircleRadius(), pConnector->GetDrawCircleRadius() > 0 );
@@ -886,6 +894,7 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 		AppendXMLAttribute( TempString, "solid", pLink->IsSolid(), pLink->IsSolid() );
 		AppendXMLAttribute( TempString, "locked", pLink->IsLocked(), pLink->IsLocked() );
 		AppendXMLAttribute( TempString, "actuator", pLink->IsActuator(), pLink->IsActuator() );
+		AppendXMLAttribute( TempString, "startoffset", pLink->GetStartOffset(), pLink->IsActuator() );
 		AppendXMLAttribute( TempString, "alwaysmanual", pLink->IsAlwaysManual(), pLink->IsAlwaysManual() );
 		AppendXMLAttribute( TempString, "measurementelement", pLink->IsMeasurementElement(), pLink->IsMeasurementElement() );
 		AppendXMLAttribute( TempString, "throw", pLink->GetStroke(), pLink->IsActuator() );
@@ -2197,7 +2206,13 @@ void CLinkageDoc::Reset( bool bClearMotionPath, bool KeepCurrentPositions )
 			continue;
 
 		if( KeepCurrentPositions )
+		{
 			pConnector->SetPoint( pConnector->GetPoint() );
+			if( pConnector->GetLimitAngle() > 0 )
+				pConnector->SetStartOffset( fmod( fabs( pConnector->GetRotationAngle() ), pConnector->GetLimitAngle() * 2 ) );
+			else
+				pConnector->SetStartOffset( 0.0 );
+		}
 		pConnector->Reset( bClearMotionPath );
 	}
 
@@ -2208,6 +2223,8 @@ void CLinkageDoc::Reset( bool bClearMotionPath, bool KeepCurrentPositions )
 		if( pLink == 0 )
 			continue;
 
+		if( KeepCurrentPositions && pLink->IsActuator() && pLink->GetStroke() != 0 )
+			pLink->SetStartOffset( fmod( pLink->GetExtendedDistance(), pLink->GetStroke() * 2 ) );
 		pLink->Reset();
 	}
 

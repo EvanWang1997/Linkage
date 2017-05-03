@@ -272,14 +272,8 @@ class CSimulatorImplementation
 							double RotationAngle = ( ( m_SimulationStep * INTERMEDIATE_STEPS ) - ( IntermediateStep * Direction ) ) * ( -( pConnector->GetRPM() * 0.2 ) / INTERMEDIATE_STEPS );
 							if( pConnector->GetLimitAngle() > 0 )
 							{
-								int Direction = RotationAngle >= 0 ? 1 : -1;
-								RotationAngle = fabs( RotationAngle );
-								double Limit = pConnector->GetLimitAngle() * 2;
-								int Oscillations = abs( (int)( RotationAngle / Limit ) );
-								RotationAngle -= Oscillations * Limit;
-								if( RotationAngle > pConnector->GetLimitAngle() )
-									RotationAngle = pConnector->GetLimitAngle() - ( RotationAngle - pConnector->GetLimitAngle() );
-								RotationAngle *= Direction;
+								RotationAngle = OscillatedAngle( RotationAngle + ( pConnector->GetStartOffset() * pConnector->GetDirection() ), pConnector->GetLimitAngle() );
+								RotationAngle -= pConnector->GetStartOffset() * pConnector->GetDirection();
 							}
 							pConnector->SetRotationAngle( RotationAngle );
 							pConnector->MakeAnglePermenant();
@@ -350,6 +344,7 @@ class CSimulatorImplementation
 						double RealExtension = pLink->GetExtendedDistance();
 						if( pLink->GetCPM() < 0 )
 							RealExtension = pLink->GetStroke() + RealExtension;
+						//RealExtension += pLink->GetStartOffset();
 						double ActuatorDifference = DesiredExtension - RealExtension;
 						double MaxDistance = pLink->GetStroke() * fabs( pLink->GetCPM() ) / 900.0;
 						if( ActuatorDifference > MaxDistance )

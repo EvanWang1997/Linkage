@@ -28,6 +28,7 @@ void CConnector::Reset( void )
 	m_TempRotationAngle = 0.0;
 	m_Identifier = 0;
 	m_bInput = false;
+	m_InputStartOffset = 0.0;
 	m_bAnchor = false;
 	m_bTempFixed = false;
 	m_bDrawingConnector = false;
@@ -323,6 +324,7 @@ CConnector::CConnector( const CConnector &ExistingConnector ) : CElement( Existi
 	m_RotationAngle = ExistingConnector.m_RotationAngle;
 	m_OriginalDrawCircleRadius = ExistingConnector.m_OriginalDrawCircleRadius;
 	m_OriginalSlideRadius = ExistingConnector.m_OriginalSlideRadius;
+	m_InputStartOffset = ExistingConnector.m_InputStartOffset;
 //	m_pSlideLimits[0] = ExistingConnector.m_pSlideLimits[0];
 //	m_pSlideLimits[1] = ExistingConnector.m_pSlideLimits[1];
 

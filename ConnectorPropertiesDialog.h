@@ -66,4 +66,7 @@ public:
 	double m_LimitAngle;
 	CEdit m_LimitControl;
 	CStatic m_LimitPrompt;
+	CEdit m_StartOffsetControl;
+	CStatic m_StartOffsetPrompt;
+	double m_StartOffset;
 };

@@ -27,9 +27,9 @@ CConnectorPropertiesDialog::CConnectorPropertiesDialog( CWnd* pParent /*=NULL*/ 
 	, m_GalleryControl( ID_POPUP_GALLERY, IDB_INSERT_POPUP_GALLERY, 48 )
 	, m_SlideRadius(0)
 	, m_bSlideRadiusPath(FALSE)
-
-, m_FastenedTo( _T( "" ) )
-, m_LimitAngle(0)
+	, m_FastenedTo( _T( "" ) )
+	, m_LimitAngle(0)
+	, m_StartOffset(0)
 {
 	m_bAnchor = false;
 	m_bInput = false;
@@ -65,6 +65,10 @@ void CConnectorPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COLOR, m_ColorControl);
 	DDX_Control(pDX, IDC_EDIT8, m_LimitControl);
 	DDX_Control(pDX, IDC_LIMITPROMPT, m_LimitPrompt);
+	DDX_Text(pDX, IDC_EDIT8, m_LimitAngle);
+	DDX_Control(pDX, IDC_EDIT9, m_StartOffsetControl);
+	DDX_Control(pDX, IDC_LIMITPROMPT2, m_StartOffsetPrompt);
+	DDX_Text(pDX, IDC_EDIT9, m_StartOffset);
 
 	int CheckValue;
 	if (pDX->m_bSaveAndValidate)
@@ -120,7 +124,6 @@ void CConnectorPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 		m_Color = m_ColorControl.GetColor();
 	else
 		m_ColorControl.SetColor(m_Color);
-	DDX_Text(pDX, IDC_EDIT8, m_LimitAngle);
 }
 
 BEGIN_MESSAGE_MAP(CConnectorPropertiesDialog, CMyDialog)
@@ -140,6 +143,8 @@ void CConnectorPropertiesDialog::OnBnClickedRadio()
 	m_RPMControl.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_LimitControl.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_LimitPrompt.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_StartOffsetControl.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_StartOffsetPrompt.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_AlwaysManualCheckbox.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_DrawCheckControl.EnableWindow( m_ConnectorControl.GetCheck() != 0 ? TRUE : FALSE );
 }

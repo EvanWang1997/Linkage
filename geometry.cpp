@@ -650,3 +650,22 @@ double GetClosestAngle( double OldAngle, double NewAngle )
 	return NewAngle;
 }
 
+double OscillatedAngle( double TotalAngle, double OscillationLimit )
+{
+	OscillationLimit = fabs( OscillationLimit );
+	int Direction = TotalAngle >= 0 ? 1 : -1;
+	TotalAngle = fabs( TotalAngle );
+	double Limit = OscillationLimit * 2;
+	int Oscillations = (int)( TotalAngle / Limit );
+	TotalAngle -= Oscillations * Limit;
+	if( TotalAngle > OscillationLimit )
+		TotalAngle = OscillationLimit - ( TotalAngle - OscillationLimit );
+	TotalAngle *= Direction;
+	return TotalAngle;
+}
+
+double OscillatedDistance( double TotalDistance, double OscillationLimit )
+{
+	return TotalDistance;
+}
+

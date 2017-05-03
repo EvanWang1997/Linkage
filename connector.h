@@ -69,6 +69,8 @@ public:
 	double GetOriginalSlideRadius( void );
 
 	bool GetSliderArc( CFArc &TheArc, bool bGetOriginal = false );
+	double GetStartOffset( void ) { return IsInput() ? m_InputStartOffset : 0; }
+	void SetStartOffset( double Value ) { m_InputStartOffset = Value; }
 
 	void UpdateControlKnob( void );
 	void UpdateControlKnob( CFPoint Point );
@@ -89,6 +91,7 @@ public:
 	CFPoint GetTempPoint( void );
 	CFPoint GetOriginalPoint( void ) { return m_OriginalPoint; }
 	double GetRPM( void ) { return m_RPM; }
+	int GetDirection( void ) { return m_RPM > 0 ? -1 : 1; }
 	CString GetIdentifierString( bool bDebugging );
 	int GetLinkCount( void ) { return (int)m_Links.GetCount(); }
 	bool PointOnConnector( CFPoint Point, double TestDistance );
@@ -100,7 +103,7 @@ public:
 	CFPoint * GetMotionPath( int &StartPoint, int &PointCount, int &MaxPoint );
 	bool HasLink( CLink *pLink );
 	bool IsAlone( void );
-	CConnector *GetCircleSizeConnector( int Index );
+	// CConnector *GetCircleSizeConnector( int Index );
 	
 	void SlideBetween( class CConnector *pConnector1 = 0, class CConnector *pConnector2 = 0 );
 	
@@ -131,6 +134,7 @@ private:
 	double m_SlideRadius;
 	double m_OriginalSlideRadius;
 	double m_LimitAngle;
+	double m_InputStartOffset;
 
 	static const int MAX_DRAWING_POINTS = 600;
 	CFPoint m_DrawingPoints[MAX_DRAWING_POINTS];

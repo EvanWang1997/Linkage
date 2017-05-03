@@ -29,6 +29,7 @@
 #define IDC_EDIT8                       1004
 #define IDC_RADIO1                      1005
 #define IDC_RADIO2                      1006
+#define IDC_EDIT9                       1006
 #define IDC_RADIO3                      1007
 #define IDC_RPMPROMPT                   1008
 #define IDC_RADIO7                      1008
@@ -508,6 +509,7 @@
 #define IDC_PROMPT1                     8007
 #define IDC_PROMPT2                     8008
 #define IDC_LIMITPROMPT                 8009
+#define IDC_LIMITPROMPT2                8010
 
 // Next default values for new objects
 // 
