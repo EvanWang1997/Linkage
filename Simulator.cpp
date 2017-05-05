@@ -324,7 +324,10 @@ class CSimulatorImplementation
 						if( !pLink->IsAlwaysManual() )
 						{
 							double Distance = pLink->GetStroke() * fabs( pLink->GetCPM() ) / 900.0;
-							pLink->SetExtension( ( ( m_SimulationStep * INTERMEDIATE_STEPS ) - ( IntermediateStep * Direction ) ) * ( Distance / INTERMEDIATE_STEPS ));
+							double Extension = ( ( m_SimulationStep * INTERMEDIATE_STEPS ) - ( IntermediateStep * Direction ) ) * ( Distance / INTERMEDIATE_STEPS );
+							//Extension = OscillatedDistance( Extension + pLink->GetStartOffset(), pLink->GetStroke() );
+							//Extension -= pLink->GetStartOffset();
+							pLink->SetExtension( Extension );
 						}
 					}
 					else

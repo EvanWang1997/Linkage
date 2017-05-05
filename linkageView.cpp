@@ -6062,15 +6062,13 @@ void CLinkageView::DrawActuator( CRenderer* pRenderer, unsigned int OnLayers, CL
 		pRenderer->SelectObject( pOldBrush );
 	}
 
-	double Offset = pLink->GetStartOffset();
-	if( Offset > pLink->GetStroke() )
-		Offset = pLink->GetStroke() - ( Offset - pLink->GetStroke() );
+	double ExtendDistance = OscillatedDistance( pLink->GetExtendedDistance() + pLink->GetStartOffset(), pLink->GetStroke() );
 
 	Line.ReverseDirection();
 	if( pLink->GetCPM() >= 0 )
-		Line.SetDistance( Line.GetDistance() - pLink->GetExtendedDistance() );
+		Line.SetDistance( Line.GetDistance() - ExtendDistance );
 	else
-		Line.SetDistance( Line.GetDistance() - pLink->GetExtendedDistance() - pLink->GetStroke() );
+		Line.SetDistance( Line.GetDistance() - ExtendDistance - pLink->GetStroke() );
 
 	CPen Pen;
 	Pen.CreatePen( PS_SOLID, StrokeLineSize, Color );
@@ -7829,6 +7827,7 @@ bool CLinkageView::LinkProperties( CLink *pLink )
 		Dialog.m_Color = RGB( 0, 0, 0 );
 		Dialog.m_bFastened = false;
 		Dialog.m_bLocked = false;
+		Dialog.m_StartOffset = 0;
 
 		LinkList* pLinkList = pDoc->GetLinkList();
 		POSITION Position = pLinkList->GetHeadPosition();
@@ -7865,6 +7864,9 @@ bool CLinkageView::LinkProperties( CLink *pLink )
 			Dialog.m_FastenedTo = "Fastened to " + pLink->GetFastenedTo()->GetElement()->GetIdentifierString( m_bShowDebug );
 		Dialog.m_bFastened = pLink->GetFastenedTo() != 0;
 		Dialog.m_Color = pLink->GetColor();
+		Dialog.m_StartOffset = pLink->GetStartOffset() * pDoc->GetUnitScale();
+		if( !pLink->IsActuator() )
+			Dialog.m_StartOffset = 0;
 	}
 	if( Dialog.DoModal() == IDOK )
 	{
@@ -7898,6 +7900,7 @@ bool CLinkageView::LinkProperties( CLink *pLink )
 			pLink->SetName( Dialog.m_Name );
 			pLink->SetStroke( Dialog.m_ThrowDistance / pDoc->GetUnitScale() );
 			pLink->SetColor( Dialog.m_Color );
+			pLink->SetStartOffset( fmod( fabs( Dialog.m_StartOffset ), pLink->GetStroke() * 2 ) / pDoc->GetUnitScale() );
 		}
 
 		return true;

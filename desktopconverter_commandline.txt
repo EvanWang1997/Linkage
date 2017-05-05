@@ -1,0 +1,2 @@
+DesktopAppConverter.exe -Installer C:\development\linkage\WixSetup\ReleaseDirect2D\linkage.msi -Destination C:\development\linkage -
+PackageName "Linkage" -Publisher "CN=David Rector" -Version 3.4.8.0 -MakeAppx

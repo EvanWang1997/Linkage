@@ -466,6 +466,7 @@
 #define IDS_RIBBON_SAVEDXF              5328
 #define ID_FILE_SAVEMOTION              5329
 #define IDS_RIBBON_SAVEMOTION           5330
+#define IDC_EDIT19                      5331
 #define ID_VIEW_ZMOUT                   5400
 #define ID_ACCELERATOR39002             5402
 #define ID_ACCELERATOR39004             5404

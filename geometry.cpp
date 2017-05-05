@@ -666,6 +666,15 @@ double OscillatedAngle( double TotalAngle, double OscillationLimit )
 
 double OscillatedDistance( double TotalDistance, double OscillationLimit )
 {
+	OscillationLimit = fabs( OscillationLimit );
+	int Direction = TotalDistance >= 0 ? 1 : -1;
+	TotalDistance = fabs( TotalDistance );
+	double Limit = OscillationLimit * 2;
+	int Oscillations = (int)( TotalDistance / Limit );
+	TotalDistance -= Oscillations * Limit;
+	if( TotalDistance > OscillationLimit )
+		TotalDistance = OscillationLimit - ( TotalDistance - OscillationLimit );
+	TotalDistance *= Direction;
 	return TotalDistance;
 }
 

@@ -2223,8 +2223,13 @@ void CLinkageDoc::Reset( bool bClearMotionPath, bool KeepCurrentPositions )
 		if( pLink == 0 )
 			continue;
 
-		if( KeepCurrentPositions && pLink->IsActuator() && pLink->GetStroke() != 0 )
-			pLink->SetStartOffset( fmod( pLink->GetExtendedDistance(), pLink->GetStroke() * 2 ) );
+		if( KeepCurrentPositions )
+		{
+			if( pLink->IsActuator() && pLink->GetStroke() != 0 )
+				pLink->SetStartOffset( fmod( fabs( pLink->GetTempActuatorExtension() ), pLink->GetStroke() * 2 ) );
+			else
+				pLink->SetStartOffset( 0 );
+		}
 		pLink->Reset();
 	}
 
@@ -2359,6 +2364,7 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 			pLink->RemoveConnector( pConnector );
 			pLink->AddConnector( pKeepConnector );
 			pKeepConnector->AddLink( pLink );
+			pLink->SetActuator( pLink->IsActuator() );
 		}
 
 		m_Connectors.Remove( pConnector );

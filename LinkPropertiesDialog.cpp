@@ -22,6 +22,7 @@ CLinkPropertiesDialog::CLinkPropertiesDialog(CWnd* pParent /*=NULL*/)
 	, m_bIsGear( FALSE )
 	, m_FastenedTo( _T( "" ) )
 	, m_bLocked(FALSE)
+	, m_StartOffset(0)
 {
 	m_Color = RGB( 200, 200, 200 );
 }
@@ -58,6 +59,9 @@ void CLinkPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COLOR, m_ColorControl);
 	DDX_Check(pDX, IDC_LOCKED, m_bLocked);
 	DDX_Control(pDX, IDC_LOCKED, m_LockedControl);
+	DDX_Control(pDX, IDC_EDIT19, m_StartOffsetControl);
+	DDX_Text(pDX, IDC_EDIT19, m_StartOffset);
+	DDX_Control(pDX, IDC_LIMITPROMPT2, m_StartOffsetPrompt);
 
 	m_SpinControl.SetRange(1, 4);
 
@@ -116,6 +120,8 @@ void CLinkPropertiesDialog::OnBnClickedCheck2()
 	m_ActuatorCPMControl.EnableWindow( m_ActuatorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_ThrowDistancePrompt.EnableWindow( m_ActuatorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_ThrowDistanceControl.EnableWindow( m_ActuatorControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_StartOffsetControl.EnableWindow( m_ActuatorControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_StartOffsetPrompt.EnableWindow( m_ActuatorControl.GetCheck() != 0 ? TRUE : FALSE );
 }
 
 void CLinkPropertiesDialog::OnStnClickedColor()

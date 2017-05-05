@@ -151,6 +151,7 @@ class CLink : public CElement
 	void IncrementExtension( double Increment );
 	void SetExtension( double Value );
 	double GetExtendedDistance( void );
+	double GetOffsetAdjustedExtendedDistance( void );
 	void UpdateControlKnob( CFPoint Point );
 	void UpdateControlKnob( void );
 	CConnector *GetConnector( int Index ) const;

@@ -58,4 +58,7 @@ public:
 	CStatic m_ColorPromptControl;
 	BOOL m_bLocked;
 	CButton m_LockedControl;
+	CEdit m_StartOffsetControl;
+	double m_StartOffset;
+	CStatic m_StartOffsetPrompt;
 };

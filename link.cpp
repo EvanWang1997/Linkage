@@ -781,24 +781,25 @@ void CLink::SetActuator( bool bActuator )
 	bool bNewActuator = bActuator && !m_bActuator;
 	m_bActuator = bActuator;
 
+	// Always deal with the control knob even if the link was already an actuator.
+	POSITION Position = m_Connectors.GetHeadPosition();
+	if( Position == 0 )
+		return;
+	CConnector* pConnector1 = m_Connectors.GetNext( Position );
+	if( Position == 0 )
+		return;
+	CConnector* pConnector2 = m_Connectors.GetNext( Position );
+
+	CControlKnob *pControlKnob = GetControlKnob();
+	if( pControlKnob != 0 )
+	{
+		pControlKnob->SetParent( this );
+		pControlKnob->SetSlideLimits( pConnector1, pConnector2 );
+		pControlKnob->SetShowOnParentSelect( true );
+	}
+
 	if( bNewActuator )
 	{
-		POSITION Position = m_Connectors.GetHeadPosition();
-		if( Position == 0 )
-			return;
-		CConnector* pConnector1 = m_Connectors.GetNext( Position );
-		if( Position == 0 )
-			return;
-		CConnector* pConnector2 = m_Connectors.GetNext( Position );
-
-		CControlKnob *pControlKnob = GetControlKnob();
-		if( pControlKnob != 0 )
-		{
-			pControlKnob->SetParent( this );
-			pControlKnob->SetSlideLimits( pConnector1, pConnector2 );
-			pControlKnob->SetShowOnParentSelect( true );
-		}
-
 		//m_StrokeConnector.SetLayers( GetLayers() );
 
 		//m_StrokeConnector.AddLink( this );
@@ -858,19 +859,16 @@ void CLink::SetExtension( double Value )
 	//
 	// The caller might have a running error in the increment.
 
-	while( m_TempActuatorExtension > m_ActuatorStroke * 2 )
-		m_TempActuatorExtension -= m_ActuatorStroke * 2;
-	while( m_TempActuatorExtension < 0 )
-		m_TempActuatorExtension += m_ActuatorStroke * 2;
+	//while( m_TempActuatorExtension > m_ActuatorStroke * 2 )
+	//	m_TempActuatorExtension -= m_ActuatorStroke * 2;
+	//while( m_TempActuatorExtension < 0 )
+	//	m_TempActuatorExtension += m_ActuatorStroke * 2;
 }
 
 double CLink::GetExtendedDistance( void )
 {
-	double UseDistance = fabs( m_TempActuatorExtension );
-	if( UseDistance > m_ActuatorStroke )
-		UseDistance = m_ActuatorStroke - ( UseDistance - m_ActuatorStroke );
-	else
-		UseDistance = m_TempActuatorExtension;
+	double UseDistance = OscillatedDistance( m_TempActuatorExtension + GetStartOffset(), m_ActuatorStroke );
+	UseDistance -= GetStartOffset();
 	return UseDistance * ( m_ActuatorCPM >= 0 ? 1 : -1 );
 }
 
