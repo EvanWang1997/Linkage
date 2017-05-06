@@ -6062,7 +6062,7 @@ void CLinkageView::DrawActuator( CRenderer* pRenderer, unsigned int OnLayers, CL
 		pRenderer->SelectObject( pOldBrush );
 	}
 
-	double ExtendDistance = OscillatedDistance( pLink->GetExtendedDistance() + pLink->GetStartOffset(), pLink->GetStroke() );
+	double ExtendDistance = OscillatedDistance( pLink->GetTempActuatorExtension() + pLink->GetStartOffset(), pLink->GetStroke() );
 
 	Line.ReverseDirection();
 	if( pLink->GetCPM() >= 0 )

@@ -867,8 +867,11 @@ void CLink::SetExtension( double Value )
 
 double CLink::GetExtendedDistance( void )
 {
-	double UseDistance = OscillatedDistance( m_TempActuatorExtension + GetStartOffset(), m_ActuatorStroke );
-	UseDistance -= GetStartOffset();
+	double StartDistance = OscillatedDistance( GetStartOffset(), m_ActuatorStroke );
+	double NewDistance = OscillatedDistance( m_TempActuatorExtension + GetStartOffset(), m_ActuatorStroke );
+	double UseDistance = NewDistance - StartDistance;
+	//if( UseDistance < 0 )
+	//	UseDistance += m_ActuatorStroke;
 	return UseDistance * ( m_ActuatorCPM >= 0 ? 1 : -1 );
 }
 

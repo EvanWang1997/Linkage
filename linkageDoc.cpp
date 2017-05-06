@@ -2226,7 +2226,7 @@ void CLinkageDoc::Reset( bool bClearMotionPath, bool KeepCurrentPositions )
 		if( KeepCurrentPositions )
 		{
 			if( pLink->IsActuator() && pLink->GetStroke() != 0 )
-				pLink->SetStartOffset( fmod( fabs( pLink->GetTempActuatorExtension() ), pLink->GetStroke() * 2 ) );
+				pLink->SetStartOffset( fmod( fabs( pLink->GetTempActuatorExtension() ) + pLink->GetStartOffset(), pLink->GetStroke() * 2 ) ); // Don't use extend distance since that is adjusted for the stroke. Use the temp distance and add the offset to start with.
 			else
 				pLink->SetStartOffset( 0 );
 		}
