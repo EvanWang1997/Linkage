@@ -5557,6 +5557,29 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 			 * mechanism elements can show an ID string when no name is
 			 * assigned by the user.
 			 */
+
+			double dx = m_ConnectorRadius - UnscaledUnits( 1 );
+			double dy = m_ConnectorRadius - UnscaledUnits( 2 );
+			if( pConnector->IsInput() )
+			{
+				dx += UnscaledUnits( 2 );
+				dy += UnscaledUnits( 2 );
+			}
+			if( pConnector->IsDrawing() )
+			{
+				dx += UnscaledUnits( 3 );
+				dy -= UnscaledUnits( m_UsingFontHeight + 1 );
+			}
+
+			if( pConnector->IsLocked() )
+			{
+				CFPoint LockLocation( Point.x + dx, Point.y + AdjustYCoordinate( dy ) );
+				LockLocation.x += m_ConnectorRadius;
+				LockLocation.y += AdjustYCoordinate( m_ConnectorRadius );
+				DrawLock( pRenderer, LockLocation );
+				dx += (int)UnscaledUnits( 12 );
+			}
+
 			CString &Name = pConnector->GetName();
 			if( !Name.IsEmpty() || ( pConnector->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) != 0 || m_bShowDebug )
 			{
@@ -5567,21 +5590,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 
 				pRenderer->SetTextAlign( TA_BOTTOM | TA_LEFT );
 				pRenderer->SetBkMode( TRANSPARENT );
-				double dx = m_ConnectorRadius - UnscaledUnits( 1 );
-				double dy = m_ConnectorRadius - UnscaledUnits( 2 );
-				if( pConnector->IsInput() )
-				{
-					dx += UnscaledUnits( 2 );
-					dy += UnscaledUnits( 2 );
-				}
-				if( pConnector->IsDrawing() )
-				{
-					dx += UnscaledUnits( 3 );
-					dy -= UnscaledUnits( m_UsingFontHeight + 1 );
-				}
 
-				//CFCircle Circle( Point.x + dx, Point.y + AdjustYCoordinate( dy ), 0.5 );
-				//pRenderer->Circle( Circle );
 				pRenderer->TextOut( Point.x + dx, Point.y + AdjustYCoordinate( dy ), Number );
 
 				if( pConnector->IsInput() )
@@ -7085,6 +7094,30 @@ void CLinkageView::DrawChain( CRenderer* pRenderer, unsigned int OnLayers, CGear
 	pRenderer->SelectObject( pOldPen );
 }
 
+void CLinkageView::DrawLock( CRenderer* pRenderer, CFPoint LockLocation )
+{
+	CPen LockPen;
+	LockPen.CreatePen( PS_SOLID, 1, RGB( 0, 0, 0 ) );
+	CPen *pOldPen = pRenderer->SelectObject( &LockPen );
+
+	pRenderer->SelectObject( &LockPen );
+
+	pRenderer->MoveTo( LockLocation.x, LockLocation.y );
+	pRenderer->LineTo( LockLocation.x, LockLocation.y + AdjustYCoordinate( UnscaledUnits( 4 ) ) );
+	pRenderer->LineTo( LockLocation.x + UnscaledUnits( 5 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 4 ) ) );
+	pRenderer->LineTo( LockLocation.x + UnscaledUnits( 5 ), LockLocation.y );
+	pRenderer->LineTo( LockLocation.x, LockLocation.y );
+
+	pRenderer->MoveTo( LockLocation.x + UnscaledUnits( 1 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 4 ) ) );
+	pRenderer->LineTo( LockLocation.x + UnscaledUnits( 1 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 6 ) ) );
+	pRenderer->LineTo( LockLocation.x + UnscaledUnits( 2 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 7 ) ) );
+	pRenderer->LineTo( LockLocation.x + UnscaledUnits( 3 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 7 ) ) );
+	pRenderer->LineTo( LockLocation.x + UnscaledUnits( 4 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 6 ) ) );
+	pRenderer->LineTo( LockLocation.x + UnscaledUnits( 4 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 4 ) ) );
+
+	pRenderer->SelectObject( pOldPen );
+}
+
 void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGearConnections, unsigned int OnLayers, CLink *pLink, bool bShowlabels, bool bDrawHighlight, bool bDrawFill )
 {
 	if( ( pLink->GetLayers() & OnLayers ) == 0 )
@@ -7224,30 +7257,10 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 			int Spacing = 0;
 			if( pLink->IsLocked() )
 			{
-				CPen LockPen;
-				LockPen.CreatePen( PS_SOLID, pLink->GetLineSize(), RGB( 0, 0, 0 ) );
-				pOldPen = pRenderer->SelectObject( &LockPen );
-
-				pRenderer->SelectObject( &LockPen );
 				CFPoint LockLocation( Average );
 				LockLocation.x += m_ConnectorRadius;
 				LockLocation.y += AdjustYCoordinate( m_ConnectorRadius );
-
-				pRenderer->MoveTo( LockLocation.x, LockLocation.y );
-				pRenderer->LineTo( LockLocation.x, LockLocation.y + AdjustYCoordinate( UnscaledUnits( 4 ) ) );
-				pRenderer->LineTo( LockLocation.x + UnscaledUnits( 5 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 4 ) ) );
-				pRenderer->LineTo( LockLocation.x + UnscaledUnits( 5 ), LockLocation.y );
-				pRenderer->LineTo( LockLocation.x, LockLocation.y );
-
-				pRenderer->MoveTo( LockLocation.x + UnscaledUnits( 1 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 4 ) ) );
-				pRenderer->LineTo( LockLocation.x + UnscaledUnits( 1 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 6 ) ) );
-				pRenderer->LineTo( LockLocation.x + UnscaledUnits( 2 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 7 ) ) );
-				pRenderer->LineTo( LockLocation.x + UnscaledUnits( 3 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 7 ) ) );
-				pRenderer->LineTo( LockLocation.x + UnscaledUnits( 4 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 6 ) ) );
-				pRenderer->LineTo( LockLocation.x + UnscaledUnits( 4 ), LockLocation.y + AdjustYCoordinate( UnscaledUnits( 4 ) ) );
-
-				pRenderer->SelectObject( pOldPen );
-
+				DrawLock( pRenderer, LockLocation );
 				Spacing += (int)UnscaledUnits( 12 );
 			}
 
@@ -7703,6 +7716,7 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 	Dialog.m_bIsSlider = pConnector->IsSlider();
 	Dialog.m_SlideRadius = pConnector->GetSlideRadius() * DocumentScale;
 	Dialog.m_StartOffset = fabs( pConnector->GetStartOffset() );
+	Dialog.m_bLocked = pConnector->IsLocked();
 	Dialog.m_Name = pConnector->GetName();
 	Dialog.m_MinimumSlideRadius = 0;
 	if( pConnector->GetFastenedTo() != 0 && pConnector->GetFastenedTo()->GetElement() != 0 )
@@ -7733,6 +7747,7 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 		pConnector->SetName( Dialog.m_Name );
 		pConnector->SetColor( Dialog.m_Color );
 		pConnector->SetStartOffset( fabs( fmod( Dialog.m_StartOffset, pConnector->GetLimitAngle() * 2 ) ) );
+		pConnector->SetLocked( Dialog.m_bLocked == TRUE );
 
 		if( Dialog.m_xPosition != pConnector->GetPoint().x ||
 		    Dialog.m_yPosition != pConnector->GetPoint().y )

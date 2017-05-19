@@ -366,6 +366,8 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			pConnector->SetMeasurementElement( Value == "true" );
 			Value = pNode->GetAttribute( "name" );
 			pConnector->SetName( Value );
+			Value = pNode->GetAttribute( "locked" );
+			pConnector->SetLocked( Value == "true" );
 			Value = pNode->GetAttribute( "layer" );
 			if( Value.IsEmpty() || atoi( Value ) == 0 )
 				pConnector->SetLayers( MECHANISMLAYER );
@@ -821,6 +823,7 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 		AppendXMLAttribute( TempString, "x", Point.x );
 		AppendXMLAttribute( TempString, "y", Point.y );
 		AppendXMLAttribute( TempString, "anchor", pConnector->IsAnchor(), pConnector->IsAnchor() );
+		AppendXMLAttribute( TempString, "locked", pConnector->IsLocked(), pConnector->IsLocked() && pConnector->IsAnchor() );
 		AppendXMLAttribute( TempString, "input", pConnector->IsInput(), pConnector->IsInput() );
 		AppendXMLAttribute( TempString, "draw", pConnector->IsDrawing(), pConnector->IsDrawing() );
 		AppendXMLAttribute( TempString, "measurementelement", pConnector->IsMeasurementElement(), pConnector->IsMeasurementElement() );
@@ -1819,6 +1822,9 @@ int CLinkageDoc::BuildSelectedLockGroup( ConnectorList *pLockGroup )
 		if( !pConnector->IsSelected() && !pConnector->IsLinkSelected() )
 			continue;
 
+		if( pConnector->IsLocked() )
+			continue;
+
 		LockedConnectors.SetBit( pConnector->GetIdentifier() );
 	}
 
@@ -1833,6 +1839,7 @@ int CLinkageDoc::BuildSelectedLockGroup( ConnectorList *pLockGroup )
 				continue;
 
 			bool bOneIsSelectedLocked = false;
+			bool bConnectorIsLocked = false;
 			POSITION Position2 = pLink->GetConnectorList()->GetHeadPosition();
 			while( Position2 != 0 )
 			{
@@ -1840,13 +1847,25 @@ int CLinkageDoc::BuildSelectedLockGroup( ConnectorList *pLockGroup )
 				if( pConnector == 0 )
 					continue;
 				if( LockedConnectors.GetBit( pConnector->GetIdentifier() ) )
-				{
 					bOneIsSelectedLocked = true;
-					break;
-				}
+				if( pConnector->IsLocked() )
+					bConnectorIsLocked = true;
 			}
 
-			if( bOneIsSelectedLocked )
+			if( bConnectorIsLocked )
+			{
+				POSITION Position2 = pLink->GetConnectorList()->GetHeadPosition();
+				while( Position2 != 0 )
+				{
+					CConnector *pConnector = pLink->GetConnectorList()->GetNext( Position2 );
+					if( pConnector == 0 || !LockedConnectors.GetBit( pConnector->GetIdentifier() ) )
+						continue;
+
+					LockedConnectors.ClearBit( pConnector->GetIdentifier() );
+					++ChangeCount;
+				}
+			}
+			else if( bOneIsSelectedLocked )
 			{
 				POSITION Position2 = pLink->GetConnectorList()->GetHeadPosition();
 				while( Position2 != 0 )
@@ -1864,16 +1883,13 @@ int CLinkageDoc::BuildSelectedLockGroup( ConnectorList *pLockGroup )
 			break;
 	}
 
-	if( m_pCapturedConnector != 0 )
-		pLockGroup->AddTail( m_pCapturedConnector );
-
 	Position = m_Connectors.GetHeadPosition();
 	while( Position != 0 )
 	{
 		CConnector *pConnector = m_Connectors.GetNext( Position );
 		if( pConnector == 0 )
 			continue;
-		if( LockedConnectors.GetBit( pConnector->GetIdentifier() ) && pConnector != m_pCapturedConnector )
+		if( LockedConnectors.GetBit( pConnector->GetIdentifier() ) )
 			pLockGroup->AddTail( pConnector );
 	}
 
@@ -1907,7 +1923,7 @@ bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap
 	if( m_SelectedConnectors.GetCount() == 1 && m_SelectedLinks.GetCount() == 0 )
 	{
 		CConnector *pConnector = m_SelectedConnectors.GetHead();
-		if( pConnector != 0 && pConnector == m_pCapturedConnector )
+		if( pConnector != 0 && pConnector == m_pCapturedConnector && !pConnector->IsLocked() )
 		{
 			int LockedLinkCount = 0;
 			CLink *pLockedLink = 0;
@@ -2238,9 +2254,10 @@ void CLinkageDoc::Reset( bool bClearMotionPath, bool KeepCurrentPositions )
 
 bool CLinkageDoc::LockSelected( void )
 {
-	if( m_SelectedConnectors.GetCount() > 0 || m_SelectedLinks.GetCount() == 0 )
+	if( m_SelectedConnectors.GetCount() == 0 && m_SelectedLinks.GetCount() == 0 )
 		return false;
 
+	PushUndo();
 	int Count = 0;
 	POSITION Position = m_SelectedLinks.GetHeadPosition();
 	while( Position != NULL )
@@ -2251,6 +2268,18 @@ bool CLinkageDoc::LockSelected( void )
 
 		pLink->SetLocked( true );
 	}
+	Position = m_SelectedConnectors.GetHeadPosition();
+	while( Position != NULL )
+	{
+		CConnector* pConnector = m_SelectedConnectors.GetNext( Position );
+		if( pConnector == 0 || !pConnector->IsAnchor() )
+			continue;
+
+		pConnector->SetLocked( true );
+	}
+
+	if( Count == 0 )
+		PopUndoDelete();
 
 	return Count > 0;
 }
@@ -3967,6 +3996,7 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 	int SelectedRealLinks = 0;
 	int SelectedLinks = 0;
 	int SelectedConnectors = 0;
+	int SelectedAnchors = 0;
 	int SelectedMechanismLinks = 0;
 	int SelectedDrawingElements = 0;
 	int Actuators = 0;
@@ -3992,6 +4022,8 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 			++SelectedConnectors;
 			if( pConnector->IsSlider() )
 				++Sliders;
+			if( pConnector->IsAnchor() )
+				++SelectedAnchors;
 			if( pConnector->GetLayers() & DRAWINGLAYER )
 				++SelectedDrawingElements;
 			if( pConnector->GetFastenedTo() != 0 )
@@ -4068,7 +4100,7 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 		m_bSelectionConnectable = SelectedRealLinks == 0 && SelectedConnectors == 2 && pConnector1->GetSharingLink( pConnector2 ) == 0 && !pConnector1->IsSlider();
 		m_bSelectionJoinable = ( SelectedConnectors > 1 && Sliders <= 1 ) || ( SelectedConnectors == 1 && SelectedRealLinks >= 1 );
 		m_bSelectionSlideable = ConnectSliderLimits( true );
-		m_bSelectionLockable = SelectedConnectors == 0 && SelectedRealLinks > 0;
+		m_bSelectionLockable = SelectedAnchors > 0 || SelectedRealLinks > 0;
 		m_bSelectionMakeAnchor = SelectedConnectors > 0 && SelectedRealLinks == 0;
 	}
 

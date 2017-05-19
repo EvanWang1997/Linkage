@@ -9,6 +9,7 @@ CElement::CElement(void)
 	m_bMeasurementElement = false;
 	m_bPositionValid = true;
 	m_FastenedTo = CElementItem();
+	m_bLocked = false;
 }
 
 CElement::~CElement(void)
@@ -25,6 +26,7 @@ CElement::CElement( const CElement &ExistingElement )
 	m_bPositionValid = ExistingElement.m_bPositionValid;
 	m_Color = ExistingElement.m_Color;
 	m_FastenedTo = CElementItem();
+	m_bLocked = ExistingElement.m_bLocked;
 	// The fastening is not copied because that seems just wrong - someother element can't be fastened to more than one element at a time.
 }
 

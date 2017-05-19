@@ -127,9 +127,6 @@ class CLink : public CElement
 	bool IsSolid( void ) { return m_bSolid; }
 	void SetSolid( bool bSolid ) { m_bSolid = bSolid; }
 	
-	bool IsLocked( void ) { return m_bLocked; }
-	void SetLocked( bool bLocked ) { m_bLocked = bLocked; }
-
 	double GetStartOffset( void ) { return IsActuator() ? m_ActuatorStartOffset : 0; }
 	void SetStartOffset( double Value ) { m_ActuatorStartOffset = Value; }
 
@@ -198,7 +195,6 @@ class CLink : public CElement
 	bool m_bAlwaysManual;
 	CFPoint *m_pHull;
 	int m_HullCount;
-	bool m_bLocked;
 	double m_ActuatorStartOffset;
 
 	bool m_bLinkTriangle;

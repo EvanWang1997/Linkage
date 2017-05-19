@@ -240,6 +240,7 @@ private:
 
 	void SetLocationAsStatus( CFPoint &Point );
 	
+	void DrawLock( CRenderer* pRenderer, CFPoint LockLocation );
 	void DebugDrawConnector( CRenderer* pRenderer, unsigned int OnLayers, CConnector *pConnector, bool bShowlabels, bool bErase = false, bool bHighlight = false, bool bDrawConnectedLinks = false );
 	void DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, CConnector *pConnector, bool bShowlabels, bool bErase = false, bool bHighlight = false, bool bDrawConnectedLinks = false, bool bControlKnob = false );
 	void DrawControlKnob( CRenderer* pRenderer, unsigned int OnLayers, CControlKnob* pControlKnob );

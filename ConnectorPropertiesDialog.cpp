@@ -30,6 +30,7 @@ CConnectorPropertiesDialog::CConnectorPropertiesDialog( CWnd* pParent /*=NULL*/ 
 	, m_FastenedTo( _T( "" ) )
 	, m_LimitAngle(0)
 	, m_StartOffset(0)
+	, m_bLocked(FALSE)
 {
 	m_bAnchor = false;
 	m_bInput = false;
@@ -69,6 +70,8 @@ void CConnectorPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT9, m_StartOffsetControl);
 	DDX_Control(pDX, IDC_LIMITPROMPT2, m_StartOffsetPrompt);
 	DDX_Text(pDX, IDC_EDIT9, m_StartOffset);
+	DDX_Control(pDX, IDC_LOCKED2, m_LockControl);
+	DDX_Check(pDX, IDC_LOCKED2, m_bLocked);
 
 	int CheckValue;
 	if (pDX->m_bSaveAndValidate)
@@ -141,6 +144,7 @@ END_MESSAGE_MAP()
 void CConnectorPropertiesDialog::OnBnClickedRadio()
 {
 	m_RPMControl.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_LockControl.EnableWindow( m_ConnectorControl.GetCheck() != 0 ? FALSE : TRUE );
 	m_LimitControl.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_LimitPrompt.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_StartOffsetControl.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );

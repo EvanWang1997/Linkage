@@ -79,6 +79,9 @@ class CElement
 	CNullableColor GetColor( void ) { return m_Color; }
 	void SetColor( CNullableColor Color ) { m_Color = Color; }
 
+	bool IsLocked( void ) { return m_bLocked; }
+	void SetLocked( bool bLocked ) { m_bLocked = bLocked; }
+
 	CElementItem * GetFastenedTo( void ) { return m_FastenedTo.GetElement() == 0 ? 0 : &m_FastenedTo; }
 	CLink * GetFastenedToLink( void ) { return m_FastenedTo.GetLink() == 0 ? 0 : m_FastenedTo.GetLink(); }
 	CConnector * GetFastenedToConnector( void ) { return m_FastenedTo.GetConnector() == 0 ? 0 : m_FastenedTo.GetConnector(); }
@@ -113,5 +116,6 @@ class CElement
 	CElementItem m_FastenedTo;
 	ElementList m_FastenedElements;
 	CControlKnob m_ControlKnob;
+	bool m_bLocked;
 };
 

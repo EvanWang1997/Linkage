@@ -69,4 +69,6 @@ public:
 	CEdit m_StartOffsetControl;
 	CStatic m_StartOffsetPrompt;
 	double m_StartOffset;
+	CButton m_LockControl;
+	BOOL m_bLocked;
 };

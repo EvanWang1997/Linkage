@@ -455,6 +455,7 @@
 #define IDC_LOCKED                      5317
 #define IDC_SLIDRADIUSMINVALUE          5318
 #define IDC_FILENAME                    5319
+#define IDC_LOCKED2                     5319
 #define IDC_TITLE                       5320
 #define IDC_VERSION                     5321
 #define IDS_RIBBON_INSERT_ANCHORLINK    5322
