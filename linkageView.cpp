@@ -5748,7 +5748,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 		Radius = Scale( Radius );
 		CFCircle Circle( Point, Radius );
 		CBrush *pBrush = (CBrush*)pRenderer->SelectStockObject( NULL_BRUSH );
-		CPen CirclePen(  PS_SOLID, 1, pConnector->GetColor() );
+		CPen CirclePen(  PS_SOLID, pConnector->GetLineSize(), pConnector->GetColor() );
 		CPen *pPen = pRenderer->SelectObject( &CirclePen );
 		CFArc Arc( Circle.GetCenter(), Circle.r, Circle.GetCenter(), Circle.GetCenter() );
 		pRenderer->Arc( Arc );
@@ -7797,6 +7797,7 @@ bool CLinkageView::PointProperties( CConnector *pConnector )
 	Dialog.m_Name = pConnector->GetName();
 	Dialog.m_Label = pConnector->GetIdentifierString( m_bShowDebug );
 	Dialog.m_Label += " - Point Properties";
+	Dialog.m_LineSize = pConnector->GetLineSize();
 	if( pConnector->GetFastenedTo() != 0 && pConnector->GetFastenedTo()->GetElement() != 0 )
 		Dialog.m_FastenTo = "Fastened to " + pConnector->GetFastenedTo()->GetElement()->GetIdentifierString( m_bShowDebug );
 	Dialog.m_Color = pConnector->GetColor();
@@ -7809,6 +7810,7 @@ bool CLinkageView::PointProperties( CConnector *pConnector )
 		pConnector->SetName( Dialog.m_Name );
 		pConnector->SetDrawCircleRadius( Dialog.m_bDrawCircle != FALSE ? Dialog.m_Radius / DocumentScale : 0.0 );
 		pConnector->SetColor( Dialog.m_Color );
+		pConnector->SetLineSize( Dialog.m_bDrawCircle != FALSE ? Dialog.m_LineSize : 1 );
 
 		if( Dialog.m_xPosition != pConnector->GetPoint().x ||
 		    Dialog.m_yPosition != pConnector->GetPoint().y )
@@ -7826,11 +7828,15 @@ bool CLinkageView::LinkProperties( CLink *pLink )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
+	int OriginalLineSize = 1;
+	bool OriginalIsSolid = false;
+	CNullableColor OriginalColor;
+
 	CLinkPropertiesDialog Dialog;
 	if( pLink == 0 )
 	{
-		Dialog.m_LineSize = 1;
-		Dialog.m_bSolid = FALSE;
+		Dialog.m_LineSize = OriginalLineSize;
+		Dialog.m_bSolid = OriginalIsSolid ? TRUE : FALSE;
 		Dialog.m_bActuator = FALSE;
 		Dialog.m_ConnectorCount = 2;
 		Dialog.m_ActuatorCPM = 0;
@@ -7839,10 +7845,13 @@ bool CLinkageView::LinkProperties( CLink *pLink )
 		Dialog.m_ThrowDistance = 0;
 		Dialog.m_bIsGear = false;
 		Dialog.m_Label = "Multiple Link Properties";
-		Dialog.m_Color = RGB( 0, 0, 0 );
+		Dialog.m_Color = OriginalColor;
 		Dialog.m_bFastened = false;
 		Dialog.m_bLocked = false;
 		Dialog.m_StartOffset = 0;
+
+		OriginalLineSize = 1;
+		OriginalIsSolid = false;
 
 		LinkList* pLinkList = pDoc->GetLinkList();
 		POSITION Position = pLinkList->GetHeadPosition();
@@ -7896,11 +7905,12 @@ bool CLinkageView::LinkProperties( CLink *pLink )
 				CLink* pSelectedLink = pLinkList->GetNext( Position );
 				if( pSelectedLink != 0 && pSelectedLink->IsSelected() )
 				{
-					pSelectedLink->SetLineSize( Dialog.m_LineSize );
-					pSelectedLink->SetSolid( Dialog.m_bSolid != 0 );
-//					pSelectedLink->SetActuator( Dialog.m_bActuator != 0 );
-//					pSelectedLink->SetCPM( Dialog.m_ActuatorCPM );
-//					pSelectedLink->SetAlwaysManual( Dialog.m_bAlwaysManual != 0 );
+					if( Dialog.m_LineSize != OriginalLineSize )
+						pSelectedLink->SetLineSize( Dialog.m_LineSize );
+					if( Dialog.m_bSolid != ( OriginalIsSolid ? TRUE : FALSE ) )
+						pSelectedLink->SetSolid( Dialog.m_bSolid != 0 );
+					if( Dialog.m_Color != OriginalColor )
+						pSelectedLink->SetColor( Dialog.m_Color );
 				}
 			}
 		}

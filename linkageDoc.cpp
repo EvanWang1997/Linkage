@@ -350,6 +350,8 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			pConnector->SetPoint( Point );
 			Value = pNode->GetAttribute( "drawcircle" );
 			pConnector->SetDrawCircleRadius( atof( Value ) );
+			Value = pNode->GetAttribute( "linesize" );
+			pConnector->SetLineSize( atoi( Value ) );
 			Value = pNode->GetAttribute( "rpm" );
 			pConnector->SetRPM( atof( Value ) );
 			Value = pNode->GetAttribute( "limitangle" );
@@ -833,6 +835,7 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 		AppendXMLAttribute( TempString, "slider", pConnector->IsSlider(), pConnector->IsSlider() );
 		AppendXMLAttribute( TempString, "alwaysmanual", pConnector->IsAlwaysManual(), pConnector->IsAlwaysManual() );
 		AppendXMLAttribute( TempString, "drawcircle", pConnector->GetDrawCircleRadius(), pConnector->GetDrawCircleRadius() > 0 );
+		AppendXMLAttribute( TempString, "linesize", pConnector->GetLineSize(), pConnector->GetDrawCircleRadius() > 0 );
 		bool bIncludeFasten = pConnector->GetFastenedToLink() != 0 && ( pConnector->GetFastenedToLink()->IsSelected() || !bSelectedOnly );
 		AppendXMLAttribute( TempString, "fastenlink", pConnector->GetFastenedToLink() == 0 ? 0 : pConnector->GetFastenedToLink()->GetIdentifier(), bIncludeFasten );
 		bool bIncludeFastenToCon = pConnector->GetFastenedToConnector() != 0 && ( pConnector->GetFastenedToConnector()->IsSelected() || !bSelectedOnly );

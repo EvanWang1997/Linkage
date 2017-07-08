@@ -84,8 +84,6 @@ void CLinkPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 		m_ActuatorCPMControl.EnableWindow(FALSE);
 		m_NamePromptControl.EnableWindow(FALSE);
 		m_NameControl.EnableWindow(FALSE);
-		m_ColorPromptControl.EnableWindow(FALSE);
-		m_ColorControl.EnableWindow(FALSE);
 		m_LockedControl.EnableWindow(FALSE);
 	}
 
@@ -100,7 +98,7 @@ void CLinkPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 	}
 
 	if (pDX->m_bSaveAndValidate)
-		m_Color = m_ColorControl.GetColor();
+		;//m_Color = m_ColorControl.GetColor();
 	else
 		m_ColorControl.SetColor(m_Color);
 

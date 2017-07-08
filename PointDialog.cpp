@@ -22,7 +22,8 @@ CPointPropertiesDialog::CPointPropertiesDialog( CWnd* pParent /*=NULL*/ )
 	, m_Name(_T(""))
 	, m_bDrawCircle(FALSE)
 	, m_Radius(0)
-, m_FastenTo( _T( "" ) )
+	, m_FastenTo( _T( "" ) )
+	, m_LineSize(1)
 {
 	m_Color = RGB( 200, 200, 200 );
 }
@@ -33,26 +34,32 @@ CPointPropertiesDialog::~CPointPropertiesDialog()
 
 void CPointPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CMyDialog::DoDataExchange( pDX );
-	DDX_MyDoubleText( pDX, IDC_EDIT2, m_xPosition, 4 );
-	DDX_MyDoubleText( pDX, IDC_EDIT4, m_yPosition, 4 );
-	DDX_Text( pDX, IDC_EDIT3, m_Name );
-	DDX_Control( pDX, IDC_CHECK1, m_DrawCircleControl );
-	DDX_Check( pDX, IDC_CHECK1, m_bDrawCircle );
-	DDX_Control( pDX, IDC_RADIUSPROMPT, m_RadiusPromptControl );
-	DDX_Control( pDX, IDC_EDIT6, m_RadiusControl );
-	DDX_MyDoubleText( pDX, IDC_EDIT6, m_Radius, 4 );
+	CMyDialog::DoDataExchange(pDX);
+	DDX_MyDoubleText(pDX, IDC_EDIT2, m_xPosition, 4);
+	DDX_MyDoubleText(pDX, IDC_EDIT4, m_yPosition, 4);
+	DDX_Text(pDX, IDC_EDIT3, m_Name);
+	DDX_Control(pDX, IDC_CHECK1, m_DrawCircleControl);
+	DDX_Check(pDX, IDC_CHECK1, m_bDrawCircle);
+	DDX_Control(pDX, IDC_RADIUSPROMPT, m_RadiusPromptControl);
+	DDX_Control(pDX, IDC_EDIT6, m_RadiusControl);
+	DDX_MyDoubleText(pDX, IDC_EDIT6, m_Radius, 4);
+	DDX_Control(pDX, IDC_LINEPROMPT, m_LinePrompt);
+	DDX_Control(pDX, IDC_EDIT1, m_LineSizeControl);
+	DDX_Text(pDX, IDC_EDIT1, m_LineSize);
+	DDV_MinMaxInt(pDX, m_LineSize, 1, 4);
+	DDX_Control(pDX, IDC_FASTENEDTO, m_FastenToControl);
+	DDX_Text(pDX, IDC_FASTENEDTO, m_FastenTo);
+	DDX_Control(pDX, IDC_SPIN1, m_LineSpinControl);
+	m_LineSpinControl.SetRange( 1, 4 );
 
 	OnBnClickedCheck1();
-	DDX_Control( pDX, IDC_FASTENEDTO, m_FastenToControl );
-	DDX_Text( pDX, IDC_FASTENEDTO, m_FastenTo );
 
-	DDX_Control( pDX, IDC_COLOR, m_ColorControl );
+	DDX_Control(pDX, IDC_COLOR, m_ColorControl);
 
-	if( pDX->m_bSaveAndValidate )
+	if (pDX->m_bSaveAndValidate)
 		m_Color = m_ColorControl.GetColor();
 	else
-		m_ColorControl.SetColor( m_Color );
+		m_ColorControl.SetColor(m_Color);
 }
 
 BEGIN_MESSAGE_MAP(CPointPropertiesDialog, CMyDialog)
@@ -131,6 +138,25 @@ void CPointPropertiesDialog::OnBnClickedCheck1()
 {
 	m_RadiusPromptControl.EnableWindow( m_DrawCircleControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_RadiusControl.EnableWindow( m_DrawCircleControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_LinePrompt.EnableWindow( m_DrawCircleControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_LineSizeControl.EnableWindow( m_DrawCircleControl.GetCheck() != 0 ? TRUE : FALSE );
+
+	if( m_DrawCircleControl.GetCheck() != 0 )
+	{
+		CString Text;
+		m_RadiusControl.GetWindowText( Text );
+		double Value = 0.0;
+		if( !MyAfxSimpleFloatParse( Text, Value ) )
+			Value = 0.0;
+
+		if( Value == 0.0 )
+		{
+			Value = 1.0;
+			char szBuffer[64];
+			sprintf_s( szBuffer, sizeof( szBuffer ), "%.*f", 4, Value );
+			m_RadiusControl.SetWindowText( szBuffer );
+		}
+	}
 }
 
 void CPointPropertiesDialog::OnStnClickedColor()

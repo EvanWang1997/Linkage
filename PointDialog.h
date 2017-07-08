@@ -3,6 +3,7 @@
 #include "MyDialog.h"
 #include "ColorStatic.h"
 #include "NullableColor.h"
+#include "afxcmn.h"
 
 
 // CPointPropertiesDialog dialog
@@ -39,4 +40,8 @@ public:
 	afx_msg void OnStnClickedColor();
 	CColorStatic m_ColorControl;
 	CNullableColor m_Color;
+	CStatic m_LinePrompt;
+	CEdit m_LineSizeControl;
+	int m_LineSize;
+	CSpinButtonCtrl m_LineSpinControl;
 };

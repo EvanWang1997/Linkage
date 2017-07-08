@@ -424,25 +424,28 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,119,53,50,14
 END
 
-IDD_POINT_PROPERTIES DIALOGEX 0, 0, 245, 135
+IDD_POINT_PROPERTIES DIALOGEX 0, 0, 245, 150
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Point Properties"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Name:",IDC_NAMEPROMPT,51,18,22,8
     EDITTEXT        IDC_EDIT3,76,16,117,12,ES_AUTOHSCROLL
-    LTEXT           "Coordinates:",IDC_STATIC,51,56,42,8
-    EDITTEXT        IDC_EDIT2,96,54,43,12,ES_AUTOHSCROLL
-    LTEXT           ",",IDC_STATIC,142,56,8,8
-    EDITTEXT        IDC_EDIT4,150,54,43,12,ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "OK",IDOK,49,116,66,14
-    PUSHBUTTON      "Cancel",IDCANCEL,128,116,66,14
     CONTROL         "Draw Circle",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,51,36,52,10
-    LTEXT           "Radius:",IDC_RADIUSPROMPT,121,37,25,8
-    EDITTEXT        IDC_EDIT6,150,35,43,12,ES_AUTOHSCROLL
-    LTEXT           "Fastened to Link",IDC_FASTENEDTO,51,92,139,8
-    LTEXT           "Color:",IDC_STATIC,51,76,20,8
-    CONTROL         "",IDC_COLOR,"Static",SS_GRAYRECT | SS_NOTIFY,140,73,53,13
+    RTEXT           "Radius:",IDC_RADIUSPROMPT,106,37,32,8
+    EDITTEXT        IDC_EDIT6,140,35,53,12,ES_AUTOHSCROLL
+    RTEXT           "Line Size:",IDC_LINEPROMPT,106,52,32,8
+    EDITTEXT        IDC_EDIT1,140,51,53,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,199,50,18,14
+    LTEXT           "Coordinates:",IDC_STATIC,51,71,42,8
+    EDITTEXT        IDC_EDIT2,96,69,43,12,ES_AUTOHSCROLL
+    LTEXT           ",",IDC_STATIC,142,71,8,8
+    EDITTEXT        IDC_EDIT4,150,69,43,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,49,131,66,14
+    PUSHBUTTON      "Cancel",IDCANCEL,127,131,66,14
+    LTEXT           "Fastened to Link",IDC_FASTENEDTO,50,107,139,8
+    LTEXT           "Color:",IDC_STATIC,51,91,20,8
+    CONTROL         "",IDC_COLOR,"Static",SS_GRAYRECT | SS_NOTIFY,140,88,53,13
 END
 
 IDD_DRAWINGLINK_PROPERTIES DIALOGEX 0, 0, 245, 145
@@ -569,8 +572,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,5,0,0
- PRODUCTVERSION 3,5,0,0
+ FILEVERSION 3,5,2,0
+ PRODUCTVERSION 3,5,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -586,12 +589,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.5.0.0"
+            VALUE "FileVersion", "3.5.2.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2017 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.5.0.0"
+            VALUE "ProductVersion", "3.5.2.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -661,7 +664,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 236
         TOPMARGIN, 7
-        BOTTOMMARGIN, 128
+        BOTTOMMARGIN, 143
     END
 
     IDD_DRAWINGLINK_PROPERTIES, DIALOG

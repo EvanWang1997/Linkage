@@ -82,6 +82,9 @@ class CElement
 	bool IsLocked( void ) { return m_bLocked; }
 	void SetLocked( bool bLocked ) { m_bLocked = bLocked; }
 
+	int GetLineSize( void ) { return m_LineSize; }
+	void SetLineSize( int Size ) { m_LineSize = Size <= 0 ? 1 : Size; }
+
 	CElementItem * GetFastenedTo( void ) { return m_FastenedTo.GetElement() == 0 ? 0 : &m_FastenedTo; }
 	CLink * GetFastenedToLink( void ) { return m_FastenedTo.GetLink() == 0 ? 0 : m_FastenedTo.GetLink(); }
 	CConnector * GetFastenedToConnector( void ) { return m_FastenedTo.GetConnector() == 0 ? 0 : m_FastenedTo.GetConnector(); }
@@ -117,5 +120,6 @@ class CElement
 	ElementList m_FastenedElements;
 	CControlKnob m_ControlKnob;
 	bool m_bLocked;
+	int m_LineSize;
 };
 

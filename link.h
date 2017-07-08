@@ -121,8 +121,6 @@ class CLink : public CElement
 	int GetMoveCount( void ) { return m_MoveCount; }
 	void IncrementMoveCount( int Increment = +1 ) { m_MoveCount += Increment; }
 	
-	int GetLineSize( void ) { return m_LineSize; }
-	void SetLineSize( int Size ) { m_LineSize = Size <= 0 ? 1 : Size; }
 	
 	bool IsSolid( void ) { return m_bSolid; }
 	void SetSolid( bool bSolid ) { m_bSolid = bSolid; }
@@ -184,7 +182,6 @@ class CLink : public CElement
 	double m_RotationAngle;
 	double m_TempRotationAngle;			
 	int m_MoveCount;
-	int m_LineSize;
 	bool m_bNoRotateWithAnchor;
 	bool m_bSolid;
 	bool m_bActuator;

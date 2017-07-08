@@ -18,7 +18,6 @@ CLink::CLink()
 	m_bAlwaysManual = false;
 	m_ActuatorStroke = 0;
 	m_ActuatorCPM = 0;
-	m_LineSize = 1;
 	m_bSolid = 0;
 	m_ActuatorExtension = 0;
 	m_TempActuatorExtension = 0;
@@ -38,7 +37,6 @@ CLink::CLink( const CLink &ExistingLink )
 	m_bTempFixed = ExistingLink.m_bTempFixed;
 	m_Identifier = ExistingLink.m_Identifier;
 	m_MoveCount = ExistingLink.m_MoveCount;
-	m_LineSize = ExistingLink.m_LineSize;
 	m_bSolid = ExistingLink.m_bSolid;
 	m_ActuatorCPM = ExistingLink.m_ActuatorCPM;
 	m_ActuatorStroke = ExistingLink.m_ActuatorStroke;

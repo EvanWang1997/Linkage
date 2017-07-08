@@ -17,9 +17,10 @@ class CNullableColor
 
 	// Check to see if this is not set by tesing if( CNullableColor_variable == 0 )...
 	_inline bool operator==( int Value ) const { return ( !m_bIsSet && Value == 0 ) ? true : false; }
+	_inline bool operator!=( int Value ) const { return !operator==( Value ); }
 
-	// Check to see if this is set by tesing if( CNullableColor_variable != 0 )...
-	_inline bool operator!=( int Value ) const { return ( m_bIsSet && Value == 0 ) ? true : false; }
+	_inline bool operator==( CNullableColor &Other ) const { return ( m_bIsSet == Other.m_bIsSet && m_Color == Other.m_Color ) ? true : false; }
+	_inline bool operator!=( CNullableColor &Other ) const { return !operator==( Other ); }
 
 	operator const COLORREF () { return GetColor(); }
 

@@ -10,6 +10,7 @@ CElement::CElement(void)
 	m_bPositionValid = true;
 	m_FastenedTo = CElementItem();
 	m_bLocked = false;
+	m_LineSize = 1;
 }
 
 CElement::~CElement(void)
@@ -27,6 +28,7 @@ CElement::CElement( const CElement &ExistingElement )
 	m_Color = ExistingElement.m_Color;
 	m_FastenedTo = CElementItem();
 	m_bLocked = ExistingElement.m_bLocked;
+	m_LineSize = ExistingElement.m_LineSize;
 	// The fastening is not copied because that seems just wrong - someother element can't be fastened to more than one element at a time.
 }
 
