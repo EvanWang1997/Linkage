@@ -5047,6 +5047,13 @@ void CLinkageView::OnRButtonUp(UINT nFlags, CPoint MousePoint)
 	if( m_bSimulating )
 		return;
 
+	if( !m_bMouseMovedEnough && m_bShowParts )
+	{
+		if( AfxMessageBox( "The Parts List cannot be modified. Would you like to turn off the Parts List view?", MB_YESNO ) == IDYES )
+			OnViewParts();
+		return;
+	}
+
 	if( !m_bMouseMovedEnough && m_bAllowEdit )
 	{
 		CLinkageDoc* pDoc = GetDocument();
