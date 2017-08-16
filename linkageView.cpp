@@ -2284,7 +2284,6 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 	#else
 		CRenderer Renderer( pDC->IsPrinting() ? CRenderer::WINDOWS_PRINTER_GDI : CRenderer::WINDOWS_GDI );
 	#endif
-    CBitmap Bitmap;
 
 	/*
 	 * Forcing a scale that is not 1.0 will result in slow framerates during editing
@@ -2292,24 +2291,24 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 	 * when saving a video animation of the mechanism.
 	 */
 
+	CBitmap Bitmap;
     PrepareRenderer( Renderer, 0, &Bitmap, pDC, 1.0, false, 0.0, 1.0, !pDC->IsPrinting(), false, m_bPrintFullSize, pPrintInfo == 0 ? 0 : pPrintInfo->m_nCurPage - 1 );
 
-//TEST CODE FOR BITMAP DRAWING FROM A FILE...
-#if 0
-CImage image;
-image.Load(_T("C:\\Users\\David\\OneDrive\\Pictures\\Screenshots\\2016-11-28 (3).png")); // just change extension to load jpg
-int cx = image.GetWidth();
-int cy = image.GetHeight();
-CBitmap bitmap;
-bitmap.Attach(image.Detach());
-
-CDC MemDC;
-MemDC.CreateCompatibleDC( pDC );
-MemDC.SelectObject( &bitmap );
-
-Renderer.GetDC()->BitBlt( 0, 0, cx, cy, &MemDC, 0, 0, SRCCOPY );
-#endif
 	Renderer.BeginDraw();
+
+	if( 0 )
+	{
+		//TEST CODE FOR BITMAP DRAWING FROM A FILE...
+		static CRendererBitmap * TheBitmap = 0;
+		if( TheBitmap == 0 )
+			TheBitmap = Renderer.LoadRendererBitmapFromFile( "C:\\Users\\David\\Pictures\\2016-06-11 (19).jpg" );
+
+		CFRect Rect( -(TheBitmap->width/2), -(TheBitmap->height/2), -(TheBitmap->width/2) + TheBitmap->width, -(TheBitmap->height/2) + TheBitmap->height );
+		Rect = Scale( Rect );
+
+		Renderer.DrawRendererBitmap( TheBitmap, Rect );
+	}
+
 
 	DoDraw( &Renderer );
 

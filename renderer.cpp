@@ -206,6 +206,8 @@ class CRendererImplementation
 	//virtual COLORREF SetPixel( double x, double y, COLORREF crColor ) = 0;
 	virtual void BeginDraw( void ) {}
 	virtual void EndDraw( void ) {}
+	virtual CRendererBitmap * LoadRendererBitmapFromFile( const char *uri ) { return 0; }
+	virtual void DrawRendererBitmap( CRendererBitmap* TheBitmap, CFRect Rect ) {}
 
 	virtual int ExpandPolygonCorner( CFPoint &Point, CFPoint &PreviousPoint, CFPoint &NextPoint, double Distance, CFPoint &NewPoint1, CFPoint &NewPoint2 )
 	{
@@ -1765,6 +1767,119 @@ class CD2DRenderer : public CRendererImplementation
 		return pDWriteFactor;
 	}
 
+	static IWICImagingFactory* GetWICFactory( void ) 
+	{ 
+		static IWICImagingFactory* pWICFactory = 0; 
+		if( pWICFactory == 0 )
+		{
+			HRESULT hr = CoCreateInstance( 
+				CLSID_WICImagingFactory, 
+				nullptr, 
+				CLSCTX_INPROC_SERVER, 
+				IID_PPV_ARGS( &pWICFactory ) ); 
+			if( !SUCCEEDED( hr ) ) 
+			{ 
+				pWICFactory = -0;
+			} 
+ 		}
+
+		return pWICFactory; 
+	} 
+
+	virtual void DrawRendererBitmap( CRendererBitmap *TheBitmap, CFRect Rect )
+	{
+		ID2D1Bitmap *pBitmap = (ID2D1Bitmap*)TheBitmap->pImplementation;
+
+		Rect = Scale( Rect );
+
+        // Retrieve the size of the bitmap.
+        // D2D1_SIZE_F size = pBitmap->GetSize();
+
+        m_pRenderTarget->DrawBitmap(
+            pBitmap,
+            D2D1::RectF(
+                (float)Rect.left,
+                (float)Rect.top,
+                (float)Rect.right,
+                (float)Rect.bottom ),
+            0.5F,
+            D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
+            );
+	}
+
+	// 
+	// Creates a Direct2D bitmap from the specified 
+	// file name. 
+	// 
+	virtual CRendererBitmap * LoadRendererBitmapFromFile( const char *uri ) 
+	{ 
+		GetRenderTarget();
+		if( m_pRenderTarget == 0 )
+			return 0;
+
+		ID2D1Bitmap * bitmap = 0;
+
+		HRESULT hr = S_OK; 
+ 
+		IWICBitmapDecoder* decoder; 
+		IWICBitmapFrameDecode* bitmapSource; 
+		IWICFormatConverter* converter; 
+		IWICImagingFactory* wicFactory = GetWICFactory();; 
+ 
+		size_t length = strlen( uri );
+		wchar_t* wc = new wchar_t[length+1];
+		size_t Count = 0;
+		mbstowcs_s( &Count, &wc[0], length+1, uri, length );
+
+		hr = wicFactory->CreateDecoderFromFilename( 
+			wc, 
+			nullptr, 
+			GENERIC_READ, 
+			WICDecodeMetadataCacheOnLoad, 
+			&decoder ); 
+ 
+		if (SUCCEEDED(hr)) 
+		{ 
+			// Create the initial frame. 
+			hr = decoder->GetFrame(0, &bitmapSource); 
+		} 
+ 
+		if (SUCCEEDED(hr)) 
+		{ 
+			// Convert the image format to 32bppPBGRA 
+			// (DXGI_FORMAT_B8G8R8A8_UNORM + D2D1_ALPHA_MODE_PREMULTIPLIED). 
+			hr = wicFactory->CreateFormatConverter(&converter); 
+		} 
+ 
+		if (SUCCEEDED(hr)) 
+		{ 
+			hr = converter->Initialize( 
+				bitmapSource, 
+				GUID_WICPixelFormat32bppPBGRA, 
+				WICBitmapDitherTypeNone, 
+				nullptr, 
+				0.f, 
+				WICBitmapPaletteTypeMedianCut); 
+		} 
+ 
+		if (SUCCEEDED(hr)) 
+		{ 
+			// Create a Direct2D bitmap from the WIC bitmap. 
+			hr = m_pRenderTarget->CreateBitmapFromWicBitmap( 
+				converter, 
+				nullptr, 
+				&bitmap); 
+
+			CRendererBitmap *pBitmap = new CRendererBitmap;
+			pBitmap->width = bitmap->GetPixelSize().width;
+			pBitmap->height = bitmap->GetPixelSize().height;
+			pBitmap->pImplementation = (void*)bitmap;
+			return pBitmap; 
+		} 
+		else
+			return 0;
+	} 
+
 	CCustomPenInfo  m_CustomPenInfo;
 	CList<CPen*,CPen*> m_CreatedPens;
 	ID2D1StrokeStyle *m_pSolidLineStroke = 0;
@@ -1778,7 +1893,7 @@ class CD2DRenderer : public CRendererImplementation
 	CFont m_ScaledFont;
 	CPen m_ScaledPen;
 	CFPoint m_CurrentPosition;
-	ID2D1DCRenderTarget * m_pRenderTarget;
+	static ID2D1DCRenderTarget * m_pRenderTarget;
 	CRect m_Rect;
 	IDWriteTextFormat* m_pTextFormat;
 	double m_FontHeight;
@@ -1794,7 +1909,7 @@ class CD2DRenderer : public CRendererImplementation
 		m_Scale = 1.0;
 		m_bCreatedFont = false;
 		m_pDC = 0;
-		m_pRenderTarget = 0;
+		//m_pRenderTarget = 0;
 		m_pTextFormat = 0;
 		m_FontHeight = 0;
 		m_TextAlign = TA_LEFT | TA_BOTTOM;
@@ -1832,8 +1947,8 @@ class CD2DRenderer : public CRendererImplementation
 			m_DashedLineStroke->Release();
 		if( m_pCustomStroke != 0 )
 			m_pCustomStroke->Release();
-		if( m_pRenderTarget != 0 )
-			m_pRenderTarget->Release();
+		//if( m_pRenderTarget != 0 )
+		//	m_pRenderTarget->Release();
 	}
 
 	virtual void BeginDraw( void ) 
@@ -2692,27 +2807,45 @@ class CD2DRenderer : public CRendererImplementation
 
 		CBitmap *pOldBitmap = m_pDC->SelectObject( pBitmap );
 
-		ID2D1Factory* pD2D1Factory = GetD2D1Factory();
-		if( pD2D1Factory == 0 )
-			return pOldBitmap;
-
-		D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
-			D2D1_RENDER_TARGET_TYPE_DEFAULT,
-			D2D1::PixelFormat(
-				DXGI_FORMAT_B8G8R8A8_UNORM,
-				D2D1_ALPHA_MODE_IGNORE),
-			0,
-			0,
-			D2D1_RENDER_TARGET_USAGE_NONE,
-			D2D1_FEATURE_LEVEL_DEFAULT
-			);
-
-		HRESULT hr = pD2D1Factory->CreateDCRenderTarget( &props, &m_pRenderTarget );
-
-		hr = m_pRenderTarget->BindDC( m_pDC->GetSafeHdc(), &m_Rect );
-		m_pRenderTarget->SetTransform(D2D1::Matrix3x2F::Identity());
+		GetRenderTarget(); // Sets the member variable so ignore the return value
+		if( m_pRenderTarget != 0 )
+		{
+			HRESULT hr = m_pRenderTarget->BindDC( m_pDC->GetSafeHdc(), &m_Rect );
+			m_pRenderTarget->SetTransform( D2D1::Matrix3x2F::Identity() );
+		}
 
 		return pOldBitmap; 
+	}
+
+	ID2D1DCRenderTarget * GetRenderTarget( void )
+	{
+		//if( m_pRenderTarget != 0 ) // Getting a new render target for each d
+		//{
+		//	m_pRenderTarget->Release();
+		//	m_pRenderTarget = 0;
+		//}
+
+		if( m_pRenderTarget == 0 )
+		{
+			ID2D1Factory* pD2D1Factory = GetD2D1Factory();
+			if( pD2D1Factory == 0 )
+				return 0;
+
+			D2D1_RENDER_TARGET_PROPERTIES props = D2D1::RenderTargetProperties(
+				D2D1_RENDER_TARGET_TYPE_DEFAULT,
+				D2D1::PixelFormat(
+					DXGI_FORMAT_B8G8R8A8_UNORM,
+					D2D1_ALPHA_MODE_IGNORE),
+				0,
+				0,
+				D2D1_RENDER_TARGET_USAGE_NONE,
+				D2D1_FEATURE_LEVEL_DEFAULT
+				);
+
+			HRESULT hr = pD2D1Factory->CreateDCRenderTarget( &props, &m_pRenderTarget );
+		}
+
+		return m_pRenderTarget;
 	}
 
 	int SelectObject( CRgn* pRgn )
@@ -3248,3 +3381,21 @@ CRenderer::CRenderer( enum _RenderDestination RendererDestination )
 			m_pImplementation = new CNullRenderer( false );
 	}
 }
+
+CRendererBitmap * CRenderer::LoadRendererBitmapFromFile( const char *uri ) 
+{
+	if( m_pImplementation == 0 )
+		return 0;
+
+	return m_pImplementation->LoadRendererBitmapFromFile( uri );
+}
+
+void CRenderer::DrawRendererBitmap( CRendererBitmap * TheBitmap, CFRect Rect )
+{
+	if( m_pImplementation == 0 )
+		return;
+
+	return m_pImplementation->DrawRendererBitmap( TheBitmap, Rect );
+}
+
+ID2D1DCRenderTarget * CD2DRenderer::m_pRenderTarget = 0;

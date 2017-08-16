@@ -5,6 +5,21 @@
 #include "geometry.h"
 #include "DXFFile.h"
 
+class CRendererBitmap
+{
+	public:
+	CRendererBitmap()
+	{
+		width = 0;
+		height = 0;
+		pImplementation = 0;
+	}
+	double width;
+	double height;
+	void *pImplementation;
+};
+
+
 class CRenderer// : public CDC
 {
 	public:
@@ -95,6 +110,9 @@ class CRenderer// : public CDC
 	CFPoint GetTextExtent( const char *pString, int Count );
 
 	bool IsPrinting( void );
+
+	CRendererBitmap* LoadRendererBitmapFromFile( const char *uri );
+	void DrawRendererBitmap( CRendererBitmap* TheBitmap, CFRect Rect );
 
 	private:
 
