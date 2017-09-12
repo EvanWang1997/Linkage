@@ -59,6 +59,7 @@ private:
 	void CreateMainCategory( void );
 	CMFCRibbonCategory *CreateCategory( CMyMFCRibbonBar *pRibbonBar, UINT StringId );
 	void CreateHomeCategory( void );
+	void CreateBackgroundCategory( void );
 	void CreatePrintingCategory( void );
 	void CreateQuickAccessCommands( void );
 	//void CreateSamplePanel( CMFCRibbonCategory* pCategory );
@@ -74,6 +75,8 @@ private:
 	void CreatePrintOptionsPanel( CMFCRibbonCategory* pCategory );
 	void CreateHelpButtons( void );
 	void CreateHelpCategory( void );
+	void CreateBackgroundPanel( CMFCRibbonCategory* pCategory );
+	void CreateBackgroundViewPanel( CMFCRibbonCategory* pCategory );
 	void CreateHelpPanel( CMFCRibbonCategory* pCategory );
 	void InitializeRibbon();
 	//int FindFocusedOutlookWnd(CMFCOutlookBarTabCtrl** ppOutlookWnd);

@@ -86,6 +86,14 @@
 #define IDS_RIBBON_HELPDOC              3022
 #define ID_FILE_HELPDOC                 3023
 #define IDS_RIBBON_HELP                 3024
+#define IDS_RIBBON_BACKGROUNDCAT        3025
+#define ID_BACKGROUND_OPEN				3026
+#define ID_BACKGROUND_TRANSPARENCY		3027
+#define IDS_RIBBON_IMAGE				3028
+#define IDS_RIBBON_TRANSPARENCY			3029
+#define IDS_RIBBON_APPEARANCE			3030
+#define ID_BACKGROUND_DELETE			3031
+#define IDS_RIBBON_BACKGROUND_DELETE	3032
 #define IDB_NAVIGATION_LARGE_HC         4100
 #define IDB_PAGES                       4101
 #define IDB_PAGES_HC                    4102

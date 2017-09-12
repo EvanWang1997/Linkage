@@ -197,6 +197,10 @@ private:
 	int m_VideoEndFrames;
 	bool m_bUseVideoCounters;
 	bool m_bShowSelection;
+
+	double m_BackgroundTransparency;
+
+	CRendererBitmap *m_pBackgroundBitmap;
 	
 	CFPoint AdjustClientAreaPoint( CPoint );
 	void MarkSelection( bool bSelectionChanged, bool bUpdateRotationCenter = true );
@@ -561,6 +565,11 @@ public:
 	afx_msg void OnFileSaveImage();
 	afx_msg void OnFileSaveDXF();
 	afx_msg void OnFileSaveMotion();
+	afx_msg void OnFileOpenBackground();
+	afx_msg void OnDeleteBackground();
+	afx_msg void OnUpdateDeleteBackground( CCmdUI *pCmdUI );
+	afx_msg void OnUpdateBackgroundTransparency( CCmdUI *pCmdUI );
+	afx_msg void OnBackgroundTransparency();
 	afx_msg void OnUpdateFileSaveMotion(CCmdUI *pCmdUI);
 	virtual void OnPrepareDC(CDC* pDC, CPrintInfo* pInfo = NULL);
 	afx_msg void OnSimulateInteractive();

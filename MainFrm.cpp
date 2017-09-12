@@ -117,6 +117,27 @@ static void AddRibbonButton( CMFCRibbonPanel *pPanel, int NameID, UINT CommandID
 	pPanel->Add( new CMFCRibbonButton( CommandID, strTemp, Mode == TEXT || Mode == LARGEONLY ? -1 : ImageOffset, Mode == TEXT || Mode == SMALL ? -1 : ImageOffset) );
 }
 
+static void AddRibbonText( CMFCRibbonPanel *pPanel, int NameID )
+{
+	CValidatedString strTemp;
+	if( NameID > 0 )
+		strTemp.LoadString( NameID );
+	pPanel->Add( new CMFCRibbonLabel( strTemp ) );
+}
+
+static void AddRibbonSlider( CMFCRibbonPanel *pPanel, int NameID, UINT CommandID )
+{
+	CValidatedString strTemp;
+	if( NameID > 0 )
+		strTemp.LoadString( NameID );
+	CMFCRibbonSlider *pSlider = new CMFCRibbonSlider( CommandID );
+	pSlider->SetRange( 0, 10 );
+	pSlider->SetZoomButtons( TRUE );
+	pSlider->SetZoomIncrement( 1 );
+	pSlider->SetDescription( strTemp );
+	pPanel->Add( pSlider );
+}
+
 static void AddRibbonCheckbox( CMFCRibbonPanel *pPanel, int NameID, UINT CommandID )
 {
 	CString strTemp;
@@ -332,6 +353,21 @@ void CMainFrame::CreateHelpPanel( CMFCRibbonCategory* pCategory )
 
 	AddRibbonButton( pPanelHelp, IDS_RIBBON_HELPABOUT, ID_FILE_HELPABOUT, 91, LARGE );
 	AddRibbonButton( pPanelHelp, IDS_RIBBON_HELPDOC, ID_FILE_HELPDOC, 92, LARGE );
+}
+
+void CMainFrame::CreateBackgroundPanel( CMFCRibbonCategory* pCategory )
+{
+	CMFCRibbonPanel* pPanelBackground = AddPanel( pCategory, IDS_RIBBON_IMAGE, m_PanelImages.ExtractIcon(33) );
+
+	AddRibbonButton( pPanelBackground, IDS_RIBBON_OPEN, ID_BACKGROUND_OPEN, 1, LARGE );
+	AddRibbonButton( pPanelBackground, IDS_RIBBON_BACKGROUND_DELETE, ID_BACKGROUND_DELETE, 95, LARGE );
+}
+
+void CMainFrame::CreateBackgroundViewPanel( CMFCRibbonCategory* pCategory )
+{
+	CMFCRibbonPanel* pPanelView = AddPanel( pCategory, IDS_RIBBON_APPEARANCE, m_PanelImages.ExtractIcon(33) );
+	AddRibbonText( pPanelView, IDS_RIBBON_TRANSPARENCY );
+	AddRibbonSlider( pPanelView, 0, ID_BACKGROUND_TRANSPARENCY );
 }
 
 void CMainFrame::CreateSettingsPanel( CMFCRibbonCategory* pCategory )
@@ -684,6 +720,13 @@ void CMainFrame::CreateHelpCategory( void )
 	CreateHelpPanel( pCategoryHelp );
 }
 
+void CMainFrame::CreateBackgroundCategory( void )
+{
+	CMFCRibbonCategory* pCategoryBackground = CreateCategory( &m_wndRibbonBar, IDS_RIBBON_BACKGROUNDCAT );
+	CreateBackgroundPanel( pCategoryBackground );
+	CreateBackgroundViewPanel( pCategoryBackground );
+}
+
 void CMainFrame::CreateHomeCategory( void )
 {
 	CMFCRibbonCategory* pCategoryHome = CreateCategory( &m_wndRibbonBar, IDS_RIBBON_HOME );
@@ -717,6 +760,7 @@ void CMainFrame::InitializeRibbon()
 	CreateMainCategory();
 	CreateHomeCategory();
 	CreatePrintingCategory();
+	CreateBackgroundCategory();
 	CreateHelpCategory();
 	CreateQuickAccessCommands();
 	CreateHelpButtons();
@@ -925,10 +969,11 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 		case 0: CreateMainCategory(); break;
 		case 1: CreateHomeCategory(); break;
 		case 2: CreatePrintingCategory(); break;
-		case 3: CreateHelpCategory(); break;
-		case 4: CreateHelpButtons(); break;
-		case 5: CreateQuickAccessCommands(); break;
-		case 6: 
+		case 3: CreateBackgroundCategory(); break;
+		case 4: CreateHelpCategory(); break;
+		case 5: CreateHelpButtons(); break;
+		case 6: CreateQuickAccessCommands(); break;
+		case 7: 
 		{
 			KillTimer( nIDEvent ); 
 			SetCursor( AfxGetApp()->LoadStandardCursor( IDC_ARROW ) ); 

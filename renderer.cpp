@@ -9,6 +9,11 @@
 #include <dwrite.h>
 #endif
 
+CRendererBitmap::~CRendererBitmap()
+{
+	
+}
+
 class CCustomPenInfo
 {
 	#define MAX_CUSTOM_PATTERN 10
@@ -206,8 +211,9 @@ class CRendererImplementation
 	//virtual COLORREF SetPixel( double x, double y, COLORREF crColor ) = 0;
 	virtual void BeginDraw( void ) {}
 	virtual void EndDraw( void ) {}
-	virtual CRendererBitmap * LoadRendererBitmapFromFile( const char *uri ) { return 0; }
-	virtual void DrawRendererBitmap( CRendererBitmap* TheBitmap, CFRect Rect ) {}
+	virtual CRendererBitmap * LoadRendererBitmapFromMemory( const unsigned char *pData, size_t Length ) { return 0; }
+	virtual void DrawRendererBitmap( CRendererBitmap* TheBitmap, CFRect Rect, double Transparency ) {}
+	void DeleteRendererBitmap( CRendererBitmap* pBitmap ) {}
 
 	virtual int ExpandPolygonCorner( CFPoint &Point, CFPoint &PreviousPoint, CFPoint &NextPoint, double Distance, CFPoint &NewPoint1, CFPoint &NewPoint2 )
 	{
@@ -1786,7 +1792,7 @@ class CD2DRenderer : public CRendererImplementation
 		return pWICFactory; 
 	} 
 
-	virtual void DrawRendererBitmap( CRendererBitmap *TheBitmap, CFRect Rect )
+	virtual void DrawRendererBitmap( CRendererBitmap *TheBitmap, CFRect Rect, double Transparency )
 	{
 		ID2D1Bitmap *pBitmap = (ID2D1Bitmap*)TheBitmap->pImplementation;
 
@@ -1802,7 +1808,7 @@ class CD2DRenderer : public CRendererImplementation
                 (float)Rect.top,
                 (float)Rect.right,
                 (float)Rect.bottom ),
-            0.5F,
+            1.0f - Transparency,
             D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
             );
 	}
@@ -1811,7 +1817,7 @@ class CD2DRenderer : public CRendererImplementation
 	// Creates a Direct2D bitmap from the specified 
 	// file name. 
 	// 
-	virtual CRendererBitmap * LoadRendererBitmapFromFile( const char *uri ) 
+	virtual CRendererBitmap * LoadRendererBitmapFromMemory( const unsigned char *pData, size_t Length ) 
 	{ 
 		GetRenderTarget();
 		if( m_pRenderTarget == 0 )
@@ -1826,15 +1832,24 @@ class CD2DRenderer : public CRendererImplementation
 		IWICFormatConverter* converter; 
 		IWICImagingFactory* wicFactory = GetWICFactory();; 
  
-		size_t length = strlen( uri );
-		wchar_t* wc = new wchar_t[length+1];
-		size_t Count = 0;
-		mbstowcs_s( &Count, &wc[0], length+1, uri, length );
+		IWICStream *pIWICStream = 0;
 
-		hr = wicFactory->CreateDecoderFromFilename( 
-			wc, 
+		// Create a WIC stream to map onto the memory.
+		if (SUCCEEDED(hr)){
+		   hr = wicFactory->CreateStream(&pIWICStream);
+		}
+
+		// Initialize the stream with the memory pointer and size.
+		if (SUCCEEDED(hr))
+		{
+		   hr = pIWICStream->InitializeFromMemory(
+				 (WICInProcPointer)pData,
+				 Length );
+		}
+
+		hr = wicFactory->CreateDecoderFromStream(
+			pIWICStream, 
 			nullptr, 
-			GENERIC_READ, 
 			WICDecodeMetadataCacheOnLoad, 
 			&decoder ); 
  
@@ -1874,6 +1889,7 @@ class CD2DRenderer : public CRendererImplementation
 			pBitmap->width = bitmap->GetPixelSize().width;
 			pBitmap->height = bitmap->GetPixelSize().height;
 			pBitmap->pImplementation = (void*)bitmap;
+			//pBitmap->pImplementation2 = (void*)m_pRenderTarget;
 			return pBitmap; 
 		} 
 		else
@@ -2916,6 +2932,8 @@ class CD2DRenderer : public CRendererImplementation
 	}
 };
 
+ID2D1DCRenderTarget * CD2DRenderer::m_pRenderTarget = 0;
+
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -3382,20 +3400,29 @@ CRenderer::CRenderer( enum _RenderDestination RendererDestination )
 	}
 }
 
-CRendererBitmap * CRenderer::LoadRendererBitmapFromFile( const char *uri ) 
+CRendererBitmap * CRenderer::LoadRendererBitmapFromMemory( const unsigned char *pData, size_t Length ) 
 {
 	if( m_pImplementation == 0 )
 		return 0;
 
-	return m_pImplementation->LoadRendererBitmapFromFile( uri );
+	return m_pImplementation->LoadRendererBitmapFromMemory( pData, Length );
 }
 
-void CRenderer::DrawRendererBitmap( CRendererBitmap * TheBitmap, CFRect Rect )
+void CRenderer::DrawRendererBitmap( CRendererBitmap * TheBitmap, CFRect Rect, double Transparency )
 {
 	if( m_pImplementation == 0 )
 		return;
 
-	return m_pImplementation->DrawRendererBitmap( TheBitmap, Rect );
+	return m_pImplementation->DrawRendererBitmap( TheBitmap, Rect, Transparency );
 }
 
-ID2D1DCRenderTarget * CD2DRenderer::m_pRenderTarget = 0;
+void CRenderer::DeleteRendererBitmap( CRendererBitmap* pBitmap )
+{
+	#if defined( LINKAGE_USE_DIRECT2D )
+		ID2D1Bitmap *pD2DBitmap = (ID2D1Bitmap*)pBitmap->pImplementation;
+		if( pD2DBitmap != 0 )
+			pD2DBitmap->Release();
+	#endif
+}
+
+

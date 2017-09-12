@@ -9,7 +9,8 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -846,6 +847,7 @@ END
 
 STRINGTABLE
 BEGIN
+	IDS_RIBBON_BACKGROUND_DELETE "&Remove"
     ID_VIEW_LARGEFONT       "Use the large for for labels and other text.\nLarge Text"
     ID_INSERT_GEAR          "Add a gear to the mechanism.\nInsert Gear"
     IDS_RIBBON_INSERTGEAR   "Gear"
@@ -892,6 +894,10 @@ BEGIN
     ID_EDIT_SET_RATIO       "Set the gear or chain/pulley ratio.\nSet Ratio"
     IDS_RIBBON_SET_RATIO    "Ratio"
     IDS_RIBBON_HELPCAT      "&Help"
+	IDS_RIBBON_BACKGROUNDCAT "&Background"
+	IDS_RIBBON_IMAGE		"Image"
+	IDS_RIBBON_TRANSPARENCY	"Transparency"
+	IDS_RIBBON_APPEARANCE	"Appearance"
     IDS_RIBBON_HELPABOUT    "About Linkage\nShow version and copyright information for this program."
     IDS_RIBBON_HELPDOC      "User's Guide\nOpen the PDF user's guide document."
 END

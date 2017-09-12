@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "geometry.h"
 #include "DXFFile.h"
+#include <istream>
 
 class CRendererBitmap
 {
@@ -14,11 +15,11 @@ class CRendererBitmap
 		height = 0;
 		pImplementation = 0;
 	}
+	~CRendererBitmap();
 	double width;
 	double height;
 	void *pImplementation;
 };
-
 
 class CRenderer// : public CDC
 {
@@ -111,8 +112,9 @@ class CRenderer// : public CDC
 
 	bool IsPrinting( void );
 
-	CRendererBitmap* LoadRendererBitmapFromFile( const char *uri );
-	void DrawRendererBitmap( CRendererBitmap* TheBitmap, CFRect Rect );
+	CRendererBitmap* LoadRendererBitmapFromMemory( const unsigned char *pData, size_t Length );
+	void DrawRendererBitmap( CRendererBitmap* TheBitmap, CFRect Rect, double Transparency );
+	static void DeleteRendererBitmap( CRendererBitmap* pBitmap );
 
 	private:
 

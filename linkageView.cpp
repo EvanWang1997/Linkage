@@ -34,6 +34,7 @@
 #include "LengthDistanceDialog.h"
 #include "RotateDialog.h"
 #include "ScaleDialog.h"
+#include <fstream>
 
 #include <algorithm>
 #include <vector>
@@ -178,16 +179,6 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_DIMENSION_ROTATE, &CLinkageView::OnUpdateEditRotate)
 	ON_COMMAND(ID_DIMENSION_SCALE, &CLinkageView::OnEditScale)
 	ON_UPDATE_COMMAND_UI(ID_DIMENSION_SCALE, &CLinkageView::OnUpdateEditScale)
-
-
-
-
-
-
-
-
-
-
 
 	ON_COMMAND(ID_EDIT_MAKEANCHOR, &CLinkageView::OnEditmakeAnchor)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MAKEANCHOR, &CLinkageView::OnUpdateEditmakeAnchor)
@@ -359,6 +350,12 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_FILE_SAVEIMAGE, &OnFileSaveImage)
 	ON_COMMAND(ID_FILE_SAVEDXF, &OnFileSaveDXF)
 	ON_COMMAND(ID_FILE_SAVEMOTION, &OnFileSaveMotion)
+	ON_COMMAND(ID_BACKGROUND_OPEN, &OnFileOpenBackground)
+	ON_COMMAND(ID_BACKGROUND_TRANSPARENCY, &OnBackgroundTransparency)
+	ON_UPDATE_COMMAND_UI(ID_BACKGROUND_TRANSPARENCY, &OnUpdateBackgroundTransparency)
+	ON_COMMAND(ID_BACKGROUND_DELETE, &OnDeleteBackground)
+	ON_UPDATE_COMMAND_UI(ID_BACKGROUND_DELETE, &OnUpdateDeleteBackground)
+	
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVEMOTION, &CLinkageView::OnUpdateFileSaveMotion)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CLinkageView::OnFilePrintPreview)
@@ -422,6 +419,7 @@ CLinkageView::CLinkageView()
 	m_bMouseMovedEnough = false;
 	m_bSuperHighlight = false;
 	m_YUpDirection = -1;
+	m_BackgroundTransparency = 0.0;
 
 	m_bRequestAbort = false;
 	m_bProcessingVideoThread = false;
@@ -432,6 +430,7 @@ CLinkageView::CLinkageView()
 	m_VideoEndFrames = 0;
 	m_bUseVideoCounters = false;
 	m_bShowSelection = true;
+	m_pBackgroundBitmap = 0;
 
 	m_SelectedEditLayers = CLinkageDoc::ALLLAYERS;
 	m_SelectedViewLayers = CLinkageDoc::ALLLAYERS;
@@ -1035,7 +1034,7 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 
 		if( bScaleToFit )
 		{
-			if( bEmpty )
+			if( bEmpty && m_pBackgroundBitmap == 0 )
 			{
 				m_Zoom = 1;
 				m_ScrollPosition.x = 0;
@@ -1466,6 +1465,16 @@ CFRect CLinkageView::GetDocumentArea( bool bWithDimensions, bool bSelectedOnly )
 
 	CFRect Rect;
 	pDoc->GetDocumentArea( Rect, bSelectedOnly );
+
+	if( !bSelectedOnly && !m_bShowParts && m_pBackgroundBitmap != 0 )
+	{
+		CFRect BackgroundRect( -(m_pBackgroundBitmap->width/2), -(m_pBackgroundBitmap->height/2), -(m_pBackgroundBitmap->width/2) + m_pBackgroundBitmap->width, -(m_pBackgroundBitmap->height/2) + m_pBackgroundBitmap->height );
+		//BackgroundRect = Scale( BackgroundRect );
+		// rect is already in document coordinates and can be used as-is.
+		CFArea AreaRect = Rect;
+		AreaRect += BackgroundRect;
+		Rect = AreaRect;
+	}
 
 //	if( !bWithDimensions )
 //		return Rect;
@@ -2102,7 +2111,7 @@ CFArea CLinkageView::DrawPartsList( CRenderer* pRenderer )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	// get the original document area, not the one for the parts list!
+	// get the original document area just to get the top left corner for placing the parts list contents.
 	CFRect Area;
 	pDoc->GetDocumentArea( Area );
 
@@ -2296,19 +2305,13 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 
 	Renderer.BeginDraw();
 
-	if( 0 )
+	if( m_pBackgroundBitmap != 0 )
 	{
-		//TEST CODE FOR BITMAP DRAWING FROM A FILE...
-		static CRendererBitmap * TheBitmap = 0;
-		if( TheBitmap == 0 )
-			TheBitmap = Renderer.LoadRendererBitmapFromFile( "C:\\Users\\David\\Pictures\\2016-06-11 (19).jpg" );
-
-		CFRect Rect( -(TheBitmap->width/2), -(TheBitmap->height/2), -(TheBitmap->width/2) + TheBitmap->width, -(TheBitmap->height/2) + TheBitmap->height );
+		CFRect Rect( -(m_pBackgroundBitmap->width/2), -(m_pBackgroundBitmap->height/2), -(m_pBackgroundBitmap->width/2) + m_pBackgroundBitmap->width, -(m_pBackgroundBitmap->height/2) + m_pBackgroundBitmap->height );
 		Rect = Scale( Rect );
 
-		Renderer.DrawRendererBitmap( TheBitmap, Rect );
+		Renderer.DrawRendererBitmap( m_pBackgroundBitmap, Rect, m_BackgroundTransparency );
 	}
-
 
 	DoDraw( &Renderer );
 
@@ -5176,7 +5179,7 @@ void CLinkageView::OnMenuZoomfit()
 
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	if( pDoc->IsEmpty() )
+	if( pDoc->IsEmpty() && m_pBackgroundBitmap == 0 )
 	{
 		m_ScreenZoom = 1;
 		m_ScreenScrollPosition.x = 0;
@@ -5223,9 +5226,7 @@ void CLinkageView::SetPrinterOrientation( void )
 	CLinkageApp *pApp = (CLinkageApp*)AfxGetApp();
 	if( pApp == 0 )
 		return;
-	CFRect DocumentArea;
-	CLinkageDoc* pDoc = GetDocument();
-	DocumentArea = GetDocumentArea();
+	CFRect DocumentArea = GetDocumentArea( m_bShowDimensions );
 
 	if( fabs( DocumentArea.Width() ) >= fabs( DocumentArea.Height() ) )
 		pApp->SetPrinterOrientation( DMORIENT_LANDSCAPE );
@@ -5583,7 +5584,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 				LockLocation.x += m_ConnectorRadius;
 				LockLocation.y += AdjustYCoordinate( m_ConnectorRadius );
 				DrawLock( pRenderer, LockLocation );
-				dx += (int)UnscaledUnits( 12 );
+				dx += UnscaledUnits( 12 );
 			}
 
 			CString &Name = pConnector->GetName();
@@ -6908,7 +6909,7 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 		 */
 
 		double Offset = OFFSET_INCREMENT;
-		int NextOffset = 0;
+		double NextOffset = 0;
 		int StartPointInList = 0;
 
 		// Find start point in list.
@@ -6921,7 +6922,7 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 			}
 		}
 
-		NextOffset = (int)ConnectorReference[0].m_Distance;
+		NextOffset = /*(int)*/ConnectorReference[0].m_Distance;
 
 		// Points before the start point on the orientation line.
 		for( int Counter = StartPointInList - 1; Counter >= 0; --Counter )
@@ -7260,14 +7261,14 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 				Average.x += LinkLabelOffset;
 			}
 
-			int Spacing = 0;
+			double Spacing = 0;
 			if( pLink->IsLocked() )
 			{
 				CFPoint LockLocation( Average );
 				LockLocation.x += m_ConnectorRadius;
 				LockLocation.y += AdjustYCoordinate( m_ConnectorRadius );
 				DrawLock( pRenderer, LockLocation );
-				Spacing += (int)UnscaledUnits( 12 );
+				Spacing += /*(int)*/UnscaledUnits( 12 );
 			}
 
 			pRenderer->TextOut( Average.x + Spacing, Average.y, Number );
@@ -8012,16 +8013,16 @@ void CLinkageView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 {
 	if( pDC->IsPrinting() )
 	{
-		CLinkageDoc* pDoc = GetDocument();
-		ASSERT_VALID(pDoc);
-		CFRect Area = GetDocumentArea();
-		if( Area.Width() > Area.Height() )
-		{
-			DEVMODE* pDevMode = pInfo->m_pPD->GetDevMode();
+		CFRect DocumentArea = GetDocumentArea( m_bShowDimensions );
+
+		DEVMODE* pDevMode = pInfo->m_pPD->GetDevMode();
+		if( fabs( DocumentArea.Width() ) >= fabs( DocumentArea.Height() ) )
 			pDevMode->dmOrientation = DMORIENT_LANDSCAPE;
-			pDevMode->dmFields |= DM_ORIENTATION;
-			pDC->ResetDC( pDevMode );
-		}
+		else
+			pDevMode->dmOrientation = DMORIENT_PORTRAIT;
+
+		pDevMode->dmFields |= DM_ORIENTATION;
+		pDC->ResetDC( pDevMode );
 	}
 
 	CView::OnPrepareDC(pDC, pInfo);
@@ -8107,6 +8108,38 @@ void CLinkageView::OnFileSaveDXF()
 	SaveAsDXF( dlg.GetPathName() );
 }
 
+void CLinkageView::OnUpdateBackgroundTransparency( CCmdUI *pCmdUI )
+{
+	pCmdUI->Enable( m_pBackgroundBitmap != 0 );
+}
+
+void CLinkageView::OnBackgroundTransparency()
+{
+	CMFCRibbonBar *pRibbon = ((CFrameWndEx*) AfxGetMainWnd())->GetRibbonBar();
+	if( pRibbon == 0 )
+		return;
+	CMFCRibbonSlider * pSlider = DYNAMIC_DOWNCAST( CMFCRibbonSlider, pRibbon->FindByID( ID_BACKGROUND_TRANSPARENCY ) );
+	if( pSlider == 0 )
+		return;
+	m_BackgroundTransparency = (double)pSlider->GetPos() / (double)pSlider->GetRangeMax();
+	UpdateForDocumentChange();
+}
+
+void CLinkageView::OnDeleteBackground()
+{
+	if( m_pBackgroundBitmap != 0 )
+	{
+		delete m_pBackgroundBitmap;
+		m_pBackgroundBitmap = 0;
+	}
+	UpdateForDocumentChange();
+}
+
+void CLinkageView::OnUpdateDeleteBackground( CCmdUI *pCmdUI )
+{
+	pCmdUI->Enable( m_pBackgroundBitmap != 0 );
+}
+
 void CLinkageView::OnUpdateFileSaveMotion( CCmdUI *pCmdUI )
 {
 	CLinkageDoc* pDoc = GetDocument();
@@ -8134,6 +8167,57 @@ void CLinkageView::OnUpdateFileSaveMotion( CCmdUI *pCmdUI )
 	}
 
 	pCmdUI->Enable( Count > 0 );
+}
+
+void CLinkageView::OnFileOpenBackground()
+{
+	#if defined( LINKAGE_USE_DIRECT2D )
+		CFileDialog dlg( TRUE, "", 0, 0, "JPEG Files (*.jpg)|*.jpg|PNG Files (*.png)|*.png|All Supported Image Files (*.jpg;*.png)|*.jpg;*.png|All Files (*.*)|*.*||" );
+		dlg.m_ofn.lpstrTitle = "Import Background Image";
+		dlg.m_ofn.Flags |= OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR | OFN_NONETWORKBUTTON;
+		if( dlg.DoModal() != IDOK )
+			return;
+
+		CFile BackgroundFile;
+		if( !BackgroundFile.Open( dlg.GetPathName(), CFile::modeRead ) )
+		{
+			AfxMessageBox( "The selected file cannot be opened.", MB_OKCANCEL | MB_ICONEXCLAMATION );
+			return;
+		}
+		BackgroundFile.Close();
+
+		if( m_pBackgroundBitmap != 0 )
+		{
+			delete m_pBackgroundBitmap;
+			m_pBackgroundBitmap = 0;
+		}
+
+		std::ifstream file(  dlg.GetPathName(), std::ios::binary | std::ios::ate );
+		std::streamsize size = file.tellg();
+		file.seekg( 0, std::ios::beg );
+
+		if( size > 0 )
+		{
+			CRenderer Renderer( CRenderer::WINDOWS_D2D );
+
+			// Maybe slow and wrong to create a renderer but the D2D stuff is needed for this.
+			CBitmap Bitmap;
+			PrepareRenderer( Renderer, 0, 0, 0, 1.0, false, 0.0, 1.0, false, false, false, 0 );
+
+			std::vector<char> buffer( (size_t)size );
+			if( file.read( buffer.data(), (size_t)size ) )
+				m_pBackgroundBitmap = Renderer.LoadRendererBitmapFromMemory( (const unsigned char*)buffer.data(), (size_t)size );
+		}
+		else
+		{
+			AfxMessageBox( "The selected file cannot be opened.", MB_OKCANCEL | MB_ICONEXCLAMATION );
+			return;
+		}
+
+		file.close();
+
+		UpdateForDocumentChange();
+	#endif
 }
 
 void CLinkageView::OnFileSaveMotion()

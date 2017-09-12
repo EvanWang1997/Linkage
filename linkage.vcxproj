@@ -744,6 +744,7 @@ exit 0
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AboutDialog.h" />
+    <ClInclude Include="Base64.h" />
     <ClInclude Include="ControlKnob.h" />
     <ClInclude Include="AngleDialog.h" />
     <ClInclude Include="AnimatedGifFile.h" />
@@ -831,6 +832,7 @@ exit 0
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutDialog.cpp" />
+    <ClCompile Include="Base64.cpp" />
     <ClCompile Include="ControlKnob.cpp" />
     <ClCompile Include="AngleDialog.cpp" />
     <ClCompile Include="AnimatedGifFile.cpp" />
