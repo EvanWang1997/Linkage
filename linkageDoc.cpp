@@ -122,6 +122,9 @@ CLinkageDoc::CLinkageDoc()
 
 	SetUnits( CLinkageDoc::MM );
 	m_ScaleFactor = 1.0;
+
+	m_BackgroundTransparency = 0.0;
+	m_BackgroundImageData = "";
 }
 
 CLinkageDoc::~CLinkageDoc()
@@ -173,6 +176,9 @@ BOOL CLinkageDoc::OnNewDocument()
 		pView->SetOffset( CPoint( 0, 0 ) );
 		pView->SetZoom( 1 );
 	}
+
+	m_BackgroundTransparency = 0.0;
+	m_BackgroundImageData = "";
 
 	return TRUE;
 }
@@ -256,7 +262,7 @@ static void AppendXMLAttribute( CString &String, const char *pName, double Value
 	AppendXMLAttribute( String, pName, (const char*)TempString, bIsSet );
 }
 
-bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset, bool bUseSavedSelection, bool bResetColors )
+bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset, bool bUseSavedSelection, bool bResetColors, bool bUseBackground )
 {
 	CWaitCursor Wait;
 	int OffsetConnectorIdentifer = m_HighestConnectorID + 1;
@@ -311,6 +317,8 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			ScaleFactor = atoi( Value );
 			if( Value.IsEmpty() || ScaleFactor == 0.0 )
 				ScaleFactor = 1.0;
+			Value = pNode->GetAttribute( "backgroundtransparency" );
+			m_BackgroundTransparency = atof( Value );
 		}
 
 		if( pNode->GetText() == "selected" )
@@ -764,12 +772,29 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 		m_ScaleFactor = ScaleFactor;
 	}
 
+	if( bUseBackground )
+	{
+		for( QuickXMLNode *pNode = pRootNode->GetFirstChild(); pNode != 0; pNode = pNode->GetNextSibling() )
+		{
+			if( !pNode->IsElement() )
+				continue;
+
+			if( pNode->GetText() == "background" )
+			{
+				QuickXMLNode *pContentNode = pNode->GetFirstChild();
+				if( pContentNode != 0 )
+					m_BackgroundImageData = pContentNode->GetText();
+				break;
+			}
+		}
+	}
+
 	SetSelectedModifiableCondition();
 
 	return true;
 }
 
-bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
+bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnly )
 {
 	CWaitCursor Wait;
 
@@ -791,6 +816,7 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 		AppendXMLAttribute( TempString, "yoffset", (int)Point.y );
 		AppendXMLAttribute( TempString, "scalefactor", m_ScaleFactor );
 		AppendXMLAttribute( TempString, "units", (const char*)Units );
+		AppendXMLAttribute( TempString, "backgroundtransparency", m_BackgroundTransparency );
 		TempString += "/>";
 
 //		TempString.Format( "\t<program zoom=\"%lf\" xoffset=\"%d\" yoffset=\"%d\" scalefactor=\"%lf\" units=\"%s\" viewlayers=\"%u\" editlayers=\"%u\"/>",
@@ -1004,9 +1030,14 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 		ar.WriteString( CRLF );
 	}
 
-	// This extra step is to get save Links for connectors that are
-	// orphans. Those that are selected but are not part of any Links
-	// that have already been saved. These get an Link just for them.
+	if( !bSelectedOnly && bUseBackground )
+	{
+		ar.WriteString( "\t<background>" );
+		if( m_BackgroundImageData.length() > 0 )
+			ar.WriteString( m_BackgroundImageData.c_str() );
+		ar.WriteString( "</background>" );
+		ar.WriteString( CRLF );
+	}
 	ar.WriteString( "</linkage2>" );
 	ar.WriteString( CRLF );
 
@@ -1016,9 +1047,9 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bSelectedOnly )
 void CLinkageDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())
-		WriteOut( ar );
+		WriteOut( ar, true, false );
 	else
-		ReadIn( ar, false, true, false, false );
+		ReadIn( ar, false, true, false, false, true );
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -3537,7 +3568,7 @@ void CLinkageDoc::Copy( bool bCut )
 {
     CMemFile mFile;
     CArchive ar( &mFile,CArchive::store );
-    WriteOut( ar, true );
+    WriteOut( ar, false, true );
     ar.Write( "\0", 1 );
     ar.Close();
 
@@ -3617,7 +3648,7 @@ void CLinkageDoc::Paste( void )
 
     PushUndo();
 
-    ReadIn( ar, true, false, false, true );
+    ReadIn( ar, true, false, false, true, false );
     mFile.Detach();
     ::GlobalUnlock( hMemory );
     ::CloseClipboard();
@@ -3651,7 +3682,7 @@ void CLinkageDoc::SelectSample( int Index )
     mFile.Attach( (BYTE*)ExampleData.GetBuffer(), ExampleData.GetLength(), 0 );
     CArchive ar( &mFile, CArchive::load );
 
-    ReadIn( ar, false, true, false, false );
+    ReadIn( ar, false, true, false, false, true );
     mFile.Detach();
     ExampleData.ReleaseBuffer();
     UpdateAllViews( 0 );
@@ -3795,7 +3826,7 @@ void CLinkageDoc::PushUndo( void )
 
     CMemFile mFile;
     CArchive ar( &mFile,CArchive::store );
-    WriteOut( ar, false );
+    WriteOut( ar, false, false );
     ar.Write( "\0", 1 );
     ar.Close();
 
@@ -3850,14 +3881,14 @@ void CLinkageDoc::PopUndo( void )
     mFile.Attach( pData, (int)strlen( (char*)pData ), 0 );
     CArchive ar( &mFile, CArchive::load );
 
-    ReadIn( ar, false, false, true, false );
+    ReadIn( ar, false, false, true, false, false );
     mFile.Detach();
 
 	PopUndoDelete();
 
     SetModifiedFlag( true );
 
-    UpdateAllViews( 0 );
+    UpdateAllViews( 0, 1 );
 }
 
 void CLinkageDoc::PopUndoDelete( void )

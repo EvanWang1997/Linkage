@@ -17,6 +17,7 @@
 #include "Renderer.h"
 #include "AviFile.h"
 #include "Simulator.h"
+#include <vector>
 
 class COleDropWndTarget : public COleDropTarget
 {
@@ -198,9 +199,8 @@ private:
 	bool m_bUseVideoCounters;
 	bool m_bShowSelection;
 
-	double m_BackgroundTransparency;
-
 	CRendererBitmap *m_pBackgroundBitmap;
+	CRendererBitmap* ImageBytesToRendererBitmap( std::vector<byte> &Buffer, size_t Size );
 	
 	CFPoint AdjustClientAreaPoint( CPoint );
 	void MarkSelection( bool bSelectionChanged, bool bUpdateRotationCenter = true );

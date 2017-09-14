@@ -34,6 +34,7 @@
 #include "LengthDistanceDialog.h"
 #include "RotateDialog.h"
 #include "ScaleDialog.h"
+#include "Base64.h"
 #include <fstream>
 
 #include <algorithm>
@@ -419,7 +420,6 @@ CLinkageView::CLinkageView()
 	m_bMouseMovedEnough = false;
 	m_bSuperHighlight = false;
 	m_YUpDirection = -1;
-	m_BackgroundTransparency = 0.0;
 
 	m_bRequestAbort = false;
 	m_bProcessingVideoThread = false;
@@ -2310,7 +2310,7 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 		CFRect Rect( -(m_pBackgroundBitmap->width/2), -(m_pBackgroundBitmap->height/2), -(m_pBackgroundBitmap->width/2) + m_pBackgroundBitmap->width, -(m_pBackgroundBitmap->height/2) + m_pBackgroundBitmap->height );
 		Rect = Scale( Rect );
 
-		Renderer.DrawRendererBitmap( m_pBackgroundBitmap, Rect, m_BackgroundTransparency );
+		Renderer.DrawRendererBitmap( m_pBackgroundBitmap, Rect, pDoc->GetBackgroundTransparency() );
 	}
 
 	DoDraw( &Renderer );
@@ -5215,6 +5215,23 @@ void CLinkageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 	CLinkageDoc::_Units Units = pDoc->GetUnits();
 
 	pComboBox->SelectItem( (DWORD_PTR)Units );
+
+	if( lHint == 0 )
+	{
+		// Deal with a background bitmap that is stored in both the document and in binary form in this view object.
+		if( m_pBackgroundBitmap != 0 )
+		{
+			delete m_pBackgroundBitmap;
+			m_pBackgroundBitmap = 0;
+		}
+
+		std::string& BitmapData = pDoc->GetBackgroundImage();
+		if( BitmapData.length() > 0 )
+		{
+			std::vector<byte> buffer = base64_decode( BitmapData );
+			m_pBackgroundBitmap = ImageBytesToRendererBitmap( buffer, (size_t)buffer.size() );
+		}
+	}
 
 	UpdateForDocumentChange();
 
@@ -8121,7 +8138,14 @@ void CLinkageView::OnBackgroundTransparency()
 	CMFCRibbonSlider * pSlider = DYNAMIC_DOWNCAST( CMFCRibbonSlider, pRibbon->FindByID( ID_BACKGROUND_TRANSPARENCY ) );
 	if( pSlider == 0 )
 		return;
-	m_BackgroundTransparency = (double)pSlider->GetPos() / (double)pSlider->GetRangeMax();
+	double Value = (double)pSlider->GetPos() / (double)pSlider->GetRangeMax();
+
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	pDoc->PushUndo();
+	pDoc->SetBackgroundTransparency( Value );
+
 	UpdateForDocumentChange();
 }
 
@@ -8132,6 +8156,10 @@ void CLinkageView::OnDeleteBackground()
 		delete m_pBackgroundBitmap;
 		m_pBackgroundBitmap = 0;
 	}
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pDoc->SetBackgroundImage( "" );
+
 	UpdateForDocumentChange();
 }
 
@@ -8198,15 +8226,16 @@ void CLinkageView::OnFileOpenBackground()
 
 		if( size > 0 )
 		{
-			CRenderer Renderer( CRenderer::WINDOWS_D2D );
+			std::vector<byte> buffer( (size_t)size );
+			if( file.read( (char*)buffer.data(), (size_t)size ) )
+			{
+				m_pBackgroundBitmap = ImageBytesToRendererBitmap( buffer, (size_t)size );
 
-			// Maybe slow and wrong to create a renderer but the D2D stuff is needed for this.
-			CBitmap Bitmap;
-			PrepareRenderer( Renderer, 0, 0, 0, 1.0, false, 0.0, 1.0, false, false, false, 0 );
-
-			std::vector<char> buffer( (size_t)size );
-			if( file.read( buffer.data(), (size_t)size ) )
-				m_pBackgroundBitmap = Renderer.LoadRendererBitmapFromMemory( (const unsigned char*)buffer.data(), (size_t)size );
+				CLinkageDoc* pDoc = GetDocument();
+				ASSERT_VALID(pDoc);
+				std::string Base64Data = base64_encode( (const unsigned char*)buffer.data(), (size_t)size );
+				pDoc->SetBackgroundImage( Base64Data );
+			}
 		}
 		else
 		{
@@ -8217,6 +8246,19 @@ void CLinkageView::OnFileOpenBackground()
 		file.close();
 
 		UpdateForDocumentChange();
+	#endif
+}
+
+CRendererBitmap* CLinkageView::ImageBytesToRendererBitmap( std::vector<byte> &Buffer, size_t Size )
+{
+	#if defined( LINKAGE_USE_DIRECT2D )
+		CRenderer Renderer( CRenderer::WINDOWS_D2D );
+
+		// Maybe slow and wrong to create a renderer but the D2D stuff is needed for this.
+		CBitmap Bitmap;
+		PrepareRenderer( Renderer, 0, 0, 0, 1.0, false, 0.0, 1.0, false, false, false, 0 );
+
+		return Renderer.LoadRendererBitmapFromMemory( (const unsigned char*)Buffer.data(), Size );
 	#endif
 }
 

@@ -122,6 +122,10 @@ public:
 	CLink *GetSelectedLink( int Index, bool bOnlyWithMultipleConnectors );
 	bool IsAnySelected( void );
 	_CoordinateChange SetSelectedElementCoordinates( CFPoint *pRotationCenterPoint, const char *pCoordinateString );
+	void SetBackgroundImage( std::string Base64Data ) { m_BackgroundImageData = Base64Data; }
+	std::string& GetBackgroundImage( void ) { return m_BackgroundImageData; }
+	void SetBackgroundTransparency( double Transparency ) { m_BackgroundTransparency = Transparency; }
+	double GetBackgroundTransparency( void ) { return m_BackgroundTransparency; }
 
 	enum _SelectDirection { NEXT, PREVIOUS };
 	bool SelectNext( _SelectDirection SelectDirection );
@@ -260,6 +264,9 @@ private:
 	CUndoRecord *m_pUndoListEnd;
 	int m_UndoCount;
 
+	double m_BackgroundTransparency;
+	std::string m_BackgroundImageData;
+
 	unsigned int m_SelectedLayers;
 	
 	CConnector *m_pCapturedConnector;
@@ -272,8 +279,8 @@ private:
 
 	void NormalizeConnectorLinks( void );
 	
-	bool ReadIn( CArchive& ar, bool bSelect, bool bObeyUnscaleOffset, bool bUseSavedSelection, bool bResetColors );
-	bool WriteOut( CArchive& ar, bool bSelectedOnly = false );
+	bool ReadIn( CArchive& ar, bool bSelect, bool bObeyUnscaleOffset, bool bUseSavedSelection, bool bResetColors, bool bUseBackground );
+	bool WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnly = false );
 	
 	void RawAngleSelected( double Angle );
 	void PopUndo( void );
