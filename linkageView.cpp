@@ -293,6 +293,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_DIMENSIONS, &CLinkageView::OnUpdateViewDimensions)
 	ON_COMMAND(ID_VIEW_GROUNDDIMENSIONS, &CLinkageView::OnViewGroundDimensions)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_GROUNDDIMENSIONS, &CLinkageView::OnUpdateViewGroundDimensions)
+	ON_COMMAND(ID_VIEW_DRAWINGLAYERDIMENSIONS, &CLinkageView::OnViewDrawingLayerDimensions)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_DRAWINGLAYERDIMENSIONS, &CLinkageView::OnUpdateViewDrawingLayerDimensions)
 
 	ON_COMMAND(ID_VIEW_SOLIDLINKS, &CLinkageView::OnViewSolidLinks)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SOLIDLINKS, &CLinkageView::OnUpdateViewSolidLinks)
@@ -400,6 +402,7 @@ CLinkageView::CLinkageView()
 	m_bAutoJoin = false;
 	m_bShowDimensions = false;
 	m_bShowGroundDimensions = true;
+	m_bShowDrawingLayerDimensions = false;
 	m_bNewLinksSolid = false;
 	m_xGrid = 20.0;
 	m_yGrid = 20.0;
@@ -486,9 +489,10 @@ CLinkageView::CLinkageView()
 		m_bShowParts = pApp->GetProfileInt( SETTINGS, "ShowParts", 0 ) != 0;
 		m_bUseMoreMomentum = pApp->GetProfileInt( SETTINGS, "MoreMomentum", 0 ) != 0;
 		m_bAllowEdit = !m_bShowParts;
-		GetSetGroundDimensionVisbility( false );
-		m_bShowDimensions = pApp->GetProfileInt( SETTINGS, "Showdimensions", 0 ) != 0;
-		m_bShowGroundDimensions = pApp->GetProfileInt( SETTINGS, "Showgrounddimensions", 1 ) != 0;
+		//m_bShowDimensions = pApp->GetProfileInt( SETTINGS, "Showdimensions", 0 ) != 0;
+		//m_bShowGroundDimensions = pApp->GetProfileInt( SETTINGS, "Showgrounddimensions", 1 ) != 0;
+		//m_bShowDrawingLayerDimensions = pApp->GetProfileInt( SETTINGS, "Showdrawinglayerdimensions", 1 ) != 0;
+		GetSetViewSpecificDimensionVisbility( false );
 		m_SelectedEditLayers = (unsigned int)pApp->GetProfileInt( SETTINGS, "EditLayers", 0xFFFFFFFF );
 		m_SelectedViewLayers = (unsigned int)pApp->GetProfileInt( SETTINGS, "ViewLayers", 0xFFFFFFFF );
 
@@ -508,7 +512,7 @@ CLinkageView::CLinkageView()
 	m_TimerID = 0;
 }
 
-void CLinkageView::GetSetGroundDimensionVisbility( bool bSave )
+void CLinkageView::GetSetViewSpecificDimensionVisbility( bool bSave )
 {
 	CWinApp *pApp = AfxGetApp();
 	if( pApp == 0 )
@@ -516,21 +520,25 @@ void CLinkageView::GetSetGroundDimensionVisbility( bool bSave )
 
 	CString ShowDimensionsName = m_bShowParts ? "PartsShowdimensions" : "Showdimensions";
 	CString ShowGroundDimensionsName = m_bShowParts ? "PartsShowgrounddimensions" : "Showgrounddimensions";
+	CString ShowDrawingLayerDimensionsName = m_bShowParts ? "PartsShowdrawinglayerdimensions" : "Showdrawinglayerdimensions";
 
 	// Not sure if I want to have separate dimension settings for the parts list while not having other settings be separate - it might be confusing to users.
 	// Just use the one set of settings for now - and think about this for a while.
 	ShowDimensionsName = "Showdimensions";
 	ShowGroundDimensionsName = "Showgrounddimensions";
+	ShowDrawingLayerDimensionsName = "Showdrawinglayerdimensions";
 
 	if( bSave )
 	{
 		pApp->WriteProfileInt( SETTINGS, ShowDimensionsName, m_bShowDimensions ? 1 : 0  );
 		pApp->WriteProfileInt( SETTINGS, ShowGroundDimensionsName, m_bShowGroundDimensions ? 1 : 0  );
+		pApp->WriteProfileInt( SETTINGS, ShowDrawingLayerDimensionsName, m_bShowDrawingLayerDimensions ? 1 : 0  );
 	}
 	else
 	{
 		m_bShowDimensions = pApp->GetProfileInt( SETTINGS, ShowDimensionsName, 0 ) != 0;
 		m_bShowGroundDimensions = pApp->GetProfileInt( SETTINGS, ShowGroundDimensionsName, 1 ) != 0;
+		m_bShowDrawingLayerDimensions = pApp->GetProfileInt( SETTINGS, ShowDrawingLayerDimensionsName, 0 ) != 0;
 	}
 }
 
@@ -569,7 +577,7 @@ void CLinkageView::SaveSettings( void )
 	pApp->WriteProfileInt( SETTINGS, "MoreMomentum", m_bUseMoreMomentum ? 1 : 0 );
 	pApp->WriteProfileInt( SETTINGS, "ShowParts", m_bShowParts ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "PrintFullSize", m_bPrintFullSize ? 1 : 0 );
-	GetSetGroundDimensionVisbility( true );
+	GetSetViewSpecificDimensionVisbility( true );
 	pApp->WriteProfileInt( SETTINGS, "EditLayers", (int)m_SelectedEditLayers  );
 	pApp->WriteProfileInt( SETTINGS, "ViewLayers", (int)m_SelectedViewLayers );
 }
@@ -4765,6 +4773,19 @@ void CLinkageView::OnUpdateViewGroundDimensions(CCmdUI *pCmdUI)
 	pCmdUI->Enable( !m_bSimulating );
 }
 
+void CLinkageView::OnViewDrawingLayerDimensions()
+{
+	m_bShowDrawingLayerDimensions = !m_bShowDrawingLayerDimensions;
+	SaveSettings();
+	InvalidateRect( 0 );
+}
+
+void CLinkageView::OnUpdateViewDrawingLayerDimensions(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck( m_bShowDrawingLayerDimensions );
+	pCmdUI->Enable( !m_bSimulating );
+}
+
 void CLinkageView::OnViewSolidLinks()
 {
 	m_bNewLinksSolid = !m_bNewLinksSolid;
@@ -4963,7 +4984,7 @@ void CLinkageView::OnViewParts()
 		ASSERT_VALID(pDoc);
 		pDoc->SelectElement();
 	}
-	GetSetGroundDimensionVisbility( false );
+	GetSetViewSpecificDimensionVisbility( false );
 	SaveSettings();
 	InvalidateRect( 0 );
 }
@@ -6692,6 +6713,9 @@ CFArea CLinkageView::DrawConnectorLinkDimensions( CRenderer* pRenderer, const Ge
 	if( ( pLink->GetLayers() & OnLayers ) == 0 )
 		return CFArea();
 
+	if( ( pLink->GetLayers() & CLinkageDoc::DRAWINGLAYER ) != 0 && !m_bShowDrawingLayerDimensions )
+		return CFArea();
+
 	CPen Pen;
 	Pen.CreatePen( PS_SOLID, 1, RGB( 192, 192, 192 ) );
 	CPen *pOldPen = pRenderer->SelectObject( &Pen );
@@ -6797,6 +6821,9 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 		return CFArea();
 
 	if( ( pLink->GetLayers() & OnLayers ) == 0 )
+		return CFArea();
+
+	if( ( pLink->GetLayers() & CLinkageDoc::DRAWINGLAYER ) != 0 && !m_bShowDrawingLayerDimensions )
 		return CFArea();
 
 	CFArea DimensionsArea;
@@ -7019,6 +7046,9 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, unsigned int OnLayers
 		return CFArea();
 
 	if( ( pConnector->GetLayers() & OnLayers ) == 0 )
+		return CFArea();
+
+	if( ( pConnector->GetLayers() & CLinkageDoc::DRAWINGLAYER ) != 0 && !m_bShowDrawingLayerDimensions )
 		return CFArea();
 
 	CFArea DimensionsArea;

@@ -136,6 +136,7 @@ private:
 	bool m_bAutoJoin;
 	bool m_bShowDimensions;
 	bool m_bShowGroundDimensions;
+	bool m_bShowDrawingLayerDimensions;
 	bool m_bNewLinksSolid;
 	double m_xGrid;
 	double m_yGrid;
@@ -335,7 +336,7 @@ private:
 	CFArc Unscale( CFArc TheArc );
 	CFArc Scale( CFArc TheArc );
 	void ShowSelectedElementStatus( void );
-	void GetSetGroundDimensionVisbility( bool bSave );
+	void GetSetViewSpecificDimensionVisbility( bool bSave );
 	void SaveSettings( void );
 
 	bool CLinkageView::AnyAlwaysManual( void );
@@ -497,6 +498,8 @@ public:
 	afx_msg void OnUpdateViewDimensions(CCmdUI *pCmdUI);
 	afx_msg void OnViewGroundDimensions();
 	afx_msg void OnUpdateViewGroundDimensions(CCmdUI *pCmdUI);
+	afx_msg void OnViewDrawingLayerDimensions();
+	afx_msg void OnUpdateViewDrawingLayerDimensions(CCmdUI *pCmdUI);
 	afx_msg void OnViewSolidLinks();
 	afx_msg void OnUpdateViewSolidLinks(CCmdUI *pCmdUI);
 	afx_msg void OnViewDrawing();

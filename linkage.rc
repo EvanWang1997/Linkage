@@ -817,6 +817,8 @@ BEGIN
     ID_VIEW_DIMENSIONS      "Automatically draw dimension lines for all links.\nAuto Dimensions"
     ID_VIEW_GROUNDDIMENSIONS 
                             "Include ground dimensions with the automatic dimensions. Show the ground link relative to the page in the parts list.\nInclude Ground Dimensions"
+    ID_VIEW_DRAWINGLAYERDIMENSIONS 
+                            "Show dimensions on the drawing layer.\nDrawing Layer Dimensions"
 END
 
 STRINGTABLE
@@ -869,6 +871,7 @@ BEGIN
     ID_EDIT_LOCK            "Lock the size and shape of a link.\nLock"
     IDS_RIBBON_LOCK         "Lock"
     IDS_RIBBON_GROUNDDIMENSIONS "Ground Dimensions"
+    IDS_RIBBON_DRAWINGLAYERDIMENSIONS "Drawing Layer Dimensions"
 END
 
 STRINGTABLE

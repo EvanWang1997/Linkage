@@ -332,6 +332,7 @@
 #define IDS_RIBBON_PRINTFULL            4934
 #define IDS_RIBBON_MEET                 4935
 #define ID_ALIGN_MEET                   4936
+#define ID_VIEW_DRAWINGLAYERDIMENSIONS  4937
 #define IDS_SAMPLE_SIMPLE               5011
 #define IDS_SAMPLE_JANSEN               5012
 #define IDS_SAMPLE_KLANN                5013
@@ -353,6 +354,7 @@
 #define ID_EDIT_LOCK                    5032
 #define IDS_RIBBON_LOCK                 5033
 #define IDS_RIBBON_GROUNDDIMENSIONS     5034
+#define IDS_RIBBON_DRAWINGLAYERDIMENSIONS 5035
 #define ID_SAMPLE_SIMPLE                5100
 #define ID_SAMPLE_ACTUATOR              5101
 #define ID_SAMPLE_ACTUATOR2             5102

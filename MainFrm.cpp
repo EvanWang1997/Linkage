@@ -270,6 +270,7 @@ void CMainFrame::CreateViewPanel( CMFCRibbonCategory* pCategory )
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_ANICROP, ID_VIEW_ANICROP, 13 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_DIMENSIONS, ID_VIEW_DIMENSIONS, 15 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_GROUNDDIMENSIONS, ID_VIEW_GROUNDDIMENSIONS, 88 );
+	AppendMenuItem( pDetailsButton, IDS_RIBBON_DRAWINGLAYERDIMENSIONS, ID_VIEW_DRAWINGLAYERDIMENSIONS, 88 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_LARGEFONT, ID_VIEW_LARGEFONT, 78 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_SOLIDLINKS, ID_VIEW_SOLIDLINKS, 75 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_GRID, ID_VIEW_GRID, 85 );
@@ -760,7 +761,9 @@ void CMainFrame::InitializeRibbon()
 	CreateMainCategory();
 	CreateHomeCategory();
 	CreatePrintingCategory();
-	CreateBackgroundCategory();
+	#if defined( LINKAGE_USE_DIRECT2D )
+		CreateBackgroundCategory();
+	#endif
 	CreateHelpCategory();
 	CreateQuickAccessCommands();
 	CreateHelpButtons();
@@ -969,7 +972,11 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 		case 0: CreateMainCategory(); break;
 		case 1: CreateHomeCategory(); break;
 		case 2: CreatePrintingCategory(); break;
-		case 3: CreateBackgroundCategory(); break;
+		case 3: 
+			#if defined( LINKAGE_USE_DIRECT2D )
+				CreateBackgroundCategory();
+			#endif
+			break;
 		case 4: CreateHelpCategory(); break;
 		case 5: CreateHelpButtons(); break;
 		case 6: CreateQuickAccessCommands(); break;
