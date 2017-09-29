@@ -44,4 +44,7 @@ public:
 	afx_msg void OnStnClickedColor();
 	CColorStatic m_ColorControl;
 	CNullableColor m_Color;
+	CButton m_PolygonControl;
+	CButton m_PolylineButton;
+	int m_Polyline;
 };

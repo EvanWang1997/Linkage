@@ -422,6 +422,8 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			pLink->SetLineSize( atoi( Value ) );
 			Value = pNode->GetAttribute( "solid" );
 			pLink->SetSolid( Value == "true" );
+			Value = pNode->GetAttribute( "polyline" );
+			pLink->SetPolyline( Value == "true" );
 			Value = pNode->GetAttribute( "locked" );
 			pLink->SetLocked( Value == "true" );
 			Value = pNode->GetAttribute( "measurementelement" );
@@ -931,6 +933,7 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "measurementelement", pLink->IsMeasurementElement(), pLink->IsMeasurementElement() );
 		AppendXMLAttribute( TempString, "throw", pLink->GetStroke(), pLink->IsActuator() );
 		AppendXMLAttribute( TempString, "cpm", pLink->GetCPM(), pLink->IsActuator() );
+		AppendXMLAttribute( TempString, "polyline", pLink->GetPolyline(), pLink->GetPolyline() );
 		AppendXMLAttribute( TempString, "fastenlink", pLink->GetFastenedToLink() == 0 ? 0 : pLink->GetFastenedToLink()->GetIdentifier(), pLink->GetFastenedToLink() != 0 );
 		AppendXMLAttribute( TempString, "fastenconnector", pLink->GetFastenedToConnector() == 0 ? 0 : pLink->GetFastenedToConnector()->GetIdentifier(), pLink->GetFastenedToConnector() != 0 );
 		AppendXMLAttribute( TempString, "gear", pLink->IsGear(), pLink->IsGear() );

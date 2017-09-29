@@ -7356,6 +7356,17 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 			SliderArc = Scale( SliderArc );
 			pRenderer->Arc( SliderArc );
 		}
+		else if( pLink->GetPolyline() )
+		{
+			int PointCount = 0;
+			CFPoint* Points = pLink->GetPoints( PointCount );
+			if( Points != 0 && PointCount > 0 )
+			{
+				pRenderer->MoveTo( Scale( Points[0] ) );
+				for( int Index = 1; Index < PointCount; ++Index )
+					pRenderer->LineTo( Scale( Points[Index] ) );
+			}
+		}
 		else
 		{
 			int PointCount = 0;
@@ -8000,6 +8011,7 @@ bool CLinkageView::LineProperties( CLink *pLink )
 		Dialog.m_bMeasurementLine = FALSE;
 		Dialog.m_Label = "Multiple Line/Link Properties";
 //		Dialog.m_Color = pLink->GetColor();
+//		Dialog.m_bPolygon = !pLink->GetPolyline();
 
 		LinkList* pLinkList = pDoc->GetLinkList();
 		POSITION Position = pLinkList->GetHeadPosition();
@@ -8024,6 +8036,7 @@ bool CLinkageView::LineProperties( CLink *pLink )
 		if( pLink->GetFastenedTo() != 0 && pLink->GetFastenedTo()->GetElement() != 0 )
 			Dialog.m_FastenTo = "Fastened to " + pLink->GetFastenedTo()->GetElement()->GetIdentifierString( m_bShowDebug );
 		Dialog.m_Color = pLink->GetColor();
+		Dialog.m_Polyline = pLink->GetPolyline() ? 1 : 0;
 	}
 	if( Dialog.DoModal() == IDOK )
 	{
@@ -8049,6 +8062,7 @@ bool CLinkageView::LineProperties( CLink *pLink )
 			pLink->SetName( Dialog.m_Name );
 			pLink->SetMeasurementElement( Dialog.m_bMeasurementLine != FALSE );
 			pLink->SetColor( Dialog.m_Color );
+			pLink->SetPolyline( Dialog.m_Polyline ? true : true );
 		}
 
 		return true;

@@ -29,6 +29,7 @@ CLink::CLink()
 	m_Color = RGB( 200, 200, 200 );
 	m_bLocked = false;
 	m_ActuatorStartOffset = 0;
+	m_bPolyline = false;
 }
 
 CLink::CLink( const CLink &ExistingLink )
@@ -52,6 +53,7 @@ CLink::CLink( const CLink &ExistingLink )
 	m_Color = ExistingLink.m_Color;
 	m_bActuator = ExistingLink.m_bActuator;
 	m_bNoRotateWithAnchor = ExistingLink.m_bNoRotateWithAnchor;
+	m_bPolyline = ExistingLink.m_bPolyline;
 	m_pHull = 0;
 	m_HullCount = 0;
 
@@ -191,7 +193,7 @@ bool CLink::PointOnLink( const GearConnectionList &GearConnections, CFPoint Poin
 	CFPoint* Points = GetHull( PointCount );
 
 	// Point within the polygon first. This doesn't allow for any grab distance outside of the polygon.
-	if( IsPointInPoly( PointCount, Points, Point ) )
+	if( !m_bPolyline && IsPointInPoly( PointCount, Points, Point ) )
 		return true;
 
 	if( m_ConnectedSliders.GetCount() > 0 )
@@ -951,6 +953,28 @@ CFPoint *CLink::GetHull( int &Count, bool bUseOriginalPoints )
 		ComputeHull( 0, bUseOriginalPoints );
 	Count = m_HullCount;
 	return m_pHull;
+}
+
+CFPoint *CLink::GetPoints( int &Count )
+{
+	POSITION Position;
+	int Counter;
+	Count = (int)m_Connectors.GetCount();
+	CFPoint* PointArray = new CFPoint[Count];
+	if( PointArray == NULL )
+		return 0;
+
+	Position = m_Connectors.GetHeadPosition();
+	for( Counter = 0; Position != NULL && Counter < Count; Counter++ )
+	{
+		CConnector* pConnector = m_Connectors.GetNext( Position );
+		if( pConnector != 0 )
+		{
+			PointArray[Counter].x = pConnector->GetPoint().x;
+			PointArray[Counter].y = pConnector->GetPoint().y;
+		}
+	}
+	return PointArray;
 }
 
 CConnector *CLink::GetConnector( int Index ) const

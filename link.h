@@ -111,6 +111,8 @@ class CLink : public CElement
 	bool CanOnlySlide( CConnector** pLimit1 = 0, CConnector** pLimit2 = 0, CConnector** pSlider1 = 0, CConnector** pSlider2 = 0, bool *pbSlidersOnLink = 0 );
 	CFPoint *ComputeHull( int *Count = 0, bool bUseOriginalPoints = false );
 	CFPoint *GetHull( int &Count, bool bUseOriginalPoints = false );
+	CFPoint *GetPoints( int &Count );
+
 
 	void MakePermanent( void );
 
@@ -143,10 +145,12 @@ class CLink : public CElement
 	void SetStroke( double Stroke );
 	double GetCPM( void ) { return m_ActuatorCPM; }
 	void SetCPM( double CPM ) { m_ActuatorCPM = CPM; }
+	void SetPolyline( bool bSet ) { m_bPolyline = bSet; }
+	bool GetPolyline( void ) { return m_bPolyline; }
 	void IncrementExtension( double Increment );
 	void SetExtension( double Value );
 	double GetExtendedDistance( void );
-	double GetOffsetAdjustedExtendedDistance( void );
+	// double GetOffsetAdjustedExtendedDistance( void );
 	void UpdateControlKnob( CFPoint Point );
 	void UpdateControlKnob( void );
 	CConnector *GetConnector( int Index ) const;
@@ -193,6 +197,7 @@ class CLink : public CElement
 	CFPoint *m_pHull;
 	int m_HullCount;
 	double m_ActuatorStartOffset;
+	bool m_bPolyline;
 
 	bool m_bLinkTriangle;
 

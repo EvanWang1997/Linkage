@@ -16,6 +16,7 @@ CLinePropertiesDialog::CLinePropertiesDialog(CWnd* pParent /*=NULL*/)
 	, m_Name(_T(""))
 	, m_bMeasurementLine(FALSE)
 	, m_FastenTo( _T( "" ) )
+	, m_Polyline(0)
 {
 	m_Color = RGB( 200, 200, 200 );
 }
@@ -26,34 +27,39 @@ CLinePropertiesDialog::~CLinePropertiesDialog()
 
 void CLinePropertiesDialog::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange( pDX );
-	DDX_Text( pDX, IDC_EDIT1, m_LineSize );
-	DDV_MinMaxInt( pDX, m_LineSize, 1, 4 );
-	DDX_Control( pDX, IDC_SPIN1, m_SpinControl );
-	DDX_Text( pDX, IDC_EDIT3, m_Name );
-	DDX_Control( pDX, IDC_NAMEPROMPT, m_NamePromptControl );
-	DDX_Control( pDX, IDC_EDIT3, m_NameControl );
-	DDX_Check( pDX, IDC_CHECK1, m_bMeasurementLine );
-	DDX_Control( pDX, IDC_CHECK1, m_MeasurementLineControl );
-	DDX_Control( pDX, IDC_RPMPROMPT, m_LineSizeControl );
-	DDX_Control( pDX, IDC_EDIT1, m_LineSizeInputControl );
+	CDialog::DoDataExchange(pDX);
+	DDX_Text(pDX, IDC_EDIT1, m_LineSize);
+	DDV_MinMaxInt(pDX, m_LineSize, 1, 4);
+	DDX_Control(pDX, IDC_SPIN1, m_SpinControl);
+	DDX_Text(pDX, IDC_EDIT3, m_Name);
+	DDX_Control(pDX, IDC_NAMEPROMPT, m_NamePromptControl);
+	DDX_Control(pDX, IDC_EDIT3, m_NameControl);
+	DDX_Check(pDX, IDC_CHECK1, m_bMeasurementLine);
+	DDX_Control(pDX, IDC_CHECK1, m_MeasurementLineControl);
+	DDX_Control(pDX, IDC_RPMPROMPT, m_LineSizeControl);
+	DDX_Control(pDX, IDC_EDIT1, m_LineSizeInputControl);
+	DDX_Control(pDX, IDC_RADIO1, m_PolygonControl);
+	DDX_Control(pDX, IDC_RADIO2, m_PolylineButton);
+	DDX_Radio(pDX, IDC_RADIO1, m_Polyline );
+	DDX_Control(pDX, IDC_FASTENEDTO, m_FastenToControl);
+	DDX_Text(pDX, IDC_FASTENEDTO, m_FastenTo);
+	DDX_Control(pDX, IDC_COLOR, m_ColorControl);
 
-	m_SpinControl.SetRange( 1, 4 );
+	m_SpinControl.SetRange(1, 4);
 
-	if( m_SelectedLinkCount > 1 )
+	if (m_SelectedLinkCount > 1)
 	{
-		m_NamePromptControl.EnableWindow( FALSE );
-		m_NameControl.EnableWindow( FALSE );
-		m_MeasurementLineControl.EnableWindow( FALSE );
+		m_NamePromptControl.EnableWindow(FALSE);
+		m_NameControl.EnableWindow(FALSE);
+		m_MeasurementLineControl.EnableWindow(FALSE);
 	}
-	DDX_Control( pDX, IDC_FASTENEDTO, m_FastenToControl );
-	DDX_Text( pDX, IDC_FASTENEDTO, m_FastenTo );
-	DDX_Control( pDX, IDC_COLOR, m_ColorControl );
 
-	if( pDX->m_bSaveAndValidate )
+	if (pDX->m_bSaveAndValidate)
 		m_Color = m_ColorControl.GetColor();
 	else
-		m_ColorControl.SetColor( m_Color );
+		m_ColorControl.SetColor(m_Color);
+
+	OnBnClickedCheck1();
 }
 
 BEGIN_MESSAGE_MAP(CLinePropertiesDialog, CMyDialog)
@@ -69,6 +75,8 @@ void CLinePropertiesDialog::OnBnClickedCheck1()
 	m_LineSizeControl.EnableWindow( bUnchecked );
 	m_LineSizeInputControl.EnableWindow( bUnchecked );
 	m_SpinControl.EnableWindow( bUnchecked );
+	m_PolygonControl.EnableWindow( bUnchecked );
+	m_PolylineButton.EnableWindow( bUnchecked );
 }
 
 void CLinePropertiesDialog::OnStnClickedColor()
