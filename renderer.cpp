@@ -1808,7 +1808,7 @@ class CD2DRenderer : public CRendererImplementation
                 (float)Rect.top,
                 (float)Rect.right,
                 (float)Rect.bottom ),
-            1.0f - Transparency,
+            (float)( 1.0f - Transparency ),
             D2D1_BITMAP_INTERPOLATION_MODE_LINEAR
             );
 	}

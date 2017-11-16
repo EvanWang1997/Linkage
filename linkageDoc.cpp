@@ -4506,6 +4506,7 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 	bool bEnableEdit = true;
 
 	int SelectedCount = GetSelectedConnectorCount();
+	int SelectedLinks = GetSelectedLinkCount( false );
 
 	pConnector0 = GetSelectedConnector( 0 );
 	if( pConnector0 == 0 )
@@ -4523,6 +4524,8 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 		pConnector0 = pSelectedLink->GetConnector( 0 );
 		pConnector1 = pSelectedLink->GetConnector( 1 );
 
+		SelectedLinks = 0; // Just using the connectors from the link and not the link.
+
 		SelectedCount = 2;
 	}
 	else
@@ -4530,9 +4533,6 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 		pConnector1 = GetSelectedConnector( 1 );
 		pConnector2 = GetSelectedConnector( 2 );
 	}
-
-	if( SelectedCount < 1 || SelectedCount > 3 )
-		return "";
 
 	CFPoint Point0 = pConnector0->GetOriginalPoint();
 	Point0.x *= DocumentScale;
@@ -4554,7 +4554,6 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 			if( pConnector1 == 0 )
 				return "";
 
-			int SelectedLinks = GetSelectedLinkCount( false );
 			if( pConnector0->IsAlone() )
 				--SelectedLinks;
 			if( pConnector0->IsAlone() )

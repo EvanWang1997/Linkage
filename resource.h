@@ -87,13 +87,13 @@
 #define ID_FILE_HELPDOC                 3023
 #define IDS_RIBBON_HELP                 3024
 #define IDS_RIBBON_BACKGROUNDCAT        3025
-#define ID_BACKGROUND_OPEN				3026
-#define ID_BACKGROUND_TRANSPARENCY		3027
-#define IDS_RIBBON_IMAGE				3028
-#define IDS_RIBBON_TRANSPARENCY			3029
-#define IDS_RIBBON_APPEARANCE			3030
-#define ID_BACKGROUND_DELETE			3031
-#define IDS_RIBBON_BACKGROUND_DELETE	3032
+#define ID_BACKGROUND_OPEN              3026
+#define ID_BACKGROUND_TRANSPARENCY      3027
+#define IDS_RIBBON_IMAGE                3028
+#define IDS_RIBBON_TRANSPARENCY         3029
+#define IDS_RIBBON_APPEARANCE           3030
+#define ID_BACKGROUND_DELETE            3031
+#define IDS_RIBBON_BACKGROUND_DELETE    3032
 #define IDB_NAVIGATION_LARGE_HC         4100
 #define IDB_PAGES                       4101
 #define IDB_PAGES_HC                    4102
@@ -101,15 +101,6 @@
 #define IDB_PAGES_SMALL_HC              4104
 #define IDR_THEME_MENU                  4105
 #define ID_SET_STYLE                    4106
-#define ID_VIEW_APPLOOK_WIN_2000        4107
-#define ID_VIEW_APPLOOK_OFF_XP          4108
-#define ID_VIEW_APPLOOK_WIN_XP          4109
-#define ID_VIEW_APPLOOK_OFF_2003        4110
-#define ID_VIEW_APPLOOK_VS_2005         4111
-#define ID_VIEW_APPLOOK_OFF_2007_BLUE   4112
-#define ID_VIEW_APPLOOK_OFF_2007_BLACK  4113
-#define ID_VIEW_APPLOOK_OFF_2007_SILVER 4114
-#define ID_VIEW_APPLOOK_OFF_2007_AQUA   4115
 #define ID_TOOLS_OPTIONS                4116
 #define ID_VIEW_CAPTION_BAR             4117
 #define IDB_INFO                        4118
@@ -513,6 +504,7 @@
 #define IDD_LENGTH                      6010
 #define IDD_ROTATE                      6011
 #define IDD_SCALE                       6012
+#define ID_BUTTON2                      7004
 #define IDC_PREVIEW                     8000
 #define IDC_LIST1                       8001
 #define IDC_COMBOBOXEX1                 8004
@@ -528,8 +520,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6011
-#define _APS_NEXT_COMMAND_VALUE         7004
+#define _APS_NEXT_RESOURCE_VALUE        6012
+#define _APS_NEXT_COMMAND_VALUE         7005
 #define _APS_NEXT_CONTROL_VALUE         8011
 #define _APS_NEXT_SYMED_VALUE           9000
 #endif
