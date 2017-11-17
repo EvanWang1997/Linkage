@@ -4437,7 +4437,7 @@ bool CLinkageDoc::ChangeLinkLength( CLink *pLink, double Value, bool bPercentage
 	CConnector *pConnector2 = pLink->GetConnector( 1 );
 	if( pConnector == 0 || pConnector2 == 0 )
 		return false;
-	if( IsLinkLocked( pConnector ) || IsLinkLocked( pConnector2 ) )
+	if( IsLinkLocked( pConnector ) && IsLinkLocked( pConnector2 ) )
 		return false;
 	CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
 	double LineLength = Line.GetDistance();
@@ -4448,11 +4448,28 @@ bool CLinkageDoc::ChangeLinkLength( CLink *pLink, double Value, bool bPercentage
 		NewLineLength = Value;
 	double OneEndAdd = ( NewLineLength - LineLength ) / 2;
 	PushUndo();
-	Line.SetDistance( LineLength + OneEndAdd );
-	Line.ReverseDirection();
-	Line.SetDistance( NewLineLength );
-	pConnector->SetPoint( Line.GetEnd() );
-	pConnector2->SetPoint( Line.GetStart() );
+	if( IsLinkLocked( pConnector ) )
+	{
+		CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
+		Line.SetDistance( NewLineLength );
+		PushUndo();
+		pConnector2->SetPoint( Line.GetEnd() );
+	}
+	else if( IsLinkLocked( pConnector2 ) )
+	{
+		CFLine Line( pConnector2->GetPoint(), pConnector->GetPoint() );
+		Line.SetDistance( NewLineLength );
+		PushUndo();
+		pConnector->SetPoint( Line.GetEnd() );
+	}
+	else
+	{
+		Line.SetDistance( LineLength + OneEndAdd );
+		Line.ReverseDirection();
+		Line.SetDistance( NewLineLength );
+		pConnector->SetPoint( Line.GetEnd() );
+		pConnector2->SetPoint( Line.GetStart() );
+	}
 	return true;
 }
 
