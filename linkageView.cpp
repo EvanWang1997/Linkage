@@ -652,6 +652,11 @@ void CLinkageView::GetAdjustmentControlRect( AdjustmentControl Control, CFRect &
 	CFRect PixelRect = Scale( m_SelectionContainerRect );
 	PixelRect.InflateRect( 4, 4 );
 
+	static const int ArrowBoxSize = 8;
+	static const int HalfCenteringBoxSize = 5;
+	static const int GrabBoxSize = 6;
+	static const int HalfGrabBox = GrabBoxSize / 2;
+
 	if( m_VisibleAdjustment == ADJUSTMENT_ROTATE )
 	{
 		switch( Control )
@@ -659,20 +664,20 @@ void CLinkageView::GetAdjustmentControlRect( AdjustmentControl Control, CFRect &
 			case AC_ROTATE:
 			{
 				CFPoint PixelPoint = Scale( m_SelectionRotatePoint );
-				Rect.SetRect( PixelPoint.x - 7, PixelPoint.y - 7, PixelPoint.x + 7, PixelPoint.y + 7 );
+				Rect.SetRect( PixelPoint.x - HalfCenteringBoxSize, PixelPoint.y - HalfCenteringBoxSize, PixelPoint.x + HalfCenteringBoxSize, PixelPoint.y + HalfCenteringBoxSize );
 				break;
 			}
 			case AC_TOP_LEFT:
-				Rect.SetRect( PixelRect.left - 11, PixelRect.top - 11, PixelRect.left, PixelRect.top );
+				Rect.SetRect( PixelRect.left - ArrowBoxSize, PixelRect.top - ArrowBoxSize, PixelRect.left, PixelRect.top );
 				break;
 			case AC_TOP_RIGHT:
-				Rect.SetRect( PixelRect.right, PixelRect.top - 11, PixelRect.right + 11, PixelRect.top );
+				Rect.SetRect( PixelRect.right, PixelRect.top - ArrowBoxSize, PixelRect.right + ArrowBoxSize, PixelRect.top );
 				break;
 			case AC_BOTTOM_RIGHT:
-				Rect.SetRect( PixelRect.right, PixelRect.bottom, PixelRect.right + 11, PixelRect.bottom + 11 );
+				Rect.SetRect( PixelRect.right, PixelRect.bottom, PixelRect.right + ArrowBoxSize, PixelRect.bottom + ArrowBoxSize );
 				break;
 			case AC_BOTTOM_LEFT:
-				Rect.SetRect( PixelRect.left - 11, PixelRect.bottom, PixelRect.left, PixelRect.bottom + 11 );
+				Rect.SetRect( PixelRect.left - ArrowBoxSize, PixelRect.bottom, PixelRect.left, PixelRect.bottom + ArrowBoxSize );
 				break;
 			default: return;
 		}
@@ -682,40 +687,40 @@ void CLinkageView::GetAdjustmentControlRect( AdjustmentControl Control, CFRect &
 		switch( Control )
 		{
 			case AC_TOP_LEFT:
-				Rect.SetRect( PixelRect.left - 6, PixelRect.top - 6, PixelRect.left, PixelRect.top );
+				Rect.SetRect( PixelRect.left - GrabBoxSize, PixelRect.top - GrabBoxSize, PixelRect.left, PixelRect.top );
 				break;
 			case AC_TOP_RIGHT:
-				Rect.SetRect( PixelRect.right, PixelRect.top - 6, PixelRect.right + 6, PixelRect.top );
+				Rect.SetRect( PixelRect.right, PixelRect.top - GrabBoxSize, PixelRect.right + GrabBoxSize, PixelRect.top );
 				break;
 			case AC_BOTTOM_RIGHT:
-				Rect.SetRect( PixelRect.right, PixelRect.bottom, PixelRect.right + 6, PixelRect.bottom + 6 );
+				Rect.SetRect( PixelRect.right, PixelRect.bottom, PixelRect.right + GrabBoxSize, PixelRect.bottom + GrabBoxSize );
 				break;
 			case AC_BOTTOM_LEFT:
-				Rect.SetRect( PixelRect.left - 6, PixelRect.bottom, PixelRect.left, PixelRect.bottom + 6 );
+				Rect.SetRect( PixelRect.left - GrabBoxSize, PixelRect.bottom, PixelRect.left, PixelRect.bottom + GrabBoxSize );
 				break;
 			case AC_TOP:
-				Rect.SetRect( ( ( PixelRect.left + PixelRect.right ) / 2 ) - 3,
-							  PixelRect.top - 6,
-							  ( ( PixelRect.left + PixelRect.right ) / 2 ) + 3,
+				Rect.SetRect( ( ( PixelRect.left + PixelRect.right ) / 2 ) - HalfGrabBox,
+							  PixelRect.top - GrabBoxSize,
+							  ( ( PixelRect.left + PixelRect.right ) / 2 ) + HalfGrabBox,
 							  PixelRect.top );
 				break;
 			case AC_RIGHT:
 				Rect.SetRect( PixelRect.right,
-							  ( ( PixelRect.top + PixelRect.bottom ) / 2 ) - 3,
-							  PixelRect.right + 6,
-							  ( ( PixelRect.top + PixelRect.bottom ) / 2 ) + 3 );
+							  ( ( PixelRect.top + PixelRect.bottom ) / 2 ) - HalfGrabBox,
+							  PixelRect.right + GrabBoxSize,
+							  ( ( PixelRect.top + PixelRect.bottom ) / 2 ) + HalfGrabBox );
 				break;
 			case AC_BOTTOM:
-				Rect.SetRect( ( ( PixelRect.left + PixelRect.right ) / 2 ) - 3,
+				Rect.SetRect( ( ( PixelRect.left + PixelRect.right ) / 2 ) - HalfGrabBox,
 							  PixelRect.bottom,
-							  ( ( PixelRect.left + PixelRect.right ) / 2 ) + 3,
-							  PixelRect.bottom + 6 );
+							  ( ( PixelRect.left + PixelRect.right ) / 2 ) + HalfGrabBox,
+							  PixelRect.bottom + GrabBoxSize );
 				break;
 			case AC_LEFT:
-				Rect.SetRect( PixelRect.left - 6,
-							  ( ( PixelRect.top + PixelRect.bottom ) / 2 ) - 3,
+				Rect.SetRect( PixelRect.left - GrabBoxSize,
+							  ( ( PixelRect.top + PixelRect.bottom ) / 2 ) - HalfGrabBox,
 							  PixelRect.left,
-							  ( ( PixelRect.top + PixelRect.bottom ) / 2 ) + 3 );
+							  ( ( PixelRect.top + PixelRect.bottom ) / 2 ) + HalfGrabBox );
 				break;
 			default: return;
 		}
@@ -727,8 +732,10 @@ void CLinkageView::DrawRotationControl( CRenderer *pRenderer, CFRect &Rect, enum
 	#if defined( LINKAGE_USE_DIRECT2D )
 		if( AdjustmentControl == AC_ROTATE )
 		{
-			double Radius = 6*m_DPIScale;
-			double SmallRadius = 4*m_DPIScale;
+			double Radius = Rect.Width() - 2;
+			//double Radius = 6*m_DPIScale;
+			//double SmallRadius = 4*m_DPIScale;
+			double SmallRadius = Radius * 2 / 3;
 			CFArc Arc( Rect.GetCenter(), Radius, Rect.TopLeft(), Rect.TopLeft() );
 			pRenderer->Arc( Arc );
 			pRenderer->Circle( CFCircle( Arc.x, Arc.y, 1.5 ) );
@@ -739,10 +746,11 @@ void CLinkageView::DrawRotationControl( CRenderer *pRenderer, CFRect &Rect, enum
 		}
 		else
 		{
-			double Radius = Rect.Width()/3*m_DPIScale;
-			double ArrowLength = 3*m_DPIScale;
+			double ArrowLength = 5;
+			double Radius = Rect.Width() - ( ArrowLength / 2 );
 			Rect.InflateRect( 1, 1 );
-			CFArc Arc( Rect.GetCenter(), 6*m_DPIScale, Rect.TopLeft(), Rect.TopLeft() );
+			CFArc Arc( Rect.GetCenter(), 6, Rect.TopLeft(), Rect.TopLeft() );
+
 			pRenderer->SetArcDirection( AD_COUNTERCLOCKWISE );
 			static const double MoveRectForArc = Scale( 2.0 );
 			switch( AdjustmentControl )
@@ -8303,6 +8311,8 @@ CRendererBitmap* CLinkageView::ImageBytesToRendererBitmap( std::vector<byte> &Bu
 		PrepareRenderer( Renderer, 0, 0, 0, 1.0, false, 0.0, 1.0, false, false, false, 0 );
 
 		return Renderer.LoadRendererBitmapFromMemory( (const unsigned char*)Buffer.data(), Size );
+	#else
+		return 0;
 	#endif
 }
 
