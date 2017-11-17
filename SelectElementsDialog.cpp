@@ -20,6 +20,8 @@ CSelectElementsDialog::CSelectElementsDialog(CWnd* pParent /*=NULL*/)
 	: CMyDialog( pParent, IDD_SELECTELEMENTS)
 {
 	m_bShowDebug = false;
+	m_pDocument = 0;
+	m_bInitialized = false;
 }
 
 CSelectElementsDialog::~CSelectElementsDialog()
@@ -33,7 +35,9 @@ void CSelectElementsDialog::DoDataExchange(CDataExchange* pDX)
 }
 
 
+
 BEGIN_MESSAGE_MAP(CSelectElementsDialog, CMyDialog)
+	ON_NOTIFY( LVN_ITEMCHANGED, IDC_LIST3, OnItemchangedList2 )
 END_MESSAGE_MAP()
 
 
@@ -137,9 +141,33 @@ BOOL CSelectElementsDialog::OnInitDialog()
 		++Row;
 	}
 
+	m_bInitialized = true;
+
 	return TRUE;
 }
 
+void CSelectElementsDialog::OnItemchangedList2(NMHDR* pNMHDR, LRESULT* pResult) 
+{
+	if( !m_bInitialized )
+		return;
+
+	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+
+	if ((pNMListView->uChanged & LVIF_STATE) 
+		&& (pNMListView->uNewState == 0x1000 || pNMListView->uNewState == 0x2000 ))
+	{
+		for( int Index = 0; Index < m_ListControl2.GetItemCount(); ++Index )
+		{
+			CElement *pElement = (CElement*)m_ListControl2.GetItemData( Index );
+			if( pElement == 0 )
+				continue;
+			pElement->Select( m_ListControl2.GetCheck( Index ) != FALSE );
+		}
+
+		if( m_pDocument != 0 )
+			m_pDocument->UpdateAllViews( 0 );
+	}
+}
 
 void CSelectElementsDialog::OnOK( void )
 {

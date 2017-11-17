@@ -5,6 +5,7 @@
 #include "afxwin.h"
 #include "afxcmn.h"
 
+
 // CSelectElementsDialog dialog
 
 class CSelectElementsDialog : public CMyDialog
@@ -23,10 +24,12 @@ public:
 public:
 	ElementList m_AllElements;
 	bool m_bShowDebug;
+	CDocument *m_pDocument;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
+	afx_msg void OnItemchangedList2(NMHDR* pNMHDR, LRESULT* pResult);
+	bool m_bInitialized;
 	DECLARE_MESSAGE_MAP()
 public:
 	virtual BOOL OnInitDialog();

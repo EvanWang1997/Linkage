@@ -4410,6 +4410,7 @@ void CLinkageView::OnEditSelectElements()
 
 	CSelectElementsDialog dlg;
 	dlg.m_bShowDebug = m_bShowDebug;
+	dlg.m_pDocument = pDoc;
 	pDoc->FillElementList( dlg.m_AllElements );
 	if( dlg.DoModal() == IDOK )
 	{
