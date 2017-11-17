@@ -137,7 +137,7 @@ void CConnector::UpdateControlKnob( void )
 	if( Point == Center )
 		Point += CFPoint( 10, 10 );
 	CFLine Line( GetPoint(), Point );
-	Line.SetDistance( m_DrawCircleRadius );
+	Line.SetLength( m_DrawCircleRadius );
 
 	pControlKnob->SetPoint( Line.GetEnd() );
 }
@@ -493,10 +493,10 @@ bool CConnector::GetSliderArc( CFArc &TheArc,bool bGetOriginal )
 
 	CFLine Line( Point1, Point2 );
 	CFLine Perpendicular;
-	double aLength = Line.GetDistance() / 2;
+	double aLength = Line.GetLength() / 2;
 	double Radius = GetSlideRadius();
 	double bLength = sqrt( ( Radius * Radius ) - ( aLength * aLength ) );
-	Line.SetDistance( aLength );
+	Line.SetLength( aLength );
 	Line.PerpendicularLine( Perpendicular, Radius > 0 ? bLength : -bLength );
 
 	if( Radius > 0 )

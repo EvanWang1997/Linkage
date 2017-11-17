@@ -81,8 +81,8 @@ static int ExpandPolygonCornerx( CFPoint &Point, CFPoint &PreviousPoint, CFPoint
 	CFLine Perp2;
 	Line2.PerpendicularLine( Perp2, bChangeDirection ? -1 : 1 );
 
-	Perp1.SetDistance( Distance );
-	Perp2.SetDistance( Distance );
+	Perp1.SetLength( Distance );
+	Perp2.SetLength( Distance );
 
 	NewPoint1 = Perp1.GetEnd();
 	NewPoint2 = Perp2.GetEnd();
@@ -235,8 +235,8 @@ class CRendererImplementation
 		CFLine Perp2;
 		Line2.PerpendicularLine( Perp2, bChangeDirection ? -1 : 1 );
 
-		Perp1.SetDistance( Distance );
-		Perp2.SetDistance( Distance );
+		Perp1.SetLength( Distance );
+		Perp2.SetLength( Distance );
 
 		NewPoint1 = Perp1.GetEnd();
 		NewPoint2 = Perp2.GetEnd();
@@ -365,9 +365,9 @@ class CRendererImplementation
 					CFLine Line( pRegionPoints[FillPoint-BackPoints], pRegionPoints[FillPoint-BackPoints-1] );
 					CFLine Perp;
 					Line.PerpendicularLine( Perp, 0 );
-					Line.SetDistance( ChordHalf );
+					Line.SetLength( ChordHalf );
 					Perp -= Line.GetEnd() - Line.GetStart();
-					Perp.SetDistance( ToCenter );
+					Perp.SetLength( ToCenter );
 
 					CPen Derf( PS_SOLID, 6, RGB( 255, 0, 0 ) );
 					CPen *pDerf = SelectObject( &Derf );
@@ -906,8 +906,8 @@ class CGDIRenderer : public CRendererImplementation
 		CSize Size = m_pDC->GetTextExtent( pString, Count );
 		CFPoint Result( Size.cx, Size.cy );
 		// Only adjust the scaling and not the position.
-		Result.x /= m_Scale * m_DPIScale;
-		Result.y /= m_Scale * m_DPIScale;
+		Result.x /= m_Scale;// * m_DPIScale;
+		Result.y /= m_Scale;// * m_DPIScale;
 		return Result;
 	}
 
@@ -933,7 +933,7 @@ class CGDIRenderer : public CRendererImplementation
 		double Blue = GetBValue( PenColor ) / 255.0;
 
 		CFLine Line( ToPoint, FromPoint );
-		Line.SetDistance( Length );
+		Line.SetLength( Length );
 
 		if( m_Scale <= 1.0 )
 		{
@@ -964,7 +964,7 @@ class CGDIRenderer : public CRendererImplementation
 			CFLine CrossLine;
 			Line.PerpendicularLine( CrossLine, Width / 2, 1 );
 			CrossLine.ReverseDirection();
-			CrossLine.SetDistance( Width );
+			CrossLine.SetLength( Width );
 			CPen *pOldPen = (CPen*)m_pDC->SelectStockObject( NULL_PEN );
 
 			POINT Points[3];
@@ -1602,8 +1602,8 @@ class CDXFRenderer : public CRendererImplementation
 		CFLine Perp2;
 		Line2.PerpendicularLine( Perp2, bChangeDirection ? 1 : -1 );
 
-		Perp1.SetDistance( Distance );
-		Perp2.SetDistance( Distance );
+		Perp1.SetLength( Distance );
+		Perp2.SetLength( Distance );
 
 		NewPoint1 = Perp1.GetEnd();
 		NewPoint2 = Perp2.GetEnd();
@@ -1690,8 +1690,8 @@ class CDXFRenderer : public CRendererImplementation
 		CSize Size = m_pDC->GetTextExtent( pString, Count );
 		CFPoint Result( Size.cx, Size.cy );
 		// Only adjust the scaling and not the position.
-		Result.x /= m_Scale * m_DPIScale;
-		Result.y /= m_Scale * m_DPIScale;
+		Result.x /= m_Scale;// * m_DPIScale;
+		Result.y /= m_Scale;// * m_DPIScale;
 		return Result;
 	}
 
@@ -1720,7 +1720,7 @@ class CDXFRenderer : public CRendererImplementation
 		Length = Scale( Length );
 
 		CFLine Line( ToPoint, FromPoint );
-		Line.SetDistance( Length );
+		Line.SetLength( Length );
 
 		CBrush Brush;
 		Red *= 0.85;
@@ -1732,7 +1732,7 @@ class CDXFRenderer : public CRendererImplementation
 		CFLine CrossLine;
 		Line.PerpendicularLine( CrossLine, Width / 2, 1 );
 		CrossLine.ReverseDirection();
-		CrossLine.SetDistance( Width );
+		CrossLine.SetLength( Width );
 		CPen *pOldPen = (CPen*)m_pDC->SelectStockObject( NULL_PEN );
 
 		DrawLine( CrossLine.GetStart(), CrossLine.GetEnd() );
@@ -2812,6 +2812,8 @@ class CD2DRenderer : public CRendererImplementation
 		m_FontHeight = FontHeight;
 		m_FontName = LogFont.lfFaceName;
 
+		m_pDC->SelectObject( pFont );
+
 		return 0;
 	}
 
@@ -2875,8 +2877,8 @@ class CD2DRenderer : public CRendererImplementation
 		CSize Size = m_pDC->GetTextExtent( pString, Count );
 		CFPoint Result( Size.cx, Size.cy );
 		// Only adjust the scaling and not the position.
-		Result.x /= m_Scale * m_DPIScale;
-		Result.y /= m_Scale * m_DPIScale;
+		Result.x /= m_Scale;// * m_DPIScale;
+		Result.y /= m_Scale;// * m_DPIScale;
 		return Result;
 	}
 
@@ -2902,7 +2904,7 @@ class CD2DRenderer : public CRendererImplementation
 		double Blue = GetBValue( PenColor ) / 255.0;
 
 		CFLine Line( ToPoint, FromPoint );
-		Line.SetDistance( Length );
+		Line.SetLength( Length );
 
 		CBrush Brush;
 		Red *= 0.80;
@@ -2914,7 +2916,7 @@ class CD2DRenderer : public CRendererImplementation
 		CFLine CrossLine;
 		Line.PerpendicularLine( CrossLine, Width / 2, 1 );
 		CrossLine.ReverseDirection();
-		CrossLine.SetDistance( Width );
+		CrossLine.SetLength( Width );
 		CPen *pOldPen = (CPen*)m_pDC->SelectStockObject( NULL_PEN );
 
 		CFPoint Points[3];

@@ -97,9 +97,9 @@ class CFLine
 		{ m_Start.x = Point1.x; m_Start.y = Point1.y; m_End.x = Point2.x; m_End.y = Point2.y; }
 	void SetLine( const CFLine &Line )
 		{ m_Start.x = Line[0].x; m_Start.y = Line[0].y; m_End.x = Line[1].x; m_End.y = Line[1].y; }
-	void SetDistance( const double Distance );
+	void SetLength( const double Distance );
 	
-	double GetDistance( void ) const
+	double GetLength( void ) const
 		{ return (double)sqrt( ( ( m_End.x - m_Start.x )  * ( m_End.x - m_Start.x ) ) + ( ( m_End.y - m_Start.y ) * ( m_End.y - m_Start.y ) ) ); }
 
 	double GetAngle( void )

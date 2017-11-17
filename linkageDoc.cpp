@@ -2081,7 +2081,7 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector )
 		{
 			double DistanceRatio = pStart->GetOriginalPoint().DistanceToPoint( pConnector->GetOriginalPoint() ) / pStart->GetOriginalPoint().DistanceToPoint( pEnd->GetOriginalPoint() );
 			CFLine Line( pStart->GetPoint(), pEnd->GetPoint() );
-			Line.SetDistance( Line.GetDistance() * DistanceRatio );
+			Line.SetLength( Line.GetLength() * DistanceRatio );
 			pConnector->SetIntermediatePoint( Line.GetEnd() );
 		}
 		else
@@ -2703,12 +2703,12 @@ void CLinkageDoc::AlignSelected( _Direction Direction )
 				sort( ConnectorReference.begin(), ConnectorReference.end(), CompareConnectorDistance() );
 
 				double Space = 0.0;
-				double Distance = Line.GetDistance();
+				double Distance = Line.GetLength();
 				Space = Distance / ( PointCount - 1 );
 
 				for( int Counter = 0; Counter < PointCount - 2; ++Counter )
 				{
-					Line.SetDistance( Space * ( Counter + 1 ) );
+					Line.SetLength( Space * ( Counter + 1 ) );
 					ConnectorReference[Counter].m_pConnector->SetPoint( Line.m_End );
 				}
 			}
@@ -4440,7 +4440,7 @@ bool CLinkageDoc::ChangeLinkLength( CLink *pLink, double Value, bool bPercentage
 	if( IsLinkLocked( pConnector ) && IsLinkLocked( pConnector2 ) )
 		return false;
 	CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
-	double LineLength = Line.GetDistance();
+	double LineLength = Line.GetLength();
 	double NewLineLength = LineLength;
 	if( bPercentage )
 		NewLineLength *= Value / 100;
@@ -4451,22 +4451,22 @@ bool CLinkageDoc::ChangeLinkLength( CLink *pLink, double Value, bool bPercentage
 	if( IsLinkLocked( pConnector ) )
 	{
 		CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
-		Line.SetDistance( NewLineLength );
+		Line.SetLength( NewLineLength );
 		PushUndo();
 		pConnector2->SetPoint( Line.GetEnd() );
 	}
 	else if( IsLinkLocked( pConnector2 ) )
 	{
 		CFLine Line( pConnector2->GetPoint(), pConnector->GetPoint() );
-		Line.SetDistance( NewLineLength );
+		Line.SetLength( NewLineLength );
 		PushUndo();
 		pConnector->SetPoint( Line.GetEnd() );
 	}
 	else
 	{
-		Line.SetDistance( LineLength + OneEndAdd );
+		Line.SetLength( LineLength + OneEndAdd );
 		Line.ReverseDirection();
-		Line.SetDistance( NewLineLength );
+		Line.SetLength( NewLineLength );
 		pConnector->SetPoint( Line.GetEnd() );
 		pConnector2->SetPoint( Line.GetStart() );
 	}
@@ -4629,7 +4629,7 @@ CLinkageDoc::_CoordinateChange CLinkageDoc::SetSelectedElementCoordinates( CFPoi
 			if( IsLinkLocked( pConnector ) )
 				return _CoordinateChange::NONE;
 			CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
-			Line.SetDistance( Line.GetDistance() * Value / 100 );
+			Line.SetLength( Line.GetLength() * Value / 100 );
 			PushUndo();
 			pConnector2->SetPoint( Line.GetEnd() );
 		}
@@ -4710,7 +4710,7 @@ CLinkageDoc::_CoordinateChange CLinkageDoc::SetSelectedElementCoordinates( CFPoi
 		if( IsLinkLocked( pConnector2 ) )
 			return _CoordinateChange::NONE;
 		CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
-		Line.SetDistance( xValue );
+		Line.SetLength( xValue );
 		PushUndo();
 		pConnector2->SetPoint( Line.GetEnd() );
 		return _CoordinateChange::DISTANCE;

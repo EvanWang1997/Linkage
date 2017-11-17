@@ -1148,7 +1148,7 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine TestLine( pSlider->GetPreviousPoint(), pSlider->GetPoint() );
-		TestLine.SetDistance( TestLine.GetDistance() * ( m_bUseIncreasedMomentum ? MOMENTUM : NO_MOMENTUM ) );
+		TestLine.SetLength( TestLine.GetLength() * ( m_bUseIncreasedMomentum ? MOMENTUM : NO_MOMENTUM ) );
 		CFPoint SuggestedPoint = TestLine.GetEnd();
 
 
@@ -1251,7 +1251,7 @@ class CSimulatorImplementation
 		// Use the NewSlideLine to measure this because it is already at the proper angle.
 		NewSlideLine -= NewSlideLine.m_Start;
 		NewSlideLine += Intersect;
-		NewSlideLine.SetDistance( IntersectToSlider );
+		NewSlideLine.SetLength( IntersectToSlider );
 
 		ChangeAngle = GetClosestAngle( pSlider1->GetRotationAngle(), ChangeAngle );
 		pSlider1->SetRotationAngle( ChangeAngle );
@@ -1445,7 +1445,7 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine Line( pCommonConnector->GetPreviousPoint(), pCommonConnector->GetPoint() );
-		Line.SetDistance( Line.GetDistance() * ( m_bUseIncreasedMomentum ? MOMENTUM : NO_MOMENTUM ) );
+		Line.SetLength( Line.GetLength() * ( m_bUseIncreasedMomentum ? MOMENTUM : NO_MOMENTUM ) );
 		CFPoint SuggestedPoint = Line.GetEnd();
 
 		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );
@@ -1769,7 +1769,7 @@ class CSimulatorImplementation
 		// location.
 
 		CFLine Line( pCommonConnector->GetPreviousPoint(), pCommonConnector->GetPoint() );
-		Line.SetDistance( Line.GetDistance() * ( m_bUseIncreasedMomentum ? MOMENTUM : NO_MOMENTUM ) );
+		Line.SetLength( Line.GetLength() * ( m_bUseIncreasedMomentum ? MOMENTUM : NO_MOMENTUM ) );
 		CFPoint SuggestedPoint = Line.GetEnd();
 
 		double d1 = Distance( SuggestedPoint /*pCommonConnector->GetPoint()*/, Intersect );

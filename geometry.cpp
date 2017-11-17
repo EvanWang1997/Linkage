@@ -24,7 +24,7 @@ void CFPoint::SnapToLine( CFLine &Line, bool bToSegment, bool bStartToInfinity )
 	// there is a problem with the new code to set x and y above.
 
     //CFLine TempLine( CFPoint( 0, 0 ), AB );
-    //TempLine.SetDistance( TempLine.GetDistance() * t );
+    //TempLine.SetLength( TempLine.GetLength() * t );
     //*this = Line.GetStart() + TempLine.GetEnd();
 }
 
@@ -142,14 +142,14 @@ bool CFPoint::IsInsideOf( class CFRect &Rect )
 CFPoint CFPoint::MidPoint( CFPoint &Point, double ScaleDistance )
 {
 	CFLine Line( *this, Point );
-	Line.SetDistance( Line.GetDistance() * ScaleDistance );
+	Line.SetLength( Line.GetLength() * ScaleDistance );
 	return Line.GetEnd();
 }
 
 CFPoint CFLine::MidPoint( double ScaleDistance )
 {
 	CFLine Line( m_Start, m_End );
-	Line.SetDistance( Line.GetDistance() * ScaleDistance );
+	Line.SetLength( Line.GetLength() * ScaleDistance );
 	return Line.GetEnd();
 }
 
@@ -424,7 +424,7 @@ void CFLine::PerpendicularLine( CFLine &Perp, double Length, const int Direction
 	CFPoint Point = m_End;
 	PerpendicularPoint( Perp[1], Direction );
 	Perp[0] = Point;
-	Perp.SetDistance( Length );
+	Perp.SetLength( Length );
 }
 
 void CFLine::GetParallelLine( CFLine &NewLine, double Offset )
@@ -435,7 +435,7 @@ void CFLine::GetParallelLine( CFLine &NewLine, double Offset )
 		return;
 	}
 
-	double Length = GetDistance();
+	double Length = GetLength();
 
 	double dx = ( m_End.x - m_Start.x ) * fabs( Offset ) / Length;
 	double dy = ( m_End.y - m_Start.y ) * fabs( Offset ) / Length;
@@ -461,7 +461,7 @@ double DistanceAlongLine( CFLine &Line, CFPoint &Point )
 
     CFLine TempLine( CFPoint( 0, 0 ), AB );
 
-	double Distance = TempLine.GetDistance() * t;
+	double Distance = TempLine.GetLength() * t;
 
 	return Distance;
 }
@@ -503,7 +503,7 @@ void CFLine::MoveEndsFromStart( double MoveStartDistance, double MoveEndDistance
 	m_End = NewEnd;
 }
 
-void CFLine::SetDistance( const double Distance )
+void CFLine::SetLength( const double Distance )
 {
 	if( m_End.x == m_Start.x && m_End.y == m_Start.y )
 		return;
@@ -546,7 +546,7 @@ double FindRadius( double ChordLength, double DistanceFromChord )
 CFPoint CFPoint::SnapToArc( CFArc &TheArc )
 {
 	CFLine AngleLine( TheArc.x, TheArc.y, x, y );
-	AngleLine.SetDistance( fabs( TheArc.r ) );
+	AngleLine.SetLength( fabs( TheArc.r ) );
 	CFPoint Point = AngleLine.GetEnd();
 
 	if( TheArc.GetStart() != TheArc.GetEnd() && !TheArc.PointOnArc( Point ) )
@@ -589,7 +589,7 @@ bool GetTangents( const CFCircle &Circle1, const CFCircle &Circle2, CFLine &Resu
 		Result2 = Line; Result2.ReverseDirection();
 		CFLine Perp;
 		Line.PerpendicularLine( Perp, 1 );
-		Perp.SetDistance( Circle2.r );
+		Perp.SetLength( Circle2.r );
 		Result1 -= Perp.GetEnd() - Circle2.GetCenter();
 		Result2 += Perp.GetEnd() - Circle2.GetCenter();
 		return true;
@@ -601,9 +601,9 @@ bool GetTangents( const CFCircle &Circle1, const CFCircle &Circle2, CFLine &Resu
 	Temp.r -= Circle1.r;
 
 	CFLine Line( Circle2.GetCenter(), Circle1.GetCenter() );
-	double DistanceValue = Line.GetDistance() / 2;
-	Line.SetDistance( DistanceValue );
-	CFCircle Intersector( Line.GetEnd(), Line.GetDistance() );
+	double DistanceValue = Line.GetLength() / 2;
+	Line.SetLength( DistanceValue );
+	CFCircle Intersector( Line.GetEnd(), Line.GetLength() );
 
 	CFPoint Point1;
 	CFPoint Point2;
@@ -614,12 +614,12 @@ bool GetTangents( const CFCircle &Circle1, const CFCircle &Circle2, CFLine &Resu
 	Result2.SetLine( Point2, Circle1.GetCenter() );
 
 	Line.SetLine( Circle2.GetCenter(), Point1 );
-	Line.SetDistance( Circle2.r );
+	Line.SetLength( Circle2.r );
 
 	Result1 += Line.GetEnd() - Point1;
 
 	Line.SetLine( Circle2.GetCenter(), Point2 );
-	Line.SetDistance( Circle2.r );
+	Line.SetLength( Circle2.r );
 
 	Result2 += Line.GetEnd() - Point2;
 

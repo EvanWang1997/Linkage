@@ -310,7 +310,7 @@ bool CLink::RotateAround( CConnector* pConnector )
 		if( IsActuator() )
 		{
 			CFLine Line( pConnector->GetOriginalPoint(), Temp );
-			Line.SetDistance( GetActuatedConnectorDistance( pConnector, pUseConnector ) );
+			Line.SetLength( GetActuatedConnectorDistance( pConnector, pUseConnector ) );
 			Temp = Line.GetEnd();
 		}
 
@@ -806,7 +806,7 @@ void CLink::SetActuator( bool bActuator )
 
 		CFLine Line( pConnector1->GetPoint(), pConnector2->GetPoint() );
 		m_ActuatorCPM = 15;
-		SetStroke( Line.GetDistance() / 2 );
+		SetStroke( Line.GetLength() / 2 );
 	}
 }
 
@@ -829,12 +829,12 @@ bool CLink::GetStrokePoint( CFPoint &Point )
 
 	CFLine Line( pConnector1->GetPoint(), pConnector2->GetPoint() );
 
-	double Distance = Line.GetDistance();
+	double Distance = Line.GetLength();
 	if( m_ActuatorStroke < Distance )
 		Distance = m_ActuatorStroke;
 
-//	Line.SetDistance( Distance );
-	Line.SetDistance( m_ActuatorStroke );
+//	Line.SetLength( Distance );
+	Line.SetLength( m_ActuatorStroke );
 	Point = Line.GetEnd();
 
 	return true;
@@ -923,7 +923,7 @@ void CLink::UpdateControlKnob( CFPoint Point )
 
 	CFLine Line( pConnector1->GetPoint(), m_ControlKnob.GetPoint() );
 
-	SetStroke( Line.GetDistance() );
+	SetStroke( Line.GetLength() );
 }
 
 void CLink::MakePermanent( void )
