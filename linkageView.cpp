@@ -345,8 +345,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_VIEW_ZOOMIN, &CLinkageView::OnViewZoomin)
 	ON_COMMAND(ID_VIEW_ZOOMOUT, &CLinkageView::OnViewZoomout)
 	ON_COMMAND(ID_VIEW_ZOOMFIT, &CLinkageView::OnMenuZoomfit)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOMIN, &CLinkageView::OnUpdateNotSimulating)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOMOUT, &CLinkageView::OnUpdateNotSimulating)
+	//ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOMIN, &CLinkageView::OnUpdateNotSimulating)
+	//ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOMOUT, &CLinkageView::OnUpdateNotSimulating)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOMFIT, &CLinkageView::OnUpdateNotSimulating)
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_SAVEVIDEO, &OnFileSaveVideo)
@@ -3265,7 +3265,7 @@ void CLinkageView::OnMouseMove(UINT nFlags, CPoint MousePoint)
 	if( m_PreviousDragPoint == point )
 		return;
 
-	if( m_bSimulating )
+	if( m_bSimulating && m_MouseAction != ACTION_PAN )
 		return;
 
 	if( !m_bMouseMovedEnough )
@@ -5125,8 +5125,8 @@ void CLinkageView::OnMButtonUp(UINT nFlags, CPoint MousePoint)
 
 BOOL CLinkageView::OnMouseWheel(UINT nFlags, short zDelta, CPoint MousePoint)
 {
-	if( m_bSimulating )
-		return TRUE;
+//	if( m_bSimulating )
+//		return TRUE;
 
 	if( zDelta == 0 )
 		return TRUE;
@@ -5172,8 +5172,8 @@ CPoint CLinkageView::GetDefaultUnscalePoint( void )
 
 void CLinkageView::OnViewZoomin()
 {
-	if( m_bSimulating )
-		return;
+	//if( m_bSimulating )
+	//	return;
 
 	CPoint Point = GetDefaultUnscalePoint();
 	ClientToScreen( &Point );
@@ -5182,8 +5182,8 @@ void CLinkageView::OnViewZoomin()
 
 void CLinkageView::OnViewZoomout()
 {
-	if( m_bSimulating )
-		return;
+	//if( m_bSimulating )
+	//	return;
 
 	CPoint Point = GetDefaultUnscalePoint();
 	ClientToScreen( &Point );
@@ -6131,7 +6131,7 @@ void CLinkageView::DrawActuator( CRenderer* pRenderer, unsigned int OnLayers, CL
 	if( pLink->GetCPM() >= 0 )
 		Line.SetLength( Line.GetLength() - ExtendDistance );
 	else
-		Line.SetLength( Line.GetLength() - ExtendDistance - pLink->GetStroke() );
+		Line.SetLength( Line.GetLength() - pLink->GetStroke() + ExtendDistance );
 
 	CPen Pen;
 	Pen.CreatePen( PS_SOLID, StrokeLineSize, Color );
