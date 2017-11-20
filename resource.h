@@ -161,7 +161,7 @@
 #define IDB_SAMPLE_GALLERY              4174
 #define IDS_RIBBON_INSERT               4175
 #define IDB_SAMPLE_GALLERY1             4175
-#define IDB_INSERT_POPUP_GALLERY        4175
+#define IDB_INSERT_POPUP_GALLERY        4000
 #define IDS_RIBBON_ACTION               4176
 #define IDS_RIBBON_CONNECT              4177
 #define IDS_RIBBON_JOIN                 4178

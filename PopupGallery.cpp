@@ -74,11 +74,23 @@ CPopupGallery::CPopupGallery( int CommandID, int ImageStripResourceID, int Image
 
 	m_pImplementation->m_Images.Load( ImageStripResourceID, NULL, TRUE );
 
+#if defined( LINKAGE_USE_DIRECT2D )
+	CDC DC; 
+	DC.CreateCompatibleDC( 0 );
+	int PPI = DC.GetDeviceCaps( LOGPIXELSX );
+	double DPIScale = (double)PPI / 96.0;
+#else
+	double DPIScale = 1.0;
+#endif
+
 	BITMAP bmp;
 	GetObject( m_pImplementation->m_Images.GetImageWell(), sizeof(BITMAP), &bmp );
 	if( ImageWidth <= 0 )
 		ImageWidth = bmp.bmHeight;
-	m_pImplementation->m_Images.SetImageSize( CSize( ImageWidth, bmp.bmHeight ), TRUE );
+
+	m_pImplementation->m_Images.SetImageSize( CSize( ImageWidth , bmp.bmHeight ), TRUE );
+	m_pImplementation->m_Images.SmoothResize( DPIScale );
+	// SmoothResize will alter the image size information that must be set before the resize!
 
 	m_pImplementation->m_Count = m_pImplementation->m_Images.GetCount();
 
