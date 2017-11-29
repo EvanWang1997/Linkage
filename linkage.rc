@@ -9,7 +9,8 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -567,6 +568,20 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,119,55,50,14
 END
 
+IDD_USERGRID DIALOGEX 0, 0, 234, 97
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Scale"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Horizontal Spacing",IDC_STATIC,55,33,60,8
+    EDITTEXT        IDC_EDIT1,131,44,46,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,65,77,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,119,77,50,14
+    LTEXT           "Vertical Spacing",IDC_STATIC,131,33,51,8
+    EDITTEXT        IDC_EDIT7,55,44,46,12,ES_AUTOHSCROLL
+    CONTROL         "Show This Grid",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,85,12,64,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -728,6 +743,13 @@ BEGIN
         RIGHTMARGIN, 228
         BOTTOMMARGIN, 68
     END
+
+    IDD_USERGRID, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 227
+        BOTTOMMARGIN, 90
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -802,6 +824,11 @@ BEGIN
     0
 END
 
+IDD_USERGRID AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -837,8 +864,8 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_RIBBON_VIEW_GRID    "Show Grid"
-    ID_VIEW_GRID            "Display an automatically sized grid.\nShow Grid"
+    IDS_RIBBON_VIEW_AUTOGRID    "Show Grid"
+    ID_VIEW_AUTOGRID            "Display an automatically sized grid.\nShow Grid"
     IDS_RIBBON_VIEW_PARTS   "Parts List"
     ID_VIEW_PARTS           "Display the mechanism as separate parts.\nParts List"
 END

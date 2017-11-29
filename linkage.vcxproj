@@ -810,6 +810,7 @@ exit 0
     <ClInclude Include="stdint.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TestDialog.h" />
+    <ClInclude Include="UserGridDialog.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="history.txt" />
@@ -967,6 +968,7 @@ exit 0
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='ReleaseDirect2D|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TestDialog.cpp" />
+    <ClCompile Include="UserGridDialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="linkage.rc">

@@ -316,8 +316,10 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_VIEW_LARGEFONT, &CLinkageView::OnViewLargeFont)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_LARGEFONT, &CLinkageView::OnUpdateViewLargeFont)
 
-	ON_COMMAND(ID_VIEW_GRID, &CLinkageView::OnViewGrid)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_GRID, &CLinkageView::OnUpdateViewGrid)
+	ON_COMMAND(ID_VIEW_AUTOGRID, &CLinkageView::OnViewAutoGrid)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOGRID, &CLinkageView::OnUpdateViewAutoGrid)
+	ON_COMMAND(ID_VIEW_USERGRID, &CLinkageView::OnViewUserGrid)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_USERGRID, &CLinkageView::OnUpdateViewUserGrid)
 	ON_COMMAND(ID_VIEW_PARTS, &CLinkageView::OnViewParts)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PARTS, &CLinkageView::OnUpdateViewParts)
 
@@ -404,14 +406,17 @@ CLinkageView::CLinkageView()
 	m_bShowGroundDimensions = true;
 	m_bShowDrawingLayerDimensions = false;
 	m_bNewLinksSolid = false;
-	m_xGrid = 20.0;
-	m_yGrid = 20.0;
+	m_xAutoGrid = 20.0;
+	m_yAutoGrid = 20.0;
+	m_xUserGrid = 20.0;
+	m_yUserGrid = 20.0;
 	m_bShowData = false;
 	m_bShowDebug = false;
 	m_bShowBold = false;
 	m_bShowAnicrop = false;
 	m_bShowLargeFont = false;
-	m_bShowGrid = false;
+	m_bShowUserGrid = false;
+	m_bShowAutoGrid = false;
 	m_bUseMoreMomentum = false;
 	m_ScreenZoom = 1;
 	m_ScrollPosition.SetPoint( 0, 0 );
@@ -485,7 +490,8 @@ CLinkageView::CLinkageView()
 		m_bShowAnicrop = pApp->GetProfileInt( SETTINGS, "Showanicrop", 0 ) != 0;
 		m_bShowLargeFont = pApp->GetProfileInt( SETTINGS, "Showlargefont", 0 ) != 0;
 		m_bPrintFullSize = pApp->GetProfileInt( SETTINGS, "PrintFullSize", 0 ) != 0;
-		m_bShowGrid = pApp->GetProfileInt( SETTINGS, "ShowGrid", 0 ) != 0;
+		m_bShowAutoGrid = pApp->GetProfileInt( SETTINGS, "ShowGrid", 0 ) != 0;
+		m_bShowUserGrid = pApp->GetProfileInt( SETTINGS, "ShowUserGrid", 0 ) != 0;
 		m_bShowParts = pApp->GetProfileInt( SETTINGS, "ShowParts", 0 ) != 0;
 		m_bUseMoreMomentum = pApp->GetProfileInt( SETTINGS, "MoreMomentum", 0 ) != 0;
 		m_bAllowEdit = !m_bShowParts;
@@ -573,7 +579,8 @@ void CLinkageView::SaveSettings( void )
 	pApp->WriteProfileInt( SETTINGS, "Newlinkssolid", m_bNewLinksSolid ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "Showanicrop", m_bShowAnicrop ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "Showlargefont", m_bShowLargeFont ? 1 : 0  );
-	pApp->WriteProfileInt( SETTINGS, "ShowGrid", m_bShowGrid ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "ShowGrid", m_bShowAutoGrid ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "ShowUserGrid", m_bShowUserGrid ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "MoreMomentum", m_bUseMoreMomentum ? 1 : 0 );
 	pApp->WriteProfileInt( SETTINGS, "ShowParts", m_bShowParts ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "PrintFullSize", m_bPrintFullSize ? 1 : 0 );
@@ -1740,7 +1747,7 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	if( m_bShowGrid )
+	if( m_bShowAutoGrid )
 		DrawGrid( pRenderer );
 
 	if( m_bShowSelection && m_bSuperHighlight && pDoc->IsAnySelected() )
@@ -2131,7 +2138,7 @@ CFArea CLinkageView::DrawPartsList( CRenderer* pRenderer )
 	CFRect Area;
 	pDoc->GetDocumentArea( Area );
 
-	if( m_bShowGrid )
+	if( m_bShowAutoGrid )
 		DrawGrid( pRenderer );
 
 	pRenderer->SelectObject( m_pUsingFont, UnscaledUnits( m_UsingFontHeight ) );
@@ -4951,9 +4958,15 @@ void CLinkageView::OnViewLargeFont()
 	InvalidateRect( 0 );
 }
 
-void CLinkageView::OnUpdateViewGrid(CCmdUI *pCmdUI)
+void CLinkageView::OnUpdateViewUserGrid(CCmdUI *pCmdUI)
 {
-	pCmdUI->SetCheck( m_bShowGrid );
+	pCmdUI->SetCheck( m_bShowUserGrid );
+	pCmdUI->Enable( !m_bSimulating );
+}
+
+void CLinkageView::OnUpdateViewAutoGrid(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck( m_bShowAutoGrid );
 	pCmdUI->Enable( !m_bSimulating );
 }
 
@@ -4970,9 +4983,16 @@ void CLinkageView::OnUpdateMoreMomentum(CCmdUI *pCmdUI)
 	pCmdUI->Enable( !m_bSimulating );
 }
 
-void CLinkageView::OnViewGrid()
+void CLinkageView::OnViewAutoGrid()
 {
-	m_bShowGrid = !m_bShowGrid;
+	m_bShowAutoGrid = !m_bShowAutoGrid;
+	SaveSettings();
+	InvalidateRect( 0 );
+}
+
+void CLinkageView::OnViewUserGrid()
+{
+	m_bShowUserGrid = !m_bShowUserGrid;
 	SaveSettings();
 	InvalidateRect( 0 );
 }

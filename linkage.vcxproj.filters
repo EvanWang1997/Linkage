@@ -142,6 +142,9 @@
     <ClCompile Include="Base64.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UserGridDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDialog.h">
@@ -313,6 +316,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Base64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UserGridDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

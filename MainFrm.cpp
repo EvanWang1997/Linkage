@@ -273,7 +273,7 @@ void CMainFrame::CreateViewPanel( CMFCRibbonCategory* pCategory )
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_DRAWINGLAYERDIMENSIONS, ID_VIEW_DRAWINGLAYERDIMENSIONS, 88 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_LARGEFONT, ID_VIEW_LARGEFONT, 78 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_SOLIDLINKS, ID_VIEW_SOLIDLINKS, 75 );
-	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_GRID, ID_VIEW_GRID, 85 );
+	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_AUTOGRID, ID_VIEW_AUTOGRID, 85 );
 	//AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_PARTS, ID_VIEW_PARTS, 86 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_MOMENTUM, ID_EDIT_MOMENTUM, 94 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_DEBUG, ID_VIEW_DEBUG, 81 );
@@ -705,7 +705,24 @@ void CMainFrame::CreateQuickAccessCommands( void )
 	lstQATCmds.AddTail(ID_FILE_SAVE);
 	lstQATCmds.AddTail(ID_FILE_PRINT_DIRECT);
 
-	m_wndRibbonBar.SetQuickAccessCommands(lstQATCmds);
+	//m_wndRibbonBar.SetQuickAccessCommands(lstQATCmds);
+
+	// All this to get rid of the Quick Access toolbar. It draws WRONG on UHD displays for some unknown reason.
+	// The drawing bug is related to the size of the customization button and how it has a x2 multiplier on its height somewhere for some unknown reason.
+	CList<UINT, UINT> Derp;
+	m_wndRibbonBar.SetQuickAccessCommands( Derp );
+	CMFCRibbonQuickAccessToolBar *pQAToolBar = m_wndRibbonBar.GetQuickAccessToolbar();
+	pQAToolBar->RemoveAll();
+	pQAToolBar->Redraw();
+
+	//CMFCRibbonQuickAccessToolBar *pQAToolBar = m_wndRibbonBar.GetQuickAccessToolbar();
+	//CMFCRibbonBaseElement *pLastButton = pQAToolBar->GetButton( pQAToolBar->GetCount() - 2 );
+	//pLastButton->SetCompactMode( 1 );
+	//pLastButton->SetDescription( "" );
+	//CRect ButtonRect = pLastButton->GetRect();
+	//ButtonRect.bottom /= 2;
+	//pLastButton->SetRect( ButtonRect );
+	//pLastButton->SetVisible( 0 );
 }
 
 void CMainFrame::CreatePrintingCategory( void )

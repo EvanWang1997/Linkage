@@ -94,6 +94,7 @@
 #define IDS_RIBBON_APPEARANCE           3030
 #define ID_BACKGROUND_DELETE            3031
 #define IDS_RIBBON_BACKGROUND_DELETE    3032
+#define IDB_INSERT_POPUP_GALLERY        4000
 #define IDB_NAVIGATION_LARGE_HC         4100
 #define IDB_PAGES                       4101
 #define IDB_PAGES_HC                    4102
@@ -161,7 +162,6 @@
 #define IDB_SAMPLE_GALLERY              4174
 #define IDS_RIBBON_INSERT               4175
 #define IDB_SAMPLE_GALLERY1             4175
-#define IDB_INSERT_POPUP_GALLERY        4000
 #define IDS_RIBBON_ACTION               4176
 #define IDS_RIBBON_CONNECT              4177
 #define IDS_RIBBON_JOIN                 4178
@@ -492,10 +492,12 @@
 #define IDS_SAMPLE_OSCILLATORGEARS      5421
 #define IDS_SAMPLE_STEPHENSON           5422
 #define IDS_SAMPLE_PEAUCELLIER          5423
-#define IDS_RIBBON_VIEW_GRID            5424
-#define ID_VIEW_GRID                    5425
+#define IDS_RIBBON_VIEW_AUTOGRID        5424
+#define ID_VIEW_AUTOGRID                5425
 #define IDS_RIBBON_VIEW_PARTS           5426
 #define ID_VIEW_PARTS                   5427
+#define IDS_RIBBON_VIEW_USERGRID        5428
+#define ID_VIEW_USERGRID                5429
 #define ID_FILE_PRINTFULL               5935
 #define IDD_EXPORTIMAGE                 6000
 #define IDD_SELECTELEMENTS              6006
@@ -504,6 +506,8 @@
 #define IDD_LENGTH                      6010
 #define IDD_ROTATE                      6011
 #define IDD_SCALE                       6012
+#define IDD_SCALE1                      6013
+#define IDD_USERGRID                    6014
 #define ID_BUTTON2                      7004
 #define IDC_PREVIEW                     8000
 #define IDC_LIST1                       8001
