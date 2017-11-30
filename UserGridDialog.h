@@ -1,10 +1,10 @@
 #pragma once
 #include "afxwin.h"
-
+#include "MyDialog.h"
 
 // CUserGridDialog dialog
 
-class CUserGridDialog : public CDialog
+class CUserGridDialog : public CMyDialog
 {
 	DECLARE_DYNAMIC(CUserGridDialog)
 

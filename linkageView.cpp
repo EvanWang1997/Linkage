@@ -1627,8 +1627,8 @@ void CLinkageView::DrawGrid( CRenderer* pRenderer, int Type )
 	}
 	else
 	{
-		xGapDistance = m_xUserGrid;
-		yGapDistance = m_yUserGrid;
+		xGapDistance = m_xUserGrid * pDoc->GetUnitScale();
+		yGapDistance = m_yUserGrid * pDoc->GetUnitScale();
 	}
 
 	if( xGapDistance <= 0 || yGapDistance <= 0 )
@@ -2915,8 +2915,8 @@ void CLinkageView::OnMouseMoveDrag(UINT nFlags, CFPoint point)
 
 	CFPoint ReferencePoint = AdjustedPoint;
 
-	double xGapDistance = m_GridType == 0 ? CalculateDefaultGrid() : m_xUserGrid;
-	double yGapDistance = m_GridType == 0 ? xGapDistance : m_yUserGrid;
+	double xGapDistance = m_GridType == 0 ? CalculateDefaultGrid() : ( m_xUserGrid * pDoc->GetUnitScale() );
+	double yGapDistance = m_GridType == 0 ? xGapDistance : ( m_yUserGrid * pDoc->GetUnitScale() );
 
 	if( m_bAllowEdit )
 	{
@@ -3253,7 +3253,7 @@ void CLinkageView::SetLocationAsStatus( CFPoint &Point )
 	CString Location;
 	double DocumentScale = pDoc->GetUnitScale();
 
-	Location.Format( "%.4f,%.4f", Point.x * DocumentScale, Point.y * DocumentScale );
+	Location.Format( "%.4lf,%.4lf", Point.x * DocumentScale, Point.y * DocumentScale );
 	SetStatusText( Location );
 }
 
@@ -4999,6 +4999,15 @@ void CLinkageView::OnEditGrid()
 		m_GridType = dlg.m_GridTypeSelection;
 		m_xUserGrid = dlg.m_HorizontalSpacing / DocumentScale;
 		m_yUserGrid = dlg.m_VerticalSpacing / DocumentScale;
+
+		if( m_GridType == 1 )
+		{
+			CFPoint Temp( m_xUserGrid, m_yUserGrid );
+			pDoc->SetGrid( Temp );
+		}
+		else
+			pDoc->SetGrid();
+
 		SaveSettings();
 		InvalidateRect( 0 );
 	}
@@ -5270,6 +5279,16 @@ void CLinkageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	CLinkageDoc::_Units Units = pDoc->GetUnits();
+
+	CFPoint Temp( m_xUserGrid, m_yUserGrid );
+	if( pDoc->GetGrid( Temp ) )
+	{
+		m_GridType = 1;
+		m_xUserGrid = Temp.x;
+		m_yUserGrid = Temp.y;
+	}
+	else
+		m_GridType = 0;
 
 	pComboBox->SelectItem( (DWORD_PTR)Units );
 

@@ -244,6 +244,10 @@ public:
 
 	void RemoveGearRatio( CConnector *pGearConnector, CLink *pGearLink );
 
+	void SetGrid( CFPoint GridSize ) { m_UserGrid = GridSize; m_bUseGrid = true; }
+	void SetGrid( void ) { m_bUseGrid = false; }
+	bool GetGrid( CFPoint &GridSize ) { GridSize = m_bUseGrid ? m_UserGrid : GridSize; return m_bUseGrid; }
+
 private:
 	LinkList m_Links;
 	ConnectorList m_Connectors;
@@ -256,6 +260,8 @@ private:
 	double m_UnitScaling;
 	enum _Units m_Units;
 	double m_ScaleFactor;
+	CFPoint m_UserGrid;
+	bool m_bUseGrid;
 
 //	int m_SimulationStep;
 //	int m_DesiredSimulationStep;

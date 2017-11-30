@@ -146,6 +146,7 @@ BOOL CLinkageDoc::OnNewDocument()
 	m_pUndoList = 0;
 	m_pUndoListEnd = 0;
 	m_UndoCount = 0;
+	m_bUseGrid = false;
 
 	m_bSelectionMakeAnchor = false;
 	m_bSelectionConnectable = false;
@@ -319,6 +320,15 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 				ScaleFactor = 1.0;
 			Value = pNode->GetAttribute( "backgroundtransparency" );
 			m_BackgroundTransparency = atof( Value );
+			m_bUseGrid = true;
+			Value = pNode->GetAttribute( "xgrid" );
+			m_UserGrid.x = atof( Value );
+			if( Value.IsEmpty() )
+				m_bUseGrid = false;
+			Value = pNode->GetAttribute( "ygrid" );
+			m_UserGrid.y = atof( Value );
+			if( Value.IsEmpty() )
+				m_bUseGrid = false;
 		}
 
 		if( pNode->GetText() == "selected" )
@@ -819,6 +829,18 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "scalefactor", m_ScaleFactor );
 		AppendXMLAttribute( TempString, "units", (const char*)Units );
 		AppendXMLAttribute( TempString, "backgroundtransparency", m_BackgroundTransparency );
+
+		if( m_bUseGrid )
+		{
+			AppendXMLAttribute( TempString, "xgrid", m_UserGrid.x, true );
+			AppendXMLAttribute( TempString, "ygrid", m_UserGrid.y, true );
+		}
+		else
+		{
+			AppendXMLAttribute( TempString, "xgrid", "", true );
+			AppendXMLAttribute( TempString, "ygrid", "", true );
+		}
+
 		TempString += "/>";
 
 //		TempString.Format( "\t<program zoom=\"%lf\" xoffset=\"%d\" yoffset=\"%d\" scalefactor=\"%lf\" units=\"%s\" viewlayers=\"%u\" editlayers=\"%u\"/>",
