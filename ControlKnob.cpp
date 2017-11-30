@@ -2,6 +2,7 @@
 #include "connector.h"
 #include "ControlKnob.h"
 #include "geometry.h"
+#include "float.h"
 
 class CControlKnobImplementation
 {
@@ -13,10 +14,14 @@ class CControlKnobImplementation
 		pLimit2 = 0;
 		m_bShowOnParentSelect = false;
 		m_bSelected = false;
+		m_RelativePoint.SetPoint( DBL_MAX, DBL_MAX );
 	}
 
 	CFPoint GetPoint( void ) 
 	{
+		if( m_RelativePoint.x == DBL_MAX )
+			return m_RelativePoint;
+
 		CFPoint Point = m_RelativePoint + ( m_pElement == 0 ? CPoint() : m_pElement->GetLocation() );
 		return Point;
 	}

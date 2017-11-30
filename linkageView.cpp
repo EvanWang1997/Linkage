@@ -35,6 +35,7 @@
 #include "RotateDialog.h"
 #include "ScaleDialog.h"
 #include "Base64.h"
+#include "UserGridDialog.h"
 #include <fstream>
 
 #include <algorithm>
@@ -316,10 +317,10 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_VIEW_LARGEFONT, &CLinkageView::OnViewLargeFont)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_LARGEFONT, &CLinkageView::OnUpdateViewLargeFont)
 
-	ON_COMMAND(ID_VIEW_AUTOGRID, &CLinkageView::OnViewAutoGrid)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOGRID, &CLinkageView::OnUpdateViewAutoGrid)
-	ON_COMMAND(ID_VIEW_USERGRID, &CLinkageView::OnViewUserGrid)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_USERGRID, &CLinkageView::OnUpdateViewUserGrid)
+	ON_COMMAND(ID_VIEW_SHOWGRID, &CLinkageView::OnViewShowGrid)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWGRID, &CLinkageView::OnUpdateViewShowGrid)
+	ON_COMMAND(ID_VIEW_EDITGRID, &CLinkageView::OnEditGrid)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_EDITGRID, &CLinkageView::OnUpdateEditGrid)
 	ON_COMMAND(ID_VIEW_PARTS, &CLinkageView::OnViewParts)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_PARTS, &CLinkageView::OnUpdateViewParts)
 
@@ -415,8 +416,8 @@ CLinkageView::CLinkageView()
 	m_bShowBold = false;
 	m_bShowAnicrop = false;
 	m_bShowLargeFont = false;
-	m_bShowUserGrid = false;
-	m_bShowAutoGrid = false;
+	m_bShowGrid = false;
+	m_GridType = 0;
 	m_bUseMoreMomentum = false;
 	m_ScreenZoom = 1;
 	m_ScrollPosition.SetPoint( 0, 0 );
@@ -490,8 +491,8 @@ CLinkageView::CLinkageView()
 		m_bShowAnicrop = pApp->GetProfileInt( SETTINGS, "Showanicrop", 0 ) != 0;
 		m_bShowLargeFont = pApp->GetProfileInt( SETTINGS, "Showlargefont", 0 ) != 0;
 		m_bPrintFullSize = pApp->GetProfileInt( SETTINGS, "PrintFullSize", 0 ) != 0;
-		m_bShowAutoGrid = pApp->GetProfileInt( SETTINGS, "ShowGrid", 0 ) != 0;
-		m_bShowUserGrid = pApp->GetProfileInt( SETTINGS, "ShowUserGrid", 0 ) != 0;
+		m_bShowGrid = pApp->GetProfileInt( SETTINGS, "ShowGrid", 0 ) != 0;
+		m_GridType = pApp->GetProfileInt( SETTINGS, "GridType", 0 );
 		m_bShowParts = pApp->GetProfileInt( SETTINGS, "ShowParts", 0 ) != 0;
 		m_bUseMoreMomentum = pApp->GetProfileInt( SETTINGS, "MoreMomentum", 0 ) != 0;
 		m_bAllowEdit = !m_bShowParts;
@@ -579,8 +580,8 @@ void CLinkageView::SaveSettings( void )
 	pApp->WriteProfileInt( SETTINGS, "Newlinkssolid", m_bNewLinksSolid ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "Showanicrop", m_bShowAnicrop ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "Showlargefont", m_bShowLargeFont ? 1 : 0  );
-	pApp->WriteProfileInt( SETTINGS, "ShowGrid", m_bShowAutoGrid ? 1 : 0  );
-	pApp->WriteProfileInt( SETTINGS, "ShowUserGrid", m_bShowUserGrid ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "ShowGrid", m_bShowGrid ? 1 : 0  );
+	pApp->WriteProfileInt( SETTINGS, "GridType", m_GridType );
 	pApp->WriteProfileInt( SETTINGS, "MoreMomentum", m_bUseMoreMomentum ? 1 : 0 );
 	pApp->WriteProfileInt( SETTINGS, "ShowParts", m_bShowParts ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "PrintFullSize", m_bPrintFullSize ? 1 : 0 );
@@ -1609,7 +1610,7 @@ double roundDown( double number, double fixedBase )
     return number;
 }
 
-void CLinkageView::DrawGrid( CRenderer* pRenderer )
+void CLinkageView::DrawGrid( CRenderer* pRenderer, int Type )
 {
 	if( pRenderer->IsPrinting() )
 		return;
@@ -1617,54 +1618,44 @@ void CLinkageView::DrawGrid( CRenderer* pRenderer )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	double GapDistance = CalculateDefaultGrid();
-
-#if 0
-	double GapDistance = Unscale( 20 ) * pDoc->GetUnitScale();
-
-	// Get the next 1, 5, 10, 50, 100 type of number that is above the
-	// distance we got using a base pixel length. This will be the value
-	// to use for the snap.
-	int Test = (int)( GapDistance * 1000 );
-	int Adjustment = -4;
-	while( Test != 0 )
+	double xGapDistance = 0;
+	double yGapDistance = 0;
+	if( Type == 0 )
 	{
-		++Adjustment;
-		Test /= 10;
+		xGapDistance = CalculateDefaultGrid();
+		yGapDistance = xGapDistance;
 	}
-	double NewValue = GapDistance / pow( 10.0, Adjustment );
-	NewValue += .9999;
-	NewValue = (int)( NewValue );
-	if( NewValue > 5.0 )
-		NewValue = 10;
-	else if( NewValue > 1.0 )
-		NewValue = 5;
-	GapDistance = NewValue * pow( 10.0, Adjustment );
-	if( GapDistance < 0.01 )
-		GapDistance = 0.01;
-#endif
+	else
+	{
+		xGapDistance = m_xUserGrid;
+		yGapDistance = m_yUserGrid;
+	}
 
-	GapDistance /= pDoc->GetUnitScale();
+	if( xGapDistance <= 0 || yGapDistance <= 0 )
+		return;
+
+	xGapDistance /= pDoc->GetUnitScale();
+	yGapDistance /= pDoc->GetUnitScale();
 
 	CFPoint DrawStartPoint = Unscale( CFPoint( m_DrawingRect.left, m_DrawingRect.top ) );
 	CFPoint DrawEndPoint = Unscale( CFPoint( m_DrawingRect.right, m_DrawingRect.bottom ) );
 	CFPoint GridStartPoint = DrawStartPoint;
 
-	GridStartPoint.x = roundDown( GridStartPoint.x, GapDistance );
-	GridStartPoint.y = roundDown( GridStartPoint.y, GapDistance );
+	GridStartPoint.x = roundDown( GridStartPoint.x, xGapDistance );
+	GridStartPoint.y = roundDown( GridStartPoint.y, yGapDistance );
 
 	COLORREF Color = COLOR_GRID;
 	CPen Pen( PS_SOLID, 1, Color );
 	CPen *pOldPen = pRenderer->SelectObject( &Pen );
 
-	for( double Step = GridStartPoint.x; Step < DrawEndPoint.x; Step += GapDistance )
+	for( double Step = GridStartPoint.x; Step < DrawEndPoint.x; Step += xGapDistance )
 	{
 		pRenderer->MoveTo( Scale( CFPoint( Step, DrawStartPoint.y ) ) );
 		pRenderer->LineTo( Scale( CFPoint( Step, DrawEndPoint.y ) ) );
 	}
 
 	// Y always goes from high values up to low values down.
-	for( double Step = GridStartPoint.y; Step > DrawEndPoint.y; Step -= GapDistance )
+	for( double Step = GridStartPoint.y; Step > DrawEndPoint.y; Step -= yGapDistance )
 	{
 		pRenderer->MoveTo( Scale( CFPoint( DrawStartPoint.x, Step ) ) );
 		pRenderer->LineTo( Scale( CFPoint( DrawEndPoint.x, Step ) ) );
@@ -1747,8 +1738,8 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	if( m_bShowAutoGrid )
-		DrawGrid( pRenderer );
+	if( m_bShowGrid )
+		DrawGrid( pRenderer, m_GridType );
 
 	if( m_bShowSelection && m_bSuperHighlight && pDoc->IsAnySelected() )
 	{
@@ -2138,8 +2129,8 @@ CFArea CLinkageView::DrawPartsList( CRenderer* pRenderer )
 	CFRect Area;
 	pDoc->GetDocumentArea( Area );
 
-	if( m_bShowAutoGrid )
-		DrawGrid( pRenderer );
+	if( m_bShowGrid )
+		DrawGrid( pRenderer, m_GridType );
 
 	pRenderer->SelectObject( m_pUsingFont, UnscaledUnits( m_UsingFontHeight ) );
 	pRenderer->SetTextColor( COLOR_TEXT );
@@ -2924,11 +2915,12 @@ void CLinkageView::OnMouseMoveDrag(UINT nFlags, CFPoint point)
 
 	CFPoint ReferencePoint = AdjustedPoint;
 
-	double GapDistance = CalculateDefaultGrid();
+	double xGapDistance = m_GridType == 0 ? CalculateDefaultGrid() : m_xUserGrid;
+	double yGapDistance = m_GridType == 0 ? xGapDistance : m_yUserGrid;
 
 	if( m_bAllowEdit )
 	{
-		if( pDoc->MoveSelected( AdjustedPoint, bElementSnap, bGridSnap,  GapDistance / pDoc->GetUnitScale(),  GapDistance / pDoc->GetUnitScale(), Unscale( PIXEL_SNAP_DISTANCE ), ReferencePoint ) )
+		if( pDoc->MoveSelected( AdjustedPoint, bElementSnap, bGridSnap,  xGapDistance / pDoc->GetUnitScale(),  yGapDistance / pDoc->GetUnitScale(), Unscale( PIXEL_SNAP_DISTANCE ), ReferencePoint ) )
 			InvalidateRect( 0 );
 	}
 
@@ -3127,7 +3119,7 @@ void CLinkageView::OnMouseEndDrag(UINT nFlags, CFPoint point)
 
 	m_SelectionContainerRect = GetDocumentArea( false, true );
 	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
-	//ShowSelectedElementCoordinates();
+	ShowSelectedElementCoordinates();
 
 	InvalidateRect( 0 );
 }
@@ -4958,15 +4950,14 @@ void CLinkageView::OnViewLargeFont()
 	InvalidateRect( 0 );
 }
 
-void CLinkageView::OnUpdateViewUserGrid(CCmdUI *pCmdUI)
+void CLinkageView::OnUpdateEditGrid(CCmdUI *pCmdUI)
 {
-	pCmdUI->SetCheck( m_bShowUserGrid );
 	pCmdUI->Enable( !m_bSimulating );
 }
 
-void CLinkageView::OnUpdateViewAutoGrid(CCmdUI *pCmdUI)
+void CLinkageView::OnUpdateViewShowGrid(CCmdUI *pCmdUI)
 {
-	pCmdUI->SetCheck( m_bShowAutoGrid );
+	pCmdUI->SetCheck( m_bShowGrid );
 	pCmdUI->Enable( !m_bSimulating );
 }
 
@@ -4983,18 +4974,34 @@ void CLinkageView::OnUpdateMoreMomentum(CCmdUI *pCmdUI)
 	pCmdUI->Enable( !m_bSimulating );
 }
 
-void CLinkageView::OnViewAutoGrid()
+void CLinkageView::OnViewShowGrid()
 {
-	m_bShowAutoGrid = !m_bShowAutoGrid;
+	m_bShowGrid = !m_bShowGrid;
 	SaveSettings();
 	InvalidateRect( 0 );
 }
 
-void CLinkageView::OnViewUserGrid()
+void CLinkageView::OnEditGrid()
 {
-	m_bShowUserGrid = !m_bShowUserGrid;
-	SaveSettings();
-	InvalidateRect( 0 );
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	double DocumentScale = pDoc->GetUnitScale();
+	
+	CUserGridDialog dlg;
+	dlg.m_GridTypeSelection = m_GridType;
+	dlg.m_HorizontalSpacing = m_xUserGrid * DocumentScale;
+	dlg.m_VerticalSpacing = m_yUserGrid * DocumentScale;
+	dlg.m_bShowUserGrid = m_bShowGrid ? 1 : 0;
+
+	if( dlg.DoModal() == IDOK )
+	{
+		m_bShowGrid = dlg.m_bShowUserGrid != 0;	
+		m_GridType = dlg.m_GridTypeSelection;
+		m_xUserGrid = dlg.m_HorizontalSpacing / DocumentScale;
+		m_yUserGrid = dlg.m_VerticalSpacing / DocumentScale;
+		SaveSettings();
+		InvalidateRect( 0 );
+	}
 }
 
 void CLinkageView::OnUpdateViewParts(CCmdUI *pCmdUI)

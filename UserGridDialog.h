@@ -1,4 +1,5 @@
 #pragma once
+#include "afxwin.h"
 
 
 // CUserGridDialog dialog
@@ -24,4 +25,10 @@ public:
 	double m_HorizontalSpacing;
 	double m_VerticalSpacing;
 	BOOL m_bShowUserGrid;
+	int m_GridTypeSelection;
+	afx_msg void OnTypeClick();
+	CStatic m_HorizontalPrompt;
+	CStatic m_VerticalPrompt;
+	CEdit m_HorizontalControl;
+	CEdit m_VerticalControl;
 };

@@ -81,7 +81,7 @@ public:
 	//}}AFX_VIRTUAL
 
 	CFArea DoDraw( CRenderer* pRenderer );
-	void DrawGrid( CRenderer* pRenderer );
+	void DrawGrid( CRenderer* pRenderer, int Type );
 	CFArea DrawMechanism( CRenderer* pRenderer );
 	CFArea DrawPartsList( CRenderer* pRenderer );
 	CFRect CLinkageView::GetDocumentArea( bool bWithDimensions = false, bool bSelectedOnly = false );
@@ -148,8 +148,8 @@ private:
 	int m_BoldMultiplier;
 	bool m_bShowAnicrop;
 	bool m_bShowLargeFont;
-	bool m_bShowUserGrid;
-	bool m_bShowAutoGrid;
+	int m_GridType;
+	bool m_bShowGrid;
 	bool m_bShowParts;
 	bool m_bUseMoreMomentum;
 	double m_Zoom;
@@ -483,10 +483,10 @@ public:
 	afx_msg void OnViewAnicrop();
 	afx_msg void OnUpdateViewParts(CCmdUI *pCmdUI);
 	afx_msg void OnViewParts();
-	afx_msg void OnUpdateViewAutoGrid(CCmdUI *pCmdUI);
-	afx_msg void OnViewAutoGrid();
-	afx_msg void OnUpdateViewUserGrid(CCmdUI *pCmdUI);
-	afx_msg void OnViewUserGrid();
+	afx_msg void OnUpdateViewShowGrid(CCmdUI *pCmdUI);
+	afx_msg void OnViewShowGrid();
+	afx_msg void OnUpdateEditGrid(CCmdUI *pCmdUI);
+	afx_msg void OnEditGrid();
 	afx_msg void OnUpdateMoreMomentum(CCmdUI *pCmdUI);
 	afx_msg void OnMoreMomentum();
 	afx_msg void OnUpdateViewLargeFont(CCmdUI *pCmdUI);

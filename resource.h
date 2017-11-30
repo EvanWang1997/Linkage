@@ -493,11 +493,11 @@
 #define IDS_SAMPLE_STEPHENSON           5422
 #define IDS_SAMPLE_PEAUCELLIER          5423
 #define IDS_RIBBON_VIEW_AUTOGRID        5424
-#define ID_VIEW_AUTOGRID                5425
+#define ID_VIEW_SHOWGRID                5425
 #define IDS_RIBBON_VIEW_PARTS           5426
 #define ID_VIEW_PARTS                   5427
 #define IDS_RIBBON_VIEW_USERGRID        5428
-#define ID_VIEW_USERGRID                5429
+#define ID_VIEW_EDITGRID                5429
 #define ID_FILE_PRINTFULL               5935
 #define IDD_EXPORTIMAGE                 6000
 #define IDD_SELECTELEMENTS              6006
