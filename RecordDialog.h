@@ -33,4 +33,5 @@ public:
 	CString m_RecordTime;
 	CString m_EndTime;
 	afx_msg void OnBnClickedButton1();
+	afx_msg void OnClickCheck();
 };

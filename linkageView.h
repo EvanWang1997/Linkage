@@ -228,7 +228,6 @@ private:
 	void OnMouseEndChangeAdjusters(UINT nFlags, CFPoint point);
 	
 	void OnButtonUp(UINT nFlags, CPoint point);
-	double ConvertToSeconds( const char *pHMSString );
 
 	void ShowSelectedElementCoordinates( void );
 

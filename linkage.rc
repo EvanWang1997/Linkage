@@ -9,8 +9,7 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -397,7 +396,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Record Video"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "Press the Record button to begin the simulation and start recording the video. Press the Stop button in the Ribbon Bar to stop recording.",IDC_STATIC,42,11,168,31
+    LTEXT           "Press the Record button to begin the simulation and start recording the video. Press the Stop button in the tool bar to stop recording.",IDC_STATIC,42,11,168,31
     LTEXT           "Select a Video Encoder:",IDC_STATIC,27,158,76,8
     COMBOBOX        IDC_COMBO1,26,169,188,161,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     DEFPUSHBUTTON   "Record",IDOK,61,228,52,14
@@ -591,8 +590,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,6,3,0
- PRODUCTVERSION 3,6,3,0
+ FILEVERSION 3,6,7,0
+ PRODUCTVERSION 3,6,7,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -608,12 +607,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.6.3.0"
+            VALUE "FileVersion", "3.6.7.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2017 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.6.3.0"
+            VALUE "ProductVersion", "3.6.7.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -827,6 +826,11 @@ BEGIN
 END
 
 IDD_USERGRID AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_START_RECORD AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

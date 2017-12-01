@@ -6,6 +6,7 @@
 #include "RecordDialog.h"
 #include "AviFile.h"
 #include "mmsystem.h"
+#include "helper.h"
 
 // CLinkPropertiesDialog dialog
 
@@ -97,6 +98,13 @@ void CRecordDialog::DoDataExchange(CDataExchange* pDX)
 
 	if( pDX->m_bSaveAndValidate )
 	{
+		double Time = ConvertToSeconds( m_StartTime ) + ConvertToSeconds( m_RecordTime ) + ConvertToSeconds( m_EndTime );
+		if( Time == 0 )
+		{
+			AfxMessageBox( "The video time length cannot be zero.", MB_OK );
+			pDX->Fail();
+		}
+
 		DDX_CBIndex(pDX, IDC_COMBO2, m_QualitySelection);
 		DDX_CBString(pDX, IDC_COMBO1, m_EncoderName);
 
@@ -117,6 +125,9 @@ void CRecordDialog::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CRecordDialog, CMyDialog)
 	ON_BN_CLICKED( IDC_BUTTON1, &CRecordDialog::OnBnClickedButton1 )
+	ON_BN_CLICKED(IDC_CHECK1, &CRecordDialog::OnClickCheck)
+	ON_BN_CLICKED(IDC_CHECK2, &CRecordDialog::OnClickCheck)
+	ON_BN_CLICKED(IDC_CHECK3, &CRecordDialog::OnClickCheck)
 END_MESSAGE_MAP()
 
 // CLinkPropertiesDialog message handlers
@@ -137,4 +148,21 @@ void CRecordDialog::OnBnClickedButton1()
 	HIC hic = ICOpen(fccType, fccHandler, ICMODE_QUERY);
 	if( hic != INVALID_HANDLE_VALUE && hic != 0 )
 		ICSendMessage(hic, ICM_CONFIGURE, (DWORD_PTR)(AfxGetMainWnd()->m_hWnd), 0);
+}
+
+
+void CRecordDialog::OnClickCheck()
+{
+	CDataExchange DX( this, true );
+
+	DDX_Check(&DX, IDC_CHECK1, m_bUseStartTime);
+	DDX_Check(&DX, IDC_CHECK2, m_bUseRecordTime);
+	DDX_Check(&DX, IDC_CHECK3, m_bUseEndTime);
+
+	if( !m_bUseStartTime && !m_bUseRecordTime && !m_bUseEndTime )
+	{
+		DX.m_bSaveAndValidate = false;
+		m_bUseRecordTime = true;
+		DDX_Check(&DX, IDC_CHECK2, m_bUseRecordTime);
+	}
 }

@@ -36,6 +36,7 @@
 #include "ScaleDialog.h"
 #include "Base64.h"
 #include "UserGridDialog.h"
+#include "helper.h"
 #include <fstream>
 
 #include <algorithm>
@@ -93,7 +94,7 @@ static const char* SETTINGS = "Settings";
 static char THIS_FILE[] = __FILE__;
 #endif
 
-static const int PIXEL_SNAP_DISTANCE = 6;
+static const int VIRTUAL_PIXEL_SNAP_DISTANCE = 6;
 
 wchar_t* ToUnicode( const char *pString )
 {
@@ -181,7 +182,7 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_DIMENSION_ROTATE, &CLinkageView::OnUpdateEditRotate)
 	ON_COMMAND(ID_DIMENSION_SCALE, &CLinkageView::OnEditScale)
 	ON_UPDATE_COMMAND_UI(ID_DIMENSION_SCALE, &CLinkageView::OnUpdateEditScale)
-
+	
 	ON_COMMAND(ID_EDIT_MAKEANCHOR, &CLinkageView::OnEditmakeAnchor)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MAKEANCHOR, &CLinkageView::OnUpdateEditmakeAnchor)
 
@@ -409,8 +410,8 @@ CLinkageView::CLinkageView()
 	m_bNewLinksSolid = false;
 	m_xAutoGrid = 20.0;
 	m_yAutoGrid = 20.0;
-	m_xUserGrid = 20.0;
-	m_yUserGrid = 20.0;
+	m_xUserGrid = 0;
+	m_yUserGrid = 0;
 	m_bShowData = false;
 	m_bShowDebug = false;
 	m_bShowBold = false;
@@ -1637,6 +1638,10 @@ void CLinkageView::DrawGrid( CRenderer* pRenderer, int Type )
 	xGapDistance /= pDoc->GetUnitScale();
 	yGapDistance /= pDoc->GetUnitScale();
 
+	double Test = Scale( min( xGapDistance, yGapDistance ) );
+	if( Test < VIRTUAL_PIXEL_SNAP_DISTANCE * 2 )
+		return;
+
 	CFPoint DrawStartPoint = Unscale( CFPoint( m_DrawingRect.left, m_DrawingRect.top ) );
 	CFPoint DrawEndPoint = Unscale( CFPoint( m_DrawingRect.right, m_DrawingRect.bottom ) );
 	CFPoint GridStartPoint = DrawStartPoint;
@@ -2343,7 +2348,7 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 	if( m_bRecordingVideo && m_RecordQuality == 0 )
 	{
 		/*
-		 * Copy the image used for the window directory to the video
+		 * Copy the image used for the window directly to the video
 		 * file as-is. No extra draw operation is needed for a
 		 * standard quality video. The image will lose data if the
 		 * window on the screen does not contain the entire video
@@ -2920,7 +2925,7 @@ void CLinkageView::OnMouseMoveDrag(UINT nFlags, CFPoint point)
 
 	if( m_bAllowEdit )
 	{
-		if( pDoc->MoveSelected( AdjustedPoint, bElementSnap, bGridSnap,  xGapDistance / pDoc->GetUnitScale(),  yGapDistance / pDoc->GetUnitScale(), Unscale( PIXEL_SNAP_DISTANCE ), ReferencePoint ) )
+		if( pDoc->MoveSelected( AdjustedPoint, bElementSnap, bGridSnap,  xGapDistance / pDoc->GetUnitScale(),  yGapDistance / pDoc->GetUnitScale(), Unscale( VIRTUAL_PIXEL_SNAP_DISTANCE ), ReferencePoint ) )
 			InvalidateRect( 0 );
 	}
 
@@ -2978,7 +2983,7 @@ void CLinkageView::OnMouseMoveRecenter(UINT nFlags, CFPoint point)
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	CSnapConnector Snap( AdjustedPoint, Unscale( PIXEL_SNAP_DISTANCE ) );
+	CSnapConnector Snap( AdjustedPoint, Unscale( VIRTUAL_PIXEL_SNAP_DISTANCE ) );
 	pDoc->GetConnectorList()->Iterate( Snap );
 
 	CConnector* pSnapConnector = Snap.GetConnector();
@@ -4989,6 +4994,10 @@ void CLinkageView::OnEditGrid()
 	
 	CUserGridDialog dlg;
 	dlg.m_GridTypeSelection = m_GridType;
+	if( m_xUserGrid == 0 )
+		m_xUserGrid = 10 / DocumentScale;
+	if( m_yUserGrid == 0 )
+		m_yUserGrid = 10 / DocumentScale;
 	dlg.m_HorizontalSpacing = m_xUserGrid * DocumentScale;
 	dlg.m_VerticalSpacing = m_yUserGrid * DocumentScale;
 	dlg.m_bShowUserGrid = m_bShowGrid ? 1 : 0;
@@ -8183,25 +8192,6 @@ void CLinkageView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 	}
 
 	CView::OnPrepareDC(pDC, pInfo);
-}
-
-double CLinkageView::ConvertToSeconds( const char *pHMSString )
-{
-	double Value1 = 0;
-	double Value2 = 0;
-	double Value3 = 0;
-	char Dummy = 0;
-
-	int Count = sscanf_s( pHMSString, "%lf:%lf:%lf%c", &Value1, &Value2, &Value3, &Dummy, 1 );
-
-	switch( Count )
-	{
-		case 1: return Value1;
-		case 2: return ( Value1 * 60.0 ) + Value2;
-		case 3: return ( Value1 * 3600.0 ) + ( Value2 * 60.0 ) + Value3;
-		default: return 0.0;
-	}
-	return 0.0;
 }
 
 void CLinkageView::OnFileSaveVideo()
