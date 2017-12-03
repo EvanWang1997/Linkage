@@ -56,6 +56,8 @@ static const int GRAB_DISTANCE = 6;
 
 static const int FRAMES_PER_SECONDS = 30;
 
+static const double PROFILE_FIXEDPOINT = 1000000;
+
 static const int ANIMATIONWIDTH = 1280;
 static const int ANIMATIONHEIGHT = 720;
 
@@ -494,6 +496,9 @@ CLinkageView::CLinkageView()
 		m_bPrintFullSize = pApp->GetProfileInt( SETTINGS, "PrintFullSize", 0 ) != 0;
 		m_bShowGrid = pApp->GetProfileInt( SETTINGS, "ShowGrid", 0 ) != 0;
 		m_GridType = pApp->GetProfileInt( SETTINGS, "GridType", 0 );
+		m_xUserGrid = pApp->GetProfileInt( SETTINGS, "XGrid", (int)( m_xUserGrid * PROFILE_FIXEDPOINT ) ) / PROFILE_FIXEDPOINT;
+		m_yUserGrid = pApp->GetProfileInt( SETTINGS, "YGrid", (int)( m_yUserGrid * PROFILE_FIXEDPOINT ) ) / PROFILE_FIXEDPOINT;
+		m_GridType = pApp->GetProfileInt( SETTINGS, "GridType", 0 );
 		m_bShowParts = pApp->GetProfileInt( SETTINGS, "ShowParts", 0 ) != 0;
 		m_bUseMoreMomentum = pApp->GetProfileInt( SETTINGS, "MoreMomentum", 0 ) != 0;
 		m_bAllowEdit = !m_bShowParts;
@@ -583,6 +588,8 @@ void CLinkageView::SaveSettings( void )
 	pApp->WriteProfileInt( SETTINGS, "Showlargefont", m_bShowLargeFont ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "ShowGrid", m_bShowGrid ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "GridType", m_GridType );
+	pApp->WriteProfileInt( SETTINGS, "XGrid", (int)( m_xUserGrid * PROFILE_FIXEDPOINT ) );
+	pApp->WriteProfileInt( SETTINGS, "YGrid", (int)( m_yUserGrid * PROFILE_FIXEDPOINT ) );
 	pApp->WriteProfileInt( SETTINGS, "MoreMomentum", m_bUseMoreMomentum ? 1 : 0 );
 	pApp->WriteProfileInt( SETTINGS, "ShowParts", m_bShowParts ? 1 : 0  );
 	pApp->WriteProfileInt( SETTINGS, "PrintFullSize", m_bPrintFullSize ? 1 : 0 );
@@ -1639,8 +1646,11 @@ void CLinkageView::DrawGrid( CRenderer* pRenderer, int Type )
 	yGapDistance /= pDoc->GetUnitScale();
 
 	double Test = Scale( min( xGapDistance, yGapDistance ) );
-	if( Test < VIRTUAL_PIXEL_SNAP_DISTANCE * 2 )
+	if( Test < VIRTUAL_PIXEL_SNAP_DISTANCE * 1.5 )
+	{
+		SetStatusText( "Grid is too small to display" );
 		return;
+	}
 
 	CFPoint DrawStartPoint = Unscale( CFPoint( m_DrawingRect.left, m_DrawingRect.top ) );
 	CFPoint DrawEndPoint = Unscale( CFPoint( m_DrawingRect.right, m_DrawingRect.bottom ) );
@@ -5004,6 +5014,7 @@ void CLinkageView::OnEditGrid()
 
 	if( dlg.DoModal() == IDOK )
 	{
+		bool bDirtyDocument = m_GridType != dlg.m_GridTypeSelection || m_xUserGrid != dlg.m_HorizontalSpacing / DocumentScale || m_yUserGrid != dlg.m_VerticalSpacing / DocumentScale;
 		m_bShowGrid = dlg.m_bShowUserGrid != 0;	
 		m_GridType = dlg.m_GridTypeSelection;
 		m_xUserGrid = dlg.m_HorizontalSpacing / DocumentScale;
@@ -5016,6 +5027,10 @@ void CLinkageView::OnEditGrid()
 		}
 		else
 			pDoc->SetGrid();
+
+		// Only treat grid changes as modifying the document if the 
+		if( !pDoc->IsEmpty() && bDirtyDocument )
+			pDoc->SetModifiedFlag( true );
 
 		SaveSettings();
 		InvalidateRect( 0 );
@@ -5296,7 +5311,7 @@ void CLinkageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 		m_xUserGrid = Temp.x;
 		m_yUserGrid = Temp.y;
 	}
-	else
+	else if( !pDoc->GetPathName().IsEmpty() || !pDoc->IsEmpty() )
 		m_GridType = 0;
 
 	pComboBox->SelectItem( (DWORD_PTR)Units );
