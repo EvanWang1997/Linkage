@@ -2339,6 +2339,8 @@ class CD2DRenderer : public CRendererImplementation
 			pTempBrush     // The brush used to draw the text.
 			);
 
+		delete wcstring;
+
 		pTempBrush->Release();
 
 		if( 0 )

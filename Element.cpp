@@ -15,6 +15,14 @@ CElement::CElement(void)
 
 CElement::~CElement(void)
 {
+	POSITION Position = m_FastenedElements.GetHeadPosition();
+	while( Position != 0 )
+	{
+		CElementItem *pItem = m_FastenedElements.GetNext( Position );
+		if( pItem != 0 )
+			delete pItem;
+	}
+	m_FastenedElements.RemoveAll();
 }
 
 CElement::CElement( const CElement &ExistingElement )
