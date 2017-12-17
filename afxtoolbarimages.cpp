@@ -3198,6 +3198,20 @@ void CMFCToolBarImages::CopyTemp(CMFCToolBarImages& imagesDest)
 
 BOOL CMFCToolBarImages::UpdateInternalImage(int nIndex)
 {
+	///////////////////////////////////////////////
+	// Read online that this might help reduce calls to this slow function.
+	///////////////////////////////////////////////
+	if (nIndex == AFX_IMAGE_SHADOW)
+	{
+		if (!CMFCVisualManager::GetInstance ()->IsShadowHighlightedImage ())
+		{
+			return FALSE;
+		}
+	}
+	///////////////////////////////////////////////
+
+
+
 	HBITMAP& hbmpInternal = (nIndex == AFX_IMAGE_LIGHT) ? m_hbmImageLight : m_hbmImageShadow;
 
 	if (nIndex == AFX_IMAGE_LIGHT)
