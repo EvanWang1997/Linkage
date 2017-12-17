@@ -71,6 +71,9 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	m_wndRibbonBar.Create(this);
 
+	// if I provide the right sizes, will this work to stop the built-in scaling and use the images as I provide them?...
+	// GetGlobalData()->EnableRibbonImageScale(FALSE);
+
 	InitializeRibbon();
 
 	if (!m_wndStatusBar.Create(this))
@@ -1021,5 +1024,3 @@ BOOL CMainFrame::OnSetCursor( CWnd* pWnd, UINT nHitTest, UINT message )
 
 	return CWnd::OnSetCursor( pWnd, nHitTest, message );
 }
-
-

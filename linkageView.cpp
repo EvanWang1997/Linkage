@@ -2686,7 +2686,7 @@ bool CLinkageView::SelectAdjustmentControl( UINT nFlags, CFPoint Point )
 	bool bVertical = fabs( m_SelectionContainerRect.Height() ) > 0;
 	bool bHorizontal = fabs( m_SelectionContainerRect.Width() ) > 0;
 
-	if( bHorizontal && bVertical )
+	if( m_VisibleAdjustment == ADJUSTMENT_ROTATE || ( bHorizontal && bVertical  ) )
 	{
 		GrabAdjustmentControl( FPoint, AdjustmentRect.TopLeft(), AC_TOP_LEFT, DoMouseAction, &m_StretchingControl, &m_DragOffset, &m_MouseAction );
 		GrabAdjustmentControl( FPoint, CFPoint( AdjustmentRect.right, AdjustmentRect.top ), AC_TOP_RIGHT, DoMouseAction, &m_StretchingControl, &m_DragOffset, &m_MouseAction );

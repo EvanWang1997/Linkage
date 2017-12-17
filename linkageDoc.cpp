@@ -4672,7 +4672,7 @@ CLinkageDoc::_CoordinateChange CLinkageDoc::SetSelectedElementCoordinates( CFPoi
 		}
 		return _CoordinateChange::OTHER;
 	}
-	else if( CoordinateCount == 2 && ( Modifier == 'd' || Modifier == 'D' ) )
+	else if( CoordinateCount == 2 && ( Modifier == 'd' || Modifier == 'D' || Modifier == '*' ) )
 	{
 		CFRect BoundingRect;
 		GetDocumentArea( BoundingRect, true );

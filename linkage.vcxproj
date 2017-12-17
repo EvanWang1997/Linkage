@@ -844,6 +844,7 @@ exit 0
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutDialog.cpp" />
+    <ClCompile Include="afxtoolbarimages.cpp" />
     <ClCompile Include="Base64.cpp" />
     <ClCompile Include="ControlKnob.cpp" />
     <ClCompile Include="AngleDialog.cpp" />
