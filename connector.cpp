@@ -301,6 +301,43 @@ void CConnector::MakePermanent( void )
 	m_RotationAngle = m_TempRotationAngle;
 	m_OriginalDrawCircleRadius = m_DrawCircleRadius;
 	m_OriginalSlideRadius = m_SlideRadius;
+
+	// Maybe this is where fastened elements should move to reflect the point movement? Let's try it.
+	CFPoint Offset;
+	Offset.x = m_Point.x - GetOriginalPoint().x;
+	Offset.y = m_Point.y - GetOriginalPoint().y;
+	POSITION Position = m_FastenedElements.GetHeadPosition();
+	while( Position != 0 )
+	{
+		CElementItem *pItem = m_FastenedElements.GetNext( Position );
+		if( pItem == 0 )
+			continue;
+
+		CConnector *pMoveConnector = pItem->GetConnector();
+		CLink *pMoveLink = pItem->GetLink();
+
+		if( pMoveConnector == 0 && pMoveLink == 0 )
+			continue; 
+
+		POSITION Position2 = pMoveLink == 0 ? 0 : pMoveLink->GetConnectorList()->GetHeadPosition();
+		if( pMoveConnector == 0 )
+			pMoveConnector = pMoveLink->GetConnectorList()->GetNext( Position2 );
+
+		while( true )
+		{
+			CFPoint Temp = pMoveConnector->GetOriginalPoint();
+
+			Temp.x += Offset.x;
+			Temp.y += Offset.y;
+			pMoveConnector->MovePoint( Temp );
+			pMoveConnector->SetTempFixed( true );
+
+			if( Position2 == 0 )
+				break;
+
+			pMoveConnector = pMoveLink->GetConnectorList()->GetNext( Position2 );
+		}
+	}
 }
 
 CConnector::CConnector( const CConnector &ExistingConnector ) : CElement( ExistingConnector )

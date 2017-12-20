@@ -78,6 +78,7 @@ public:
 		data = 0;
 	}
 
+#pragma optimize( "agt", on )
 	COLORREF FastGetPixel(int x, int y) {
 		if (bGood) {
 			int offset = (rowSize*(pixelHeight()-y-1) + x)*4;
@@ -92,6 +93,7 @@ public:
 		// Fall back on standard GetPixel if the pixels could not be read
 		return GetPixel(hdc, x, y);
 	}
+#pragma optimize( "", on )
 protected:
 	BITMAPINFO bitmapInfo;
 	CSize size;

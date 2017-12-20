@@ -6082,7 +6082,7 @@ void CLinkageView::DrawFasteners( CRenderer* pRenderer, unsigned int OnLayers, C
 	Brush.CreateSolidBrush( COLOR_MINORSELECTION );
 	LOGBRUSH lBrush = { 0 };
 	Brush.GetLogBrush( &lBrush );
-    DWORD Style[] = { 3, 1 };
+    DWORD Style[] = { 2, 1 };
 	CPen CustomPen;
 	CustomPen.CreatePen( PS_USERSTYLE, 1, &lBrush, 2, Style );
 

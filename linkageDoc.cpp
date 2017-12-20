@@ -4052,20 +4052,29 @@ static unsigned int NumberOfSetBits( unsigned int Value )
 
 void CLinkageDoc::SetSelectedModifiableCondition( void )
 {
+	int SelectedDrawingElements = 0;
+	int SelectedMechanismLinks = 0;
+	int SelectedMechanismConnectors = 0;
+	int SelectedGears = 0;
+	int SelectedNonGears = 0;
+
+
 	int SelectedRealLinks = 0;
 	int SelectedLinks = 0;
 	int SelectedConnectors = 0;
 	int SelectedAnchors = 0;
-	int SelectedMechanismLinks = 0;
-	int SelectedDrawingElements = 0;
+	//int SelectedMechanismLinks = 0;
+	//int SelectedDrawingElements = 0;
 	int Actuators = 0;
 	int Sliders = 0;
-	int SelectedGears = 0;
+	//int SelectedGears = 0;
 	int FastenedCount = 0;
 	int GearFastenToCount = 0;
 	int SelectedLinkConnectorCount = 0;
 
 	CConnector *pFastenToConnector = 0;
+	CLink *pSelectedGear = 0;
+	CLink *pSelectedLink = 0;
 
 	m_SelectedLayers = 0;
 
@@ -4083,10 +4092,15 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 				++Sliders;
 			if( pConnector->IsAnchor() )
 				++SelectedAnchors;
-			if( pConnector->GetLayers() & DRAWINGLAYER )
-				++SelectedDrawingElements;
 			if( pConnector->GetFastenedTo() != 0 )
 				++FastenedCount;
+
+			if( pConnector->GetLayers() & DRAWINGLAYER )
+				++SelectedDrawingElements;
+			else
+				++SelectedMechanismConnectors;
+
+			++SelectedNonGears;
 
 			// This is tentative because I dont know if people will expect ALL fastened elements to become unfastened
 			// from this element, or if they only expect to use the unfasten action when a fastened thing is selected.
@@ -4109,19 +4123,29 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 		CLink *pLink = m_Links.GetNext( Position );
 		if( pLink == 0 )
 			continue;
-		if( pLink->IsSelected() )
+		if( pLink->IsSelected( false ) )
 		{
-			++SelectedLinks;
-
 			SelectedLinkConnectorCount = pLink->GetConnectorCount();
+			if( SelectedLinkConnectorCount <= 1 )
+				continue;
+
+			++SelectedLinks;
 
 			if( SelectedLinkConnectorCount > 1 || pLink->IsGear() ) // Lone connectors don't count as real links!
 				++SelectedRealLinks;
 			if( pLink->IsActuator() )
 				++Actuators;
 			if( pLink->IsGear() )
+			{
 				++SelectedGears;
-			m_SelectedLayers |= pLink->GetLayers();
+				pSelectedGear = pLink;
+			}
+			else
+			{
+				++SelectedNonGears;
+				pSelectedLink = pLink;
+			}
+				m_SelectedLayers |= pLink->GetLayers();
 			if( pLink->GetLayers() & MECHANISMLAYERS )
 			{
 				++SelectedMechanismLinks;
@@ -4138,6 +4162,9 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 				++FastenedCount;
 			if( !pLink->IsGear() && SelectedLinkConnectorCount > 1 )
 				++GearFastenToCount;
+
+			if( pLink->GetLayers() & DRAWINGLAYER )
+				++SelectedDrawingElements;
 		}
 	}
 
@@ -4201,9 +4228,26 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 	}
 
 	m_bSelectionFastenable = false;
-	if( SelectedDrawingElements > 0 && SelectedMechanismLinks == 1 )
+	if( SelectedDrawingElements > 0 && ( SelectedMechanismLinks == 1 || SelectedMechanismConnectors == 1 ) )
 		m_bSelectionFastenable = true;
-	else if( SelectedGears == 1 && ( SelectedMechanismLinks - SelectedGears ) == 1 && GearFastenToCount == 1 )
+	else if( SelectedDrawingElements > 0 && SelectedMechanismLinks == 1 )
+		m_bSelectionFastenable = true;
+	else if( SelectedGears == 1 && SelectedNonGears == 1 )
+	{
+		if( SelectedConnectors > 0 ) 
+		{
+			// Gear to connector fasten
+			if( pFastenToConnector != 0 )
+				m_bSelectionFastenable = true;
+		}
+		else
+		{
+			// Gear to non-gear link fasten
+			if( pSelectedGear->GetConnector( 0 )->HasLink( pSelectedLink ) )
+				m_bSelectionFastenable = true;
+		}
+	}
+	else if( false ) //SelectedGears == 1 && ( SelectedMechanismLinks - SelectedGears ) == 1 && GearFastenToCount == 1 )
 	{
 		m_bSelectionFastenable = true;
 		Position = m_Links.GetHeadPosition();
@@ -4234,7 +4278,7 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 			}
 		}
 	}
-	else if( SelectedGears == 1 && SelectedMechanismLinks == 1 && SelectedConnectors == 0 )
+	else if( false ) // SelectedGears == 1 && SelectedMechanismLinks == 1 && SelectedConnectors == 0 )
 	         //&& SelectedConnectors == 1 && GetSelectedLink( 0, false ) != 0 
 			 //&& pFastenToConnector == GetSelectedLink( 0, false )->GetConnector( 0 ) )
 	{
@@ -4899,9 +4943,9 @@ bool CLinkageDoc::FastenSelected( void )
 
 	bool bFastenDrawingElements = false;
 	int DrawingFastenToCount = 0;
-	CLink *pDrawingFastenTo = 0;
+	CLink *pFastenToLink = 0;
+	CConnector *pFastenToConnector = 0;
 	CLink *pGearFastenToLink = 0;
-	CConnector *pGearFastenToConnector = 0;
 	int GearFastenToCount = 0;
 
 	POSITION Position = m_Links.GetHeadPosition();
@@ -4911,14 +4955,17 @@ bool CLinkageDoc::FastenSelected( void )
 		if( pLink == 0 )
 			continue;
 
-		if( pLink->IsSelected() )
+		if( pLink->IsSelected( false ) )
 		{
+			if( pLink->GetConnectorCount() <= 1 && !pLink->IsGear() )
+				continue;
+
 			if( ( pLink->GetLayers() & DRAWINGLAYER ) != 0 )
 				bFastenDrawingElements = true;
 			else
 			{
 				++DrawingFastenToCount;
-				pDrawingFastenTo = pLink;
+				pFastenToLink = pLink;
 
 				if( !pLink->IsGear() && pLink->GetConnectorCount() > 1 )
 				{
@@ -4940,9 +4987,10 @@ bool CLinkageDoc::FastenSelected( void )
 			bFastenDrawingElements = true;
 		else
 		{
-			DrawingFastenToCount += 2; // A single connector is too many to fasten to so just increment this by 2.
+			++DrawingFastenToCount;
+			//DrawingFastenToCount += 2; // A single connector is too many to fasten to so just increment this by 2.
 
-			pGearFastenToConnector = pConnector;
+			pFastenToConnector = pConnector;
 			++GearFastenToCount;
 		}
 	}
@@ -4961,7 +5009,10 @@ bool CLinkageDoc::FastenSelected( void )
 			if( pLink == 0 || !pLink->IsSelected() || ( pLink->GetLayers() & DRAWINGLAYER ) == 0 )
 				continue;
 
-			FastenThese( pLink, pDrawingFastenTo );
+			if( pFastenToConnector == 0 )
+				FastenThese( pLink, pFastenToLink );
+			else
+				FastenThese( pLink, pFastenToConnector );
 		}
 
 		Position = m_Connectors.GetHeadPosition();
@@ -4971,7 +5022,10 @@ bool CLinkageDoc::FastenSelected( void )
 			if( pConnector == 0 || !pConnector->IsSelected() || ( pConnector->GetLayers() &DRAWINGLAYER ) == 0 )
 				continue;
 
-			FastenThese( pConnector, pDrawingFastenTo );
+			if( pFastenToConnector == 0 )
+				FastenThese( pConnector, pFastenToLink );
+			else
+				FastenThese( pConnector, pFastenToConnector );
 		}
 	}
 	else
@@ -4979,8 +5033,8 @@ bool CLinkageDoc::FastenSelected( void )
 		if( GearFastenToCount > 1 )
 			return false;
 
-		if( DrawingFastenToCount == 1 && pDrawingFastenTo != 0 && pDrawingFastenTo->IsGear() && pDrawingFastenTo->GetConnector( 0 )->IsAnchor() && !pDrawingFastenTo->GetConnector( 0 )->IsInput() )
-			pGearFastenToConnector = pDrawingFastenTo->GetConnector( 0 );
+		if( DrawingFastenToCount == 1 && pFastenToLink != 0 && pFastenToLink->IsGear() && pFastenToLink->GetConnector( 0 )->IsAnchor() && !pFastenToLink->GetConnector( 0 )->IsInput() )
+			pFastenToConnector = pFastenToLink->GetConnector( 0 );
 
 		PushUndo();
 
@@ -4991,8 +5045,8 @@ bool CLinkageDoc::FastenSelected( void )
 			if( pLink == 0 || !pLink->IsSelected() || ( pLink->GetLayers() & DRAWINGLAYER ) != 0 || !pLink->IsGear() )
 				continue;
 
-			if( pGearFastenToConnector != 0 )
-				FastenThese( pLink, pGearFastenToConnector );
+			if( pFastenToConnector != 0 )
+				FastenThese( pLink, pFastenToConnector );
 			else if( pGearFastenToLink != 0 )
 				FastenThese( pLink, pGearFastenToLink );
 		}
@@ -5324,6 +5378,13 @@ void CLinkageDoc::FastenThese( CLink *pFastenThis, CConnector *pFastenToThis )
 	Unfasten( pFastenThis );
 	pFastenThis->FastenTo( pFastenToThis );
 	pFastenToThis->AddFastenLink( pFastenThis );
+}
+
+void CLinkageDoc::FastenThese( CConnector *pFastenThis, CConnector *pFastenToThis )
+{
+	Unfasten( pFastenThis );
+	pFastenThis->FastenTo( pFastenToThis );
+	pFastenToThis->AddFastenConnector( pFastenThis );
 }
 
 #if 0

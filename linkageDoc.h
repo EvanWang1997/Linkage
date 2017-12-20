@@ -341,6 +341,8 @@ private:
 	void FastenThese( CConnector *pFastenThis, CLink *pFastenToThis );
 	void FastenThese( CLink *pFastenThis, CLink *pFastenToThis );
 	void FastenThese( CLink *pFastenThis, CConnector *pFastenToThis );
+	void FastenThese( CConnector *pFastenThis, CConnector *pFastenToThis );
+
 	//bool Unfasten( CLink *pFastenedTo );
 	bool Unfasten( CElement *pElement );
 	bool SetGearRatio( CLink *pGear1, CLink *pGear2, double Size1, double Size2, bool bUseSizeAsSize, CGearConnection::ConnectionType ConnectionType, bool bFromUI );

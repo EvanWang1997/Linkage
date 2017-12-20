@@ -1792,6 +1792,33 @@ class CD2DRenderer : public CRendererImplementation
 		return pWICFactory; 
 	} 
 
+	static ID2D1StrokeStyle* GetSolidStrokeStyle( void )
+	{
+		static ID2D1StrokeStyle *pStrokeStyle = 0;
+		if( pStrokeStyle == 0 )
+		{
+			// This code assumes that the factory object is also static since a non-static factory might 
+			// not work with a static stroke style object.
+			ID2D1Factory* pD2D1Factory = GetD2D1Factory();
+			pD2D1Factory->CreateStrokeStyle( D2D1::StrokeStyleProperties( D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE), 0, 0, &pStrokeStyle ); 
+		}
+		return pStrokeStyle;
+	}
+
+	static ID2D1StrokeStyle* GetDashedStrokeStyle( void )
+	{
+		static ID2D1StrokeStyle *pStrokeStyle = 0;
+		if( pStrokeStyle == 0 )
+		{
+			// This code assumes that the factory object is also static since a non-static factory might 
+			// not work with a static stroke style object.
+			ID2D1Factory* pD2D1Factory = GetD2D1Factory();
+			float Pattern[] = { 3.0, 3.0 };
+			pD2D1Factory->CreateStrokeStyle( D2D1::StrokeStyleProperties( D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_LINE_JOIN_MITER, 10.f, D2D1_DASH_STYLE_CUSTOM ), Pattern, 2, &pStrokeStyle );
+		}
+		return pStrokeStyle;
+	}
+
 	virtual void DrawRendererBitmap( CRendererBitmap *TheBitmap, CFRect Rect, double Transparency )
 	{
 		ID2D1Bitmap *pBitmap = (ID2D1Bitmap*)TheBitmap->pImplementation;
@@ -1933,15 +1960,8 @@ class CD2DRenderer : public CRendererImplementation
 		memset( &m_ScaledLogFont, 0, sizeof( m_ScaledLogFont ) );
 
 		ID2D1Factory* pD2D1Factory = GetD2D1Factory();
-
-		pD2D1Factory->CreateStrokeStyle( D2D1::StrokeStyleProperties( D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE), 0, 0, &m_pSolidLineStroke ); 
-
-
-		
-		//pD2D1Factory->CreateStrokeStyle( D2D1::StrokeStyleProperties( D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_LINE_JOIN_MITER, 10.f, D2D1_DASH_STYLE_DASH ), 0, 0, &m_DashedLineStroke );
-
-		float Pattern[] = { 3.0, 3.0 };
-		pD2D1Factory->CreateStrokeStyle( D2D1::StrokeStyleProperties( D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_CAP_STYLE_SQUARE, D2D1_LINE_JOIN_MITER, 10.f, D2D1_DASH_STYLE_CUSTOM ), Pattern, 2, &m_DashedLineStroke );
+		m_pSolidLineStroke = GetSolidStrokeStyle();
+		m_DashedLineStroke = GetDashedStrokeStyle();
 	}
 
 	virtual ~CD2DRenderer()
@@ -1957,10 +1977,10 @@ class CD2DRenderer : public CRendererImplementation
 		if( m_pDC != 0 )
 			delete m_pDC;
 
-		if( m_pSolidLineStroke != 0 )
-			m_pSolidLineStroke->Release();
-		if( m_DashedLineStroke != 0 )
-			m_DashedLineStroke->Release();
+		//if( m_pSolidLineStroke != 0 )
+		//	m_pSolidLineStroke->Release();
+		//if( m_DashedLineStroke != 0 )
+		//	m_DashedLineStroke->Release();
 		if( m_pCustomStroke != 0 )
 			m_pCustomStroke->Release();
 		//if( m_pRenderTarget != 0 )
