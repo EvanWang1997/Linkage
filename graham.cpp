@@ -59,9 +59,7 @@ CFPoint* GetHull( ConnectorList* pConnectors, int &ReturnedPointCount, bool bUse
 
 	/*
 	 * Duplicate removal doesn't work correctly in the qsort compare function for an unknown reason.
-	 * Remove duplicate points now before the qsort. Also comment out the squash function call later
-	 * since it is not needed because of this fix. But leave it there as a reminder to someday figure
-	 * out why it's not all working correctly without the following duplicate removal loops.
+	 * Remove duplicate points now before the qsort.
 	 */
 	for( int Index = 0; Index < Count - 1; ++Index )
 	{
@@ -77,8 +75,6 @@ CFPoint* GetHull( ConnectorList* pConnectors, int &ReturnedPointCount, bool bUse
 			}
 		}
 	}
-
-	Count = Squash( PointArray, Count );
 
 	/*
 	 * this is the end of the duplicate removal fix.
