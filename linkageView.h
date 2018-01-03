@@ -145,7 +145,6 @@ private:
 	bool m_bShowData;
 	bool m_bShowDebug;
 	bool m_bShowBold;
-	int m_BoldMultiplier;
 	bool m_bShowAnicrop;
 	bool m_bShowLargeFont;
 	int m_GridType;

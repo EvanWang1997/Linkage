@@ -110,12 +110,14 @@ CLinkageDoc::CLinkageDoc()
 	m_bSelectionLengthable = false;
 	m_bSelectionRotatable = false;
 	m_bSelectionScalable = false;
+	m_bSelectionMeetable = false;
 
 	m_AlignConnectorCount = 0;
 	m_HighestConnectorID = -1;
 	m_HighestLinkID = -1;
 	m_UnitScaling = 1;
 	m_SelectedLayers = 0;
+	m_bUseGrid = false;
 
 	SetViewLayers( ALLLAYERS );
 	SetEditLayers( ALLLAYERS );

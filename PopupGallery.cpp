@@ -156,7 +156,7 @@ void CPopupGallery::SetTooltip( int Index, const char *pString )
 	const char *pNewline = strchr( pString, '\n' );
 	if( pNewline != 0 )
 	{
-		Description.Truncate( pNewline - pString );
+		Description.Truncate( (int)( pNewline - pString ) );
 		Title = pNewline + 1;
 	}
 

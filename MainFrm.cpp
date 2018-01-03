@@ -50,6 +50,7 @@ class CValidatedString : public CString
 CMainFrame::CMainFrame()
 {
 	m_pSampleGallery = 0;
+	m_RibbonInitializingCounter = 0;
 
 	// TODO: add member initialization code here
 	//theApp.m_nAppLook = theApp.GetInt(_T("ApplicationLook"), ID_VIEW_APPLOOK_OFF_2007_SILVER);

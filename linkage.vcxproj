@@ -73,7 +73,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>Static</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -200,6 +200,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseDirect2D|x64'">
     <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugDirect2D|x64'">
     <IntDir>$(SolutionDir)$(Platform)\$(Configuration)\</IntDir>
@@ -697,7 +698,7 @@ exit 0
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
@@ -710,6 +711,7 @@ exit 0
       <DebugInformationFormat>
       </DebugInformationFormat>
       <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -726,9 +728,12 @@ exit 0
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>res\linkage.xml;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+      <AdditionalManifestFiles>res\linkage64.xml;%(AdditionalManifestFiles)</AdditionalManifestFiles>
       <OutputManifestFile>
       </OutputManifestFile>
       <EnableDpiAwareness>true</EnableDpiAwareness>
@@ -847,7 +852,12 @@ exit 0
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AboutDialog.cpp" />
-    <ClCompile Include="afxtoolbarimages.cpp" />
+    <ClCompile Include="afxtoolbarimages.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Base64.cpp" />
     <ClCompile Include="ControlKnob.cpp" />
     <ClCompile Include="AngleDialog.cpp" />
@@ -988,6 +998,9 @@ exit 0
     <Image Include="res\filesmallscaled150.bmp" />
     <Image Include="res\icon9.ico" />
     <Image Include="res\popup_gallery_2.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="res\linkage64.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

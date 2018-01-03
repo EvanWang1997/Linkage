@@ -70,18 +70,24 @@ code depending on the byte order we're targeting.
 
 class CFastBitmapReader {
 public:
-	CFastBitmapReader(HDC aHdc, HBITMAP hBitMap) : data(0), bGood(false) {
+	CFastBitmapReader(HDC aHdc, HBITMAP hBitMap){
+		data = 0;
+		bGood = false;
+		sizeInBytes = 0;
+		PixelHeight = 0;
+		PixelWidth = 0;
 		constructFrom(aHdc, hBitMap);
 	}
 	~CFastBitmapReader() {
-		delete [] data;
+		if( data != 0 )
+			delete [] data;
 		data = 0;
 	}
 
-#pragma optimize( "agt", on )
+//#pragma optimize( "agt", on )
 	COLORREF FastGetPixel(int x, int y) {
 		if (bGood) {
-			int offset = (rowSize*(pixelHeight()-y-1) + x)*4;
+			int offset = (PixelWidth*(PixelHeight-y-1) + x)*4;
 			if ((offset >= 0) && (offset+2 < sizeInBytes)) {
 				unsigned char b = data[offset];
 				unsigned char g = data[offset+1];
@@ -91,9 +97,10 @@ public:
 			}
 		}
 		// Fall back on standard GetPixel if the pixels could not be read
-		return GetPixel(hdc, x, y);
+		return ::GetPixel(hdc, x, y);
 	}
-#pragma optimize( "", on )
+//#pragma optimize( "", on )
+
 protected:
 	BITMAPINFO bitmapInfo;
 	CSize size;
@@ -105,10 +112,11 @@ protected:
 		return abs(bitmapInfo.bmiHeader.biWidth);
 	}
 	int sizeInBytes;
-	int rowSize;
 	HDC hdc;
 	bool bGood;
 	char *data;
+	int PixelHeight;
+	int PixelWidth;
 };
 
 // Read all of the pixels at once into an array of bytes
@@ -116,19 +124,29 @@ bool CFastBitmapReader::constructFrom(HDC aHdc, HBITMAP hBitMap) {
 	hdc = aHdc;
 	memset(&bitmapInfo, 0, sizeof bitmapInfo);
 	bitmapInfo.bmiHeader.biSize = sizeof(bitmapInfo.bmiHeader);
-	if (!GetDIBits(hdc, hBitMap, 0, 0, NULL, &bitmapInfo, 0 /* = DIG_RGB_COLORS */))
+	if (!GetDIBits(hdc, hBitMap, 0, 0, NULL, &bitmapInfo, DIB_RGB_COLORS ))
 		return false;
-	rowSize = pixelWidth();
-	sizeInBytes = pixelHeight() * pixelWidth() * 4;
+
+	PixelWidth = abs( bitmapInfo.bmiHeader.biWidth );
+	PixelHeight = abs( bitmapInfo.bmiHeader.biHeight );
+
+	sizeInBytes = PixelWidth * PixelHeight * 4; // this overestimates for some weird reason that the original programmer thought was ok.
+	sizeInBytes = max( (DWORD)sizeInBytes, bitmapInfo.bmiHeader.biSizeImage ); // In case there's something really weird going on. And why did the writer of this code not just use the size value from the heade4r?
+	
 	data = new char[sizeInBytes];
+	if( data == 0 )
+		return false;
 
 	// standardize to positive height, no compression, 32-bit
 	bitmapInfo.bmiHeader.biBitCount = 32;
 	bitmapInfo.bmiHeader.biCompression = BI_RGB;
-	bitmapInfo.bmiHeader.biHeight = pixelHeight();
-	if (!GetDIBits(hdc, hBitMap, 0, pixelHeight(), data, &bitmapInfo, 0 /* = DIG_RGB_COLORS */)) {
+	bitmapInfo.bmiHeader.biHeight = PixelHeight;
+	if (!GetDIBits(hdc, hBitMap, 0, PixelHeight, data, &bitmapInfo, DIB_RGB_COLORS )) {
+		delete [] data;
+		data = 0;
 		return false;
 	}
+
 	bGood = true;
 	return true;
 }
@@ -4447,6 +4465,7 @@ BOOL CMFCToolBarImages::SmoothResize(double dblImageScale)
 
 	return IsValid();
 }
+
 
 BOOL CMFCToolBarImages::ConvertTo32Bits(COLORREF clrTransparent)
 {

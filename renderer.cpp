@@ -1871,7 +1871,7 @@ class CD2DRenderer : public CRendererImplementation
 		{
 		   hr = pIWICStream->InitializeFromMemory(
 				 (WICInProcPointer)pData,
-				 Length );
+				 (DWORD)Length );
 		}
 
 		hr = wicFactory->CreateDecoderFromStream(
@@ -2353,7 +2353,7 @@ class CD2DRenderer : public CRendererImplementation
 
 		m_pRenderTarget->DrawText( 
 			wcstring,        // The string to render.
-			convertedCharsa,    // The string's length.
+			(int)convertedCharsa,    // The string's length.
 			m_pTextFormat,    // The text format.
 			&layoutRect,       // The region of the window where the text will be rendered.
 			pTempBrush     // The brush used to draw the text.

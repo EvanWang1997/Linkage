@@ -1891,7 +1891,7 @@ class CSimulatorImplementation
 				Connectors.AddTail( pConnector );
 			}
 		}
-		return Connectors.GetCount();
+		return (int)Connectors.GetCount();
 	}
 
 	bool FindLinkTriangleMatch( CLink *pLink )

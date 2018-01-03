@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "linkage", "linkage.vcxproj", "{1507094B-5BDC-469C-9CA2-C88F1ACD6703}"
 EndProject
@@ -51,6 +51,7 @@ Global
 		{D90E0EB0-73C1-43C8-91CC-4DE3C9177F55}.Release|x86.ActiveCfg = Release|x86
 		{D90E0EB0-73C1-43C8-91CC-4DE3C9177F55}.Release|x86.Build.0 = Release|x86
 		{D90E0EB0-73C1-43C8-91CC-4DE3C9177F55}.ReleaseDirect2D|x64.ActiveCfg = ReleaseDirect2D|x64
+		{D90E0EB0-73C1-43C8-91CC-4DE3C9177F55}.ReleaseDirect2D|x64.Build.0 = ReleaseDirect2D|x64
 		{D90E0EB0-73C1-43C8-91CC-4DE3C9177F55}.ReleaseDirect2D|x86.ActiveCfg = ReleaseDirect2D|x86
 		{D90E0EB0-73C1-43C8-91CC-4DE3C9177F55}.ReleaseDirect2D|x86.Build.0 = ReleaseDirect2D|x86
 	EndGlobalSection

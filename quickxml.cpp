@@ -83,7 +83,7 @@ const char *QuickXMLNode::Parse( const char *pText, bool bExpectEndTag )
 		{
 			// Save the data as a data node
 			QuickXMLNode *pNewNode = new QuickXMLNode( false );
-			pNewNode->m_pImplementation->m_NameOrData.Append( pText, pTag - pText );
+			pNewNode->m_pImplementation->m_NameOrData.Append( pText, (int)( pTag - pText ) );
 			if( pLastChild == 0 )
 				m_pImplementation->m_pFirstChild = pNewNode;
 			else
@@ -99,7 +99,7 @@ const char *QuickXMLNode::Parse( const char *pText, bool bExpectEndTag )
 			if( *pEnd == '\0' )
 				return 0;
 			CString EndTag;
-			EndTag.Append( pTagData, pEnd - pTagData );
+			EndTag.Append( pTagData, (int)( pEnd - pTagData ) );
 			if( m_pImplementation->m_NameOrData != EndTag )
 				return 0;
 			// Done. Return pointer after this end tag.
@@ -125,11 +125,11 @@ const char *QuickXMLNode::Parse( const char *pText, bool bExpectEndTag )
 			// Done. Return pointer after this end tag.
 			// Now parse the new node.
 			QuickXMLNode *pNewNode = new QuickXMLNode( true );
-			pNewNode->m_pImplementation->m_NameOrData.Append( pTag, pNameEnd - pTag );
+			pNewNode->m_pImplementation->m_NameOrData.Append( pTag, (int)( pNameEnd - pTag ) );
 			if( pNameEnd != pEnd )
 			{
 				++pNameEnd;
-				pNewNode->m_pImplementation->m_Attributes.Append( pNameEnd, pEnd - pNameEnd );
+				pNewNode->m_pImplementation->m_Attributes.Append( pNameEnd, (int)( pEnd - pNameEnd ) );
 			}
 			if( pLastChild == 0 )
 				m_pImplementation->m_pFirstChild = pNewNode;

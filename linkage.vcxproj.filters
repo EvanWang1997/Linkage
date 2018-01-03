@@ -440,4 +440,9 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="res\linkage64.xml">
+      <Filter>Other Files</Filter>
+    </Xml>
+  </ItemGroup>
 </Project>

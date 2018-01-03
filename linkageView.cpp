@@ -432,6 +432,7 @@ CLinkageView::CLinkageView()
 	m_bMouseMovedEnough = false;
 	m_bSuperHighlight = false;
 	m_YUpDirection = -1;
+	m_SimulationSteps = 0;
 
 	m_bRequestAbort = false;
 	m_bProcessingVideoThread = false;
@@ -8378,7 +8379,7 @@ void CLinkageView::OnFileOpenBackground()
 
 				CLinkageDoc* pDoc = GetDocument();
 				ASSERT_VALID(pDoc);
-				std::string Base64Data = base64_encode( (const unsigned char*)buffer.data(), (size_t)size );
+				std::string Base64Data = base64_encode( (const unsigned char*)buffer.data(), (unsigned int)size );
 				pDoc->SetBackgroundImage( Base64Data );
 			}
 		}
