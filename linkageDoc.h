@@ -248,6 +248,8 @@ public:
 	void SetGrid( void ) { m_bUseGrid = false; }
 	bool GetGrid( CFPoint &GridSize ) { GridSize = m_bUseGrid ? m_UserGrid : GridSize; return m_bUseGrid; }
 
+	virtual void OnDocumentEvent(DocumentEvent deEvent);
+
 private:
 	LinkList m_Links;
 	ConnectorList m_Connectors;

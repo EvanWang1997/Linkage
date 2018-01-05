@@ -5389,6 +5389,19 @@ void CLinkageDoc::FastenThese( CConnector *pFastenThis, CConnector *pFastenToThi
 	pFastenToThis->AddFastenConnector( pFastenThis );
 }
 
+void CLinkageDoc::OnDocumentEvent(DocumentEvent deEvent)
+{
+	CDocument::OnDocumentEvent( deEvent );
+
+	// NONE of this is necessary since the documents show up in the recent document list in Outlook if the system setting is enabled to show recent opened items.
+	// But how do I get the file into that list when the setting is disabled? Word does it with doc files so the system setting is not the only thing affecting the list in Outlook.
+	//if( deEvent == onAfterSaveDocument )
+	//{
+		// Save file name to system MRU.
+		//SHAddToRecentDocs( SHARD::SHARD_PATHA, GetPathName() );
+	//}
+}
+
 #if 0
 
 CLinkageDoc *CLinkageDoc::GetPartsDocument( bool bRecompute )
