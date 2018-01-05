@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 
-	<?define PRODUCTVERSION="3.3.8"?>
+	<?define PRODUCTVERSION="3.7.3"?>
 	<?define UPGRADECODE="363E6270-4C3C-4022-80C5-32499430E4BE"?>
 
+  <?if $(var.Platform) = x64 ?>
+    <?define ProductName = "Linkage (64 bit)" ?>
+    <?define Win64 = "yes" ?>
+    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+    <?define PlatformExecutableFile = "..\x64\$(var.Configuration)\linkage.exe" ?>
+  <?else ?>
+    <?define ProductName = "Linkage" ?>
+    <?define Win64 = "no" ?>
+    <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+    <?define PlatformExecutableFile = "..\$(var.Configuration)\linkage.exe" ?>
+  <?endif ?>
+  
 	<Product Id="*" Name="Linkage" Language="1033" Codepage="1252" Version="$(var.PRODUCTVERSION)" 
 	         Manufacturer="David Rector" UpgradeCode="$(var.UPGRADECODE)">
 
@@ -119,7 +131,6 @@
 		<Feature Id="ProductFeature" Title="Linkage" Level="1">
 			<ComponentRef Id="LinkageExecutable"/>
 			<ComponentRef Id="LinkageDocumentation"/>
-			<ComponentRef Id="LinkageMisc"/>
 		</Feature>
 
 		<Icon Id="icon.exe" SourceFile="..\res\icon.exe" />
@@ -134,7 +145,7 @@
 			<Directory Id="ProgramMenuFolder">
 				<Directory Id="ApplicationProgramsFolder" Name="Linkage"/>
 			</Directory>
-			<Directory Id="ProgramFilesFolder">
+			<Directory Id="$(var.PlatformProgramFilesFolder)">
 				<Directory Id="INSTALLFOLDER" Name="Linkage"/>
 			</Directory>
 		</Directory>
@@ -142,7 +153,7 @@
 
 	<Fragment>
 		<Component Id="LinkageExecutable" Directory="INSTALLFOLDER" Guid="7AF9110C-E88C-4BBE-A510-1933A0798D8A">
-			<File Id="linkage.exe" Name="linkage.exe" DiskId="1" Vital="yes" Source="..\$(var.Configuration)\linkage.exe" KeyPath="yes">
+			<File Id="linkage.exe" Name="linkage.exe" DiskId="1" Vital="yes" Source="$(var.PlatformExecutableFile)" KeyPath="yes">
 				<Shortcut Id="ApplicationStartMenuShortcut"
 						  Advertise="yes"
 						  Directory="ApplicationProgramsFolder"
@@ -163,10 +174,6 @@
 
 		<Component Id="LinkageDocumentation" Directory="INSTALLFOLDER" Guid="27D1D154-2197-4B00-9B1D-D97C57D2E96D">
 			<File Id="linkage.pdf" Name="linkage.pdf" DiskId="1" Vital="yes" Source="..\linkage.pdf" />
-		</Component>
-
-		<Component Id="LinkageMisc" Directory="INSTALLFOLDER" Guid="ACE32A96-1D38-453D-9E22-671366577E46">
-			<File Id="history.txt" Name="history.txt" DiskId="1" Vital="yes" Source="..\history.txt" />
 		</Component>
 
 	</Fragment>
