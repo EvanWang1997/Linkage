@@ -4128,6 +4128,13 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 		if( pLink->IsSelected( false ) )
 		{
 			SelectedLinkConnectorCount = pLink->GetConnectorCount();
+
+			if( pLink->IsGear() )
+			{
+				++SelectedGears;
+				pSelectedGear = pLink;
+			}
+
 			if( SelectedLinkConnectorCount <= 1 )
 				continue;
 
@@ -4137,12 +4144,7 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 				++SelectedRealLinks;
 			if( pLink->IsActuator() )
 				++Actuators;
-			if( pLink->IsGear() )
-			{
-				++SelectedGears;
-				pSelectedGear = pLink;
-			}
-			else
+			if( !pLink->IsGear() )
 			{
 				++SelectedNonGears;
 				pSelectedLink = pLink;

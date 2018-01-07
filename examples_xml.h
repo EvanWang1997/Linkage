@@ -2562,3 +2562,187 @@
 	</Link>\
 </linkage2>\
 "
+
+#define LEVERELBOW_XML "\
+<linkage2>\
+<program zoom=\"3.712930\" xoffset=\"-1\" yoffset=\"146\" scalefactor=\"1.000000\" units=\"Millimeters\" />\
+	<connector id=\"2\" layer=\"16\" x=\"-68.031504\" y=\"-75.590560\" draw=\"true\" color=\"32768\"/>\
+	<connector id=\"1\" layer=\"16\" x=\"0.000000\" y=\"0.000000\" anchor=\"true\" input=\"true\" rpm=\"15.000000\" color=\"12632064\"/>\
+	<connector id=\"4\" layer=\"16\" x=\"-64.251976\" y=\"-68.031504\" draw=\"true\" color=\"6854344\"/>\
+	<connector id=\"10\" layer=\"16\" x=\"0.000000\" y=\"-7.559056\" color=\"12615935\"/>\
+	<connector id=\"3\" layer=\"16\" x=\"0.000000\" y=\"-68.031504\" color=\"16711808\"/>\
+	<connector id=\"8\" layer=\"16\" x=\"63.811881\" y=\"-60.524224\" anchor=\"true\" color=\"8439808\"/>\
+	<Link id=\"1\" layer=\"16\" linesize=\"1\" solid=\"true\" color=\"10485760\">\
+		<connector id=\"2\"/>\
+		<connector id=\"8\"/>\
+		<connector id=\"3\"/>\
+	</Link>\
+	<Link id=\"3\" layer=\"16\" linesize=\"1\" color=\"16711808\">\
+		<connector id=\"1\"/>\
+		<connector id=\"10\"/>\
+	</Link>\
+	<Link id=\"4\" layer=\"16\" linesize=\"1\" solid=\"true\" color=\"16384\">\
+		<connector id=\"4\"/>\
+		<connector id=\"10\"/>\
+		<connector id=\"3\"/>\
+	</Link>\
+	<selected>\
+	</selected>\
+	<background></background>\
+</linkage2>\
+"
+
+#define ROSSYOKE_XML "\
+<linkage2>\
+	<program zoom=\"6.274852\" xoffset=\"32\" yoffset=\"186\" scalefactor=\"1.000000\" units=\"Millimeters\" backgroundtransparency=\"0.000000\" xgrid=\"\" ygrid=\"\"/>\
+	<connector id=\"0\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"-7.559055\" anchor=\"true\" input=\"true\" rpm=\"15.000000\" color=\"16711680\"/>\
+	<connector id=\"2\" selected=\"false\" layer=\"16\" x=\"-37.795276\" y=\"-56.692913\" draw=\"true\" color=\"32768\"/>\
+	<connector id=\"3\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"-18.897637\" color=\"16711808\"/>\
+	<connector id=\"4\" selected=\"false\" layer=\"16\" x=\"37.795276\" y=\"-56.692913\" draw=\"true\" color=\"6854344\"/>\
+	<connector id=\"1\" selected=\"false\" layer=\"16\" x=\"37.795276\" y=\"-45.673063\" anchor=\"true\" color=\"12632064\"/>\
+	<connector id=\"6\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"-56.692913\" color=\"16744448\"/>\
+	<Link id=\"0\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"16711680\">\
+		<connector id=\"0\"/>\
+		<connector id=\"3\"/>\
+	</Link>\
+	<Link id=\"1\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"8388608\">\
+		<connector id=\"2\"/>\
+		<connector id=\"3\"/>\
+		<connector id=\"4\"/>\
+		<connector id=\"6\"/>\
+	</Link>\
+	<Link id=\"2\" selected=\"false\" layer=\"16\" linesize=\"1\" solid=\"true\" color=\"32768\">\
+		<connector id=\"1\"/>\
+		<connector id=\"6\"/>\
+	</Link>\
+	<selected>\
+	</selected>\
+	<background></background>\
+</linkage2>\
+"
+
+#define RHOMBIC_XML "\
+<linkage2>\
+	<program zoom=\"2.197000\" xoffset=\"-213\" yoffset=\"-36\" scalefactor=\"1.000000\" units=\"Millimeters\" backgroundtransparency=\"0.000000\" xgrid=\"\" ygrid=\"\"/>\
+	<connector id=\"0\" selected=\"false\" layer=\"16\" x=\"-18.897638\" y=\"18.897638\" anchor=\"true\" input=\"true\" rpm=\"15.000000\" color=\"16711680\"/>\
+	<connector id=\"2\" selected=\"false\" layer=\"16\" x=\"-94.488189\" y=\"109.828645\" draw=\"true\" color=\"32768\"/>\
+	<connector id=\"4\" selected=\"false\" layer=\"16\" x=\"-170.078740\" y=\"18.897638\" anchor=\"true\" input=\"true\" rpm=\"-15.000000\" color=\"6854344\"/>\
+	<connector id=\"3\" selected=\"false\" layer=\"16\" x=\"-14.006569\" y=\"37.151355\" color=\"16711808\"/>\
+	<connector id=\"8\" selected=\"false\" layer=\"16\" x=\"-174.969809\" y=\"37.151355\" color=\"8439808\"/>\
+	<connector id=\"10\" selected=\"false\" layer=\"16\" x=\"-94.488189\" y=\"-38.113598\" draw=\"true\" color=\"12615935\"/>\
+	<connector id=\"1\" selected=\"false\" layer=\"1\" x=\"-75.590551\" y=\"-32.507386\" color=\"13158600\"/>\
+	<connector id=\"5\" selected=\"false\" layer=\"1\" x=\"-75.590551\" y=\"-85.343650\" color=\"13158600\"/>\
+	<connector id=\"6\" selected=\"false\" layer=\"1\" x=\"-188.976378\" y=\"-32.507386\" color=\"13158600\"/>\
+	<connector id=\"7\" selected=\"false\" layer=\"1\" x=\"18.897638\" y=\"-32.507386\" color=\"13158600\"/>\
+	<connector id=\"9\" selected=\"false\" layer=\"1\" x=\"-170.078740\" y=\"-85.781310\" color=\"13158600\"/>\
+	<connector id=\"11\" selected=\"false\" layer=\"1\" x=\"18.897638\" y=\"-85.511981\" color=\"13158600\"/>\
+	<Link id=\"4\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"6854344\">\
+		<connector id=\"0\"/>\
+		<connector id=\"3\"/>\
+	</Link>\
+	<Link id=\"2\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"32768\">\
+		<connector id=\"2\"/>\
+		<connector id=\"3\"/>\
+	</Link>\
+	<Link id=\"1\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"12632064\">\
+		<connector id=\"2\"/>\
+		<connector id=\"8\"/>\
+	</Link>\
+	<Link id=\"3\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"16711808\">\
+		<connector id=\"4\"/>\
+		<connector id=\"8\"/>\
+	</Link>\
+	<Link id=\"5\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"11012476\">\
+		<connector id=\"3\"/>\
+		<connector id=\"10\"/>\
+	</Link>\
+	<Link id=\"6\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"16744448\">\
+		<connector id=\"8\"/>\
+		<connector id=\"10\"/>\
+	</Link>\
+	<Link id=\"0\" selected=\"false\" layer=\"1\" linesize=\"1\" measurementelement=\"true\" color=\"13158600\">\
+		<connector id=\"1\"/>\
+		<connector id=\"5\"/>\
+	</Link>\
+	<Link id=\"7\" selected=\"false\" layer=\"1\" linesize=\"1\" color=\"13158600\">\
+		<connector id=\"6\"/>\
+		<connector id=\"7\"/>\
+	</Link>\
+	<Link id=\"8\" selected=\"false\" layer=\"1\" linesize=\"1\" color=\"13158600\">\
+		<connector id=\"9\"/>\
+		<connector id=\"11\"/>\
+	</Link>\
+	<selected>\
+	</selected>\
+	<background></background>\
+</linkage2>\
+"
+
+#define GEARRHOMBIC_XML "\
+<linkage2>\
+	<program zoom=\"2.197000\" xoffset=\"-213\" yoffset=\"-36\" scalefactor=\"1.000000\" units=\"Millimeters\" backgroundtransparency=\"0.000000\" xgrid=\"\" ygrid=\"\"/>\
+	<connector id=\"2\" selected=\"false\" layer=\"16\" x=\"-94.488189\" y=\"109.828645\" draw=\"true\" color=\"32768\"/>\
+	<connector id=\"4\" selected=\"false\" layer=\"16\" x=\"-170.078740\" y=\"18.897638\" anchor=\"true\" input=\"true\" rpm=\"-15.000000\" color=\"6854344\"/>\
+	<connector id=\"3\" selected=\"false\" layer=\"16\" x=\"-14.006569\" y=\"37.151355\" color=\"16711808\"/>\
+	<connector id=\"8\" selected=\"false\" layer=\"16\" x=\"-174.969809\" y=\"37.151355\" color=\"8439808\"/>\
+	<connector id=\"10\" selected=\"false\" layer=\"16\" x=\"-94.488189\" y=\"-38.113598\" draw=\"true\" color=\"12615935\"/>\
+	<connector id=\"1\" selected=\"false\" layer=\"1\" x=\"-75.590551\" y=\"-32.507386\" color=\"13158600\"/>\
+	<connector id=\"5\" selected=\"false\" layer=\"1\" x=\"-75.590551\" y=\"-85.343650\" color=\"13158600\"/>\
+	<connector id=\"6\" selected=\"false\" layer=\"1\" x=\"-188.976378\" y=\"-32.507386\" color=\"13158600\"/>\
+	<connector id=\"7\" selected=\"false\" layer=\"1\" x=\"18.897638\" y=\"-32.507386\" color=\"13158600\"/>\
+	<connector id=\"9\" selected=\"false\" layer=\"1\" x=\"-170.078740\" y=\"-85.781310\" color=\"13158600\"/>\
+	<connector id=\"11\" selected=\"false\" layer=\"1\" x=\"18.897638\" y=\"-85.511981\" color=\"13158600\"/>\
+	<connector id=\"12\" selected=\"false\" layer=\"16\" x=\"-18.897638\" y=\"18.897638\" anchor=\"true\" color=\"223719\"/>\
+	<Link id=\"4\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"6854344\">\
+		<connector id=\"3\"/>\
+		<connector id=\"12\"/>\
+	</Link>\
+	<Link id=\"2\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"32768\">\
+		<connector id=\"2\"/>\
+		<connector id=\"3\"/>\
+	</Link>\
+	<Link id=\"1\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"12632064\">\
+		<connector id=\"2\"/>\
+		<connector id=\"8\"/>\
+	</Link>\
+	<Link id=\"3\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"16711808\">\
+		<connector id=\"4\"/>\
+		<connector id=\"8\"/>\
+	</Link>\
+	<Link id=\"5\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"11012476\">\
+		<connector id=\"3\"/>\
+		<connector id=\"10\"/>\
+	</Link>\
+	<Link id=\"6\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"16744448\">\
+		<connector id=\"8\"/>\
+		<connector id=\"10\"/>\
+	</Link>\
+	<Link id=\"0\" selected=\"false\" layer=\"1\" linesize=\"1\" measurementelement=\"true\" color=\"13158600\">\
+		<connector id=\"1\"/>\
+		<connector id=\"5\"/>\
+	</Link>\
+	<Link id=\"7\" selected=\"false\" layer=\"1\" linesize=\"1\" color=\"13158600\">\
+		<connector id=\"6\"/>\
+		<connector id=\"7\"/>\
+	</Link>\
+	<Link id=\"8\" selected=\"false\" layer=\"1\" linesize=\"1\" color=\"13158600\">\
+		<connector id=\"9\"/>\
+		<connector id=\"11\"/>\
+	</Link>\
+	<Link id=\"9\" selected=\"false\" layer=\"16\" linesize=\"1\" gear=\"true\" color=\"13123282\">\
+		<connector id=\"4\"/>\
+	</Link>\
+	<Link id=\"10\" selected=\"false\" layer=\"16\" linesize=\"1\" fastenlink=\"4\" gear=\"true\" color=\"12615935\">\
+		<connector id=\"12\"/>\
+	</Link>\
+	<selected>\
+	</selected>\
+	<ratios>\
+		<ratio type=\"gears\" sizeassize=\"false\">\
+			<link id=\"10\" size=\"1.000000\"/>\
+			<link id=\"9\" size=\"1.000000\"/>\
+		</ratio>\
+	</ratios>\
+	<background></background>\
+</linkage2>\
+"

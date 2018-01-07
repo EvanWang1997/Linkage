@@ -9,7 +9,8 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -590,8 +591,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,7,3,0
- PRODUCTVERSION 3,7,3,0
+ FILEVERSION 3,7,4,0
+ PRODUCTVERSION 3,7,4,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -607,12 +608,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.7.3.0"
+            VALUE "FileVersion", "3.7.4.0"
             VALUE "InternalName", "Linkage"
-            VALUE "LegalCopyright", "Copyright © 2002 - 2017 David Rector"
+            VALUE "LegalCopyright", "Copyright © 2002 - 2018 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.7.3.0"
+            VALUE "ProductVersion", "3.7.4.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -918,7 +919,12 @@ BEGIN
     IDS_SAMPLE_OSCILLATORGEARS 
                             "Applified rocking motion mechanism.\nAmplified Rocking"
     IDS_SAMPLE_STEPHENSON   "Stephenson valve gear.\nStephenson Valve Gear"
-    IDS_SAMPLE_PEAUCELLIER  "Peaucellier straight link mechanism.\\Peaucellier Mechanism"
+    IDS_SAMPLE_PEAUCELLIER  "Peaucellier straight link mechanism.\nPeaucellier Mechanism"
+
+	IDS_SAMPLE_GEARRHOMBIC	"Rhombic Drive Mechanism for Coaxial Cylinder Engines.\nRhombic Drive"
+	IDS_SAMPLE_LEVERELBOW	"Sirling Engine Piston Mechanism.\nLever Elbow"
+	IDS_SAMPLE_ROSSYOKE		"Steam Engine Mechanism Adapted By Ross for Stirling Engines.\nRoss Yoke"
+
 END
 
 STRINGTABLE
@@ -1388,6 +1394,10 @@ BEGIN
     ID_SAMPLE_ORBITGEARS    "Planet and Moon Orbit Meachanism."
     ID_SAMPLE_OSCILLATORGEARS "Applified Rocking Motion Mechanism."
     ID_SAMPLE_STEPHENSON    "Stephenson Valve Gear Mechanism."
+	ID_SAMPLE_GEARRHOMBIC	"Rhombic Drive Mechanism for Coaxial Cylinder Engines."
+	ID_SAMPLE_LEVERELBOW	"Sirling Engine Piston Mechanism."
+	ID_SAMPLE_ROSSYOKE		"Steam Engine Mechanism Adapted By Ross for Stirling Engines."
+
 END
 
 STRINGTABLE

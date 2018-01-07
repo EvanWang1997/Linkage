@@ -380,10 +380,10 @@
 #define ID_SAMPLE_ORBITGEARS            5131
 #define ID_SAMPLE_OSCILLATORGEARS       5132
 #define ID_SAMPLE_STEPHENSON            5133
-#define ID_SAMPLE_UNUSED17              5134
-#define ID_SAMPLE_UNUSED18              5135
-#define ID_SAMPLE_UNUSED19              5136
-#define ID_SAMPLE_UNUSED20              5137
+#define ID_SAMPLE_LEVERELBOW            5134
+#define ID_SAMPLE_ROSSYOKE              5135
+#define ID_SAMPLE_RHOMBIC               5136
+#define ID_SAMPLE_GEARRHOMBIC           5137
 #define ID_SAMPLE_UNUSED21              5138
 #define ID_SAMPLE_UNUSED22              5139
 #define ID_SAMPLE_UNUSED23              5140
@@ -498,6 +498,10 @@
 #define ID_VIEW_PARTS                   5427
 #define IDS_RIBBON_VIEW_USERGRID        5428
 #define ID_VIEW_EDITGRID                5429
+#define IDS_SAMPLE_LEVERELBOW           5430
+#define IDS_SAMPLE_ROSSYOKE             5431
+#define IDS_SAMPLE_RHOMBIC              5432
+#define IDS_SAMPLE_GEARRHOMBIC          5433
 #define ID_FILE_PRINTFULL               5935
 #define IDD_EXPORTIMAGE                 6000
 #define IDD_SELECTELEMENTS              6006
