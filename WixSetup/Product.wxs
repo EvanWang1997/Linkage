@@ -153,7 +153,8 @@
 
 	<Fragment>
 		<Component Id="LinkageExecutable" Directory="INSTALLFOLDER" Guid="7AF9110C-E88C-4BBE-A510-1933A0798D8A">
-			<File Id="linkage.exe" Name="linkage.exe" DiskId="1" Vital="yes" Source="$(var.PlatformExecutableFile)" KeyPath="yes">
+
+      <File Id="linkage.exe" Name="linkage.exe" DiskId="1" Vital="yes" Source="$(var.PlatformExecutableFile)" KeyPath="yes">
 				<Shortcut Id="ApplicationStartMenuShortcut"
 						  Advertise="yes"
 						  Directory="ApplicationProgramsFolder"
@@ -169,7 +170,19 @@
 						  Description="Linkage Mechanism Designer and Simulator"
 						  WorkingDirectory="INSTALLFOLDER"/>
 			</File>
-			<RemoveFolder Id="ApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+
+
+      <ProgId Advertise="yes" Id="linkage2" Icon="icon.ico" IconIndex="0" Description="Linkage Mechanism">
+        <Extension Id="linkage2" ContentType="application/xml">
+          <Verb Id="open" Command="Open" Argument="&quot;%1&quot;" />
+          <Verb Id="edit" Command="Edit" Argument="&quot;%1&quot;" />
+          <MIME ContentType="application/xml" Default="yes" />
+        </Extension>
+      </ProgId>
+
+      <RegistryValue Root="HKLM" Key="SOFTWARE\Classes\Linkage.Document" Name="FriendlyTypeName" Value="Linkage Mechanism" Type="string" />
+
+      <RemoveFolder Id="ApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
 		</Component>
 
 		<Component Id="LinkageDocumentation" Directory="INSTALLFOLDER" Guid="27D1D154-2197-4B00-9B1D-D97C57D2E96D">
