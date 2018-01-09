@@ -146,7 +146,7 @@ class CLink : public CElement
 	double GetCPM( void ) { return m_ActuatorCPM; }
 	void SetCPM( double CPM ) { m_ActuatorCPM = CPM; }
 	void SetPolyline( bool bSet ) { m_bPolyline = bSet; }
-	bool GetPolyline( void ) { return m_bPolyline; }
+	bool IsPolyline( void ) { return m_bPolyline; }
 	void IncrementExtension( double Increment );
 	void SetExtension( double Value );
 	double GetExtendedDistance( void );

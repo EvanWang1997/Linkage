@@ -16,7 +16,7 @@ CLinePropertiesDialog::CLinePropertiesDialog(CWnd* pParent /*=NULL*/)
 	, m_Name(_T(""))
 	, m_bMeasurementLine(FALSE)
 	, m_FastenTo( _T( "" ) )
-	, m_Polyline(0)
+	, m_Polygon(0)
 {
 	m_Color = RGB( 200, 200, 200 );
 }
@@ -40,7 +40,7 @@ void CLinePropertiesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_EDIT1, m_LineSizeInputControl);
 	DDX_Control(pDX, IDC_RADIO1, m_PolygonControl);
 	DDX_Control(pDX, IDC_RADIO2, m_PolylineButton);
-	DDX_Radio(pDX, IDC_RADIO1, m_Polyline );
+	DDX_Radio(pDX, IDC_RADIO1, m_Polygon );
 	DDX_Control(pDX, IDC_FASTENEDTO, m_FastenToControl);
 	DDX_Text(pDX, IDC_FASTENEDTO, m_FastenTo);
 	DDX_Control(pDX, IDC_COLOR, m_ColorControl);

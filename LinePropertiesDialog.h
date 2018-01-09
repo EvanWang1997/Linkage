@@ -46,5 +46,5 @@ public:
 	CNullableColor m_Color;
 	CButton m_PolygonControl;
 	CButton m_PolylineButton;
-	int m_Polyline;
+	int m_Polygon;
 };
