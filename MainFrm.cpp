@@ -600,10 +600,16 @@ void CMainFrame::CreateSimulationPanel( CMFCRibbonCategory* pCategory )
 	pPanelMechanism->Add( pGroup );
 
 	MyCMFCRibbonButtonsGroup *pGroup2 = new MyCMFCRibbonButtonsGroup( 10 );
-	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATE_BACKWARD, "", 71, -1 ) );
-	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_PAUSE, "", 70, -1 ) );
-	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATE_FORWARD, "", 72, -1 ) );
+	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_ONECYCLE, "", 104, -1 ) );
+	//pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_PAUSE, "", 70, -1 ) );
+	//pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATE_FORWARD, "", 72, -1 ) );
 	pPanelMechanism->Add( pGroup2 );
+
+	MyCMFCRibbonButtonsGroup *pGroup3 = new MyCMFCRibbonButtonsGroup( 10 );
+	pGroup3->AddButton( new CMFCRibbonButton( ID_SIMULATE_BACKWARD, "", 71, -1 ) );
+	pGroup3->AddButton( new CMFCRibbonButton( ID_SIMULATION_PAUSE, "", 70, -1 ) );
+	pGroup3->AddButton( new CMFCRibbonButton( ID_SIMULATE_FORWARD, "", 72, -1 ) );
+	pPanelMechanism->Add( pGroup3 );
 }
 
 void CMainFrame::CreateMainCategory( void )
@@ -766,6 +772,7 @@ void CMainFrame::InitializeRibbon()
 {
 	m_wndRibbonBar.SetWindows7Look( TRUE );
 	m_wndRibbonBar.EnablePrintPreview( 1 );
+	m_wndRibbonBar.SetTooltipFixedWidth( 500, 500 );
 
 	// Load panel images:
 	m_PanelImages.SetImageSize(CSize(16, 16));

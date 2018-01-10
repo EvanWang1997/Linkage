@@ -954,6 +954,7 @@ STRINGTABLE
 BEGIN
     IDS_RIBBON_PAUSE        "Pause"
     ID_SIMULATION_PAUSE     "Pause the simulation or start it in a paused state.\nPause Simulation"
+	ID_SIMULATION_ONECYCLE	"Run one cycle of the simulation and pause.\nRun One Cycle"
     IDS_RIBBON_FORWARD      "Forward"
     ID_SIMULATE_FORWARD     "Step the simulation forward 0.033 (1/30) seconds.\nStep Forward"
     IDS_RIBBON_BACKWARD     "Backward"

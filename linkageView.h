@@ -108,7 +108,7 @@ public:
 
 	void HighlightSelected( bool bHighlight ) { m_bSuperHighlight = bHighlight; InvalidateRect( 0 ); }
 
-	enum _SimulationControl { AUTO, GLOBAL, INDIVIDUAL, STEP };
+	enum _SimulationControl { AUTO, GLOBAL, INDIVIDUAL, STEP, ONECYCLE };
 
 private:
 	typedef enum _AdjustmentType { ADJUSTMENT_NONE, ADJUSTMENT_ROTATE, ADJUSTMENT_STRETCH } AdjustmentType;
@@ -123,6 +123,7 @@ private:
 	CFPoint m_PreviousDragPoint;
 	bool m_bSimulating;
 	int m_SimulationSteps;
+	int m_PauseStep;
 	_SimulationControl m_SimulationControl;
 	CFont m_SmallFont;
 	CFont m_MediumFont;
@@ -538,11 +539,13 @@ public:
 	//afx_msg LRESULT OnGesture(WPARAM wParam, LPARAM lParam);
 
 	afx_msg void OnSimulatePause();
+	afx_msg void OnSimulateOneCycle();
 	afx_msg void OnSimulateForward();
 	afx_msg void OnSimulateBackward();
 	afx_msg void OnSimulateForwardBig();
 	afx_msg void OnSimulateBackwardBig();
 	afx_msg void OnUpdateSimulatePause(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateSimulateOneCycle(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateSimulateForwardBackward(CCmdUI *pCmdUI);
 
 protected:

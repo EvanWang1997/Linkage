@@ -148,6 +148,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 
 	ON_COMMAND(ID_SIMULATION_PAUSE, &CLinkageView::OnSimulatePause)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_PAUSE, &CLinkageView::OnUpdateSimulatePause)
+	ON_COMMAND(ID_SIMULATION_ONECYCLE, &CLinkageView::OnSimulateOneCycle)
+	ON_UPDATE_COMMAND_UI(ID_SIMULATION_ONECYCLE, &CLinkageView::OnUpdateSimulateOneCycle)
 	ON_COMMAND(ID_SIMULATE_FORWARD, &CLinkageView::OnSimulateForward)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATE_FORWARD, &CLinkageView::OnUpdateSimulateForwardBackward)
 	ON_COMMAND(ID_SIMULATE_BACKWARD, &CLinkageView::OnSimulateBackward)
@@ -434,6 +436,7 @@ CLinkageView::CLinkageView()
 	m_bSuperHighlight = false;
 	m_YUpDirection = -1;
 	m_SimulationSteps = 0;
+	m_PauseStep = -1;
 
 	m_bRequestAbort = false;
 	m_bProcessingVideoThread = false;
@@ -1618,6 +1621,12 @@ double roundDown( double number, double fixedBase )
         number *= sign;
     }
     return number;
+}
+
+int roundToNext(int numToRound, int multiple) 
+{
+	ASSERT(multiple);
+	return ((numToRound + multiple - 1) / multiple) * multiple;
 }
 
 void CLinkageView::DrawGrid( CRenderer* pRenderer, int Type )
@@ -3677,6 +3686,13 @@ void CLinkageView::StepSimulation( enum _SimulationControl SimulationControl )
 
 	if( SimulationControl == AUTO )
 		m_SimulationSteps = 1;
+	else if( SimulationControl == ONECYCLE )
+	{
+		if( m_SimulationSteps >= m_PauseStep )
+			return;
+		++m_SimulationSteps;
+		bSetToAbsoluteStep = true;
+	}
 	else if( SimulationControl == GLOBAL )
 	{
 		static const int MAX_MANUAL_STEPS = 800;
@@ -3700,7 +3716,8 @@ void CLinkageView::StepSimulation( enum _SimulationControl SimulationControl )
 		m_Simulator.SimulateStep( pDoc, m_SimulationSteps, bSetToAbsoluteStep, pControlIDs, pPositions, ControlCount, AnyAlwaysManual() && SimulationControl != INDIVIDUAL );
 	}
 
-	m_SimulationSteps = 0;
+	if( !bSetToAbsoluteStep )
+		m_SimulationSteps = 0;
 
 	if( pControlIDs != 0 )
 		delete [] pControlIDs;
@@ -6038,8 +6055,8 @@ void CLinkageView::DebugDrawLink( CRenderer* pRenderer, unsigned int OnLayers, C
 			pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
 
 			CString String;
-			//double DocumentScale = pDoc->GetUnitScale();
-			String.Format( "LA %.4lf", pLink->GetRotationAngle() );
+			double DocumentScale = pDoc->GetUnitScale();
+			String.Format( "ext %.4lf", pLink->GetExtendedDistance() * DocumentScale );
 
 			double Radius = m_ConnectorRadius * 5;
 
@@ -8488,12 +8505,34 @@ void CLinkageView::OnSimulateInteractive()
 
 void CLinkageView::OnSimulatePause()
 {
-	if( m_bSimulating && m_SimulationControl == AUTO )
+	if( m_bSimulating && ( m_SimulationControl == AUTO || m_SimulationControl == ONECYCLE ) )
 		m_SimulationControl = STEP;
 	else
 	{
 		ConfigureControlWindow( STEP );
 		StartMechanismSimulate( STEP );
+	}
+}
+
+void CLinkageView::OnSimulateOneCycle()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	if( m_bSimulating )
+	{
+		if( m_SimulationSteps != m_PauseStep )
+			return;
+
+		// Assume that the simulation step absolute value is at zero or some number evenly divisible by the cycle step.
+		m_PauseStep = m_SimulationSteps + m_Simulator.GetCycleSteps( pDoc );
+	}
+	else
+	{
+		m_SimulationSteps = 0;
+		m_PauseStep = m_Simulator.GetCycleSteps( pDoc );
+		ConfigureControlWindow( ONECYCLE );
+		StartMechanismSimulate( ONECYCLE );
 	}
 }
 
@@ -8527,6 +8566,13 @@ void CLinkageView::OnUpdateSimulatePause(CCmdUI *pCmdUI)
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	pCmdUI->Enable( ( !m_bSimulating || m_SimulationControl == AUTO ) && !pDoc->IsEmpty() && m_bAllowEdit );
+}
+
+void CLinkageView::OnUpdateSimulateOneCycle(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !pDoc->IsEmpty() );
 }
 
 void CLinkageView::OnUpdateSimulateForwardBackward(CCmdUI *pCmdUI)

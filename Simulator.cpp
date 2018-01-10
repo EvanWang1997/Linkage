@@ -113,6 +113,46 @@ class CSimulatorImplementation
 	}
 	#pragma optimize( "", on )
 
+	int GetCycleSteps( CLinkageDoc *pDoc )
+	{
+		int InputCount = 0;
+		double Cycle = 0;
+		int Adjustment = 1;
+		POSITION Position = pDoc->GetConnectorList()->GetHeadPosition();
+		int Count = 0;
+		CConnector *pLastInput = 0;
+		while( Position != NULL )
+		{
+			CConnector* pConnector = pDoc->GetConnectorList()->GetNext( Position );
+			if( pConnector == 0 )
+				continue;
+			if( pConnector->IsInput() )
+			{
+				Cycle = fabs( pConnector->GetRPM() );
+				++InputCount;
+			}
+		}
+
+		Position = pDoc->GetLinkList()->GetHeadPosition();
+		while( Position != NULL )
+		{
+			CLink* pLink = pDoc->GetLinkList()->GetNext( Position );
+			if( pLink == 0 )
+				continue;
+			if( pLink->IsActuator() )
+			{
+				Cycle = fabs( pLink->GetCPM() );
+				++InputCount;
+				Adjustment = 2; // For dividing the total steps by 2 to get just an in-to-out or vice-versa movement form the actuator.
+			}
+		}
+
+		if( InputCount != 1 )
+			return 0;
+
+		return ( int)( 1800.0 / Cycle / Adjustment );
+	}
+
 	int GetSimulationSteps( CLinkageDoc *pDoc )
 	{
 		int InputCount = 0;
@@ -2266,6 +2306,13 @@ int CSimulator::GetSimulationSteps( CLinkageDoc *pDoc )
 	if( m_pImplementation == 0 )
 		return false;
 	return m_pImplementation->GetSimulationSteps( pDoc );
+}
+
+int CSimulator::GetCycleSteps( CLinkageDoc *pDoc )
+{
+	if( m_pImplementation == 0 )
+		return false;
+	return m_pImplementation->GetCycleSteps( pDoc );
 }
 
 bool CSimulator::IsSimulationValid( void )

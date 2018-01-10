@@ -94,6 +94,7 @@
 #define IDS_RIBBON_APPEARANCE           3030
 #define ID_BACKGROUND_DELETE            3031
 #define IDS_RIBBON_BACKGROUND_DELETE    3032
+#define ID_SIMULATION_ONECYCLE			3033
 #define IDB_INSERT_POPUP_GALLERY        4000
 #define IDB_NAVIGATION_LARGE_HC         4100
 #define IDB_PAGES                       4101
