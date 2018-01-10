@@ -387,7 +387,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_WM_CHAR()
 	ON_COMMAND_RANGE( ID_SAMPLE_SIMPLE, ID_SAMPLE_UNUSED25, OnSelectSample )
 	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
+		ON_COMMAND(ID_FILE_SAVE, &CLinkageView::OnFileSave)
+		END_MESSAGE_MAP()
 
 static const int SMALL_FONT_SIZE = 9;
 static const int MEDIUM_FONT_SIZE = 13;
@@ -9357,3 +9358,14 @@ LRESULT CLinkageView::OnGesture(WPARAM wParam, LPARAM lParam)
 }
 
 #endif
+
+
+void CLinkageView::OnFileSave()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pDoc->DoFileSave();
+	CLinkageApp *pApp = (CLinkageApp*)AfxGetApp();
+	if( pApp != 0 )
+		pApp->SaveStdProfileSettings();
+}

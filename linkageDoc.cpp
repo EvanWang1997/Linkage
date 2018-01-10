@@ -395,8 +395,11 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 				pConnector->SetLayers( MECHANISMLAYER );
 			else
 				pConnector->SetLayers( atoi( Value ) );
+			Value = pNode->GetAttribute( "usercolor" );
+			bool bUserColor = Value == "true";
 			Value = pNode->GetAttribute( "color" );
-			if( Value.IsEmpty() || bResetColors )
+
+			if( Value.IsEmpty() || ( bResetColors && !bUserColor ) )
 			{
 				if( ( pConnector->GetLayers() & DRAWINGLAYER ) != 0 )
 					pConnector->SetColor( RGB( 200, 200, 200 ) );
@@ -489,8 +492,11 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			pLink->SetStartOffset( atof( Value ) );
 			Value = pNode->GetAttribute( "gear" );
 			pLink->SetGear( Value == "true" );
+			Value = pNode->GetAttribute( "usercolor" );
+			bool bUserColor = Value == "true";
 			Value = pNode->GetAttribute( "color" );
-			if( Value.IsEmpty() || bResetColors )
+
+			if( Value.IsEmpty() || ( bResetColors && !bUserColor ) )
 			{
 				if( ( pLink->GetLayers() & DRAWINGLAYER ) != 0 )
 					pLink->SetColor( RGB( 200, 200, 200 ) );
@@ -894,6 +900,8 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "fastenconnector", pConnector->GetFastenedToConnector() == 0 ? 0 : pConnector->GetFastenedToConnector()->GetIdentifier(), bIncludeFastenToCon );
 		AppendXMLAttribute( TempString, "slideradius", pConnector->GetSlideRadius(), pConnector->GetSlideRadius() != 0 && pConnector->IsSlider() );
 		AppendXMLAttribute( TempString, "color", (unsigned int)(COLORREF)pConnector->GetColor() );
+		AppendXMLAttribute( TempString, "usercolor", pConnector->GetColor().IsSet() );
+
 		TempString += bSlideLimits ? ">" : "/>";
 
 //		TempString.Format( "\t<connector id=\"%d\" selected=\"%s\" name=\"%s\" layer=\"%d\" anchor=\"%s\" input=\"%s\" draw=\"%s\" "
@@ -962,6 +970,7 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "fastenconnector", pLink->GetFastenedToConnector() == 0 ? 0 : pLink->GetFastenedToConnector()->GetIdentifier(), pLink->GetFastenedToConnector() != 0 );
 		AppendXMLAttribute( TempString, "gear", pLink->IsGear(), pLink->IsGear() );
 		AppendXMLAttribute( TempString, "color", (unsigned int)(COLORREF)pLink->GetColor() );
+		AppendXMLAttribute( TempString, "usercolor", pLink->GetColor().IsSet() );
 		TempString += ">";
 
 //		TempString.Format( "\t<Link id=\"%d\" selected=\"%s\" name=\"%s\" layer=\"%d\" linesize=\"%d\" solid=\"%s\" actuator=\"%s\" alwaysmanual=\"%s\" "

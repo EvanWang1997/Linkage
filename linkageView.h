@@ -590,6 +590,7 @@ public:
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	afx_msg void OnFileSave();
 };
 
 #ifndef _DEBUG  // debug version in LinkageView.cpp

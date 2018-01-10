@@ -812,10 +812,32 @@ void CMainFrame::Dump(CDumpContext& dc) const
 
 class CMFCVisualManagerWindows7Dave : public CMFCVisualManagerWindows7
 {
-	DECLARE_DYNAMIC( CMFCVisualManagerWindows7Dave )
+	DECLARE_DYNCREATE( CMFCVisualManagerWindows7Dave )
+public:
+	CMFCVisualManagerWindows7Dave() {}
+	virtual ~CMFCVisualManagerWindows7Dave() {}
+	
+	virtual BOOL DrawTextOnGlass(
+		CDC* pDC,
+		CString strText,
+		CRect rect,
+		DWORD dwFlags,
+		int nGlowSize = 0,
+		COLORREF clrText = (COLORREF)-1);
 };
 
-IMPLEMENT_DYNAMIC( CMFCVisualManagerWindows7Dave, CMFCVisualManagerWindows7 )
+IMPLEMENT_DYNCREATE( CMFCVisualManagerWindows7Dave, CMFCVisualManagerWindows7 )
+
+BOOL CMFCVisualManagerWindows7Dave::DrawTextOnGlass(
+	CDC* pDC,
+	CString strText,
+	CRect rect,
+	DWORD dwFlags,
+	int nGlowSize,
+	COLORREF clrText)
+{
+	return CMFCVisualManagerWindows7::DrawTextOnGlass( pDC, strText, rect, dwFlags, 10, (COLORREF)-1 );
+}
 
 // CMainFrame message handlers
 
@@ -878,7 +900,7 @@ void CMainFrame::OnApplicationLook(UINT id)
 
 #endif
 
-	CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows7));
+	CMFCVisualManager::SetDefaultManager( RUNTIME_CLASS( CMFCVisualManagerWindows7Dave ) );
 
 	RedrawWindow(NULL, NULL, RDW_ALLCHILDREN | RDW_INVALIDATE | RDW_UPDATENOW | RDW_FRAME | RDW_ERASE);
 

@@ -181,6 +181,11 @@ BOOL CLinkageApp::InitInstance()
 	return TRUE;
 }
 
+void CLinkageApp::SaveStdProfileSettings( void )
+{
+	CWinApp::SaveStdProfileSettings();
+}
+
 void CLinkageApp::SetPrinterOrientation( int OrientationMode )
 {
 	// Get default printer settings.
