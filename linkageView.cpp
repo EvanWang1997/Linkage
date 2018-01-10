@@ -8475,7 +8475,7 @@ void CLinkageView::OnFileSaveMotion()
 
 		for( int Counter = 0; Counter < PointCount; ++Counter )
 		{
-			Temp.Format( "%.6f,%.6f\r\n", pPoints[Counter].x, pPoints[Counter].y );
+			Temp.Format( "%.6f,%.6f\r\n", pPoints[Counter].x * DocumentScale, pPoints[Counter].y * DocumentScale );
 			OutputFile.Write( (const char*)Temp, Temp.GetLength() );
 		}
 	}
