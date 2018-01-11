@@ -94,8 +94,9 @@ public:
 	bool SelectElement( CFPoint Point, double GrabDistance, double SolidLinkExpansion, bool bMultiSelect, bool &bSelectionChanged );
 	bool SelectElement( CFRect Rect, double SolidLinkExpansion, bool bMultiSelect, bool &bSelectionChanged );
 	bool SelectElement( void );
-	bool CLinkageDoc::DeSelectElement( CLink *pLink );
+	bool DeSelectElement( CLink *pLink );
 	bool DeSelectElement( CConnector *pConnector );
+	bool SelectLinkFromConnectors( void );
 	bool FindElement( CFPoint Point, double GrabDistance, double SolidLinkExpansion, CLink *&pFoundLink, CConnector *&pFoundConnector );
 	CFPoint CheckForSnap( ConnectorList &SelectedConnectors, double SnapDistance, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, CFPoint &ReferencePoint );
 	bool CheckForGridSnap( CConnector *pConnector, double SnapDistance, double xGrid, double yGrid, CFPoint &ReferencePoint, CFPoint &Adjustment );

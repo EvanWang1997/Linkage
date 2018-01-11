@@ -1136,6 +1136,42 @@ bool CLinkageDoc::ClearSelection( void )
 	return bChanged;
 }
 
+bool CLinkageDoc::SelectLinkFromConnectors( void )
+{
+	if( GetSelectedConnectorCount() <= 1 || GetSelectedLinkCount( false ) > 0 )
+		return false;
+
+	CConnector *pConnector1 = GetSelectedConnector( 0 );
+	CConnector *pConnector2 = GetSelectedConnector( 1 );
+
+	if( pConnector1 == 0 || pConnector2 == 0 )
+		return false;
+
+	POSITION Position1 = pConnector1->GetLinkList()->GetHeadPosition();
+	while( Position1 != 0 )
+	{
+		CLink *pLink1 = pConnector1->GetLinkList()->GetNext( Position1 );
+		if( pLink1 == 0 )
+			continue;
+
+		POSITION Position2 = pConnector2->GetLinkList()->GetHeadPosition();
+		while( Position2 != 0 )
+		{
+			CLink *pLink2 = pConnector2->GetLinkList()->GetNext( Position2 );
+			if( pLink2 == 0 )
+				continue;
+
+			if( pLink1 == pLink2 )
+			{
+				ClearSelection();
+				SelectElement( pLink1 );
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 bool CLinkageDoc::SelectElement( void )
 {
 	ClearSelection();

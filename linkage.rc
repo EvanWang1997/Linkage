@@ -275,7 +275,8 @@ BEGIN
     "C",            ID_EDIT_CONNECT,        VIRTKEY, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "D",            ID_VIEW_DIMENSIONS,     VIRTKEY, NOINVERT
-    "F",            ID_EDIT_FASTEN,         VIRTKEY, NOINVERT
+	"E",            ID_EDIT_SELECTLINK,     VIRTKEY, NOINVERT
+	"F",            ID_EDIT_FASTEN,         VIRTKEY, NOINVERT
     "G",            ID_EDIT_MAKEANCHOR,     VIRTKEY, NOINVERT
     "J",            ID_EDIT_JOIN,           VIRTKEY, NOINVERT
     "K",            ID_EDIT_LOCK,           VIRTKEY, NOINVERT
@@ -591,8 +592,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,7,5,0
- PRODUCTVERSION 3,7,5,0
+ FILEVERSION 3,7,6,0
+ PRODUCTVERSION 3,7,6,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -608,12 +609,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.7.5.0"
+            VALUE "FileVersion", "3.7.6.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2018 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.7.5.0"
+            VALUE "ProductVersion", "3.7.6.0"
         END
     END
     BLOCK "VarFileInfo"

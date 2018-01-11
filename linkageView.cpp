@@ -159,7 +159,6 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATE_FORWARD_BIG, &CLinkageView::OnUpdateSimulateForwardBackward)
 	ON_COMMAND(ID_SIMULATE_BACKWARD_BIG, &CLinkageView::OnSimulateBackwardBig)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATE_BACKWARD_BIG, &CLinkageView::OnUpdateSimulateForwardBackward)
-
 	ON_COMMAND(ID_SIMULATE_MANUAL, &CLinkageView::OnSimulateManual)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATE_MANUAL, &CLinkageView::OnUpdateButtonRun)
 	ON_WM_TIMER()
@@ -172,10 +171,10 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_FASTEN, &CLinkageView::OnUpdateEditFasten)
 	ON_COMMAND(ID_EDIT_UNFASTEN, &CLinkageView::OnEditUnfasten)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNFASTEN, &CLinkageView::OnUpdateEditUnfasten)
-
+	ON_COMMAND(ID_EDIT_SELECTLINK, &CLinkageView::OnEditSelectLink)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_SELECTLINK, &CLinkageView::OnUpdateEditSelectLink)
 	ON_COMMAND(ID_EDIT_SET_RATIO, &CLinkageView::OnEditSetRatio)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SET_RATIO, &CLinkageView::OnUpdateEditSetRatio)
-
 	ON_COMMAND(ID_DIMENSION_SETLOCATION, &CLinkageView::OnEditSetLocation)
 	ON_UPDATE_COMMAND_UI(ID_DIMENSION_SETLOCATION, &CLinkageView::OnUpdateEditSetLocation)
 	ON_COMMAND(ID_DIMENSION_SETLENGTH, &CLinkageView::OnEditSetLength)
@@ -3915,6 +3914,21 @@ void CLinkageView::OnEditConnect()
 	ASSERT_VALID(pDoc);
 	pDoc->ConnectSelected();
 	InvalidateRect( 0 );
+}
+
+void CLinkageView::OnEditSelectLink()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if( pDoc->SelectLinkFromConnectors() )
+		InvalidateRect( 0 );
+}
+
+void CLinkageView::OnUpdateEditSelectLink(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !m_bSimulating && pDoc->GetSelectedConnectorCount() > 1 && pDoc->GetSelectedLinkCount( false ) == 0  && m_bAllowEdit );
 }
 
 void CLinkageView::OnEditFasten()

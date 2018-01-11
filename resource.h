@@ -437,6 +437,7 @@
 #define ID_EDIT_FASTEN                  5237
 #define ID_INSERT_ANCHORLINK            5238
 #define IDS_SAMPLE_LIFTER               5240
+#define ID_EDIT_SELECTLINK				5241
 #define IDC_COPYRIGHT                   5303
 #define IDC_COMBO1                      5303
 #define IDC_COMBO2                      5304

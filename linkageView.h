@@ -375,6 +375,8 @@ public:
 	afx_msg void OnUpdateEditSelected(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateEditConnect(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateEditFasten(CCmdUI *pCmdUI);
+	afx_msg void OnEditSelectLink();
+	afx_msg void OnUpdateEditSelectLink(CCmdUI *pCmdUI);
 	afx_msg void OnEditFasten();
 	afx_msg void OnUpdateEditUnfasten(CCmdUI *pCmdUI);
 	afx_msg void OnEditUnfasten();
