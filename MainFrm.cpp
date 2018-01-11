@@ -772,7 +772,28 @@ void CMainFrame::InitializeRibbon()
 {
 	m_wndRibbonBar.SetWindows7Look( TRUE );
 	m_wndRibbonBar.EnablePrintPreview( 1 );
-	m_wndRibbonBar.SetTooltipFixedWidth( 500, 500 );
+	//m_wndRibbonBar.SetTooltipFixedWidth( 500, 500 );  DON'T SET THIS SINCE THE m_nMaxDescrWidth PARAM BELOW WILL MAKE THE TOOLTIP WINDOW WIDER.
+
+	CWinAppEx *pAppEx = (CWinAppEx *)AfxGetApp();
+	if( pAppEx != 0 )
+	{
+		CTooltipManager *pTTM = pAppEx->GetTooltipManager();
+		if( pTTM != 0 )
+		{
+			CMFCToolTipInfo Params;
+
+#if defined( LINKAGE_USE_DIRECT2D )
+			CWindowDC DC( 0 );
+			int PPI = DC.GetDeviceCaps( LOGPIXELSX );
+			double DPIScale = (double)PPI / 96.0;
+#else
+			double DPIScale = 1.0;
+#endif
+			// This number will override the tooltip width information set elsewhere. Just take it and adjust it to deal with the text scaling DPI 
+			Params.m_nMaxDescrWidth = (int)( Params.m_nMaxDescrWidth * DPIScale );
+			pTTM->SetTooltipParams( AFX_TOOLTIP_TYPE_ALL, RUNTIME_CLASS (CMFCToolTipCtrl), &Params );
+		}
+	}
 
 	// Load panel images:
 	m_PanelImages.SetImageSize(CSize(16, 16));

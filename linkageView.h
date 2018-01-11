@@ -186,6 +186,8 @@ private:
 	unsigned int m_SelectedViewLayers;
 	bool m_bAllowEdit;
 
+	double m_ForceCPM;
+
 	bool m_bPrintFullSize;
 
 	double m_BaseUnscaledUnit;

@@ -437,6 +437,7 @@ CLinkageView::CLinkageView()
 	m_YUpDirection = -1;
 	m_SimulationSteps = 0;
 	m_PauseStep = -1;
+	m_ForceCPM = 0;
 
 	m_bRequestAbort = false;
 	m_bProcessingVideoThread = false;
@@ -3681,6 +3682,7 @@ void CLinkageView::StepSimulation( enum _SimulationControl SimulationControl )
 
 	DWORD SimulationTimeLimit = 100;
 	DWORD SimulationStartTicks = GetTickCount();
+	double ForceCPM = 0;
 
 	bool bSetToAbsoluteStep = false;
 
@@ -3692,6 +3694,7 @@ void CLinkageView::StepSimulation( enum _SimulationControl SimulationControl )
 			return;
 		++m_SimulationSteps;
 		bSetToAbsoluteStep = true;
+		ForceCPM = m_ForceCPM;
 	}
 	else if( SimulationControl == GLOBAL )
 	{
@@ -3713,7 +3716,7 @@ void CLinkageView::StepSimulation( enum _SimulationControl SimulationControl )
 	if( m_SimulationSteps != 0 || SimulationControl == INDIVIDUAL || bSetToAbsoluteStep )
 	{
 		ClearDebugItems();
-		m_Simulator.SimulateStep( pDoc, m_SimulationSteps, bSetToAbsoluteStep, pControlIDs, pPositions, ControlCount, AnyAlwaysManual() && SimulationControl != INDIVIDUAL );
+		m_Simulator.SimulateStep( pDoc, m_SimulationSteps, bSetToAbsoluteStep, pControlIDs, pPositions, ControlCount, AnyAlwaysManual() && SimulationControl != INDIVIDUAL, ForceCPM );
 	}
 
 	if( !bSetToAbsoluteStep )
@@ -5472,11 +5475,11 @@ void CLinkageView::OnMechanismQuicksim()
 	bool bGoodSimulation = true;
 	int Counter = 0;
 	for( ; Counter < Steps && bGoodSimulation; ++Counter )
-		bGoodSimulation = m_Simulator.SimulateStep( pDoc, 1, false, 0, 0, 0, false );
+		bGoodSimulation = m_Simulator.SimulateStep( pDoc, 1, false, 0, 0, 0, false, 0 );
 
 	// Do one more step so that the final resting place for the drawing connectors are included in the motion path.
 	if( !bGoodSimulation )
-		m_Simulator.SimulateStep( pDoc, 1, false, 0, 0, 0, false );
+		m_Simulator.SimulateStep( pDoc, 1, false, 0, 0, 0, false, 0 );
 
 	DebugItemList.Clear();
 
@@ -8525,12 +8528,12 @@ void CLinkageView::OnSimulateOneCycle()
 			return;
 
 		// Assume that the simulation step absolute value is at zero or some number evenly divisible by the cycle step.
-		m_PauseStep = m_SimulationSteps + m_Simulator.GetCycleSteps( pDoc );
+		m_PauseStep = m_SimulationSteps + m_Simulator.GetCycleSteps( pDoc, &m_ForceCPM );
 	}
 	else
 	{
 		m_SimulationSteps = 0;
-		m_PauseStep = m_Simulator.GetCycleSteps( pDoc );
+		m_PauseStep = m_Simulator.GetCycleSteps( pDoc, &m_ForceCPM  );
 		ConfigureControlWindow( ONECYCLE );
 		StartMechanismSimulate( ONECYCLE );
 	}

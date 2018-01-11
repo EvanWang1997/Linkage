@@ -113,14 +113,11 @@ class CSimulatorImplementation
 	}
 	#pragma optimize( "", on )
 
-	int GetCycleSteps( CLinkageDoc *pDoc )
+	CElement * GetCycleElement( CLinkageDoc *pDoc )
 	{
 		int InputCount = 0;
-		double Cycle = 0;
-		int Adjustment = 1;
 		POSITION Position = pDoc->GetConnectorList()->GetHeadPosition();
-		int Count = 0;
-		CConnector *pLastInput = 0;
+		CElement *pLastInput = 0;
 		while( Position != NULL )
 		{
 			CConnector* pConnector = pDoc->GetConnectorList()->GetNext( Position );
@@ -128,7 +125,7 @@ class CSimulatorImplementation
 				continue;
 			if( pConnector->IsInput() )
 			{
-				Cycle = fabs( pConnector->GetRPM() );
+				pLastInput = pConnector;
 				++InputCount;
 			}
 		}
@@ -141,14 +138,36 @@ class CSimulatorImplementation
 				continue;
 			if( pLink->IsActuator() )
 			{
-				Cycle = fabs( pLink->GetCPM() );
+				pLastInput = pLink;
 				++InputCount;
-				Adjustment = 2; // For dividing the total steps by 2 to get just an in-to-out or vice-versa movement form the actuator.
 			}
 		}
+		return InputCount == 0 ? 0 : pLastInput;
+	}
 
-		if( InputCount != 1 )
+	int GetCycleSteps( CLinkageDoc *pDoc, double *pNewCPM )
+	{
+		CElement *pInputElement = GetCycleElement( pDoc );
+		if( pInputElement == 0 )
 			return 0;
+
+		double Cycle = 0;
+		int Adjustment = 1;
+		if( pInputElement->IsConnector() )
+			Cycle = fabs( ((CConnector*)pInputElement)->GetRPM() );
+		else
+		{
+			Cycle = fabs( ((CLink*)pInputElement)->GetCPM() );
+			Adjustment = 2;
+
+			if( pNewCPM != 0 )
+			{
+				// Calculate a new CPM for the actuator that moves it just a bit faster so it gets to exactly the end
+				// within the given number of simulation steps.
+				int Temp = (int)( 1800.0 / Cycle / Adjustment );
+				*pNewCPM = 1800.0 / Temp / Adjustment;
+			}
+		}
 
 		return ( int)( 1800.0 / Cycle / Adjustment );
 	}
@@ -235,7 +254,7 @@ class CSimulatorImplementation
 		return 1800 / Divisor;
 	}
 
-	bool SimulateStep( CLinkageDoc *pDoc, int StepNumber, bool bAbsoluteStepNumber, int* pInputID, double *pInputPositions, int InputCount, bool bNoMultiStep )
+	bool SimulateStep( CLinkageDoc *pDoc, int StepNumber, bool bAbsoluteStepNumber, int* pInputID, double *pInputPositions, int InputCount, bool bNoMultiStep, double ForceAllCPM )
 	{
 		if( pDoc == 0 )
 			return false;
@@ -309,6 +328,7 @@ class CSimulatorImplementation
 
 						if( !pConnector->IsAlwaysManual() )
 						{
+							double RPM = ForceAllCPM == 0 ? pConnector->GetRPM() : ForceAllCPM;
 							double RotationAngle = ( ( m_SimulationStep * INTERMEDIATE_STEPS ) - ( IntermediateStep * Direction ) ) * ( -( pConnector->GetRPM() * 0.2 ) / INTERMEDIATE_STEPS );
 							if( pConnector->GetLimitAngle() > 0 )
 							{
@@ -317,7 +337,6 @@ class CSimulatorImplementation
 							}
 							pConnector->SetRotationAngle( RotationAngle );
 							pConnector->MakeAnglePermenant();
-
 						}
 					}
 					else
@@ -363,7 +382,8 @@ class CSimulatorImplementation
 						 */
 						if( !pLink->IsAlwaysManual() )
 						{
-							double Distance = pLink->GetStroke() * fabs( pLink->GetCPM() ) / 900.0;
+							double CPM = ForceAllCPM == 0 ? pLink->GetCPM() : ForceAllCPM;
+							double Distance = pLink->GetStroke() * fabs( CPM ) / 900.0;
 							double Extension = ( ( m_SimulationStep * INTERMEDIATE_STEPS ) - ( IntermediateStep * Direction ) ) * ( Distance / INTERMEDIATE_STEPS );
 							//Extension = OscillatedDistance( Extension + pLink->GetStartOffset(), pLink->GetStroke() );
 							//Extension -= pLink->GetStartOffset();
@@ -2294,11 +2314,11 @@ bool CSimulator::Reset( void )
 }
 
 bool CSimulator::SimulateStep( CLinkageDoc *pDoc, int StepNumber, bool bAbsoluteStepNumber, int* pInputID, double *pInputPositions,
-                               int InputCount, bool bNoMultiStep )
+                               int InputCount, bool bNoMultiStep, double ForceCPM )
 {
 	if( m_pImplementation == 0 )
 		return false;
-	return m_pImplementation->SimulateStep( pDoc, StepNumber, bAbsoluteStepNumber, pInputID, pInputPositions, InputCount, bNoMultiStep );
+	return m_pImplementation->SimulateStep( pDoc, StepNumber, bAbsoluteStepNumber, pInputID, pInputPositions, InputCount, bNoMultiStep, ForceCPM );
 }
 
 int CSimulator::GetSimulationSteps( CLinkageDoc *pDoc )
@@ -2308,11 +2328,18 @@ int CSimulator::GetSimulationSteps( CLinkageDoc *pDoc )
 	return m_pImplementation->GetSimulationSteps( pDoc );
 }
 
-int CSimulator::GetCycleSteps( CLinkageDoc *pDoc )
+int CSimulator::GetCycleSteps( CLinkageDoc *pDoc, double *pNewCPM )
 {
 	if( m_pImplementation == 0 )
 		return false;
-	return m_pImplementation->GetCycleSteps( pDoc );
+	return m_pImplementation->GetCycleSteps( pDoc, pNewCPM );
+}
+
+CElement * CSimulator::GetCycleElement( CLinkageDoc *pDoc )
+{
+	if( m_pImplementation == 0 )
+		return false;
+	return m_pImplementation->GetCycleElement( pDoc );
 }
 
 bool CSimulator::IsSimulationValid( void )

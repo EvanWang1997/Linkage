@@ -30,10 +30,11 @@ public:
 	CSimulator();
 	~CSimulator();
 
-	bool SimulateStep( CLinkageDoc *pDoc, int StepNumber, bool bAbsoluteStepNumber, int* pInputID, double *pInputPositions, int InputCount, bool bNoMultiStep );
+	bool SimulateStep( CLinkageDoc *pDoc, int StepNumber, bool bAbsoluteStepNumber, int* pInputID, double *pInputPositions, int InputCount, bool bNoMultiStep, double ForceAllCPM );
 	bool Reset( void );
 	int GetSimulationSteps( CLinkageDoc *pDoc );
-	int GetCycleSteps( CLinkageDoc *pDoc );
+	int GetCycleSteps( CLinkageDoc *pDoc, double *pNewCPM = 0 );
+	CElement * GetCycleElement( CLinkageDoc *pDoc );
 	bool IsSimulationValid( void );
 	void Options( bool bUseIncreasedMomentum );
 
