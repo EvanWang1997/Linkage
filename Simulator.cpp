@@ -142,7 +142,7 @@ class CSimulatorImplementation
 				++InputCount;
 			}
 		}
-		return InputCount == 0 ? 0 : pLastInput;
+		return InputCount == 1 ? pLastInput : 0;
 	}
 
 	int GetCycleSteps( CLinkageDoc *pDoc, double *pNewCPM )

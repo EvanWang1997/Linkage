@@ -3574,6 +3574,7 @@ void CLinkageView::StopMechanismSimulate( bool KeepCurrentPositions )
 
 	SetStatusText();
 	m_bSimulating = false;
+	m_SimulationSteps = 0;
 	SetScrollExtents();
 	m_ControlWindow.ShowWindow( SW_HIDE );
 
@@ -8534,6 +8535,8 @@ void CLinkageView::OnSimulateOneCycle()
 	{
 		m_SimulationSteps = 0;
 		m_PauseStep = m_Simulator.GetCycleSteps( pDoc, &m_ForceCPM  );
+		if( m_PauseStep == 0 )
+			return;
 		ConfigureControlWindow( ONECYCLE );
 		StartMechanismSimulate( ONECYCLE );
 	}
@@ -8575,7 +8578,7 @@ void CLinkageView::OnUpdateSimulateOneCycle(CCmdUI *pCmdUI)
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	pCmdUI->Enable( !pDoc->IsEmpty() );
+	pCmdUI->Enable( !pDoc->IsEmpty() && m_Simulator.GetCycleSteps( pDoc, 0 ) != 0 && ( m_SimulationSteps == 0 || m_SimulationSteps == m_PauseStep ) );
 }
 
 void CLinkageView::OnUpdateSimulateForwardBackward(CCmdUI *pCmdUI)
