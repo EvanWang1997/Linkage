@@ -108,7 +108,7 @@ public:
 
 	void HighlightSelected( bool bHighlight ) { m_bSuperHighlight = bHighlight; InvalidateRect( 0 ); }
 
-	enum _SimulationControl { AUTO, GLOBAL, INDIVIDUAL, STEP, ONECYCLE };
+	enum _SimulationControl { AUTO, GLOBAL, INDIVIDUAL, STEP, ONECYCLE, ONECYCLEX };
 
 private:
 	typedef enum _AdjustmentType { ADJUSTMENT_NONE, ADJUSTMENT_ROTATE, ADJUSTMENT_STRETCH } AdjustmentType;
@@ -303,7 +303,7 @@ private:
 	void OnEndPrintPreview( CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewView* pView );
 
 	void StepSimulation( enum _SimulationControl SimulationControl );
-	void StartMechanismSimulate( enum _SimulationControl SimulationControl );
+	void StartMechanismSimulate( enum _SimulationControl SimulationControl, int StartStep = 0 );
 	void StopMechanismSimulate( bool KeepCurrentPositions = false );
 	void OnSimulateStep( int Direction, bool bBig );
 
@@ -544,6 +544,7 @@ public:
 
 	afx_msg void OnSimulatePause();
 	afx_msg void OnSimulateOneCycle();
+	afx_msg void OnSimulateOneCycleX();
 	afx_msg void OnSimulateForward();
 	afx_msg void OnSimulateBackward();
 	afx_msg void OnSimulateForwardBig();

@@ -601,6 +601,7 @@ void CMainFrame::CreateSimulationPanel( CMFCRibbonCategory* pCategory )
 
 	MyCMFCRibbonButtonsGroup *pGroup2 = new MyCMFCRibbonButtonsGroup( 10 );
 	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_ONECYCLE, "", 104, -1 ) );
+	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_ONECYCLEX, "", 105, -1 ) );
 	//pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_PAUSE, "", 70, -1 ) );
 	//pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATE_FORWARD, "", 72, -1 ) );
 	pPanelMechanism->Add( pGroup2 );
@@ -777,15 +778,15 @@ void CMainFrame::InitializeRibbon()
 	CWinAppEx *pAppEx = (CWinAppEx *)AfxGetApp();
 	if( pAppEx != 0 )
 	{
-		CTooltipManager *pTTM = pAppEx->GetTooltipManager();
+		CTooltipManager *pTTM = pAppEx->GetTooltipManager(); // if the app class is not derived from CWinAppEx then this might cause a crash.
 		if( pTTM != 0 )
 		{
 			CMFCToolTipInfo Params;
 
-#if defined( LINKAGE_USE_DIRECT2D )
+#if defined( LINKAGE_USE_DIRECT2D ) // only use the system DPI setting, the one the user can control for scaling, if DPI awareness is built into the program.
 			CWindowDC DC( 0 );
 			int PPI = DC.GetDeviceCaps( LOGPIXELSX );
-			double DPIScale = (double)PPI / 96.0;
+			double DPIScale = (double)PPI / 96.0; // The assumption that all scaling is done from 96 DPI seems correct.
 #else
 			double DPIScale = 1.0;
 #endif

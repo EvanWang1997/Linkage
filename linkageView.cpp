@@ -148,6 +148,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 
 	ON_COMMAND(ID_SIMULATION_PAUSE, &CLinkageView::OnSimulatePause)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_PAUSE, &CLinkageView::OnUpdateSimulatePause)
+	ON_COMMAND(ID_SIMULATION_ONECYCLEX, &CLinkageView::OnSimulateOneCycleX)
+	ON_UPDATE_COMMAND_UI(ID_SIMULATION_ONECYCLEX, &CLinkageView::OnUpdateSimulateOneCycle)
 	ON_COMMAND(ID_SIMULATION_ONECYCLE, &CLinkageView::OnSimulateOneCycle)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_ONECYCLE, &CLinkageView::OnUpdateSimulateOneCycle)
 	ON_COMMAND(ID_SIMULATE_FORWARD, &CLinkageView::OnSimulateForward)
@@ -3515,7 +3517,7 @@ bool CLinkageView::AnyAlwaysManual( void )
 	return false;
 }
 
-void CLinkageView::StartMechanismSimulate( enum _SimulationControl SimulationControl )
+void CLinkageView::StartMechanismSimulate( enum _SimulationControl SimulationControl, int StartStep )
 {
 	SetFocus();
 
@@ -3546,7 +3548,7 @@ void CLinkageView::StartMechanismSimulate( enum _SimulationControl SimulationCon
 	m_Simulator.Options( m_bUseMoreMomentum );
 	m_bSimulating = true;
 	m_SimulationControl = SimulationControl;
-	m_SimulationSteps = 0;
+	m_SimulationSteps = StartStep;
 	SetScrollExtents( false );
 	m_ControlWindow.ShowWindow( m_ControlWindow.GetControlCount() > 0 ? SW_SHOWNORMAL : SW_HIDE );
 	m_TimerID = timeSetEvent( 33, 1, TimeProc, (DWORD_PTR)this, 0 );
@@ -3695,6 +3697,11 @@ void CLinkageView::StepSimulation( enum _SimulationControl SimulationControl )
 		++m_SimulationSteps;
 		bSetToAbsoluteStep = true;
 		ForceCPM = m_ForceCPM;
+	}
+	else if( SimulationControl == ONECYCLEX )
+	{
+		// This is only used to show the end of the simuation after the pause step is reached.
+		return;
 	}
 	else if( SimulationControl == GLOBAL )
 	{
@@ -8554,6 +8561,49 @@ void CLinkageView::OnSimulateOneCycle()
 		ConfigureControlWindow( ONECYCLE );
 		StartMechanismSimulate( ONECYCLE );
 	}
+}
+
+void CLinkageView::OnSimulateOneCycleX()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	if( m_TimerID != 0 )
+		timeKillEvent( m_TimerID );
+
+	pDoc->SelectElement();
+	m_MouseAction = ACTION_NONE;
+
+	if( m_bSimulating )
+	{
+		m_bSimulating = false;
+		m_TimerID = 0;
+		OnMechanismReset();
+	}
+
+	pDoc->Reset( true );
+	m_Simulator.Reset();
+
+	m_PauseStep = m_Simulator.GetCycleSteps( pDoc, &m_ForceCPM  );
+	if( m_PauseStep == 0 )
+		return;
+
+	bool bGoodSimulation = true;
+	int Counter = 0;
+	for( ; Counter <= m_PauseStep && bGoodSimulation; ++Counter )
+		bGoodSimulation = m_Simulator.SimulateStep( pDoc, Counter, true, 0, 0, 0, false, m_ForceCPM );
+
+	DebugItemList.Clear();
+
+	// Start the timer to get the normal sim code to keep running.
+	m_SimulationControl = ONECYCLEX;
+	m_SimulationSteps = m_PauseStep;
+	if( m_TimerID != 0 )
+		timeKillEvent( m_TimerID );
+	SetScrollExtents( false );
+	m_ControlWindow.ShowWindow( m_ControlWindow.GetControlCount() > 0 ? SW_SHOWNORMAL : SW_HIDE );
+	m_bSimulating = true;
+	m_TimerID = timeSetEvent( 33, 1, TimeProc, (DWORD_PTR)this, 0 );
 }
 
 void CLinkageView::OnSimulateStep( int Direction, bool bBig )
