@@ -78,6 +78,8 @@ class CElement
 
 	CNullableColor GetColor( void ) { return m_Color; }
 	void SetColor( CNullableColor Color ) { m_Color = Color; }
+	void SetUserColor( bool bSet ) { m_bUserColor = bSet; }
+	bool IsUserColor( void ) { return m_bUserColor; }
 
 	bool IsLocked( void ) { return m_bLocked; }
 	void SetLocked( bool bLocked ) { m_bLocked = bLocked; }
@@ -116,6 +118,7 @@ class CElement
 	bool m_bMeasurementElement;
 	bool m_bPositionValid; // True until there is some sort of binding problem
 	CNullableColor m_Color;
+	bool m_bUserColor;
 	CElementItem m_FastenedTo;
 	ElementList m_FastenedElements;
 	CControlKnob m_ControlKnob;

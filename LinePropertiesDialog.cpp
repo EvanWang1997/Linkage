@@ -18,6 +18,7 @@ CLinePropertiesDialog::CLinePropertiesDialog(CWnd* pParent /*=NULL*/)
 	, m_FastenTo( _T( "" ) )
 	, m_Polygon(0)
 {
+	m_bColorIsSet = false;
 	m_Color = RGB( 200, 200, 200 );
 }
 
@@ -86,5 +87,6 @@ void CLinePropertiesDialog::OnStnClickedColor()
 	{
 		m_Color = dlg.GetColor();
 		m_ColorControl.SetColor( m_Color );
+		m_bColorIsSet = true;
 	}
 }

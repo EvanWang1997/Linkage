@@ -130,6 +130,8 @@ private:
 	CFont *m_pUsingFont;
 	int m_UsingFontHeight;
 	MMRESULT m_TimerID;
+	HANDLE m_hTimer;
+	HANDLE m_hTimerQueue;
 	bool m_bShowLabels;
 	bool m_bShowAngles;
 	bool m_bSnapOn;
@@ -186,6 +188,10 @@ private:
 	unsigned int m_SelectedViewLayers;
 	bool m_bAllowEdit;
 
+	CBitmap *m_pCachedRenderBitmap;
+	int m_CachedBitmapWidth;
+	int m_CachedBitmapHeight;
+
 	double m_ForceCPM;
 
 	bool m_bPrintFullSize;
@@ -232,6 +238,9 @@ private:
 	void OnButtonUp(UINT nFlags, CPoint point);
 
 	void ShowSelectedElementCoordinates( void );
+
+	void StartTimer( void );
+	void EndTimer( void );
 
 	CRect PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBitmap *pBitmap, CDC *pDC, double ForceScaling, bool bScaleToFit, double MarginScale, double UnscaledUnitSize, bool bForScreen, bool bAntiAlias, bool bActualSize, int PageNumber );
 	int GetPrintPageCount( CDC *pDC, CPrintInfo *pPrintInfo, bool bPrintActualSize );

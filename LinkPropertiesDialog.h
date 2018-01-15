@@ -34,6 +34,7 @@ public:
 	CEdit m_ActuatorCPMControl;
 	double m_ActuatorCPM;
 	bool m_bFastened;
+	bool m_bColorIsSet;
 
 protected:
 

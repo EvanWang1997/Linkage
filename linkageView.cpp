@@ -48,6 +48,8 @@ using namespace Gdiplus;
 
 CDebugItemList DebugItemList;
 
+static const int TimerMinimumResolution = 1; // Milliseconds.
+
 static const double ZOOM_AMOUNT = 1.3;
 
 static const double LINK_INSERT_PIXELS = 40;
@@ -439,6 +441,12 @@ CLinkageView::CLinkageView()
 	m_SimulationSteps = 0;
 	m_PauseStep = -1;
 	m_ForceCPM = 0;
+	m_hTimer = 0;
+	m_hTimerQueue = 0;
+	m_pCachedRenderBitmap = 0;
+	m_CachedBitmapWidth = 0;
+	m_CachedBitmapHeight = 0;
+
 
 	m_bRequestAbort = false;
 	m_bProcessingVideoThread = false;
@@ -528,7 +536,7 @@ CLinkageView::CLinkageView()
 	GdiplusStartupInput gdiplusStartupInput;
 	GdiplusStartup( &m_gdiplusToken, &gdiplusStartupInput, 0 );
 
-	timeBeginPeriod( 1 );
+	timeBeginPeriod( TimerMinimumResolution );
 	m_TimerID = 0;
 }
 
@@ -968,7 +976,7 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 	if( pDrawRect != 0 )
 		m_DrawingRect = *pDrawRect;
 
-	m_bShowSelection = bForScreen;
+	m_bShowSelection = bForScreen && !m_bSimulating && m_bAllowEdit;
 
 	m_Zoom = 1.0;
 	m_ScrollPosition.SetPoint( 0, 0 );
@@ -1063,9 +1071,23 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 		if( pBitmap != 0 && pDC != 0 )
 		{
 			Renderer.CreateCompatibleDC( pDC, &m_DrawingRect );
-			pBitmap->CreateCompatibleBitmap( pDC, (int)( m_DrawingRect.Width() * ScalingValue ), (int)( m_DrawingRect.Height() * ScalingValue ) );
-			Renderer.SelectObject( pBitmap );
-			Renderer.PatBlt( 0, 0, (int)( m_DrawingRect.Width() * ScalingValue ), (int)( m_DrawingRect.Height() * ScalingValue ), WHITENESS );
+
+			int NeedBitmapWidth = (int)( m_DrawingRect.Width() * ScalingValue );
+			int NeedBitmapHeight = (int)( m_DrawingRect.Height() * ScalingValue );
+			if( m_pCachedRenderBitmap == 0 || m_CachedBitmapWidth != NeedBitmapWidth || m_CachedBitmapHeight != NeedBitmapHeight )
+			{
+				if( m_pCachedRenderBitmap != 0 )
+					delete m_pCachedRenderBitmap;
+
+				m_pCachedRenderBitmap = new CBitmap;
+				m_pCachedRenderBitmap->CreateCompatibleBitmap( pDC, (int)( m_DrawingRect.Width() * ScalingValue ), (int)( m_DrawingRect.Height() * ScalingValue ) );
+				m_CachedBitmapWidth = NeedBitmapWidth;
+				m_CachedBitmapHeight = NeedBitmapHeight;
+			}
+
+			//pBitmap->CreateCompatibleBitmap( pDC, (int)( m_DrawingRect.Width() * ScalingValue ), (int)( m_DrawingRect.Height() * ScalingValue ) );
+			Renderer.SelectObject( m_pCachedRenderBitmap );
+			//Renderer.PatBlt( 0, 0, (int)( m_DrawingRect.Width() * ScalingValue ), (int)( m_DrawingRect.Height() * ScalingValue ), WHITENESS );
 		}
 
 		Renderer.SetOffset( 0, 0 );
@@ -2347,6 +2369,13 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 
 	Renderer.BeginDraw();
 
+	if( !pDC->IsPrinting() )
+	{
+		CFRect FillRect( 0, 0, m_DrawingRect.Width(), m_DrawingRect.Height()  );
+		CBrush WhiteBrush( RGB( 255, 255, 255 ) );
+		Renderer.FillRect( &FillRect, &WhiteBrush );
+	}
+
 	if( m_pBackgroundBitmap != 0 )
 	{
 		CFRect Rect( -(m_pBackgroundBitmap->width/2), -(m_pBackgroundBitmap->height/2), -(m_pBackgroundBitmap->width/2) + m_pBackgroundBitmap->width, -(m_pBackgroundBitmap->height/2) + m_pBackgroundBitmap->height );
@@ -3357,6 +3386,13 @@ void CALLBACK TimeProc( UINT uID, UINT uMsg, DWORD_PTR dwUser, DWORD_PTR dw1, DW
 	pView->SendMessage( WM_TIMER, 0, 0 );
 }
 
+void CALLBACK TimerQueueCallback( void *pParameter, BOOLEAN bTimerOrWaitFired )
+{
+	TickCount = GetTickCount();
+	CLinkageView* pView = (CLinkageView*)pParameter;
+	pView->SendMessage( WM_TIMER, 0, 0 );
+}
+
 bool CLinkageView::InitializeVideoFile( const char *pVideoFile, const char *pCompressorString )
 {
 	CString FCC = "CVID";
@@ -3517,6 +3553,11 @@ bool CLinkageView::AnyAlwaysManual( void )
 	return false;
 }
 
+DWORD TimeArray[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+int TimerArrayIndex = 1;
+DWORD LastTickTimeArray = 0;
+DWORD FirstTimeArrayTick = 0;
+
 void CLinkageView::StartMechanismSimulate( enum _SimulationControl SimulationControl, int StartStep )
 {
 	SetFocus();
@@ -3530,7 +3571,7 @@ void CLinkageView::StartMechanismSimulate( enum _SimulationControl SimulationCon
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	pDoc->SelectElement();
+	//pDoc->SelectElement();
 	InvalidateRect( 0 );
 	m_MouseAction = ACTION_NONE;
 
@@ -3551,6 +3592,14 @@ void CLinkageView::StartMechanismSimulate( enum _SimulationControl SimulationCon
 	m_SimulationSteps = StartStep;
 	SetScrollExtents( false );
 	m_ControlWindow.ShowWindow( m_ControlWindow.GetControlCount() > 0 ? SW_SHOWNORMAL : SW_HIDE );
+
+	TimeArray[0] = GetTickCount();
+	LastTickTimeArray = GetTickCount();
+	FirstTimeArrayTick = GetTickCount();
+	TimerArrayIndex = 0;
+
+	//StartTimer();
+
 	m_TimerID = timeSetEvent( 33, 1, TimeProc, (DWORD_PTR)this, 0 );
 }
 
@@ -3569,7 +3618,7 @@ void CLinkageView::StopMechanismSimulate( bool KeepCurrentPositions )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	pDoc->SelectElement();
+	//pDoc->SelectElement();
 	InvalidateRect( 0 );
 	m_MouseAction = ACTION_NONE;
 
@@ -3740,6 +3789,22 @@ void CLinkageView::OnTimer(UINT_PTR nIDEvent)
 	if( !m_bSimulating )
 		return;
 
+	DWORD Temp = GetTickCount();
+	if( TimerArrayIndex < 9  )
+	{
+		TimeArray[TimerArrayIndex] = Temp - LastTickTimeArray;
+		LastTickTimeArray = Temp;
+		++TimerArrayIndex;
+	}
+	else
+	{
+		FirstTimeArrayTick = Temp - FirstTimeArrayTick;
+		TimeArray[9] = 0;
+		CString Derp;
+		Derp.Format( "%u", FirstTimeArrayTick );
+		//AfxMessageBox( Derp );
+	}
+
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
@@ -3795,11 +3860,13 @@ void CLinkageView::OnTimer(UINT_PTR nIDEvent)
 	if( !m_bSimulating )
 		return;
 
-	TickCount = GetTickCount() - TickCount;
-	if( TickCount > 32 )
-		TickCount = 32;
+	DWORD Derf = GetTickCount();
+	DWORD Adjust = Derf - TickCount;
+	if( Adjust > 32 )
+		Adjust = 32;
+	TickCount = Derf;
 
-	m_TimerID = timeSetEvent( 33 - TickCount, 1, TimeProc, (DWORD_PTR)this, 0 );
+	m_TimerID = timeSetEvent( 33 - Adjust, 1, TimeProc, (DWORD_PTR)this, 0 );
 }
 
 void CLinkageView::OnUpdateMechanismReset(CCmdUI *pCmdUI)
@@ -5095,7 +5162,7 @@ void CLinkageView::OnViewParts()
 	{
 		CLinkageDoc* pDoc = GetDocument();
 		ASSERT_VALID(pDoc);
-		pDoc->SelectElement();
+		//pDoc->SelectElement();
 	}
 	GetSetViewSpecificDimensionVisbility( false );
 	SaveSettings();
@@ -5432,7 +5499,7 @@ BOOL CLinkageView::OnPreparePrinting(CPrintInfo* pInfo)
 void CLinkageView::OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo)
 {
 	if( m_bSimulating )
-		OnMechanismSimulate();
+		StopMechanismSimulate();
 }
 
 void CLinkageView::SetZoom( double Zoom )
@@ -5471,7 +5538,7 @@ void CLinkageView::OnMechanismQuicksim()
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	pDoc->SelectElement();
+	//pDoc->SelectElement();
 	InvalidateRect( 0 );
 	m_MouseAction = ACTION_NONE;
 
@@ -7706,8 +7773,8 @@ void CLinkageView::OnEditUndo()
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	pDoc->Undo();
-	if( m_bShowParts )
-		pDoc->SelectElement();
+	//if( m_bShowParts )
+		//pDoc->SelectElement();
 	UpdateForDocumentChange();
 }
 
@@ -7975,6 +8042,8 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 		pConnector->SetAlwaysManual( Dialog.m_bAlwaysManual );
 		pConnector->SetName( Dialog.m_Name );
 		pConnector->SetColor( Dialog.m_Color );
+		if( Dialog.m_bColorIsSet )
+			pConnector->SetUserColor( true );
 		pConnector->SetStartOffset( fabs( fmod( Dialog.m_StartOffset, pConnector->GetLimitAngle() * 2 ) ) );
 		pConnector->SetLocked( Dialog.m_bLocked == TRUE );
 
@@ -8138,7 +8207,7 @@ bool CLinkageView::LinkProperties( CLink *pLink )
 						pSelectedLink->SetLineSize( Dialog.m_LineSize );
 					if( Dialog.m_bSolid != ( OriginalIsSolid ? TRUE : FALSE ) )
 						pSelectedLink->SetSolid( Dialog.m_bSolid != 0 );
-					if( Dialog.m_Color != OriginalColor )
+					if( Dialog.m_bColorIsSet )
 						pSelectedLink->SetColor( Dialog.m_Color );
 				}
 			}
@@ -8154,6 +8223,9 @@ bool CLinkageView::LinkProperties( CLink *pLink )
 			pLink->SetName( Dialog.m_Name );
 			pLink->SetStroke( Dialog.m_ThrowDistance / pDoc->GetUnitScale() );
 			pLink->SetColor( Dialog.m_Color );
+			if( Dialog.m_bColorIsSet )
+				pLink->SetUserColor( true );
+
 			pLink->SetStartOffset( fmod( fabs( Dialog.m_StartOffset ), pLink->GetStroke() * 2 ) / pDoc->GetUnitScale() );
 		}
 
@@ -8525,6 +8597,7 @@ void CLinkageView::OnEndPrintPreview( CDC* pDC, CPrintInfo* pInfo, POINT point, 
 void CLinkageView::OnSimulateInteractive()
 {
 	ConfigureControlWindow( INDIVIDUAL );
+
 	StartMechanismSimulate( INDIVIDUAL );
 }
 
@@ -8571,7 +8644,7 @@ void CLinkageView::OnSimulateOneCycleX()
 	if( m_TimerID != 0 )
 		timeKillEvent( m_TimerID );
 
-	pDoc->SelectElement();
+	//pDoc->SelectElement();
 	m_MouseAction = ACTION_NONE;
 
 	if( m_bSimulating )
@@ -8604,6 +8677,24 @@ void CLinkageView::OnSimulateOneCycleX()
 	m_ControlWindow.ShowWindow( m_ControlWindow.GetControlCount() > 0 ? SW_SHOWNORMAL : SW_HIDE );
 	m_bSimulating = true;
 	m_TimerID = timeSetEvent( 33, 1, TimeProc, (DWORD_PTR)this, 0 );
+}
+
+void CLinkageView::StartTimer( void )
+{
+	timeBeginPeriod( TimerMinimumResolution );
+
+	// Create the timer queue.
+	m_hTimerQueue = CreateTimerQueue();
+
+	CreateTimerQueueTimer( &m_hTimer, m_hTimerQueue, TimerQueueCallback, (PVOID)this , 5, 5, 0 );
+}
+
+void CLinkageView::EndTimer( void )
+{
+	DeleteTimerQueueTimer ( m_hTimerQueue, m_hTimer, 0 );
+	DeleteTimerQueue( m_hTimerQueue );
+
+	timeEndPeriod( TimerMinimumResolution );
 }
 
 void CLinkageView::OnSimulateStep( int Direction, bool bBig )
@@ -9403,7 +9494,7 @@ void CLinkageView::OnSelectSample (UINT ID )
 		if( ID == GalleryData.GetCommandID( Counter ) )
 		{
 			if( m_bSimulating )
-				StopSimulation();
+				StopMechanismSimulate();
 			pDoc->SelectSample( Counter );
 			break;
 		}

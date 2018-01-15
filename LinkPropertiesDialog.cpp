@@ -24,6 +24,7 @@ CLinkPropertiesDialog::CLinkPropertiesDialog(CWnd* pParent /*=NULL*/)
 	, m_bLocked(FALSE)
 	, m_StartOffset(0)
 {
+	m_bColorIsSet = false;
 	m_Color = RGB( 200, 200, 200 );
 }
 
@@ -129,5 +130,6 @@ void CLinkPropertiesDialog::OnStnClickedColor()
 	{
 		m_Color = dlg.GetColor();
 		m_ColorControl.SetColor( m_Color );
+		m_bColorIsSet = true;
 	}
 }

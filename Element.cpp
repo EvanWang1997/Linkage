@@ -11,6 +11,7 @@ CElement::CElement(void)
 	m_FastenedTo = CElementItem();
 	m_bLocked = false;
 	m_LineSize = 1;
+	m_bUserColor = false;
 }
 
 CElement::~CElement(void)
@@ -34,6 +35,7 @@ CElement::CElement( const CElement &ExistingElement )
 	m_bMeasurementElement = ExistingElement.m_bMeasurementElement;
 	m_bPositionValid = ExistingElement.m_bPositionValid;
 	m_Color = ExistingElement.m_Color;
+	m_bUserColor = ExistingElement.m_bUserColor;
 	m_FastenedTo = CElementItem();
 	m_bLocked = ExistingElement.m_bLocked;
 	m_LineSize = ExistingElement.m_LineSize;

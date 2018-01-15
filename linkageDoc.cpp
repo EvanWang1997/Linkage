@@ -900,7 +900,7 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "fastenconnector", pConnector->GetFastenedToConnector() == 0 ? 0 : pConnector->GetFastenedToConnector()->GetIdentifier(), bIncludeFastenToCon );
 		AppendXMLAttribute( TempString, "slideradius", pConnector->GetSlideRadius(), pConnector->GetSlideRadius() != 0 && pConnector->IsSlider() );
 		AppendXMLAttribute( TempString, "color", (unsigned int)(COLORREF)pConnector->GetColor() );
-		AppendXMLAttribute( TempString, "usercolor", pConnector->GetColor().IsSet() );
+		AppendXMLAttribute( TempString, "usercolor", pConnector->IsUserColor() );
 
 		TempString += bSlideLimits ? ">" : "/>";
 
@@ -970,7 +970,7 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "fastenconnector", pLink->GetFastenedToConnector() == 0 ? 0 : pLink->GetFastenedToConnector()->GetIdentifier(), pLink->GetFastenedToConnector() != 0 );
 		AppendXMLAttribute( TempString, "gear", pLink->IsGear(), pLink->IsGear() );
 		AppendXMLAttribute( TempString, "color", (unsigned int)(COLORREF)pLink->GetColor() );
-		AppendXMLAttribute( TempString, "usercolor", pLink->GetColor().IsSet() );
+		AppendXMLAttribute( TempString, "usercolor", pLink->IsUserColor() );
 		TempString += ">";
 
 //		TempString.Format( "\t<Link id=\"%d\" selected=\"%s\" name=\"%s\" layer=\"%d\" linesize=\"%d\" solid=\"%s\" actuator=\"%s\" alwaysmanual=\"%s\" "
@@ -2316,7 +2316,7 @@ void CLinkageDoc::Reset( bool bClearMotionPath, bool KeepCurrentPositions )
 	if( KeepCurrentPositions )
 		PushUndo();
 
-	ClearSelection();
+	//ClearSelection();
 
 	POSITION Position;
 

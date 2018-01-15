@@ -35,6 +35,7 @@ CConnectorPropertiesDialog::CConnectorPropertiesDialog( CWnd* pParent /*=NULL*/ 
 	m_bAnchor = false;
 	m_bInput = false;
 	m_bIsSlider = false;
+	m_bColorIsSet = false;
 	m_Color = RGB( 200, 200, 200 );
 }
 
@@ -172,5 +173,6 @@ void CConnectorPropertiesDialog::OnStnClickedColor()
 	{
 		m_Color = dlg.GetColor();
 		m_ColorControl.SetColor( m_Color );
+		m_bColorIsSet = true;
 	}
 }

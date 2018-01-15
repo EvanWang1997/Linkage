@@ -71,4 +71,5 @@ public:
 	double m_StartOffset;
 	CButton m_LockControl;
 	BOOL m_bLocked;
+	bool m_bColorIsSet;
 };

@@ -47,4 +47,5 @@ public:
 	CButton m_PolygonControl;
 	CButton m_PolylineButton;
 	int m_Polygon;
+	bool m_bColorIsSet;
 };
