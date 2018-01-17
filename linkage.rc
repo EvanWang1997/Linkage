@@ -9,8 +9,7 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -275,8 +274,8 @@ BEGIN
     "C",            ID_EDIT_CONNECT,        VIRTKEY, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "D",            ID_VIEW_DIMENSIONS,     VIRTKEY, NOINVERT
-	"E",            ID_EDIT_SELECTLINK,     VIRTKEY, NOINVERT
-	"F",            ID_EDIT_FASTEN,         VIRTKEY, NOINVERT
+    "E",            ID_EDIT_SELECTLINK,     VIRTKEY, NOINVERT
+    "F",            ID_EDIT_FASTEN,         VIRTKEY, NOINVERT
     "G",            ID_EDIT_MAKEANCHOR,     VIRTKEY, NOINVERT
     "J",            ID_EDIT_JOIN,           VIRTKEY, NOINVERT
     "K",            ID_EDIT_LOCK,           VIRTKEY, NOINVERT
@@ -592,8 +591,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,7,6,0
- PRODUCTVERSION 3,7,6,0
+ FILEVERSION 3,7,7,0
+ PRODUCTVERSION 3,7,7,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -609,12 +608,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.7.6.0"
+            VALUE "FileVersion", "3.7.7.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2018 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.7.6.0"
+            VALUE "ProductVersion", "3.7.7.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -878,6 +877,9 @@ BEGIN
     ID_VIEW_PARTS           "Display the mechanism as separate parts.\nParts List"
     IDS_RIBBON_VIEW_USERGRID "Edit Grid"
     ID_VIEW_EDITGRID        "Select the grid type and enter grid spacing.\nEdit Grid"
+    IDS_SAMPLE_LEVERELBOW   "Sirling Engine Piston Mechanism.\nLever Elbow"
+    IDS_SAMPLE_ROSSYOKE     "Steam Engine Mechanism Adapted By Ross for Stirling Engines.\nRoss Yoke"
+    IDS_SAMPLE_GEARRHOMBIC  "Rhombic Drive Mechanism for Coaxial Cylinder Engines.\nRhombic Drive"
 END
 
 STRINGTABLE
@@ -906,6 +908,8 @@ BEGIN
     IDS_RIBBON_TRANSPARENCY "Transparency"
     IDS_RIBBON_APPEARANCE   "Appearance"
     IDS_RIBBON_BACKGROUND_DELETE "&Remove"
+    ID_SIMULATION_ONECYCLE  "Run one cycle of the simulation and pause.\nRun One Cycle"
+    ID_SIMULATION_ONECYCLEX "Run the simulation and only show the end of the cycle.\nJump One Cycle"
 END
 
 STRINGTABLE
@@ -921,12 +925,11 @@ BEGIN
                             "Applified rocking motion mechanism.\nAmplified Rocking"
     IDS_SAMPLE_STEPHENSON   "Stephenson valve gear.\nStephenson Valve Gear"
     IDS_SAMPLE_PEAUCELLIER  "Peaucellier straight link mechanism.\nPeaucellier Mechanism"
+END
 
-	IDS_SAMPLE_GEARRHOMBIC	"Rhombic Drive Mechanism for Coaxial Cylinder Engines.\nRhombic Drive"
-	IDS_SAMPLE_LEVERELBOW	"Sirling Engine Piston Mechanism.\nLever Elbow"
-	IDS_SAMPLE_ROSSYOKE		"Steam Engine Mechanism Adapted By Ross for Stirling Engines.\nRoss Yoke"
-	IDS_SAMPLE_TRAMMEL		"Trammel of Archimedes.\nTrammel of Archimedes"
-
+STRINGTABLE
+BEGIN
+    IDS_SAMPLE_TRAMMEL      "Trammel of Archimedes.\nTrammel of Archimedes"
 END
 
 STRINGTABLE
@@ -956,9 +959,7 @@ STRINGTABLE
 BEGIN
     IDS_RIBBON_PAUSE        "Pause"
     ID_SIMULATION_PAUSE     "Pause the simulation or start it in a paused state.\nPause Simulation"
-	ID_SIMULATION_ONECYCLE	"Run one cycle of the simulation and pause.\nRun One Cycle"
-	ID_SIMULATION_ONECYCLEX	"Run the simulation and only show the end of the cycle.\nJump One Cycle"
-	IDS_RIBBON_FORWARD      "Forward"
+    IDS_RIBBON_FORWARD      "Forward"
     ID_SIMULATE_FORWARD     "Step the simulation forward 0.033 (1/30) seconds.\nStep Forward"
     IDS_RIBBON_BACKWARD     "Backward"
     ID_SIMULATE_BACKWARD    "Step the simulation backwards 0.033 (1/30) seconds.\nStep Backward"
@@ -1398,11 +1399,14 @@ BEGIN
     ID_SAMPLE_ORBITGEARS    "Planet and Moon Orbit Meachanism."
     ID_SAMPLE_OSCILLATORGEARS "Applified Rocking Motion Mechanism."
     ID_SAMPLE_STEPHENSON    "Stephenson Valve Gear Mechanism."
-	ID_SAMPLE_GEARRHOMBIC	"Rhombic Drive Mechanism for Coaxial Cylinder Engines."
-	ID_SAMPLE_LEVERELBOW	"Sirling Engine Piston Mechanism."
-	ID_SAMPLE_ROSSYOKE		"Steam Engine Mechanism Adapted By Ross for Stirling Engines."
-	ID_SAMPLE_TRAMMEL		"Trammel of Archimedes."
+    ID_SAMPLE_LEVERELBOW    "Sirling Engine Piston Mechanism."
+    ID_SAMPLE_ROSSYOKE      "Steam Engine Mechanism Adapted By Ross for Stirling Engines."
+END
 
+STRINGTABLE
+BEGIN
+    ID_SAMPLE_GEARRHOMBIC   "Rhombic Drive Mechanism for Coaxial Cylinder Engines."
+    ID_SAMPLE_TRAMMEL       "Trammel of Archimedes."
 END
 
 STRINGTABLE
