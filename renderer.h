@@ -33,6 +33,8 @@ class CRenderer// : public CDC
 	void BeginDraw( void );
 	void EndDraw( void );
 
+	void Clear( DWORD dwRop = WHITENESS );
+
 	//CDC *GetScreenDevice( void );
 
 	void Attach( HDC hDeviceContext );
@@ -45,6 +47,7 @@ class CRenderer// : public CDC
 	void SetOffset( CFPoint &Offset );
 	void SetOffset( double dx, double dy );
 	void SetScale( double Scale );
+	void SetSize( double cx, double cy );
 
 	int GetYOrientation( void );
 	//bool IsPlotter( void );

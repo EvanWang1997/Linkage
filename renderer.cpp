@@ -100,6 +100,7 @@ class CRendererImplementation
 	CFPoint m_ScrollPosition;
 	double m_Scale;
 	double m_DPIScale;
+	CFPoint m_Size;
 
 	CRendererImplementation()
 	{
@@ -109,6 +110,12 @@ class CRendererImplementation
 	}
 
 	virtual ~CRendererImplementation() {}
+
+	void SetSize( double cx, double cy )
+	{
+		m_Size.x = cx;
+		m_Size.y = cy;
+	}
 
 	double Scale( double &length )
 	{
@@ -172,6 +179,7 @@ class CRendererImplementation
 		return NewRect;
 	}
 
+	virtual void Clear( DWORD dwRop ) {}
 	virtual int GetYOrientation( void ) = 0;
 	virtual void SaveDXF( const char *pFileName ) = 0;
 	virtual bool IsPrinting( void ) = 0;
@@ -482,6 +490,13 @@ class CGDIRenderer : public CRendererImplementation
 			delete m_pDC;
 	}
 
+	virtual void Clear( DWORD dwRop )
+	{
+		if( dwRop != WHITENESS ) // Only one useful value handled right now.
+			return;
+		PatBlt( 0, 0, (int)( m_Size.x * m_Scale ), (int)( m_Size.y * m_Scale ), dwRop );
+	}
+
 	int GetYOrientation( void )
 	{
 		return -1;
@@ -500,7 +515,7 @@ class CGDIRenderer : public CRendererImplementation
 		return m_pDC->SetTextAlign( nFlags );
 	}
 
-	virtual void FillRect( LPCRECT lpRect, CBrush* pBrush )
+	void FillRect( LPCRECT lpRect, CBrush* pBrush )
 	{
 		if( m_pDC == 0 )
 			return;
@@ -2709,6 +2724,16 @@ class CD2DRenderer : public CRendererImplementation
 		FillRgn( Points, 4, pBrush );
 	}
 
+	void Clear( DWORD dwRop )
+	{
+		if( dwRop != WHITENESS ) // Only one useful value handled right now.
+			return;
+
+		CFRect FillingRect( 0, 0, m_Size.x * m_Scale, m_Size.y * m_Scale );
+		CBrush WhiteBrush( RGB( 255, 255, 255 ) );
+		FillRect( &FillingRect, &WhiteBrush );
+	}
+
 	void SetUpCustomPen( void )
 	{
 		if( m_pCustomStroke != 0 )
@@ -3085,6 +3110,18 @@ bool CRenderer::DrawRect( const CFRect &Rect )
 	return m_pImplementation->DrawRect( Rect );
 }
 
+void CRenderer::Clear( DWORD dwRop )
+{
+	if( m_pImplementation == 0 )
+		return;
+
+	// None of the renderers allow the Clear function to do anything when printing.
+	if( IsPrinting() )
+		return;
+
+	return m_pImplementation->Clear( dwRop );
+}
+
 void CRenderer::FillRect( CFRect* pRect, CBrush* pBrush )
 {
 	if( m_pImplementation == 0 )
@@ -3422,6 +3459,14 @@ CRenderer::CRenderer( enum _RenderDestination RendererDestination )
 		default:
 			m_pImplementation = new CNullRenderer( false );
 	}
+}
+
+void CRenderer::SetSize( double cx, double cy )
+{
+	if( m_pImplementation == 0 )
+		return;
+
+	return m_pImplementation->SetSize( cx, cy );
 }
 
 CRendererBitmap * CRenderer::LoadRendererBitmapFromMemory( const unsigned char *pData, size_t Length ) 

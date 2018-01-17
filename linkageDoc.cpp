@@ -1752,9 +1752,92 @@ bool CLinkageDoc::MoveCapturedController( CFPoint Point )
 	return true;
 }
 
-bool CLinkageDoc::CheckForSliderSnap( CConnector *pConnector, CFPoint &Adjustment )
-{
-	return true;
+bool CLinkageDoc::CheckForSliderElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment )
+{	
+	if( !pConnector->IsSlider() )
+		return false;
+
+	bool bSnapItem = false;
+	CFPoint ConnectorPoint;
+	if( !FixupSliderLocation( pConnector, ConnectorPoint ) )
+		return false;
+
+	/*
+	 * A starting limit on how far a snap point can be from the connector point.
+	 * if a snap point is within the horizontal snap distance on a curved slider
+	 * path, it could still be a long way off vertically, and vice-versa. This
+	 * attempts to limit that possible error later. It is adjusted to the 
+	 * closest snap point is used if multiple qualify.
+	 */ 
+	double FoundDistance = SnapDistance * 1.41421356237;
+	POSITION Position2 = m_Connectors.GetHeadPosition();
+	while( Position2 != 0 )
+	{
+		CConnector* pCheckConnector = m_Connectors.GetNext( Position2 );
+		if( pCheckConnector == 0 || ( pConnector->GetLayers() & m_EditLayers ) == 0 )
+			continue;
+
+		if( pCheckConnector->IsSelected() || pCheckConnector->IsLinkSelected() )
+			continue;
+
+		/*
+		* This is a snap to the intersection of the slider track and the horizontal position
+		* of the other connector, or to the intersection of the track and the vertical position
+		* of the other connector.
+		*/
+
+		CFPoint Intersect[4];
+		bool bIntersect[4] = { false, false, false, false };
+
+		CFPoint CheckPoint = pCheckConnector->GetOriginalPoint();
+		CFLine HorizontalLine( CheckPoint.x - 1, CheckPoint.y, CheckPoint.x + 1, CheckPoint.y );
+		CFLine VerticalLine( CheckPoint.x, CheckPoint.y - 1, CheckPoint.x, CheckPoint.y + 1 );
+
+		if( pConnector->GetSlideRadius() != 0 )
+		{
+			CFArc Arc;
+			if( pConnector->GetSliderArc( Arc ) )
+			{
+				Intersects( HorizontalLine, Arc, Intersect[0], Intersect[1], bIntersect[0], bIntersect[1], true, true );
+				bIntersect[0] = bIntersect[0] && Arc.PointOnArc( Intersect[0] );
+				bIntersect[1] = bIntersect[1] && Arc.PointOnArc( Intersect[1] );
+				Intersects( VerticalLine, Arc, Intersect[2], Intersect[3], bIntersect[2], bIntersect[3], true, true );
+				bIntersect[2] = bIntersect[2] && Arc.PointOnArc( Intersect[2] );
+				bIntersect[3] = bIntersect[3] && Arc.PointOnArc( Intersect[3] );
+			}
+		}
+		else
+		{
+			CFPoint Point1;
+			CFPoint Point2;
+			if( pConnector->GetSlideLimits( Point1, Point2 ) )
+			{
+				CFLine Limit( Point1, Point2 );
+				bIntersect[0] = Intersects( HorizontalLine, Limit, Intersect[0] );
+				bIntersect[2] = Intersects( VerticalLine, Limit, Intersect[2] );
+			}
+		}
+
+		double TestDistance = 0;
+		double AbsDistance = 0;
+		for( int Counter = 0; Counter < 4; ++Counter )
+		{
+			AbsDistance = Distance( ConnectorPoint, Intersect[Counter] );
+			if( Counter < 2 )
+				TestDistance = fabs( ConnectorPoint.y - CheckPoint.y );
+			else
+				TestDistance = fabs( ConnectorPoint.x - CheckPoint.x );
+			if( bIntersect[Counter] && TestDistance < SnapDistance && AbsDistance < FoundDistance )
+			{
+				bSnapItem = true;
+				Adjustment = Intersect[Counter] - ConnectorPoint;
+				m_SnapLine[0].SetLine( CheckPoint, Intersect[Counter] );
+				ReferencePoint = Intersect[Counter];
+				FoundDistance = Distance( ConnectorPoint, Intersect[Counter] );
+			}
+		}
+	}
+	return bSnapItem;
 }
 
 bool CLinkageDoc::CheckForElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment )
@@ -1894,11 +1977,17 @@ CFPoint CLinkageDoc::CheckForSnap( ConnectorList &SelectedConnectors, double Sna
 				continue;
 
 			if( pConnector->IsSlider() )
-				continue;
-
-			bSnapItem = CheckForElementSnap( pConnector, SnapDistance, ReferencePoint, Adjustment );
-			if( bSnapItem )
-				break;
+			{
+				bSnapItem = CheckForSliderElementSnap( pConnector, SnapDistance, ReferencePoint, Adjustment );
+				if( bSnapItem )
+					break;	
+			}
+			else
+			{
+				bSnapItem = CheckForElementSnap( pConnector, SnapDistance, ReferencePoint, Adjustment );
+				if( bSnapItem )
+					break;	
+			}		
 		}
 	}
 
@@ -2133,6 +2222,18 @@ bool CLinkageDoc::MoveSelected( CFPoint Offset )
 
 bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector )
 {
+	CFPoint NewPoint;
+	if( FixupSliderLocation( pConnector, NewPoint ) )
+	{
+		pConnector->SetIntermediatePoint( NewPoint );
+		return true;
+	}
+
+	return false;
+}
+
+bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector, CFPoint &NewPoint )
+{
 	CConnector *pStart;
 	CConnector *pEnd;
 	pConnector->GetSlideLimits( pStart, pEnd );
@@ -2151,7 +2252,7 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector )
 			double DistanceRatio = pStart->GetOriginalPoint().DistanceToPoint( pConnector->GetOriginalPoint() ) / pStart->GetOriginalPoint().DistanceToPoint( pEnd->GetOriginalPoint() );
 			CFLine Line( pStart->GetPoint(), pEnd->GetPoint() );
 			Line.SetLength( Line.GetLength() * DistanceRatio );
-			pConnector->SetIntermediatePoint( Line.GetEnd() );
+			NewPoint = Line.GetEnd();
 		}
 		else
 		{
@@ -2173,12 +2274,12 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector )
 
 			double NewAngleSpan = TheArc.AngleSpan();
 			double NewAngle = OriginalAngle * ( NewAngleSpan / OriginalAngleSpan );
-			
 
-			CFPoint NewPoint( TheArc.GetStart() );
-			NewPoint.RotateAround( TheArc.GetCenter(), NewAngle * 2 ); // I have no idea why *2 is needed here, but it works.
 
-			pConnector->SetIntermediatePoint( NewPoint );
+			CFPoint RotatedPoint( TheArc.GetStart() );
+			RotatedPoint.RotateAround( TheArc.GetCenter(), NewAngle * 2 ); // I have no idea why *2 is needed here, but it works.
+
+			NewPoint = RotatedPoint;
 		}
 	}
 	else //if( pConnector->IsSelected() || pConnector->IsLinkSelected() )
@@ -2190,7 +2291,7 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector )
 		{
 			CFLine TempLine( pStart->GetPoint(), pEnd->GetPoint() );
 			ConnectorPoint.SnapToLine( TempLine, true );
-			pConnector->SetIntermediatePoint( ConnectorPoint );
+			NewPoint = ConnectorPoint;
 		}
 		else
 		{
@@ -2198,12 +2299,13 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector )
 			if( !pConnector->GetSliderArc( TheArc ) )
 				return false;
 			ConnectorPoint.SnapToArc( TheArc );
-			pConnector->SetIntermediatePoint( ConnectorPoint );
+			NewPoint = ConnectorPoint;
 		}
 	}
 
 	return true;
 }
+
 
 bool CLinkageDoc::FixupSliderLocations( void )
 {

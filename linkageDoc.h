@@ -101,7 +101,7 @@ public:
 	CFPoint CheckForSnap( ConnectorList &SelectedConnectors, double SnapDistance, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, CFPoint &ReferencePoint );
 	bool CheckForGridSnap( CConnector *pConnector, double SnapDistance, double xGrid, double yGrid, CFPoint &ReferencePoint, CFPoint &Adjustment );
 	bool CheckForElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment );
-	bool CheckForSliderSnap( CConnector *pConnector, CFPoint &Adjustment );
+	bool CheckForSliderElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment );
 	bool MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, double SnapDistance, CFPoint &ReferencePoint );
 	bool MoveSelected( CFPoint Offset );
 	CString GetSelectedElementCoordinates( void );
@@ -112,6 +112,7 @@ public:
 	bool MoveCapturedController( CFPoint Point );
 	bool FixupSliderLocations( void );
 	bool FixupGearConnections( void );
+	bool FixupSliderLocation( CConnector *pConnector, CFPoint &NewPoint );
 	bool FixupSliderLocation( CConnector *pConnector );
 	bool FinishChangeSelected( void );
 	bool StartChangeSelected( void );

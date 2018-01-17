@@ -1021,6 +1021,7 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 		if( pDrawRect == 0 )
 			m_DrawingRect.SetRect( 0, 0, (int)( cx * ScaleFactor ), (int)( cy * ScaleFactor ) );
 
+		Renderer.SetSize( cx, cy );
 		Renderer.SetScale( DETAILSCALE );
 
 		CFRect Area = GetDocumentArea();
@@ -1092,6 +1093,9 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 
 		Renderer.SetOffset( 0, 0 );
 		Renderer.SetScale( ScalingValue );
+		Renderer.SetSize( m_DrawingRect.Width(), m_DrawingRect.Height() );
+		Renderer.BeginDraw();
+		Renderer.Clear();
 
 		if( bScaleToFit )
 		{
@@ -2364,17 +2368,18 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 	 * when saving a video animation of the mechanism.
 	 */
 
+	// Just a note for later experimentation...
+	// The 8th parameter below is the unscalled unit size and it should be possible to set that to a large value to
+	// get thicker lines as well as larget connector circles, etc.
+	// When changing it, it does appear to alter the connector ciecle size but not he line thicknesses. I tried
+	// to change the line thickness in a pen creation call and it worked like expected.
+	// The trick is to called UnscaledUnits() on the number passed in to the call to create the pen object. Then the
+	// thickness of everything can be altered. Maybe it's useless but it might be handy to do all of that in the floating
+	// point world and then allow the mechanism scale to be adjucted for video capture, sort of like when the video
+	// is captured using a separate draw operation to a separate renderer object. Give it a try sometime.
+
 	CBitmap Bitmap;
     PrepareRenderer( Renderer, 0, &Bitmap, pDC, 1.0, false, 0.0, 1.0, !pDC->IsPrinting(), false, m_bPrintFullSize, pPrintInfo == 0 ? 0 : pPrintInfo->m_nCurPage - 1 );
-
-	Renderer.BeginDraw();
-
-	if( !pDC->IsPrinting() )
-	{
-		CFRect FillRect( 0, 0, m_DrawingRect.Width(), m_DrawingRect.Height()  );
-		CBrush WhiteBrush( RGB( 255, 255, 255 ) );
-		Renderer.FillRect( &FillRect, &WhiteBrush );
-	}
 
 	if( m_pBackgroundBitmap != 0 )
 	{
@@ -2458,6 +2463,8 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 		m_DPIScale = SaveDPIScale;
 
 		SaveVideoFrame( &VideoRenderer, VideoRect );
+		
+		Renderer.EndDraw();
 	}
 }
 
@@ -9362,6 +9369,8 @@ bool CLinkageView::DisplayAsImage( CDC *pOutputDC, int xOut, int yOut, int OutWi
 		pOutputDC->FrameRect( &Rect, &Brush );
 	}
 
+	Renderer.EndDraw();
+
 	return true;
 }
 
@@ -9398,6 +9407,8 @@ bool CLinkageView::SaveAsImage( const char *pFileName, int RenderWidth, int Rend
 	PrepareRenderer( Renderer, &ImageRect, &MemoryBitmap, pDC, ScaleFactor, true, MarginScale, 1.0, false, true, false, 0 );
 
 	DoDraw( &Renderer );
+
+	Renderer.EndDraw();
 
 	m_DPIScale = SaveDPIScale;
 
@@ -9472,6 +9483,8 @@ bool CLinkageView::SaveAsDXF( const char *pFileName )
 	DoDraw( &Renderer );
 
 	Renderer.SaveDXF( pFileName );
+
+	Renderer.EndDraw();
 
 	InvalidateRect( 0 );
 
