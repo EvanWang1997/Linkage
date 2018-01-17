@@ -386,7 +386,7 @@
 #define ID_SAMPLE_ROSSYOKE              5135
 #define ID_SAMPLE_RHOMBIC               5136
 #define ID_SAMPLE_GEARRHOMBIC           5137
-#define ID_SAMPLE_UNUSED21              5138
+#define ID_SAMPLE_TRAMMEL	            5138
 #define ID_SAMPLE_UNUSED22              5139
 #define ID_SAMPLE_UNUSED23              5140
 #define ID_SAMPLE_UNUSED24              5141
@@ -506,6 +506,7 @@
 #define IDS_SAMPLE_RHOMBIC              5432
 #define IDS_SAMPLE_GEARRHOMBIC          5433
 #define ID_FILE_PRINTFULL               5935
+#define IDS_SAMPLE_TRAMMEL				5936
 #define IDD_EXPORTIMAGE                 6000
 #define IDD_SELECTELEMENTS              6006
 #define IDB_BITMAP7                     6008

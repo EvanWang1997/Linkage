@@ -925,6 +925,7 @@ BEGIN
 	IDS_SAMPLE_GEARRHOMBIC	"Rhombic Drive Mechanism for Coaxial Cylinder Engines.\nRhombic Drive"
 	IDS_SAMPLE_LEVERELBOW	"Sirling Engine Piston Mechanism.\nLever Elbow"
 	IDS_SAMPLE_ROSSYOKE		"Steam Engine Mechanism Adapted By Ross for Stirling Engines.\nRoss Yoke"
+	IDS_SAMPLE_TRAMMEL		"Trammel of Archimedes.\nTrammel of Archimedes"
 
 END
 
@@ -1400,6 +1401,7 @@ BEGIN
 	ID_SAMPLE_GEARRHOMBIC	"Rhombic Drive Mechanism for Coaxial Cylinder Engines."
 	ID_SAMPLE_LEVERELBOW	"Sirling Engine Piston Mechanism."
 	ID_SAMPLE_ROSSYOKE		"Steam Engine Mechanism Adapted By Ross for Stirling Engines."
+	ID_SAMPLE_TRAMMEL		"Trammel of Archimedes."
 
 END
 

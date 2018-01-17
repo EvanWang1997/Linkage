@@ -2746,3 +2746,53 @@
 	<background></background>\
 </linkage2>\
 "
+#define TRAMMEL_XML "\
+<linkage2>\
+	<program zoom=\"0.591716\" xoffset=\"20\" yoffset=\"-34\" scalefactor=\"1.000000\" units=\"Millimeters\" backgroundtransparency=\"0.000000\" xgrid=\"\" ygrid=\"\"/>\
+	<connector id=\"0\" selected=\"false\" layer=\"16\" x=\"-141.000000\" y=\"48.000000\" anchor=\"true\" color=\"16711680\" usercolor=\"false\"/>\
+	<connector id=\"1\" selected=\"false\" layer=\"16\" x=\"151.181102\" y=\"48.000000\" anchor=\"true\" color=\"12632064\" usercolor=\"false\"/>\
+	<connector id=\"2\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"-132.283465\" anchor=\"true\" color=\"32768\" usercolor=\"false\"/>\
+	<connector id=\"3\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"226.771654\" anchor=\"true\" color=\"16711808\" usercolor=\"false\"/>\
+	<connector id=\"4\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"-84.283465\" slider=\"true\" color=\"6854344\" usercolor=\"false\">\
+		<slidelimit id=\"2\"/>\
+		<slidelimit id=\"3\"/>\
+	</connector>\
+	<connector id=\"5\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"151.181102\" draw=\"true\" color=\"11012476\" usercolor=\"false\"/>\
+	<connector id=\"6\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"48.000000\" slider=\"true\" color=\"13158600\" usercolor=\"false\">\
+		<slidelimit id=\"0\"/>\
+		<slidelimit id=\"1\"/>\
+	</connector>\
+	<connector id=\"7\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"-171.678740\" anchor=\"true\" input=\"true\" rpm=\"5.000000\" color=\"11272364\" usercolor=\"false\"/>\
+	<connector id=\"8\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"-303.962205\" color=\"8439808\" usercolor=\"false\"/>\
+	<connector id=\"9\" selected=\"false\" layer=\"16\" x=\"0.000000\" y=\"428.788850\" draw=\"true\" color=\"13158600\" usercolor=\"false\"/>\
+	<connector id=\"10\" selected=\"false\" name=\"Momentum should be turned on in the Details menu or the mechanism might oscillate instead of rotate.\" layer=\"1\" x=\"0.000000\" y=\"491.338583\" color=\"13158600\" usercolor=\"false\"/>\
+	<Link id=\"0\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"16711680\" usercolor=\"false\">\
+		<connector id=\"0\"/>\
+		<connector id=\"1\"/>\
+	</Link>\
+	<Link id=\"1\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"12632064\" usercolor=\"false\">\
+		<connector id=\"2\"/>\
+		<connector id=\"3\"/>\
+	</Link>\
+	<Link id=\"2\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"32768\" usercolor=\"false\">\
+		<connector id=\"4\"/>\
+		<connector id=\"5\"/>\
+		<connector id=\"6\"/>\
+		<connector id=\"9\"/>\
+	</Link>\
+	<Link id=\"3\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"16711808\" usercolor=\"false\">\
+		<connector id=\"7\"/>\
+		<connector id=\"8\"/>\
+	</Link>\
+	<Link id=\"4\" selected=\"false\" layer=\"16\" linesize=\"1\" color=\"6854344\" usercolor=\"false\">\
+		<connector id=\"4\"/>\
+		<connector id=\"8\"/>\
+	</Link>\
+	<Link id=\"5\" selected=\"false\" layer=\"1\" linesize=\"1\" color=\"13158600\" usercolor=\"false\">\
+		<connector id=\"10\"/>\
+	</Link>\
+	<selected>\
+	</selected>\
+	<background></background>\
+</linkage2>\
+"
