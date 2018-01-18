@@ -601,7 +601,7 @@ void CMainFrame::CreateSimulationPanel( CMFCRibbonCategory* pCategory )
 
 	MyCMFCRibbonButtonsGroup *pGroup2 = new MyCMFCRibbonButtonsGroup( 10 );
 	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_ONECYCLE, "", 104, -1 ) );
-	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_ONECYCLEX, "", 105, -1 ) );
+	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_ONECYCLEX, "", 106, -1 ) );
 	//pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_PAUSE, "", 70, -1 ) );
 	//pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATE_FORWARD, "", 72, -1 ) );
 	pPanelMechanism->Add( pGroup2 );
