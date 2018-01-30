@@ -383,6 +383,7 @@ static inline double GetAngle( CFPoint Point1, CFPoint Point2, CFPoint Point3, C
 	return Angle;
 }
 
+double DistanceToSegment( CFPoint &End1, CFPoint &End2, CFPoint CheckPoint );
 double DistanceToLine( CFPoint &End1, CFPoint &End2, CFPoint CheckPoint );
 
 void Intersects( const CFLine &Line, const CFCircle &Circle, CFPoint &HitPoint1, CFPoint &HitPoint2, bool &bHit1, bool &bHit2, bool bBeforeOkay, bool bAfterOkay );

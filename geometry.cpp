@@ -81,6 +81,20 @@ double DistanceToLine( CFPoint &End1, CFPoint &End2, CFPoint CheckPoint )
 	double r_denomenator = (End2.x-End1.x)*(End2.x-End1.x) + (End2.y-End1.y)*(End2.y-End1.y);
 	double r = r_numerator / r_denomenator;
 
+	double px = End1.x + r*(End2.x-End1.x);
+	double py = End1.y + r*(End2.y-End1.y);
+
+	double s =  ((End1.y-CheckPoint.y)*(End2.x-End1.x)-(End1.x-CheckPoint.x)*(End2.y-End1.y) ) / r_denomenator;
+
+	return fabs(s)*sqrt(r_denomenator);
+}
+
+double DistanceToSegment( CFPoint &End1, CFPoint &End2, CFPoint CheckPoint )
+{
+	double r_numerator = (CheckPoint.x-End1.x)*(End2.x-End1.x) + (CheckPoint.y-End1.y)*(End2.y-End1.y);
+	double r_denomenator = (End2.x-End1.x)*(End2.x-End1.x) + (End2.y-End1.y)*(End2.y-End1.y);
+	double r = r_numerator / r_denomenator;
+
     double px = End1.x + r*(End2.x-End1.x);
     double py = End1.y + r*(End2.y-End1.y);
 

@@ -57,6 +57,8 @@ class CRenderer// : public CDC
 
 	int GetPenSize( int UnscaledSize );
 	double GetUnScaledValue( double Value );
+
+	bool BackgroundsAllowed( void ); // Images, grids, etc. might not be supported by a particular renderer.
 	
 	CFPoint DrawLine( CFLine Line );
 	CFPoint DrawLine( CFPoint Point1, CFPoint Point2 );

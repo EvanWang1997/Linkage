@@ -8,6 +8,8 @@ static const double MOMENTUM = 2.5;
 
 extern CDebugItemList DebugItemList;
 
+static const double DISTANCE_ACCURACY = 0.0001;
+
 #define SWAP(x,y) do \
    { unsigned char swap_temp[sizeof(x) == sizeof(y) ? (signed)sizeof(x) : -1]; \
      memcpy(swap_temp,&y,sizeof(x)); \
@@ -659,7 +661,7 @@ class CSimulatorImplementation
 
 			double OriginalDistance = Distance( OriginalFixedPoint, pConnector->GetOriginalPoint() );
 			double distance = Distance( FixedPoint, pConnector->GetPoint() );
-			if( fabs( OriginalDistance - distance ) > 0.0001 )
+			if( fabs( OriginalDistance - distance ) > DISTANCE_ACCURACY )
 				return false;
 		}
 
@@ -1415,6 +1417,72 @@ class CSimulatorImplementation
 		return true;
 	}
 
+	bool RotateLink( CLink *pLink, CConnector *pFixedConnector, CConnector *pCommonConnector, CLink *pOtherToRotate, double Angle )
+	{
+		pFixedConnector->SetRotationAngle( Angle );
+		if( !pLink->RotateAround( pFixedConnector ) )
+			return false;
+
+		/*
+		 * The movement of the current link could cause other links to "follow". They might be attached to this
+		 * link and are not this link and are not the "other" link that is moving, or being moved by this one.
+		 * Find those other links and mover and rotate them into position.
+		 */
+
+		for( POSITION Position = pLink->GetConnectorList()->GetHeadPosition() ; Position != 0; )
+		{
+			CConnector* pTestConnector = pLink->GetConnectorList()->GetNext( Position );
+			if( pTestConnector == 0 || pTestConnector == pFixedConnector || pTestConnector == pCommonConnector )
+				continue;
+			for( POSITION Position2 = pTestConnector->GetLinkList()->GetHeadPosition(); Position2 != 0; )
+			{
+				CLink *pTestLink = pTestConnector->GetLinkList()->GetNext( Position2 );
+				if( pTestLink == 0 || pTestLink == pLink || pTestLink == pOtherToRotate )
+					continue;
+				if( pTestLink->GetFixedConnectorCount() != 1 )
+				{
+					// The link should have two fixed connectors, the one that was fixed before the rotation that just happened
+					// and the one that just got rotated. So if that link can be fully rotated to match the new location of
+					// the connector that was just moved.
+					if( pTestLink->GetFixedConnectorCount() > 2 )
+					{
+						// DO THIS LATER. MAYBE IT'S NOT NEEDED?
+					}
+					else
+					{
+						POSITION Position3 = pTestLink->GetConnectorList()->GetHeadPosition();
+						while( Position3 != 0 )
+						{
+							CConnector *pConnector = pTestLink->GetConnectorList()->GetNext( Position3 );
+							if( pConnector == 0 || pConnector == pTestConnector || !pConnector->IsFixed() )
+								continue;
+
+							double Diff = fabs( Distance( pConnector->GetOriginalPoint(), pTestConnector->GetOriginalPoint() ) - Distance( pConnector->GetTempPoint(), pTestConnector->GetTempPoint() ) );
+							if( Diff < DISTANCE_ACCURACY )
+							{
+								double Angle = GetAngle( pConnector->GetTempPoint(), pTestConnector->GetTempPoint(), pConnector->GetOriginalPoint(), pTestConnector->GetOriginalPoint() );
+								Angle = GetClosestAngle( pConnector->GetRotationAngle(), Angle );
+								if( !RotateLink( pTestLink, pConnector, pTestConnector, 0, Angle ) )
+									return false;
+								// It seems like this is the only place where the position of this connector is
+								// being validated - so validate it.
+								pTestConnector->SetPositionValid( true );
+								DebugItemList.AddTail( new CDebugItem( pTestConnector->GetTempPoint() ) );
+							}
+							else
+							{
+								DebugItemList.AddTail( new CDebugItem( pTestConnector->GetTempPoint() ) );
+								//pTestConnector->SetPositionValid( false );
+								//return false;
+							}
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 	bool JoinToLink( CLink *pLink, CConnector *pFixedConnector, CConnector *pCommonConnector, CLink *pOtherToRotate )
 	{
 		/*
@@ -1447,10 +1515,10 @@ class CSimulatorImplementation
 		// sure but don't otherwise move anything else. Check all Links connected to
 		// this other than the pOtherToRotate Link and if any of them have fixed connectors,
 		// return immediately.
-		for( POSITION Position = pLink->GetConnectorList()->GetHeadPosition() ; Position != 0; )
+		for( POSITION Position = pLink->GetConnectorList()->GetHeadPosition(); Position != 0 && 0; )
 		{
 			CConnector* pTestConnector = pLink->GetConnectorList()->GetNext( Position );
-			if( pTestConnector == 0 || pTestConnector == pFixedConnector || pTestConnector == pFixedConnector )
+			if( pTestConnector == 0 || pTestConnector == pFixedConnector || pTestConnector == pCommonConnector )
 				continue;
 			for( POSITION Position2 = pTestConnector->GetLinkList()->GetHeadPosition(); Position2 != 0; )
 			{
@@ -1517,15 +1585,28 @@ class CSimulatorImplementation
 		double Angle = GetAngle( pFixedConnector->GetTempPoint(), Intersect, pFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
 		Angle = GetClosestAngle( pFixedConnector->GetRotationAngle(), Angle );
 		pFixedConnector->SetRotationAngle( Angle );
-		if( !pLink->RotateAround( pFixedConnector ) )
+
+
+		if( !RotateLink( pLink, pFixedConnector, pCommonConnector, pOtherToRotate, Angle ) )
 			return false;
+
+
+
+		//if( !pLink->RotateAround( pFixedConnector ) )
+		//	return false;
 		pCommonConnector->SetTempFixed( false ); // needed so it can be rotated again.
 		pLink->IncrementMoveCount( -1 ); // Don't count that one twice.
 		Angle = GetAngle( pOtherFixedConnector->GetTempPoint(), Intersect, pOtherFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
 		Angle = GetClosestAngle( pOtherToRotate->GetRotationAngle(), Angle );
 		pOtherFixedConnector->SetRotationAngle( Angle );
-		if( !pOtherToRotate->RotateAround( pOtherFixedConnector ) )
+
+		
+		if( !RotateLink( pOtherToRotate, pOtherFixedConnector, pCommonConnector, pLink, Angle ) )
 			return false;
+
+
+		//if( !pOtherToRotate->RotateAround( pOtherFixedConnector ) )
+		//	return false;
 
 		return true;
 	}

@@ -213,7 +213,7 @@ bool CLink::PointOnLink( const GearConnectionList &GearConnections, CFPoint Poin
 
 	for( int Counter = 0; Counter < PointCount; ++Counter )
 	{
-		double Distance = DistanceToLine( *pPreviousPoint, Points[Counter], CFPoint( Point ) );
+		double Distance = DistanceToSegment( *pPreviousPoint, Points[Counter], CFPoint( Point ) );
 		if( Distance < TestDistance )
 		{
 			double left = min( pPreviousPoint->x, Points[Counter].x ) - TestDistance;

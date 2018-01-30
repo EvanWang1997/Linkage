@@ -179,6 +179,7 @@ class CRendererImplementation
 		return NewRect;
 	}
 
+	virtual bool BackgroundsAllowed( void ) = 0;
 	virtual void Clear( DWORD dwRop ) {}
 	virtual int GetYOrientation( void ) = 0;
 	virtual void SaveDXF( const char *pFileName ) = 0;
@@ -497,6 +498,11 @@ class CGDIRenderer : public CRendererImplementation
 		PatBlt( 0, 0, (int)( m_Size.x * m_Scale ), (int)( m_Size.y * m_Scale ), dwRop );
 	}
 
+	bool BackgroundsAllowed( void )
+	{
+		return true; 
+	}
+	
 	int GetYOrientation( void )
 	{
 		return -1;
@@ -1025,6 +1031,11 @@ class CNullRenderer : public CRendererImplementation
 		return -1;
 	}
 
+	bool BackgroundsAllowed( void )
+	{
+		return false; 
+	}
+
 	void SaveDXF( const char *pFileName ) {}
 
 	CFPoint MoveTo( CFPoint Point ) { return MoveTo( Point.x, Point.y ); }
@@ -1275,6 +1286,11 @@ class CDXFRenderer : public CRendererImplementation
 		m_CreatedPens.RemoveAll();
 		if( m_pDC != 0 )
 			delete m_pDC;
+	}
+
+	bool BackgroundsAllowed( void )
+	{
+		return false; 
 	}
 
 	int GetYOrientation( void )
@@ -2014,6 +2030,11 @@ class CD2DRenderer : public CRendererImplementation
 		if( m_pRenderTarget == 0 )
 			return;
 		m_pRenderTarget->EndDraw();
+	}
+
+	bool BackgroundsAllowed( void )
+	{
+		return true; 
 	}
 
 	int GetYOrientation( void )
@@ -2994,6 +3015,14 @@ CRenderer::~CRenderer()
 	if( m_pImplementation != 0 )
 		delete m_pImplementation;
 	m_pImplementation = 0;
+}
+
+bool CRenderer::BackgroundsAllowed( void )
+{
+	if( m_pImplementation == 0 )
+		return false;
+
+	return m_pImplementation->BackgroundsAllowed();
 }
 
 CFPoint CRenderer::MoveTo( double x, double y )

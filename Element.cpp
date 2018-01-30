@@ -70,7 +70,10 @@ void CElement::RemoveFastenElement( class CElement *pElement )
 			if( pItem->GetElement()->GetFastenedTo() != 0 && this == pItem->GetElement()->GetFastenedTo()->GetElement() )
 				pItem->GetElement()->UnfastenTo();
 
-			break;
+			delete pItem;
+
+			if( pElement != 0 )
+				break;
 		}
 	}
 }

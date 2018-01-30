@@ -110,6 +110,7 @@ wchar_t* ToUnicode( const char *pString )
 }
 
 static int GetLongestHullDimensionLine( CLink *pLink, int &BestEndPoint, CFPoint *pHullPoints, int HullPointCount, CConnector **pStartConnector );
+static int GetLongestLinearDimensionLine( CLink *pLink, int &BestEndPoint, CFPoint *pPoints, int PointCount, CConnector **pStartConnector );
 
 class CTempLink : public CLink
 {
@@ -1792,7 +1793,7 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	if( m_bShowGrid )
+	if( m_bShowGrid && pRenderer->BackgroundsAllowed() )
 		DrawGrid( pRenderer, m_GridType );
 
 	if( m_bShowSelection && m_bSuperHighlight && pDoc->IsAnySelected() )
@@ -2025,28 +2026,40 @@ void CLinkageView::MovePartsLinkToOrigin( CLink *pPartsLink, CFPoint Origin, Gea
 		return;
 	}
 
-	int HullCount = 0;
-	CFPoint *pPoints = pPartsLink->GetHull( HullCount );
 	int BestStartPoint = -1;
 	int BestEndPoint = -1;
 
-	CConnector *pStartConnector = 0;
-	BestStartPoint = GetLongestHullDimensionLine( pPartsLink, BestEndPoint, pPoints, HullCount, &pStartConnector );
-	if( BestStartPoint < 0 )
-		return;
-
-	POSITION Position = pPartsLink->GetConnectorList()->GetHeadPosition();
-	while( Position != 0 )
+	int PointCount = 0;
+	CFPoint *pPoints = pPartsLink->GetPoints( PointCount );
+	bool bIsLine = true;
+	if( PointCount > 2 )
 	{
-		CConnector *pConnector = pPartsLink->GetConnectorList()->GetNext( Position );
-		if( pConnector == 0 )
-			continue;
-
-		if( pConnector->GetPoint() == pPoints[BestStartPoint] )
+		for( int Index = 2; Index < PointCount; ++Index )
 		{
-			pStartConnector = pConnector;
-			break;
+			if( DistanceToLine( pPoints[0], pPoints[1], pPoints[Index] ) > 0.0001 )
+			{
+				bIsLine = false;
+				break;
+			}
 		}
+	}
+
+	CConnector *pStartConnector = 0;
+
+	if( bIsLine )
+	{
+		BestStartPoint = GetLongestLinearDimensionLine( pPartsLink, BestEndPoint, pPoints, PointCount, &pStartConnector );
+		if( BestStartPoint < 0 )
+			return;
+	}
+	else
+	{
+		PointCount = 0;
+		pPoints = pPartsLink->GetHull( PointCount );
+
+		BestStartPoint = GetLongestHullDimensionLine( pPartsLink, BestEndPoint, pPoints, PointCount, &pStartConnector );
+		if( BestStartPoint < 0 )
+			return;
 	}
 
 	CFLine OrientationLine( pPoints[BestStartPoint], pPoints[BestEndPoint] );
@@ -2055,7 +2068,7 @@ void CLinkageView::MovePartsLinkToOrigin( CLink *pPartsLink, CFPoint Origin, Gea
 		Angle = GetAngle( pPoints[BestStartPoint], pPoints[BestEndPoint] );
 
 	CFPoint AdditionalOffset;
-	Position = pPartsLink->GetConnectorList()->GetHeadPosition();
+	POSITION Position = pPartsLink->GetConnectorList()->GetHeadPosition();
 	while( Position != 0 )
 	{
 		CConnector *pConnector = pPartsLink->GetConnectorList()->GetNext( Position );
@@ -2183,7 +2196,7 @@ CFArea CLinkageView::DrawPartsList( CRenderer* pRenderer )
 	CFRect Area;
 	pDoc->GetDocumentArea( Area );
 
-	if( m_bShowGrid )
+	if( m_bShowGrid && pRenderer->BackgroundsAllowed() )
 		DrawGrid( pRenderer, m_GridType );
 
 	pRenderer->SelectObject( m_pUsingFont, UnscaledUnits( m_UsingFontHeight ) );
@@ -7053,6 +7066,55 @@ static int GetLongestHullDimensionLine( CLink *pLink, int &BestEndPoint, CFPoint
 	return BestStartPoint;
 }
 
+static int GetLongestLinearDimensionLine( CLink *pLink, int &BestEndPoint, CFPoint *pPoints, int PointCount, CConnector **pStartConnector )
+{
+	int BestStartPoint = -1;
+	BestEndPoint = -1;
+
+	if( pLink->GetConnectorCount() == 2 )
+	{
+		BestStartPoint = 0;
+		BestEndPoint = 1;
+	}
+	else
+	{
+		double LargestDistance = 0.0;
+		for( int Counter = 0; Counter < PointCount; ++Counter )
+		{
+			for( int Counter2 = 0; Counter2 < PointCount; ++Counter2 )
+			{
+				if( Counter2 == Counter )
+					continue;
+				double TestDistance = Distance( pPoints[Counter], pPoints[Counter2] );
+				if( TestDistance > LargestDistance )
+				{
+					LargestDistance = TestDistance;
+					BestStartPoint = Counter;
+					BestEndPoint = Counter2;
+				}
+			}
+		}
+	}
+
+	if( pStartConnector != 0 && BestStartPoint >= 0 )
+	{
+		*pStartConnector = 0;
+		POSITION Position = pLink->GetConnectorList()->GetHeadPosition();
+		int Counter = 0;
+		while( Position != 0 )
+		{
+			CConnector *pConnector = pLink->GetConnectorList()->GetNext( Position );
+			if( pConnector == 0 )
+				continue;
+
+			if( pConnector->GetPoint() == pPoints[BestStartPoint] )
+				*pStartConnector = pConnector;
+		}
+	}
+
+	return BestStartPoint;
+}
+
 CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionList *pGearConnections, unsigned int OnLayers, CLink *pLink, bool bDrawLines, bool bDrawText )
 {
 	if( !m_bShowDimensions )
@@ -7080,12 +7142,11 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 	pRenderer->SetTextAlign( TA_CENTER | TA_TOP );
 	pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
 
-	double LargestDistance = 0.0;
-
-	int HullCount = 0;
-	CFPoint *pPoints = pLink->GetHull( HullCount );
+	//double LargestDistance = 0.0;
 
 	/*
+	 * Determine if the link is drawn as what appears to be a line (small deviations are ignored).
+	 * If the link is a line, pick the points farthest apart as the basis for the measurement lines. Otherwise...
 	 * Find two adjacent hull locations that have the largest distance between
 	 * them. This is used to pick the orientation of the measurement lines.
 	 * these points are not used for any other purpose.
@@ -7094,8 +7155,31 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 	int BestStartPoint = -1;
 	int BestEndPoint = -1;
 
+	int PointCount = 0;
+	CFPoint *pPoints = pLink->GetPoints( PointCount );
+	bool bIsLine = true;
+	for( int Index = 2; Index < PointCount; ++Index )
+	{
+		if( DistanceToLine( pPoints[0], pPoints[1], pPoints[Index] ) > 0.0001 )
+		{
+			bIsLine = false;
+			break;
+		}
+	}
+
 	CConnector *pStartConnector = 0;
-	BestStartPoint = GetLongestHullDimensionLine( pLink, BestEndPoint, pPoints, HullCount, &pStartConnector );
+
+	if( bIsLine )
+	{
+		BestStartPoint = GetLongestLinearDimensionLine( pLink, BestEndPoint, pPoints, PointCount, &pStartConnector );
+	}
+	else
+	{
+		PointCount = 0;
+		pPoints = pLink->GetHull( PointCount );
+		
+		BestStartPoint = GetLongestHullDimensionLine( pLink, BestEndPoint, pPoints, PointCount, &pStartConnector );
+	}
 
 	if( BestStartPoint < 0 )
 	{
@@ -7233,7 +7317,7 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 			Offset -= OFFSET_INCREMENT;
 		}
 
-		if( ConnectorCount > 2 )
+		if( ConnectorCount > 2 && !bIsLine )
 		{
 			// Find start point in list.
 			for( int Counter = 0; Counter < ConnectorCount; ++Counter )
