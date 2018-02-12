@@ -148,6 +148,9 @@
     <ClCompile Include="afxtoolbarimages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MyMFCRibbonLabel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDialog.h">
@@ -322,6 +325,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="UserGridDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MyMFCRibbonLabel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

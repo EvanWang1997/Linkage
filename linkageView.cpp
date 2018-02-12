@@ -37,6 +37,7 @@
 #include "Base64.h"
 #include "UserGridDialog.h"
 #include "helper.h"
+#include "MyMFCRibbonLabel.h"
 #include <fstream>
 
 #include <algorithm>
@@ -9295,9 +9296,22 @@ void CLinkageView::ShowSelectedElementCoordinates( void )
 	if( pEditBox == 0 )
 		return;
 
+	// The cast is acceptable since the CMyMFCRibbonLabel adds functionality but no variables.
+	CMyMFCRibbonLabel * pLabel = (CMyMFCRibbonLabel*)pRibbon->FindByID( ID_VIEW_DIMENSIONSLABEL );
+	if( pLabel == 0 )
+		return;
+
 	CString Text = pDoc->GetSelectedElementCoordinates();
 
 	pEditBox->SetEditText( Text );
+	pLabel->SetTextAndResize( Text );
+	//pLabel->SetTextAlwaysOnRight( TRUE );
+	//pLabel->SetTextAlwaysOnRight( FALSE );
+	//pLabel->Redraw();
+	//pLabel->SetInitialMode( TRUE );
+
+
+	//CMFCRibbonLabel
 }
 
 void CLinkageView::OnViewCoordinates()

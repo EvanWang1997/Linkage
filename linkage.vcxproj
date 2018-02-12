@@ -798,6 +798,7 @@ exit 0
     <ClInclude Include="MyMFCRibbonBar.h" />
     <ClInclude Include="MyMFCRibbonCategory.h" />
     <ClInclude Include="MyMFCRibbonGallery.h" />
+    <ClInclude Include="MyMFCRibbonLabel.h" />
     <ClInclude Include="NullableColor.h" />
     <ClInclude Include="PointDialog.h" />
     <ClInclude Include="PopupGallery.h" />
@@ -953,6 +954,7 @@ exit 0
     <ClCompile Include="MyDialog.cpp" />
     <ClCompile Include="MyMFCRibbonBar.cpp" />
     <ClCompile Include="MyMFCRibbonCategory.cpp" />
+    <ClCompile Include="MyMFCRibbonLabel.cpp" />
     <ClCompile Include="PointDialog.cpp" />
     <ClCompile Include="PopupGallery.cpp" />
     <ClCompile Include="quickxml.cpp" />

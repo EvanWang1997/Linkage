@@ -311,7 +311,11 @@ void CMainFrame::CreateDimensionsPanel( CMFCRibbonCategory* pCategory )
 	pEdit->SetWidth( 104 );
 	pPanelDimensions->Add( pEdit );
 
-	AddRibbonButton( pPanelDimensions, IDS_RIBBON_SET_RATIO, ID_EDIT_SET_RATIO, 79, SMALL );
+	CMFCRibbonLabel *pLabel = new CMFCRibbonLabel( "     " );
+	pLabel->SetID( ID_VIEW_DIMENSIONSLABEL );
+	pPanelDimensions->Add( pLabel );
+
+	//AddRibbonButton( pPanelDimensions, IDS_RIBBON_SET_RATIO, ID_EDIT_SET_RATIO, 79, SMALL );
 	
 		//CMFCRibbonButton* pSetButton = new CMFCRibbonButton( ID_DIMENSION_SET, "Edit", 53 );
 

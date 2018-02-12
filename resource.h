@@ -326,6 +326,7 @@
 #define IDS_RIBBON_MEET                 4935
 #define ID_ALIGN_MEET                   4936
 #define ID_VIEW_DRAWINGLAYERDIMENSIONS  4937
+#define ID_VIEW_DIMENSIONSLABEL			4938
 #define IDS_SAMPLE_SIMPLE               5011
 #define IDS_SAMPLE_JANSEN               5012
 #define IDS_SAMPLE_KLANN                5013
