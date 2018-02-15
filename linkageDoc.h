@@ -104,7 +104,7 @@ public:
 	bool CheckForSliderElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment );
 	bool MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, double SnapDistance, CFPoint &ReferencePoint );
 	bool MoveSelected( CFPoint Offset );
-	CString GetSelectedElementCoordinates( void );
+	CString GetSelectedElementCoordinates( CString *pHintText );
 	bool RotateSelected( CFPoint CenterPoint, double Angle );
 	bool StretchSelected( CFRect OriginalRect, CFRect NewRect, _Direction Direction );
 	bool StretchSelected( double Percentage );
@@ -241,7 +241,7 @@ public:
 
 	void SetSelectedModifiableCondition( void );
 
-	static CString GetUnitsString( CLinkageDoc::_Units Units );
+	static CString GetUnitsString( CLinkageDoc::_Units Units, bool bShortVersion = false );
 	static CLinkageDoc::_Units GetUnitsValue( const char *pUnits );
 
 	void RemoveGearRatio( CConnector *pGearConnector, CLink *pGearLink );

@@ -2835,6 +2835,10 @@ bool CLinkageView::SelectDocumentItem( UINT nFlags, CFPoint point )
 	bool bSelectionChanged = false;
 	m_MouseAction = pDoc->SelectElement( AdjustedPoint, GrabDistance, 0, bMultiSelect, bSelectionChanged ) ? ACTION_DRAG : ACTION_NONE;
 
+	SelectionChanged();
+	//if( pDoc->IsSelectionAdjustable() )
+	//	SetStatusText( m_MouseAction == ACTION_ROTATE ? "0.0000°" : ( m_MouseAction == ACTION_STRETCH ? "100.000%" : "" ) );
+
 	MarkSelection( bSelectionChanged );
 	ShowSelectedElementCoordinates();
 
@@ -3019,10 +3023,20 @@ void CLinkageView::OnMouseMoveRotate(UINT nFlags, CFPoint point)
 
 	double Angle1 = GetAngle( m_SelectionRotatePoint, DragStartPoint );
 	double Angle2 = GetAngle( m_SelectionRotatePoint, CurrentPoint );
+	double Change = Angle2 - Angle1;
+	while( Change < -180 )
+		Change += 360;
+	while( Change > 180 )
+		Change -= 360;
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	if( pDoc->RotateSelected( m_SelectionRotatePoint, Angle2 - Angle1 ) )
+	if( pDoc->RotateSelected( m_SelectionRotatePoint, Change ) )
+	{
 		InvalidateRect( 0 );
+		CString Temp;
+		Temp.Format( "%.4lf°", Change );
+		SetStatusText( Temp );
+	}
 }
 
 class CSnapConnector : public ConnectorListOperation
@@ -3146,6 +3160,16 @@ void CLinkageView::OnMouseMoveStretch(UINT nFlags, CFPoint point, bool bEndStret
 	if( !pDoc->StretchSelected( m_SelectionAdjustmentRect, NewRect, Direction ) )
 		return;
 
+	double Ratio1 = NewRect.Width() / m_SelectionAdjustmentRect.Width();
+	double Ratio2 = NewRect.Height() / m_SelectionAdjustmentRect.Height();
+	if( isnan( Ratio1 ) || ( !isnan( Ratio2 ) && Ratio2 != 1.0 ) ) // Take the second if it's better than the first.
+		Ratio1 = Ratio2;
+
+	CString Temp;
+	Temp.Format( "%.4lf%%", Ratio1 * 100 );
+	SetStatusText( isnan( Ratio1 ) ? "" : Temp );
+
+
 	if( bEndStretch )
 	{
 		CFPoint Scale( NewRect.Width() / m_SelectionAdjustmentRect.Width(), NewRect.Height() / m_SelectionAdjustmentRect.Height() );
@@ -3198,6 +3222,7 @@ void CLinkageView::OnMouseEndDrag(UINT nFlags, CFPoint point)
 	m_SelectionContainerRect = GetDocumentArea( false, true );
 	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
 	ShowSelectedElementCoordinates();
+	SelectionChanged();
 
 	InvalidateRect( 0 );
 }
@@ -3231,7 +3256,7 @@ void CLinkageView::ShowSelectedElementStatus( void )
 	//
 	//String += pElement->GetIdentifierString( m_bShowDebug );
 
-	SetStatusText( GetElementFullDescription( pElement ) );
+	// SetStatusText( GetElementFullDescription( pElement ) );
 }
 
 CString CLinkageView::GetElementFullDescription( CElement *pElement )
@@ -3273,8 +3298,10 @@ void CLinkageView::OnMouseEndSelect(UINT nFlags, CFPoint point)
 	bool bSelectionChanged = false;
 	m_MouseAction = pDoc->SelectElement( Rect, 0, bMultiSelect, bSelectionChanged ) ? ACTION_DRAG : ACTION_NONE;
 
-    if( pDoc->IsSelectionAdjustable() )
+	if( pDoc->IsSelectionAdjustable() )
     {
+		//SetStatusText( m_MouseAction == ACTION_ROTATE ? "0.0000°" : ( m_MouseAction == ACTION_STRETCH ? "100.000%" : "" ) );
+
 		if( bSelectionChanged )
 		{
 			m_VisibleAdjustment = ADJUSTMENT_STRETCH;
@@ -3290,6 +3317,7 @@ void CLinkageView::OnMouseEndSelect(UINT nFlags, CFPoint point)
 	ShowSelectedElementStatus();
 
 	ShowSelectedElementCoordinates();
+	SelectionChanged();
 	InvalidateRect( 0 );
 }
 
@@ -3305,6 +3333,7 @@ void CLinkageView::OnMouseEndRotate(UINT nFlags, CFPoint point)
 	pDoc->FinishChangeSelected();
 	m_SelectionContainerRect = GetDocumentArea( false, true );
 	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
+	// SelectionChanged(); // Is it good to reset the and in the status bar to zero? maybe not so comment this out.
 	InvalidateRect( 0 );
 }
 
@@ -3320,6 +3349,7 @@ void CLinkageView::OnMouseEndStretch(UINT nFlags, CFPoint point)
 	pDoc->FinishChangeSelected();
 	m_SelectionContainerRect = GetDocumentArea( false, true );
 	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
+	// SelectionChanged(); // Is it good to reset the stretch to 100% in the status bar? Maybe not so comment this out.
 	InvalidateRect( 0 );
 }
 
@@ -3327,6 +3357,9 @@ void CLinkageView::SetLocationAsStatus( CFPoint &Point )
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
+
+	if( pDoc->IsAnySelected() )
+		return;
 
 	CString Location;
 	double DocumentScale = pDoc->GetUnitScale();
@@ -3363,7 +3396,7 @@ void CLinkageView::OnMouseMove(UINT nFlags, CPoint MousePoint)
 		}
 	}
 
-	if( m_MouseAction != ACTION_DRAG )
+	if( m_MouseAction != ACTION_DRAG && m_MouseAction != ACTION_ROTATE && m_MouseAction != ACTION_STRETCH )
 	{
 		CFPoint DocumentPoint = Unscale( point );
 		SetLocationAsStatus( DocumentPoint );
@@ -4091,7 +4124,7 @@ void CLinkageView::OnEditSetLength()
 	CLengthDistanceDialog dlg;
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	dlg.m_Distance = pDoc->GetSelectedElementCoordinates();
+	dlg.m_Distance = pDoc->GetSelectedElementCoordinates( 0 );
 	if( dlg.DoModal() == IDOK )
 	{
 		pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, dlg.m_Distance );
@@ -4111,7 +4144,7 @@ void CLinkageView::OnEditSetAngle()
 	CAngleDialog dlg;
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	dlg.m_Angle = pDoc->GetSelectedElementCoordinates();
+	dlg.m_Angle = pDoc->GetSelectedElementCoordinates( 0 );
 	if( dlg.DoModal() == IDOK )
 	{
 	}
@@ -4132,7 +4165,7 @@ void CLinkageView::OnEditRotate()
 	dlg.m_Angle = "0.0";
 	if( dlg.DoModal() == IDOK )
 	{
-		CString Temp = dlg.m_Angle + "D";
+		CString Temp = dlg.m_Angle + "*";
 		pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, Temp );
 		UpdateForDocumentChange();
 	}
@@ -4212,6 +4245,7 @@ void CLinkageView::OnEditDeleteselected()
 	ASSERT_VALID(pDoc);
 	pDoc->DeleteSelected();
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 BOOL CLinkageView::OnEraseBkgnd(CDC* pDC)
@@ -4294,6 +4328,7 @@ void CLinkageView::InsertPoint( CFPoint *pPoint )
 	m_bSuperHighlight = true;
 
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertLine( CFPoint *pPoint )
@@ -4304,6 +4339,7 @@ void CLinkageView::InsertLine( CFPoint *pPoint )
 	m_bSuperHighlight = true;
 
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertMeasurement( CFPoint *pPoint )
@@ -4314,6 +4350,7 @@ void CLinkageView::InsertMeasurement( CFPoint *pPoint )
 	m_bSuperHighlight = true;
 
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertGear( CFPoint *pPoint )
@@ -4324,6 +4361,7 @@ void CLinkageView::InsertGear( CFPoint *pPoint )
 	m_bSuperHighlight = true;
 
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertConnector( CFPoint *pPoint )
@@ -4334,6 +4372,7 @@ void CLinkageView::InsertConnector( CFPoint *pPoint )
 	m_bSuperHighlight = true;
 
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertAnchor( CFPoint *pPoint )
@@ -4344,6 +4383,7 @@ void CLinkageView::InsertAnchor( CFPoint *pPoint )
 	m_bSuperHighlight = true;
 
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertAnchorLink( CFPoint *pPoint )
@@ -4354,6 +4394,7 @@ void CLinkageView::InsertAnchorLink( CFPoint *pPoint )
 	m_bSuperHighlight = true;
 
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertRotatinganchor( CFPoint *pPoint )
@@ -4364,6 +4405,7 @@ void CLinkageView::InsertRotatinganchor( CFPoint *pPoint )
 	m_bSuperHighlight = true;
 
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertLink( CFPoint *pPoint )
@@ -4374,6 +4416,7 @@ void CLinkageView::InsertLink( CFPoint *pPoint )
 	m_bSuperHighlight = true;
 
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::OnUpdateEditSplit(CCmdUI *pCmdUI)
@@ -4703,7 +4746,7 @@ void CLinkageView::OnAlignSetAngle()
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	CAngleDialog dlg;
-	dlg.m_Angle = pDoc->GetSelectedElementCoordinates();
+	dlg.m_Angle = pDoc->GetSelectedElementCoordinates( 0 );
 	if( dlg.DoModal() == IDOK )
 	{
 		pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, dlg.m_Angle );
@@ -4807,6 +4850,7 @@ void CLinkageView::InsertDouble( CFPoint *pPoint )
 	pDoc->InsertLink(  CLinkageDoc::MECHANISMLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0, 2, m_bNewLinksSolid );
 	m_bSuperHighlight = true;
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertTriple( CFPoint *pPoint )
@@ -4816,6 +4860,7 @@ void CLinkageView::InsertTriple( CFPoint *pPoint )
 	pDoc->InsertLink(  CLinkageDoc::MECHANISMLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0, 3, m_bNewLinksSolid );
 	m_bSuperHighlight = true;
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertQuad( CFPoint *pPoint )
@@ -4825,6 +4870,7 @@ void CLinkageView::InsertQuad( CFPoint *pPoint )
 	pDoc->InsertLink(  CLinkageDoc::MECHANISMLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0, 4, m_bNewLinksSolid );
 	m_bSuperHighlight = true;
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::OnViewLabels()
@@ -5208,6 +5254,7 @@ void CLinkageView::OnEditCut()
 	ASSERT_VALID(pDoc);
 	pDoc->Copy( true );
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::OnEditCopy()
@@ -5228,6 +5275,7 @@ void CLinkageView::OnEditPaste()
 	m_SelectionRotatePoint.SetPoint( ( m_SelectionContainerRect.left + m_SelectionContainerRect.right ) / 2,
 									 ( m_SelectionContainerRect.top + m_SelectionContainerRect.bottom ) / 2 );
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::OnUpdateEditPaste(CCmdUI *pCmdUI)
@@ -7868,6 +7916,7 @@ void CLinkageView::OnEditUndo()
 	//if( m_bShowParts )
 		//pDoc->SelectElement();
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 CRect CLinkageView::GetDocumentScrollingRect( void )
@@ -8054,6 +8103,7 @@ void CLinkageView::InsertlinkSlider( CFPoint *pPoint )
 	pDoc->InsertLink(  CLinkageDoc::MECHANISMLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0, 1, false, false, true, false, false, false, false );
 	m_bSuperHighlight = true;
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::InsertSliderCombo( CFPoint *pPoint )
@@ -8957,6 +9007,7 @@ void CLinkageView::InsertActuator( CFPoint *pPoint )
 	pDoc->InsertLink( CLinkageDoc::MECHANISMLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0, 2, false, false, false, true, false, m_bNewLinksSolid, false );
 	m_bSuperHighlight = true;
 	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 int CLinkageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
@@ -9087,6 +9138,7 @@ void CLinkageView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		{
 			ShowSelectedElementStatus();
 			UpdateForDocumentChange();
+			SelectionChanged();
 		}
 	}
 	else if( nChar == VK_LEFT || nChar == VK_RIGHT )
@@ -9301,14 +9353,11 @@ void CLinkageView::ShowSelectedElementCoordinates( void )
 	if( pLabel == 0 )
 		return;
 
-	CString Text = pDoc->GetSelectedElementCoordinates();
+	CString Hint = "";
+	CString Text = pDoc->GetSelectedElementCoordinates( &Hint );
 
 	pEditBox->SetEditText( Text );
-	pLabel->SetTextAndResize( Text );
-	//pLabel->SetTextAlwaysOnRight( TRUE );
-	//pLabel->SetTextAlwaysOnRight( FALSE );
-	//pLabel->Redraw();
-	//pLabel->SetInitialMode( TRUE );
+	pLabel->SetTextAndResize( Hint );
 
 
 	//CMFCRibbonLabel
@@ -9618,6 +9667,15 @@ void CLinkageView::UpdateForDocumentChange( bool bUpdateRotationCenter )
 	InvalidateRect( 0 );
 	MarkSelection( true, bUpdateRotationCenter );
 	ShowSelectedElementCoordinates();
+}
+
+void CLinkageView::SelectionChanged( void )
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	if( pDoc->IsSelectionAdjustable() )
+		SetStatusText( m_VisibleAdjustment == ADJUSTMENT_ROTATE ? "0.0000°" : ( m_VisibleAdjustment == ADJUSTMENT_STRETCH ? "100.000%" : "" ) );
 }
 
 #if 0

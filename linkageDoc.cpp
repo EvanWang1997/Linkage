@@ -49,13 +49,13 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CLinkageDoc construction/destruction
 
-CString CLinkageDoc::GetUnitsString( CLinkageDoc::_Units Units )
+CString CLinkageDoc::GetUnitsString( CLinkageDoc::_Units Units, bool bShortVersion )
 {
 	switch( Units )
 	{
 		case CLinkageDoc::INCH: return CString( "Inches" ); break;
 		case CLinkageDoc::MM:
-		default: return CString( "Millimeters" ); break;
+		default: return bShortVersion ? "MM" : "Millimeters"; break;
 	}
 }
 
@@ -4690,9 +4690,11 @@ bool CLinkageDoc::ChangeLinkLength( CLink *pLink, double Value, bool bPercentage
 	return true;
 }
 
-CString CLinkageDoc::GetSelectedElementCoordinates( void )
+CString CLinkageDoc::GetSelectedElementCoordinates( CString *pHintText )
 {
 	CString Text;
+	if( pHintText != 0 )
+		*pHintText = "";
 
 	if( IsSelectionMeshableGears() )
 	{
@@ -4726,6 +4728,8 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 			}
 			Text += Temp;
 		}
+		if( pHintText != 0 )
+			*pHintText = "Ratio";
 		return Text;
 	}
 
@@ -4741,6 +4745,7 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 
 	int SelectedCount = GetSelectedConnectorCount();
 	int SelectedLinks = GetSelectedLinkCount( false );
+	bool bLinkSelected = false;
 
 	pConnector0 = GetSelectedConnector( 0 );
 	if( pConnector0 == 0 )
@@ -4759,6 +4764,7 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 		pConnector1 = pSelectedLink->GetConnector( 1 );
 
 		SelectedLinks = 0; // Just using the connectors from the link and not the link.
+		bLinkSelected = true; // For test hint info.
 
 		SelectedCount = 2;
 	}
@@ -4780,6 +4786,8 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 				return "";
 
 			Text.Format( "%.4lf,%.4lf", Point0.x, Point0.y );
+			if( pHintText != 0 )
+				*pHintText = "X,Y Coordinates";
 			break;
 		}
 
@@ -4800,6 +4808,13 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 
 			double distance = Distance( Point0, Point1 );
 			Text.Format( "%.4lf", distance );
+			if( pHintText != 0 )
+			{
+				if( bLinkSelected )
+					*pHintText = " Length";
+				else
+					*pHintText = " Distance";
+			}
 			break;
 		}
 
@@ -4811,6 +4826,9 @@ CString CLinkageDoc::GetSelectedElementCoordinates( void )
 			if( Angle > 180 )
 				Angle = Angle - 360;
 			Text.Format( "%.4lf", Angle );
+			if( pHintText != 0 )
+				*pHintText = "°Angle";
+
 			break;
 		}
 	}

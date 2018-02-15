@@ -353,7 +353,7 @@ CConnector::CConnector( const CConnector &ExistingConnector ) : CElement( Existi
 	m_LimitAngle = ExistingConnector.m_LimitAngle;
 	m_bInput = ExistingConnector.m_bInput;
 	m_bAnchor = ExistingConnector.m_bAnchor;
-	m_bSelected = ExistingConnector.m_bSelected;
+	m_bSelected = false; // ExistingConnector.m_bSelected; // Can't copy the selection state since being selected is more than just having this flag set (like the document keeping track of all selected elements).
 	m_bTempFixed = ExistingConnector.m_bTempFixed;
 	m_bDrawingConnector = ExistingConnector.m_bDrawingConnector;
 	m_Layers = ExistingConnector.m_Layers;

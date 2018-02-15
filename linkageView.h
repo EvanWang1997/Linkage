@@ -361,6 +361,7 @@ private:
 	void SetPrinterOrientation( void );
 
 	void UpdateForDocumentChange( bool bUpdateRotationCenter = true );
+	void SelectionChanged( void );
 
 // Generated message map functions
 protected:
