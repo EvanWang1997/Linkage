@@ -400,6 +400,29 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 static const int SMALL_FONT_SIZE = 9;
 static const int MEDIUM_FONT_SIZE = 13;
 
+static COLORREF DesaturateColor( COLORREF Color, double ByAmount )
+{
+	double L = 0.3 * GetRValue( Color ) + 0.6 * GetGValue( Color ) + 0.1 * GetBValue( Color );
+	return RGB( GetRValue( Color ) + ByAmount * (L - GetRValue( Color )),
+		GetGValue( Color ) + ByAmount * (L - GetGValue( Color )),
+		GetBValue( Color ) + ByAmount * (L - GetBValue( Color )) );
+}
+
+static COLORREF LightenColor( COLORREF Color, double byAmount )
+{
+	double Red = GetRValue( Color ) / 255.0;
+	double Green = GetGValue( Color ) / 255.0;
+	double Blue = GetBValue( Color ) / 255.0;
+	if( Red < 1.0 )
+		Red += ( 1.0 - Red ) * byAmount;
+	if( Green < 1.0 )
+		Green += ( 1.0 - Green ) * byAmount;
+	if( Blue < 1.0 )
+		Blue += ( 1.0 - Blue ) * byAmount;
+
+	return RGB( (int)( Red * 255 ), (int)( Green * 255 ), (int)( Blue * 255 ) );
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CLinkageView construction/destruction
 
@@ -1689,7 +1712,7 @@ void CLinkageView::DrawGrid( CRenderer* pRenderer, int Type )
 	double Test = Scale( min( xGapDistance, yGapDistance ) );
 	if( Test < VIRTUAL_PIXEL_SNAP_DISTANCE * 1.5 )
 	{
-		SetStatusText( "Grid is too small to display" );
+		//SetStatusText( "Grid is too small to display" );
 		return;
 	}
 
@@ -5833,6 +5856,9 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 			Color = RGB(0, 0, 0);
 	}
 
+	if( ( m_SelectedEditLayers & CLinkageDoc::MECHANISMLAYERS ) == 0 )
+		Color = LightenColor( DesaturateColor( Color, 0.5 ), 0.6 );
+
 	CFPoint Point = pConnector->GetPoint();
 	Point = Scale( Point );
 
@@ -6321,6 +6347,12 @@ void CLinkageView::DrawActuator( CRenderer* pRenderer, unsigned int OnLayers, CL
 		Blue += ( 1.0 - Blue ) * .7;
 
 	COLORREF SecondColor = RGB( (int)( Red * 255 ), (int)( Green * 255 ), (int)( Blue * 255 ) );
+
+	if( ( m_SelectedEditLayers & CLinkageDoc::MECHANISMLAYERS ) == 0 )
+	{
+		Color = LightenColor( DesaturateColor( Color, 0.5 ), 0.6 );
+		SecondColor = LightenColor( DesaturateColor( SecondColor, 0.5 ), 0.6 );
+	}
 
 	int PointCount = 0;
 	CFPoint* Points = pLink->GetHull( PointCount );
@@ -7545,6 +7577,9 @@ void CLinkageView::DrawLock( CRenderer* pRenderer, CFPoint LockLocation )
 
 void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGearConnections, unsigned int OnLayers, CLink *pLink, bool bShowlabels, bool bDrawHighlight, bool bDrawFill )
 {
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
 	if( ( pLink->GetLayers() & OnLayers ) == 0 )
 		return;
 
@@ -7563,9 +7598,6 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 			if( pLink->IsSelected( true ) )
 			{
 				CPen GrayPen;
-
-				CLinkageDoc* pDoc = GetDocument();
-				ASSERT_VALID(pDoc);
 
 				GrayPen.CreatePen( PS_SOLID, 1, pDoc->GetLastSelectedLink() == pLink ? COLOR_MAJORSELECTION : COLOR_MINORSELECTION ) ;
 				pOldPen = pRenderer->SelectObject( &GrayPen );
@@ -7612,12 +7644,13 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 	CPen Pen;
 	COLORREF Color;
 
-	if( !pLink->IsOnLayers( CLinkageDoc::MECHANISMLAYERS ) )
-		Color = pLink->GetColor();
-	else if( pRenderer->GetColorCount() == 2 )
+	if( pRenderer->GetColorCount() == 2 )
 		Color = RGB( 0, 0, 0 );
 	else
 		Color = pLink->GetColor();
+
+	if( ( m_SelectedEditLayers & CLinkageDoc::MECHANISMLAYERS ) == 0 )
+		Color = LightenColor( DesaturateColor( Color, 0.5 ), 0.6 );
 
 	if( bShowlabels && ( Count > 1 || pLink->IsGear() ) )
 	{
@@ -8186,7 +8219,10 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 		pConnector->SetColor( Dialog.m_Color );
 		if( Dialog.m_bColorIsSet )
 			pConnector->SetUserColor( true );
-		pConnector->SetStartOffset( fabs( fmod( Dialog.m_StartOffset, pConnector->GetLimitAngle() * 2 ) ) );
+		if( Dialog.m_StartOffset == 0 || pConnector->GetLimitAngle() == 0 )
+			pConnector->SetStartOffset( Dialog.m_StartOffset );
+		else
+			pConnector->SetStartOffset( fabs( fmod( Dialog.m_StartOffset, pConnector->GetLimitAngle() * 2 ) ) );
 		pConnector->SetLocked( Dialog.m_bLocked == TRUE );
 
 		if( Dialog.m_xPosition != pConnector->GetPoint().x ||

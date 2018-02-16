@@ -270,15 +270,17 @@ class CRendererImplementation
 		CFPoint FirstPoint2;
 		int FillPoint = 0;
 
+		static const double Adjust = 0.965;
+
 		double Red = GetRValue( Color ) / 255.0;
 		double Green = GetGValue( Color ) / 255.0;
 		double Blue = GetBValue( Color ) / 255.0;
 		if( Red < 1.0 )
-			Red += ( 1.0 - Red ) * .965;
+			Red += ( 1.0 - Red ) * Adjust;
 		if( Green < 1.0 )
-			Green += ( 1.0 - Green ) * .965;
+			Green += ( 1.0 - Green ) * Adjust;
 		if( Blue < 1.0 )
-			Blue += ( 1.0 - Blue ) * .965;
+			Blue += ( 1.0 - Blue ) * Adjust;
 
 		NewColor = RGB( (int)( Red * 255 ), (int)( Green * 255 ), (int)( Blue * 255 ) );
 		CBrush Brush;

@@ -5043,7 +5043,8 @@ bool CLinkageDoc::CanAddConnector( void )
 	}
 	else if( GetSelectedLinkCount( false ) == 1 )
 	{
-		if( GetSelectedLink( 0, false )->IsActuator() )
+		CLink *pLink = GetSelectedLink( 0, false );
+		if( pLink != 0 || pLink->IsActuator() || pLink->IsGear() )
 			return false;
 		return /* ( GetSelectedLink( 0, false )->GetLayers() & MECHANISMLAYERS ) != 0 && */ GetSelectedConnectorCount() == 0 || ( GetSelectedConnectorCount() == 1 && GetSelectedConnector( 0 )->IsAlone() );
 	}
