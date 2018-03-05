@@ -59,7 +59,7 @@ void CConnectorPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_MyDoubleText(pDX, IDC_EDIT7, m_SlideRadius, 4);
 	DDX_Control(pDX, IDC_SLIDERADIUSMINPROMPT, m_SlideRadiusMinPrompt);
 	DDX_Control(pDX, IDC_SLIDRADIUSMINVALUE, m_SlideRadiusMinControl);
-	DDX_MyDoubleText(pDX, IDC_SLIDRADIUSMINVALUE, m_MinimumSlideRadius, 4);
+	DDX_Text(pDX, IDC_SLIDRADIUSMINVALUE, m_MinimumSlideRadius );
 	DDX_Control(pDX, IDC_EDIT2, m_xControl);
 	DDX_Control(pDX, IDC_EDIT4, m_yControl);
 	DDX_Control(pDX, IDC_FASTENEDTO, m_FastenedToControl);

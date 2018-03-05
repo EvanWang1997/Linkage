@@ -77,8 +77,16 @@ void AFXAPI CMyDialog::DDX_MyDoubleText( CDataExchange* pDX, int nIDC, double& v
     MyAfxTextFloatFormat(pDX, nIDC, &value, value, Precision, DBL_DIG);
 }
 
-BOOL AFXAPI CMyDialog::MyAfxSimpleFloatParse(LPCTSTR lpszText, double& d)
+BOOL AFXAPI CMyDialog::MyAfxSimpleFloatParse(LPCTSTR lpszText, size_t BufferSize, double& d)
 {
+	ASSERT(lpszText != NULL);
+
+	if (_sntscanf_s(lpszText, BufferSize, _T("%lf"), &d) != 1)
+		return FALSE;
+
+	return TRUE;
+
+/*
 	ASSERT(lpszText != NULL);
 	while (*lpszText == ' ' || *lpszText == '\t')
 		lpszText++;
@@ -93,8 +101,14 @@ BOOL AFXAPI CMyDialog::MyAfxSimpleFloatParse(LPCTSTR lpszText, double& d)
 	if (*lpszText != '\0')
 		return FALSE;   // not terminated properly
 
-	return TRUE;
+	return TRUE;*/
 }
+
+
+
+
+
+
 
 void AFXAPI CMyDialog::MyAfxTextFloatFormat(CDataExchange* pDX, int nIDC,
                                   void* pData, double value, int nSizeGcvt,
@@ -113,7 +127,7 @@ void AFXAPI CMyDialog::MyAfxTextFloatFormat(CDataExchange* pDX, int nIDC,
     {
         ::GetWindowText(hWndCtrl, szBuffer, _countof(szBuffer));
         double d;
-        if (!MyAfxSimpleFloatParse(szBuffer, d))
+        if (!MyAfxSimpleFloatParse(szBuffer, _countof(szBuffer), d))
         {
             AfxMessageBox(AFX_IDP_PARSE_REAL);
             pDX->Fail();            // throws exception

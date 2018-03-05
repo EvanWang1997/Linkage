@@ -146,7 +146,7 @@ void CPointPropertiesDialog::OnBnClickedCheck1()
 		CString Text;
 		m_RadiusControl.GetWindowText( Text );
 		double Value = 0.0;
-		if( !MyAfxSimpleFloatParse( Text, Value ) )
+		if( !MyAfxSimpleFloatParse( Text, Text.GetLength(), Value ) )
 			Value = 0.0;
 
 		if( Value == 0.0 )

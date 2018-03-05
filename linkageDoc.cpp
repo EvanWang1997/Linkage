@@ -4823,8 +4823,8 @@ CString CLinkageDoc::GetSelectedElementCoordinates( CString *pHintText )
 			if( pConnector1 == 0 || pConnector2 == 0 )
 				return "";
 			double Angle = GetAngle( pConnector1->GetOriginalPoint(), pConnector0->GetOriginalPoint(), pConnector2->GetOriginalPoint() );
-			if( Angle > 180 )
-				Angle = Angle - 360;
+			if( Angle < 0 )
+				Angle += 360.0; // Because the hint mark for the angle is never shown on the "negative" side of the angle, don't show the number as negative.
 			Text.Format( "%.4lf", Angle );
 			if( pHintText != 0 )
 				*pHintText = "°Angle";
@@ -5044,7 +5044,7 @@ bool CLinkageDoc::CanAddConnector( void )
 	else if( GetSelectedLinkCount( false ) == 1 )
 	{
 		CLink *pLink = GetSelectedLink( 0, false );
-		if( pLink != 0 || pLink->IsActuator() || pLink->IsGear() )
+		if( pLink == 0 || pLink->IsActuator() || pLink->IsGear() )
 			return false;
 		return /* ( GetSelectedLink( 0, false )->GetLayers() & MECHANISMLAYERS ) != 0 && */ GetSelectedConnectorCount() == 0 || ( GetSelectedConnectorCount() == 1 && GetSelectedConnector( 0 )->IsAlone() );
 	}
