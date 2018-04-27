@@ -1651,6 +1651,9 @@ bool CLinkageDoc::StretchSelected( CFRect OriginalRect, CFRect NewRect, _Directi
 		if( !pConnector->IsSelected() && !pConnector->IsLinkSelected() )
 			continue;
 
+		if( pConnector->IsLocked() )
+			continue;
+
 		CFPoint Scale( OriginalRect.Width() == 0 ? 1 : NewRect.Width() / OriginalRect.Width(), OriginalRect.Height() == 0 ? 1 : NewRect.Height() / OriginalRect.Height() );
 
 		CFPoint OldPoint = pConnector->GetOriginalPoint();
@@ -4656,6 +4659,8 @@ bool CLinkageDoc::ChangeLinkLength( CLink *pLink, double Value, bool bPercentage
 		return false;
 	if( IsLinkLocked( pConnector ) && IsLinkLocked( pConnector2 ) )
 		return false;
+	if( pConnector->IsLocked() && pConnector2->IsLocked() )
+		return false;
 	CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
 	double LineLength = Line.GetLength();
 	double NewLineLength = LineLength;
@@ -4665,14 +4670,14 @@ bool CLinkageDoc::ChangeLinkLength( CLink *pLink, double Value, bool bPercentage
 		NewLineLength = Value;
 	double OneEndAdd = ( NewLineLength - LineLength ) / 2;
 	PushUndo();
-	if( IsLinkLocked( pConnector ) )
+	if( IsLinkLocked( pConnector ) || pConnector->IsLocked() )
 	{
 		CFLine Line( pConnector->GetPoint(), pConnector2->GetPoint() );
 		Line.SetLength( NewLineLength );
 		PushUndo();
 		pConnector2->SetPoint( Line.GetEnd() );
 	}
-	else if( IsLinkLocked( pConnector2 ) )
+	else if( IsLinkLocked( pConnector2 ) || pConnector2->IsLocked() )
 	{
 		CFLine Line( pConnector2->GetPoint(), pConnector->GetPoint() );
 		Line.SetLength( NewLineLength );
@@ -4853,6 +4858,7 @@ CLinkageDoc::_CoordinateChange CLinkageDoc::SetSelectedElementCoordinates( CFPoi
 	CConnector *pConnector = (CConnector*)GetSelectedConnector( 0 );
 
 	CoordinateCount = sscanf_s( (const char*)Text, "%lf %c%c", &Value, &Modifier, 1, &Dummy1, 1 );
+
 	if( CoordinateCount == 2 && Modifier == '%' )
 	{
 		if( SelectedConnectorCount == 2 && SelectedLinkCount == 0 )
@@ -4966,6 +4972,56 @@ CLinkageDoc::_CoordinateChange CLinkageDoc::SetSelectedElementCoordinates( CFPoi
 
 	return _CoordinateChange::NONE;
 }
+
+bool CLinkageDoc::CanSimulate( CString &ErrorIfFalse )
+{
+	int Inputs = 0;
+	int Actuators = 0;
+	int GroundedActuators = 0;
+	int Anchors = 0;
+	POSITION Position = m_Links.GetHeadPosition();
+	while( Position != 0 )
+	{
+		CLink *pLink = m_Links.GetNext( Position );
+		if( pLink == 0 )
+			continue;
+		if( pLink->IsActuator() )
+		{
+			++Inputs;
+			++Actuators;
+			GroundedActuators += pLink->GetAnchorCount();
+		}
+	}
+	Position = m_Connectors.GetHeadPosition();
+	while( Position != 0 )
+	{
+		CConnector *pConnector = m_Connectors.GetNext( Position );
+		if( pConnector == 0 )
+			continue;
+		if( pConnector->IsInput() )
+			++Inputs;
+		if( pConnector->IsAnchor() )
+			++Anchors; 
+	}
+	if( Inputs == 0 )
+	{
+		ErrorIfFalse = "The mechanism has no inputs. A rotating input connector or a linear actuator is required to run the mechanism.";
+		return false;
+	}
+	if( Anchors == 0 )
+	{
+		ErrorIfFalse = "The mechanism has anchors. At least one anchor is required to connect the mechanism to the \"ground\"";
+		return false;
+	}
+	//if( Actuators >= Inputs && GroundedActuators == 0 )
+	//{
+	//	ErrorIfFalse = "None of the linear actuators are anchored. The mechanism cannot be simulated.";
+	//	return false;
+	//}
+	return true;
+
+}
+
 
 CLink *CLinkageDoc::GetSelectedLink( int Index, bool bOnlyWithMultipleConnectors )
 {

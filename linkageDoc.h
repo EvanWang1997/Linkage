@@ -128,6 +128,7 @@ public:
 	std::string& GetBackgroundImage( void ) { return m_BackgroundImageData; }
 	void SetBackgroundTransparency( double Transparency ) { m_BackgroundTransparency = Transparency; }
 	double GetBackgroundTransparency( void ) { return m_BackgroundTransparency; }
+	bool CanSimulate( CString &ErrorIfFalse );
 
 	enum _SelectDirection { NEXT, PREVIOUS };
 	bool SelectNext( _SelectDirection SelectDirection );

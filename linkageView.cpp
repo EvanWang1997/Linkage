@@ -3711,8 +3711,23 @@ void CLinkageView::StopMechanismSimulate( bool KeepCurrentPositions )
 	UpdateForDocumentChange();
 }
 
+bool CLinkageView::CanSimulate( void )
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	CString Error;
+	if( !pDoc->CanSimulate( Error ) )
+	{
+		AfxMessageBox( Error );
+		return false;
+	}
+	return true;
+}
+
 void CLinkageView::OnMechanismSimulate()
 {
+	if( !CanSimulate() )
+		return;
 	ConfigureControlWindow( AUTO );
 	StartMechanismSimulate( AUTO );
 }
@@ -4304,6 +4319,8 @@ void CLinkageView::OnUpdateButtonStop(CCmdUI *pCmdUI)
 
 void CLinkageView::OnButtonRun()
 {
+	if( !CanSimulate() )
+		return;
 	if( m_bSimulating )
 	{
 		if( m_SimulationControl == STEP )
@@ -8505,6 +8522,9 @@ void CLinkageView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 
 void CLinkageView::OnFileSaveVideo()
 {
+	if( !CanSimulate() )
+		return;
+
 	CFileDialog dlg( 0, "avi", 0, 0, "AVI Video Files|*.avi|All Files|*.*||" );
 	dlg.m_ofn.lpstrTitle = "Save Video";
 	dlg.m_ofn.Flags |= OFN_NOCHANGEDIR | OFN_NONETWORKBUTTON | OFN_OVERWRITEPROMPT;
@@ -8774,6 +8794,9 @@ void CLinkageView::OnEndPrintPreview( CDC* pDC, CPrintInfo* pInfo, POINT point, 
 
 void CLinkageView::OnSimulateInteractive()
 {
+	if( !CanSimulate() )
+		return;
+	
 	ConfigureControlWindow( INDIVIDUAL );
 
 	StartMechanismSimulate( INDIVIDUAL );
@@ -8781,6 +8804,9 @@ void CLinkageView::OnSimulateInteractive()
 
 void CLinkageView::OnSimulatePause()
 {
+	if( !CanSimulate() )
+		return;
+
 	if( m_bSimulating && ( m_SimulationControl == AUTO || m_SimulationControl == ONECYCLE ) )
 		m_SimulationControl = STEP;
 	else
@@ -8792,6 +8818,9 @@ void CLinkageView::OnSimulatePause()
 
 void CLinkageView::OnSimulateOneCycle()
 {
+	if( !CanSimulate() )
+		return;
+
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
@@ -8928,6 +8957,9 @@ void CLinkageView::OnUpdateSimulateInteractive(CCmdUI *pCmdUI)
 
 void CLinkageView::OnSimulateManual()
 {
+	if( !CanSimulate() )
+		return;
+
 	ConfigureControlWindow( GLOBAL );
 	StartMechanismSimulate( GLOBAL );
 }

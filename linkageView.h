@@ -352,7 +352,10 @@ private:
 	void GetSetViewSpecificDimensionVisbility( bool bSave );
 	void SaveSettings( void );
 
-	bool CLinkageView::AnyAlwaysManual( void );
+	bool AnyAlwaysManual( void );
+
+	bool CanSimulate( void );
+
 
 	void EditProperties( CConnector *pConnector, CLink *pLink, bool bSelectedLinks );
 
