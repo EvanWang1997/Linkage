@@ -1,9 +1,7 @@
-#if !defined( _Linkage_CONNECTOR_H_ )
-#define _Linkage_CONNECTOR_H_
+#pragma once
 
 #include "Element.h"
 #include "geometry.h"
-//#include "Renderer.h"
 
 class ConnectorListOperation
 {
@@ -157,5 +155,4 @@ struct CompareConnectorDistance
 	}
 };
 
-#endif
 

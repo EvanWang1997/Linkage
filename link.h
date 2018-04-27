@@ -1,10 +1,7 @@
-#if !defined( _Linkage_LINK_H_ )
-#define _Linkage_LINK_H_
-
+#pragma once
 #include "Element.h"
 #include "connector.h"
 #include <list>
-
 
 class LinkList : public CList< class CLink*, class CLink* >
 {
@@ -207,4 +204,3 @@ class CLink : public CElement
 	int GetInputConnectorCount( void );
 };
 
-#endif
