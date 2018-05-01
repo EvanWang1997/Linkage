@@ -307,6 +307,7 @@ class CSimulatorImplementation
 			 */
 			for( int IntermediateStep = INTERMEDIATE_STEPS - 1; IntermediateStep >= 0 && bResult; --IntermediateStep )
 			{
+				DebugItemList.RemoveAll(); // Delete these before the last step.
 				POSITION Position = pConnectors->GetHeadPosition();
 				while( Position != 0 )
 				{
@@ -799,7 +800,6 @@ class CSimulatorImplementation
 		if( !pSlider1->GetSliderArc( LinkArc, true ) )
 			return false;
 
-	//		DebugItemList.AddTail( new CDebugItem( LinkArc ) );
 
 		if( bOtherLinkHasSliders )
 		{
@@ -1177,8 +1177,6 @@ class CSimulatorImplementation
 
 			if( !bHit && !bHit2 )
 			{
-	//			DebugItemList.AddTail( new CDebugItem( Line ) );
-	//			DebugItemList.AddTail( new CDebugItem( Circle ) );
 				return false;
 			}
 
@@ -1250,78 +1248,123 @@ class CSimulatorImplementation
 		 * Slide the link so that it's slide limits line up through the fixed sliding connector.
 		 */
 
-		CConnector *pLimit1 = 0;
-		CConnector *pLimit2 = 0;
-		CConnector *pSlider1 = 0;
-		CConnector *pSlider2 = 0;
+		CConnector *pOther1 = 0;
+		CConnector *pOther2 = 0;
+		CConnector *pThis1 = 0;
+		CConnector *pThis2 = 0;
 		CConnector *pActualSlider1 = 0;
 		CConnector *pActualSlider2 = 0;
 		bool bOtherLinkHasSliders;
 
 		// Double check that it can slide and get the limits for that slide.
-		if( !pLink->CanOnlySlide( &pLimit1, &pLimit2, &pSlider1, &pSlider2, &bOtherLinkHasSliders ) )
+		// Note that "pOther_" and "pThis_" pointers are not correct right after this call and
+		// they might refer to the wrong link until swapped later.
+		if( !pLink->CanOnlySlide( &pOther1, &pOther2, &pThis1, &pThis2, &bOtherLinkHasSliders ) )
 			return false;
 
-		if( !bOtherLinkHasSliders )
+		// Save actual sliders and limits for error checking later.
+		CConnector *pLimit1 = pOther1;
+		CConnector *pLimit2 = pOther2;
+		CConnector *pSlider1 = pThis1;
+		CConnector *pSlider2 = pThis2;
+
+		if( bOtherLinkHasSliders )
 		{
-			SWAP( pSlider1, pLimit1 );
-			SWAP( pSlider2, pLimit2 );
+			// Swap so that the connector pointers point to connectors on the other link
+			// and on this link are refering to the correct link. it does not matter which ones are sliders
+			// and which ones are limits.
+			SWAP( pThis1, pOther1 );
+			SWAP( pThis2, pOther2 );
 		}
 
 		// Check to see if the slider that positions the link is part of the link. This is handled by other
 		// code elsewhere so leave this function.
-		if( pTargetConnector->IsSharingLink( pLimit1 ) )
+		if( pTargetConnector->IsSharingLink( pOther1 ) )
 			return false;
 
-		// Get a line through the connector slider limits in their original location.
+		// Get a line through the other sliders or limits in their original location.
+		// This is used to figure out the relationship between the slide control path of this
+		// link and the one connector that is moving this link. The start of this line is moved
+		// further out from the line segment to ensure that the intersection of the two line (done below)
+		// is always on the segment now and later when the lines are being used for positioning.
+		CFLine SlideLine( pOther1->GetOriginalPoint(), pOther2->GetOriginalPoint() );
+		// Get the new version of this line.
+		CFLine NewSlideLine( pOther1->GetTempPoint(), pOther2->GetTempPoint() );
+
+		// Get the change in angle from the original to the new slide line to allow
+		// the new connection line angle to be adjusted.
+		double ChangeAngle = NewSlideLine.GetAngle() - SlideLine.GetAngle();
+		ChangeAngle = GetClosestAngle( SlideLine.GetAngle(), ChangeAngle );
+
+		// Get a line through the connector slider limits in their original location. This is
+		// the line that controls the location of the link.
 		CFLine ConnectedLine( pTargetLimit1->GetOriginalPoint(), pTargetLimit2->GetOriginalPoint() );
+		// Get a new version of this line using the change angle of the slide path.
+		CFLine NewConnectedLine = ConnectedLine;
+		NewConnectedLine -= ConnectedLine.GetStart();
+		NewConnectedLine += pTargetConnector->GetPoint();
+		NewConnectedLine.m_End.RotateAround( NewConnectedLine.m_Start, ChangeAngle );
 
-		// Get a line through the link slide limits in their original location.
-		CFLine SlideLine( pLimit1->GetOriginalPoint(), pLimit2->GetOriginalPoint() );
-
-		// Their intersection.
+		// Get the intersection of the connected line and the slide path line.
 		CFPoint Intersect;
 		if( !Intersects( ConnectedLine, SlideLine, Intersect ) )
 			return false;
 
-		// Save the distance form the intersection to one of the sliding connectors on this link.
-		double IntersectToSlider = Distance( Intersect, pSlider1->GetOriginalPoint() );
-		if( !bOtherLinkHasSliders )
-			IntersectToSlider = -IntersectToSlider;
-
-		// Get a line through the new location of the link slide limits.
-		CFLine NewSlideLine( pLimit1->GetPoint(), pLimit2->GetPoint() );
-
-		// Get the change in angle from the original to the new slide limit line.
-		double ChangeAngle = NewSlideLine.GetAngle() - SlideLine.GetAngle();
-
-		// Figure out the angle between the two lines at the intersection point. Use the connected slider location for one point and one of the slide limits for the other.
-		// double SlideToSlideAngle = GetAngle( Intersect, pTargetConnector->GetOriginalPoint(), pLimit1->GetOriginalPoint() );
-
-		// Move the connected slider limit line to go through its new point.
-		ConnectedLine -= ConnectedLine.GetStart();
-		ConnectedLine += pTargetConnector->GetPoint();
-
-		// Change the connected slider limit line to be the proper new angle.
-		ConnectedLine.m_End.RotateAround( ConnectedLine.m_Start, ChangeAngle );
-
-		// Get the intersection of the connected slider limits and the link slider limits.
-		if( !Intersects( ConnectedLine, NewSlideLine, Intersect ) )
+		// Get the new intersection of the new connected line and the new slide path line.
+		CFPoint NewIntersect;
+		if( !Intersects( NewConnectedLine, NewSlideLine, NewIntersect ) )
 			return false;
 
-		// Find the location of the slider on the link based on its distance from the intersection and being on the new limit line.
-		// Use the NewSlideLine to measure this because it is already at the proper angle.
-		NewSlideLine -= NewSlideLine.m_Start;
-		NewSlideLine += Intersect;
-		NewSlideLine.SetLength( IntersectToSlider );
+		/*
+		 * Create a line from the slide line but make it start a long ways off. Then,
+		 * get the distance along it to the intersect point. Do the same for the new
+		 * slide line. Then determine the diffent distances along that line to the pThis1
+		 * connector location. Use the change to determine the new location of that connector
+		 * and finish the calculations by moving and rotating this link based on that new
+		 * pThis12 connector location. 
+		 */
 
-		ChangeAngle = GetClosestAngle( pSlider1->GetRotationAngle(), ChangeAngle );
-		pSlider1->SetRotationAngle( ChangeAngle );
-		pSlider1->MovePoint( NewSlideLine.m_End );
-		pLink->RotateAround( pSlider1 );
+		static const double StartAdjustment = -1000000.0;
+		CFLine Temp = SlideLine;
+		Temp.MoveEnds( StartAdjustment, 0 );
+		CFLine NewTemp = NewSlideLine;
+		NewTemp.MoveEnds( StartAdjustment, 0 );
+
+		double DistanceToIntersect = Distance( Temp.GetStart(), Intersect );
+		double DistanceTopThis1 = Distance( Temp.GetStart(), pThis1->GetOriginalPoint() );
+		double Change = DistanceToIntersect - DistanceTopThis1;
+		double DistanceToNewIntersect = Distance( NewTemp.GetStart(), NewIntersect );
+		DistanceToNewIntersect -= Change;
+		NewTemp.SetLength( DistanceToNewIntersect );
+
+		// NewTemp now ends at the expected location of the pThis1 connector.
+
+		DebugItemList.AddTail( new CDebugItem( NewTemp.GetEnd(), RGB( 0, 0, 255 ) ) );
+
+		pThis1->SetRotationAngle( ChangeAngle );
+		pThis1->MovePoint( NewTemp.m_End );
+		pLink->RotateAround( pThis1 );
+
+		// Error checking.
+		CFLine SlideLimitLine( pLimit1->GetTempPoint(), pLimit2->GetTempPoint() );
+		CFPoint TestPoint = pSlider1->GetTempPoint();
+		if( !TestPoint.SnapToLine( SlideLimitLine, true ) )
+		{
+			pSlider1->SetPositionValid( false );
+			return false;
+		}
+		TestPoint = pSlider2->GetTempPoint();
+		if( !TestPoint.SnapToLine( SlideLimitLine, true ) )
+		{
+			pSlider2->SetPositionValid( false );
+			return false;
+		}
+
+
+
 
 		/////// JUST FOR DEBUGGING
-		pLink->SetTempFixed( true );
+		//pLink->SetTempFixed( true );
 
 		/*
 
@@ -1467,11 +1510,9 @@ class CSimulatorImplementation
 								// It seems like this is the only place where the position of this connector is
 								// being validated - so validate it.
 								pTestConnector->SetPositionValid( true );
-								DebugItemList.AddTail( new CDebugItem( pTestConnector->GetTempPoint() ) );
 							}
 							else
 							{
-								DebugItemList.AddTail( new CDebugItem( pTestConnector->GetTempPoint() ) );
 								//pTestConnector->SetPositionValid( false );
 								//return false;
 							}

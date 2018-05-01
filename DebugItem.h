@@ -2,28 +2,34 @@
 
 #include "geometry.h"
 
+#define DEFAULT_COLOR RGB( 255, 0, 0 )
+
 class CDebugItem
 {
 	public:
-	CDebugItem( CFPoint Point ) 
+	CDebugItem( CFPoint Point, COLORREF Color = DEFAULT_COLOR ) 
 	{ 
 		m_Type = DEBUG_OBJECT_POINT;
 		m_Point = Point;
+		m_Color = Color;
 	}
-	CDebugItem( CFLine Line ) 
+	CDebugItem( CFLine Line, COLORREF Color = DEFAULT_COLOR ) 
 	{ 
 		m_Type = DEBUG_OBJECT_LINE;
 		m_Line = Line;
+		m_Color = Color;
 	}
-	CDebugItem( CFCircle Circle ) 
+	CDebugItem( CFCircle Circle, COLORREF Color = DEFAULT_COLOR ) 
 	{ 
 		m_Type = DEBUG_OBJECT_CIRCLE;
 		m_Circle = Circle;
+		m_Color = Color;
 	}
-	CDebugItem( CFArc Arc ) 
+	CDebugItem( CFArc Arc, COLORREF Color = DEFAULT_COLOR ) 
 	{ 
 		m_Type = DEBUG_OBJECT_ARC;
 		m_Arc = Arc;
+		m_Color = Color;
 	}
 	~CDebugItem() {}
 
@@ -32,6 +38,7 @@ class CDebugItem
 	CFLine m_Line;
 	CFCircle m_Circle;
 	CFArc m_Arc;
+	COLORREF m_Color;
 };
 
 class CDebugItemList : public CList< class CDebugItem*, class CDebugItem* >

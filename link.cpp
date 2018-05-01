@@ -666,7 +666,7 @@ bool CLink::CanOnlySlide( CConnector** pLimit1, CConnector** pLimit2, CConnector
 	/*
 	 * Find two sliding connectors that both slide on the same link.
 	 * Start with sliders that are on links connected to this link
-	 * then switch to testing the connectos on this link that are
+	 * then switch to testing the connectors on this link that are
 	 * sliders. In either case, if we find two sliders that slide on
 	 * this link or this link slides on another, return true with some
 	 * infomation about the sliders. Note that sliders on another link
@@ -757,7 +757,7 @@ bool CLink::CanOnlySlide( CConnector** pLimit1, CConnector** pLimit2, CConnector
 					}
 
 					if( pbSlidersOnLink != 0 )
-						*pbSlidersOnLink = Try == 1;
+						*pbSlidersOnLink = Try == 0;
 
 					return true;
 				}

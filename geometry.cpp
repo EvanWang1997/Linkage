@@ -2,19 +2,26 @@
 #include "math.h"
 #include "geometry.h"
 
-void CFPoint::SnapToLine( CFLine &Line, bool bToSegment, bool bStartToInfinity )
+bool CFPoint::SnapToLine( CFLine &Line, bool bToSegment, bool bStartToInfinity )
 {
     CFPoint AP = *this - Line.GetStart();
     CFPoint AB = Line.GetEnd() - Line.GetStart();
     double ab2 = AB.x*AB.x + AB.y*AB.y;
     double ap_ab = AP.x*AB.x + AP.y*AB.y;
     double t = ap_ab / ab2;
+	bool bOnAllowedSegment = true;
     if( bToSegment || bStartToInfinity )
     {
          if( t < 0.0f )
+		 {
 			t = 0.0f;
+			bOnAllowedSegment = false;
+		}
          else if( !bStartToInfinity && t > 1.0f )
+		 {
 			t = 1.0f;
+			bOnAllowedSegment = false;
+		}
     }
 
 	x = Line.m_Start.x + ( AB.x * t );
@@ -26,6 +33,8 @@ void CFPoint::SnapToLine( CFLine &Line, bool bToSegment, bool bStartToInfinity )
     //CFLine TempLine( CFPoint( 0, 0 ), AB );
     //TempLine.SetLength( TempLine.GetLength() * t );
     //*this = Line.GetStart() + TempLine.GetEnd();
+
+	return bOnAllowedSegment;
 }
 
 void CFCircle::SetCircle( CFPoint Center, CFPoint RadiusPoint )

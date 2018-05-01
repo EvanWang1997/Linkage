@@ -1755,20 +1755,22 @@ void CLinkageView::ClearDebugItems( void )
 
 void CLinkageView::DrawDebugItems( CRenderer *pRenderer )
 {
-	CPen Pen( PS_SOLID, 1, RGB( 255, 0, 0 ) );
-	CPen *pOldPen = pRenderer->SelectObject( &Pen );
-
 	pRenderer->SetTextAlign( TA_LEFT | TA_TOP );
 	pRenderer->SetTextColor( COLOR_TEXT );
 	CString Label;
 	CFPoint LabelPoint;
 	int Count = 0;
 	POSITION Position = DebugItemList.GetHeadPosition();
+	CPen *pOldPen = 0;
+	double LabelYAdjust = 0;
 	while( Position != 0 )
 	{
 		CDebugItem *pDebugItem = DebugItemList.GetNext( Position );
 		if( pDebugItem == 0 )
 			break;
+
+		CPen Pen( PS_SOLID, 1, pDebugItem->m_Color );
+		CPen *pOldPen = pRenderer->SelectObject( &Pen );
 
 		Label.Format( "DEBUG %d", Count );
 
@@ -1779,6 +1781,11 @@ void CLinkageView::DrawDebugItems( CRenderer *pRenderer )
 			Point = Scale( Point );
 			pRenderer->Arc( Point.x - m_ConnectorRadius * 2, Point.y - m_ConnectorRadius * 2, Point.x + m_ConnectorRadius * 2, Point.y + m_ConnectorRadius * 2,
 				            Point.x, Point.y - m_ConnectorRadius * 2, Point.x, Point.y - m_ConnectorRadius * 2 );
+			CFLine Cross1( Point.x - m_ConnectorRadius * 2, Point.y - m_ConnectorRadius * 2, Point.x + m_ConnectorRadius * 2, Point.y + m_ConnectorRadius * 2 );
+			CFLine Cross2( Point.x - m_ConnectorRadius * 2, Point.y + m_ConnectorRadius * 2, Point.x + m_ConnectorRadius * 2, Point.y - m_ConnectorRadius * 2 );
+			pRenderer->DrawLine( Cross1 );
+			pRenderer->DrawLine( Cross2 );
+
 		}
 		else if( pDebugItem->m_Type == pDebugItem->DEBUG_OBJECT_LINE )
 		{
@@ -1805,11 +1812,16 @@ void CLinkageView::DrawDebugItems( CRenderer *pRenderer )
 			pRenderer->SelectObject( pSaveBrush );
 		}
 		LabelPoint = Scale( LabelPoint );
+		LabelPoint.y -= LabelYAdjust;
+		LabelYAdjust += 4;
+		pRenderer->SetTextColor( pDebugItem->m_Color );
+		pRenderer->SetTextAlign( TA_TOP | TA_LEFT );
 		pRenderer->TextOut(LabelPoint.x, LabelPoint.y, Label );
 		++Count;
 	}
 
-	pRenderer->SelectObject( pOldPen );
+	if( pOldPen != 0 )
+		pRenderer->SelectObject( pOldPen );
 }
 
 CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )

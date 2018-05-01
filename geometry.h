@@ -68,7 +68,7 @@ class CFPoint
 		
 	bool IsInsideOf( class CFRect &Rect );
 	
-	void SnapToLine( class CFLine &Line, bool bToSegment, bool bStartToInfinity = false );
+	bool SnapToLine( class CFLine &Line, bool bToSegment, bool bStartToInfinity = false );
 	CFPoint SnapToArc( class CFArc &TheArc );
 
 	double GetDistance( const CFPoint &Point ) const
