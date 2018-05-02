@@ -1268,7 +1268,7 @@ class CSimulatorImplementation
 		CConnector *pSlider1 = pThis1;
 		CConnector *pSlider2 = pThis2;
 
-		if( bOtherLinkHasSliders )
+		if( !bOtherLinkHasSliders )
 		{
 			// Swap so that the connector pointers point to connectors on the other link
 			// and on this link are refering to the correct link. it does not matter which ones are sliders

@@ -757,7 +757,7 @@ bool CLink::CanOnlySlide( CConnector** pLimit1, CConnector** pLimit2, CConnector
 					}
 
 					if( pbSlidersOnLink != 0 )
-						*pbSlidersOnLink = Try == 0;
+						*pbSlidersOnLink = Try == 1;
 
 					return true;
 				}
