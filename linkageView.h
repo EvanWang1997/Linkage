@@ -366,6 +366,15 @@ private:
 	void UpdateForDocumentChange( bool bUpdateRotationCenter = true );
 	void SelectionChanged( void );
 
+	/*
+	 * Standard accelerators work regardless of the focus. The editor window handles
+	 * editor-specific keys in it's own handling function to avoid this problem.
+	 */
+	bool HandleShortcutKeys( UINT nChar, unsigned int MyFlags );
+
+	void Nudge( double Horizontal, double Vertical );
+
+
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CLinkageView)
@@ -544,6 +553,17 @@ public:
 	afx_msg void OnEditCopy();
 	afx_msg void OnEditPaste();
 	afx_msg void OnSelectNext();
+	afx_msg void OnSelectPrevious();
+
+	afx_msg void OnNudgeLeft();
+	afx_msg void OnNudgeRight();
+	afx_msg void OnNudgeUp();
+	afx_msg void OnNudgeDown();
+	afx_msg void OnNudgeBigLeft();
+	afx_msg void OnNudgeBigRight();
+	afx_msg void OnNudgeBigUp();
+	afx_msg void OnNudgeBigDown();
+
 	afx_msg void OnUpdateEditPaste(CCmdUI *pCmdUI);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
@@ -567,6 +587,7 @@ public:
 	afx_msg void OnUpdateSimulateForwardBackward(CCmdUI *pCmdUI);
 
 protected:
+	virtual void OnInitialUpdate();
 	virtual void OnUpdate(CView* /*pSender*/, LPARAM /*lHint*/, CObject* /*pHint*/);
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
@@ -612,6 +633,8 @@ public:
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	afx_msg void OnFileSave();
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
 };
 
 #ifndef _DEBUG  // debug version in LinkageView.cpp

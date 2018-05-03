@@ -87,8 +87,11 @@ public:
 
 	void SetViewLayers( unsigned int Layers );
 	void SetEditLayers( unsigned int Layers );
+	void KeepLayerSelections( unsigned int Layers );
+
 
 	bool ClearSelection( void );
+	bool SelectElement( CElement *pElement );
 	bool SelectElement( CConnector *pConnector );
 	bool SelectElement( CLink *pLink );
 	bool SelectElement( CFPoint Point, double GrabDistance, double SolidLinkExpansion, bool bMultiSelect, bool &bSelectionChanged );
@@ -158,7 +161,7 @@ public:
 	
 	void Reset( bool bClearMotionPath = true, bool KeepCurrentPositions = false );
 	
-	void ConnectSelected( void );
+	CLink* ConnectSelected( void );
 	bool FastenSelected( void );
 	bool UnfastenSelected( void );
 	bool JoinSelected( bool bSaveUndoState );
@@ -325,6 +328,7 @@ private:
 
 	unsigned int m_ViewLayers;
 	unsigned int m_EditLayers;
+	unsigned int m_UsableLayers; // Combination of view and edit layers
 	
 	CBitArray m_IdentifiedConnectors;
 	CBitArray m_IdentifiedLinks;

@@ -258,6 +258,15 @@
 #define ID_BUTTON32850                  4850
 #define ID_SELECT_NEXT                  4851
 #define ID_VIEW_ANGLES                  4852
+#define ID_SELECT_PREVIOUS              4853
+#define ID_NUDGE_LEFT					4854
+#define ID_NUDGE_RIGHT					4855
+#define ID_NUDGE_UP						4856
+#define ID_NUDGE_DOWN					4857
+#define ID_NUDGE_BIGLEFT				4858
+#define ID_NUDGE_BIGRIGHT				4859
+#define ID_NUDGE_BIGUP					4860
+#define ID_NUDGE_BIGDOWN				4861
 #define ID_EDIT_SLIDE                   4863
 #define ID_EDIT_SLIDE32865              4865
 #define IDB_WRITESMALL                  4867

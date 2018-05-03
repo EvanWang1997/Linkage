@@ -161,7 +161,9 @@ void CSelectElementsDialog::OnItemchangedList2(NMHDR* pNMHDR, LRESULT* pResult)
 			CElement *pElement = (CElement*)m_ListControl2.GetItemData( Index );
 			if( pElement == 0 )
 				continue;
-			pElement->Select( m_ListControl2.GetCheck( Index ) != FALSE );
+			if( m_pDocument != 0 )
+				m_pDocument->SelectElement( pElement );
+				//pElement->Select( m_ListControl2.GetCheck( Index ) != FALSE );
 		}
 
 		if( m_pDocument != 0 )

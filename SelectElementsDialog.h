@@ -24,7 +24,7 @@ public:
 public:
 	ElementList m_AllElements;
 	bool m_bShowDebug;
-	CDocument *m_pDocument;
+	CLinkageDoc *m_pDocument;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

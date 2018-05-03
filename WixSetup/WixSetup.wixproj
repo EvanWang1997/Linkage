@@ -64,6 +64,11 @@ signtool sign /debug /n "David Rector" !(TargetPath)
 echo Copying release files
 copy $(SolutionDir)$(ConfigurationName)\linkage.exe $(TargetDir).  2&gt;nul 1&gt;nul
 copy $(SolutionDir)Linkage.pdf  $(TargetDir).  2&gt;nul 1&gt;nul
+mkdir $(ProjectDir)AllOutputs
+copy $(ProjectDir)ReleaseDirect2D\linkage.msi $(ProjectDir)\AllOutputs\linkage.msi
+copy $(ProjectDir)ReleaseDirect2D\linkage.pdf $(ProjectDir)\AllOutputs\linkage.pdf
+copy $(ProjectDir)Release\linkage.msi $(ProjectDir)\AllOutputs\linkageXP.msi
+copy $(ProjectDir)x64\ReleaseDirect2D\linkage.msi $(ProjectDir)\AllOutputs\linkage64.msi
 exit 0</PostBuildEvent>
   </PropertyGroup>
   <!--

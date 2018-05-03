@@ -9,7 +9,8 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -267,7 +268,17 @@ END
 
 IDR_MAINFRAME ACCELERATORS
 BEGIN
-    VK_RETURN,      ID_PROPERTIES_PROPERTIES, VIRTKEY, NOINVERT
+	"N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+	"O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+	"P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
+	"S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+END
+
+
+
+22 ACCELERATORS
+BEGIN
+	VK_RETURN,      ID_PROPERTIES_PROPERTIES, VIRTKEY, NOINVERT
     "A",            ID_EDIT_ADDCONNECTOR,   VIRTKEY, NOINVERT
     "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
     "B",            ID_EDIT_COMBINE,        VIRTKEY, NOINVERT
@@ -280,13 +291,9 @@ BEGIN
     "J",            ID_EDIT_JOIN,           VIRTKEY, NOINVERT
     "K",            ID_EDIT_LOCK,           VIRTKEY, NOINVERT
     "L",            ID_EDIT_SLIDE,          VIRTKEY, NOINVERT
-    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
-    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
-    "P",            ID_FILE_PRINT,          VIRTKEY, CONTROL, NOINVERT
     "P",            ID_PROPERTIES_PROPERTIES, VIRTKEY, NOINVERT
     "R",            ID_SIMULATION_RUN,      VIRTKEY, NOINVERT
     "S",            ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
-    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     "T",            ID_EDIT_SPLIT,          VIRTKEY, NOINVERT
     "U",            ID_EDIT_UNFASTEN,       VIRTKEY, NOINVERT
     "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
@@ -298,8 +305,9 @@ BEGIN
     VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
     VK_DELETE,      ID_EDIT_DELETESELECTED, VIRTKEY, NOINVERT
     VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
-    VK_TAB,         ID_SELECT_NEXT,         VIRTKEY, NOINVERT
-    "<",            ID_SIMULATE_BACKWARD,   ASCII,  NOINVERT
+	VK_TAB,         ID_SELECT_NEXT,         VIRTKEY, NOINVERT
+	VK_TAB,         ID_SELECT_PREVIOUS,     VIRTKEY, SHIFT, NOINVERT   
+	"<",            ID_SIMULATE_BACKWARD,   ASCII,  NOINVERT
     "[",            ID_SIMULATE_BACKWARD,   ASCII,  NOINVERT
     ">",            ID_SIMULATE_FORWARD,    ASCII,  NOINVERT
     "]",            ID_SIMULATE_FORWARD,    ASCII,  NOINVERT
@@ -320,12 +328,16 @@ BEGIN
     LTEXT           "Name:",IDC_NAMEPROMPT,45,18,22,8
     EDITTEXT        IDC_EDIT3,70,16,128,12,ES_AUTOHSCROLL
     CONTROL         "Connector",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,45,38,49,10
+    CONTROL         "Draw Motion Path",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,133,38,73,10
     CONTROL         "Anchor",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,45,59,39,10
     CONTROL         "Rotating Input Anchor of RPM:",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON,45,80,109,10
     EDITTEXT        IDC_EDIT1,157,80,42,12,ES_AUTOHSCROLL
     LTEXT           "Oscillation Limit Angle:",IDC_LIMITPROMPT,61,94,74,8
     EDITTEXT        IDC_EDIT8,157,93,42,12,ES_AUTOHSCROLL
+    LTEXT           "Oscillation Start Angle:",IDC_LIMITPROMPT2,61,107,73,8
+    EDITTEXT        IDC_EDIT9,157,106,42,12,ES_AUTOHSCROLL
     CONTROL         "Always Manual Operation",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,61,119,97,10
+    CONTROL         "Locked",IDC_LOCKED2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,139,38,10
     CONTROL         "Slide Path Radius:",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,157,73,10
     EDITTEXT        IDC_EDIT7,157,155,42,12,ES_AUTOHSCROLL
     LTEXT           "Slide Path Minimum Radius:",IDC_SLIDERADIUSMINPROMPT,62,169,91,8
@@ -336,13 +348,9 @@ BEGIN
     EDITTEXT        IDC_EDIT2,102,206,43,12,ES_AUTOHSCROLL
     LTEXT           ",",IDC_STATIC,148,208,8,8
     EDITTEXT        IDC_EDIT4,156,206,43,12,ES_AUTOHSCROLL
-    CONTROL         "Draw Motion Path",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,133,38,73,10
+    LTEXT           "Fastened to Link",IDC_FASTENEDTO,45,229,139,8
     DEFPUSHBUTTON   "OK",IDOK,49,260,66,14
     PUSHBUTTON      "Cancel",IDCANCEL,131,260,66,14
-    LTEXT           "Fastened to Link",IDC_FASTENEDTO,45,229,139,8
-    LTEXT           "Oscillation Start Angle:",IDC_LIMITPROMPT2,61,107,73,8
-    EDITTEXT        IDC_EDIT9,157,106,42,12,ES_AUTOHSCROLL
-    CONTROL         "Locked",IDC_LOCKED2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,139,38,10
 END
 
 IDD_SELECT_IMAGE_OPTION DIALOGEX 0, 0, 249, 75
@@ -591,8 +599,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,7,15,0
- PRODUCTVERSION 3,7,15,0
+ FILEVERSION 3,7,17,0
+ PRODUCTVERSION 3,7,17,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -608,12 +616,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.7.15.0"
+            VALUE "FileVersion", "3.7.17.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2018 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.7.15.0"
+            VALUE "ProductVersion", "3.7.17.0"
         END
     END
     BLOCK "VarFileInfo"

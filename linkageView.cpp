@@ -375,7 +375,18 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_FILE_SAVEMOTION, &CLinkageView::OnUpdateFileSaveMotion)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CLinkageView::OnFilePrintPreview)
-	ON_COMMAND(ID_SELECT_NEXT,OnSelectNext)
+	ON_COMMAND(ID_SELECT_NEXT, OnSelectNext)
+	ON_COMMAND(ID_SELECT_PREVIOUS, OnSelectPrevious)
+
+	ON_COMMAND(ID_NUDGE_LEFT, OnNudgeLeft)
+	ON_COMMAND(ID_NUDGE_RIGHT, OnNudgeRight)
+	ON_COMMAND(ID_NUDGE_UP, OnNudgeUp)
+	ON_COMMAND(ID_NUDGE_DOWN, OnNudgeDown)
+	ON_COMMAND(ID_NUDGE_BIGLEFT, OnNudgeBigLeft)
+	ON_COMMAND(ID_NUDGE_BIGRIGHT, OnNudgeBigRight)
+	ON_COMMAND(ID_NUDGE_BIGUP, OnNudgeBigUp)
+	ON_COMMAND(ID_NUDGE_BIGDOWN, OnNudgeBigDown)
+
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, &CLinkageView::OnUpdateEditUndo)
 	ON_COMMAND(ID_EDIT_UNDO, &CLinkageView::OnEditUndo)
 	ON_WM_HSCROLL()
@@ -395,6 +406,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND_RANGE( ID_SAMPLE_SIMPLE, ID_SAMPLE_UNUSED25, OnSelectSample )
 	//}}AFX_MSG_MAP
 		ON_COMMAND(ID_FILE_SAVE, &CLinkageView::OnFileSave)
+		ON_WM_SETFOCUS()
+		ON_WM_KILLFOCUS()
 		END_MESSAGE_MAP()
 
 static const int SMALL_FONT_SIZE = 9;
@@ -2906,12 +2919,14 @@ bool CLinkageView::DragSelectionBox( UINT nFlags, CFPoint point )
 
 void CLinkageView::OnLButtonDown(UINT nFlags, CPoint MousePoint)
 {
-	CFPoint point = AdjustClientAreaPoint( MousePoint );
+	SetFocus();
 
-	SetCapture();
+	CFPoint point = AdjustClientAreaPoint( MousePoint );
 
 	if( m_bSimulating || !m_bAllowEdit )
 		return;
+
+	SetCapture();
 
 	m_PreviousDragPoint = point;
 	m_DragStartPoint = point;
@@ -4090,7 +4105,9 @@ void CLinkageView::OnEditConnect()
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	pDoc->ConnectSelected();
+	CLink *pLink = pDoc->ConnectSelected();
+	if( pLink != 0 && m_bNewLinksSolid )
+		pLink->SetSolid( true );
 	InvalidateRect( 0 );
 }
 
@@ -5052,31 +5069,6 @@ void CLinkageView::OnUpdateViewSolidLinks(CCmdUI *pCmdUI)
 	pCmdUI->Enable( !m_bSimulating );
 }
 
-void CLinkageView::OnViewDrawing()
-{
-	CLinkageDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-
-	if( m_SelectedViewLayers & CLinkageDoc::DRAWINGLAYER )
-		m_SelectedViewLayers &= ~CLinkageDoc::DRAWINGLAYER;
-	else
-		m_SelectedViewLayers |= CLinkageDoc::DRAWINGLAYER;
-	SaveSettings();
-
-	pDoc->SetViewLayers( m_SelectedViewLayers );
-
-	InvalidateRect( 0 );
-}
-
-void CLinkageView::OnUpdateViewDrawing(CCmdUI *pCmdUI)
-{
-	CLinkageDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-
-	pCmdUI->SetCheck( ( m_SelectedViewLayers & CLinkageDoc::DRAWINGLAYER ) != 0 ? 1 : 0 );
-	pCmdUI->Enable( !m_bSimulating );
-}
-
 void CLinkageView::OnViewMechanism()
 {
 	CLinkageDoc* pDoc = GetDocument();
@@ -5090,6 +5082,9 @@ void CLinkageView::OnViewMechanism()
 
 	pDoc->SetViewLayers( m_SelectedViewLayers );
 
+	pDoc->FinishChangeSelected();
+	m_SelectionContainerRect = GetDocumentArea( false, true );
+	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
 	InvalidateRect( 0 );
 }
 
@@ -5099,6 +5094,34 @@ void CLinkageView::OnUpdateViewMechanism(CCmdUI *pCmdUI)
 	ASSERT_VALID(pDoc);
 
 	pCmdUI->SetCheck( ( m_SelectedViewLayers & CLinkageDoc::MECHANISMLAYERS ) != 0 ? 1 : 0 );
+	pCmdUI->Enable( !m_bSimulating );
+}
+
+void CLinkageView::OnViewDrawing()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	if( m_SelectedViewLayers & CLinkageDoc::DRAWINGLAYER )
+		m_SelectedViewLayers &= ~CLinkageDoc::DRAWINGLAYER;
+	else
+		m_SelectedViewLayers |= CLinkageDoc::DRAWINGLAYER;
+	SaveSettings();
+
+	pDoc->SetViewLayers( m_SelectedViewLayers );
+
+	pDoc->FinishChangeSelected();
+	m_SelectionContainerRect = GetDocumentArea( false, true );
+	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
+	InvalidateRect( 0 );
+}
+
+void CLinkageView::OnUpdateViewDrawing(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	pCmdUI->SetCheck( ( m_SelectedViewLayers & CLinkageDoc::DRAWINGLAYER ) != 0 ? 1 : 0 );
 	pCmdUI->Enable( !m_bSimulating );
 }
 
@@ -5115,6 +5138,9 @@ void CLinkageView::OnEditDrawing()
 
 	pDoc->SetEditLayers( m_SelectedEditLayers );
 
+	pDoc->FinishChangeSelected();
+	m_SelectionContainerRect = GetDocumentArea( false, true );
+	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
 	InvalidateRect( 0 );
 }
 
@@ -5123,8 +5149,8 @@ void CLinkageView::OnUpdateEditDrawing(CCmdUI *pCmdUI)
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	pCmdUI->SetCheck( ( m_SelectedViewLayers & CLinkageDoc::DRAWINGLAYER ) != 0 && ( m_SelectedEditLayers & CLinkageDoc::DRAWINGLAYER ) != 0 ? 1 : 0 );
-	pCmdUI->Enable( !m_bSimulating && ( m_SelectedViewLayers & CLinkageDoc::DRAWINGLAYER ) != 0 );
+	pCmdUI->SetCheck( ( m_SelectedEditLayers & CLinkageDoc::DRAWINGLAYER ) != 0 ? 1 : 0 );
+	pCmdUI->Enable( !m_bSimulating );
 }
 
 void CLinkageView::OnEditMechanism()
@@ -5132,7 +5158,7 @@ void CLinkageView::OnEditMechanism()
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	unsigned int CurrentEditLayers = m_SelectedEditLayers; //pDoc->GetEditLayers();
+	unsigned int CurrentEditLayers = m_SelectedEditLayers;
 
 	if( m_SelectedEditLayers & CLinkageDoc::MECHANISMLAYERS )
 		m_SelectedEditLayers &= ~CLinkageDoc::MECHANISMLAYERS;
@@ -5142,6 +5168,9 @@ void CLinkageView::OnEditMechanism()
 
 	pDoc->SetEditLayers( m_SelectedEditLayers );
 
+	pDoc->FinishChangeSelected();
+	m_SelectionContainerRect = GetDocumentArea( false, true );
+	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
 	InvalidateRect( 0 );
 }
 
@@ -5150,8 +5179,8 @@ void CLinkageView::OnUpdateEditMechanism(CCmdUI *pCmdUI)
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	pCmdUI->SetCheck( ( m_SelectedViewLayers & CLinkageDoc::MECHANISMLAYERS ) != 0 && ( m_SelectedEditLayers & CLinkageDoc::MECHANISMLAYERS ) != 0 ? 1 : 0 );
-	pCmdUI->Enable( !m_bSimulating && ( m_SelectedViewLayers & CLinkageDoc::MECHANISMLAYERS ) != 0 );
+	pCmdUI->SetCheck( ( m_SelectedEditLayers & CLinkageDoc::MECHANISMLAYERS ) != 0 ? 1 : 0 );
+	pCmdUI->Enable( !m_bSimulating );
 }
 
 void CLinkageView::OnViewDebug()
@@ -5340,6 +5369,8 @@ void CLinkageView::OnUpdateEditPaste(CCmdUI *pCmdUI)
 
 void CLinkageView::OnRButtonDown(UINT nFlags, CPoint MousePoint)
 {
+	SetFocus();
+	
 	CFPoint point = AdjustClientAreaPoint( MousePoint );
 
 	SetCapture();
@@ -5521,6 +5552,17 @@ void CLinkageView::OnMenuZoomfit()
 	InvalidateRect( 0 );
 }
 
+void CLinkageView::OnInitialUpdate()
+{
+	CView::OnInitialUpdate();
+
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	
+	pDoc->SetViewLayers( m_SelectedViewLayers );
+	pDoc->SetEditLayers( m_SelectedEditLayers );
+}
+
 void CLinkageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 {
 	SetScrollExtents();
@@ -5649,6 +5691,99 @@ void CLinkageView::SetOffset( CFPoint Offset )
 
 void CLinkageView::OnSelectNext( void )
 {
+	SetFocus();
+	
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if( pDoc->SelectNext( pDoc->NEXT ) )
+	{
+		ShowSelectedElementStatus();
+		UpdateForDocumentChange();
+		SelectionChanged();
+	}
+}
+
+void CLinkageView::OnSelectPrevious( void )
+{
+	SetFocus();
+	
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	if( pDoc->SelectNext( pDoc->PREVIOUS ) )
+	{
+		ShowSelectedElementStatus();
+		UpdateForDocumentChange();
+		SelectionChanged();
+	}
+}
+
+void CLinkageView::Nudge( double Horizontal, double Vertical )
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	double xNudge = Unscale( 1.0 / m_DPIScale ) * Horizontal;
+	double yNudge = Unscale( 1.0 / m_DPIScale ) * Vertical;
+	pDoc->MoveSelected( CFPoint( xNudge, yNudge ) );
+	UpdateForDocumentChange();
+}
+
+static const int BigNudge = 10;
+
+void CLinkageView::OnNudgeLeft( void )
+{
+	if( m_bSimulating )
+		OnSimulateStep( 0, false );
+	else if( m_bAllowEdit )
+		Nudge( -1, 0 );
+}
+
+void CLinkageView::OnNudgeRight( void )
+{
+	if( m_bSimulating )
+		OnSimulateStep( 1, false );
+	else if( m_bAllowEdit )
+		Nudge( 1, 0 );
+}
+
+void CLinkageView::OnNudgeUp( void )
+{
+	if( !m_bSimulating && m_bAllowEdit )
+		Nudge( 0, 1 );
+}
+
+void CLinkageView::OnNudgeDown( void )
+{
+	if( !m_bSimulating && m_bAllowEdit )
+		Nudge( 0, -1 );
+}
+
+void CLinkageView::OnNudgeBigLeft( void )
+{
+	if( m_bSimulating )
+		OnSimulateStep( 0, true );
+	else if( m_bAllowEdit )
+		Nudge( -1 * BigNudge, 0 );
+}
+
+void CLinkageView::OnNudgeBigRight( void )
+{
+	if( m_bSimulating )
+		OnSimulateStep( 1, true );
+	else if( m_bAllowEdit )
+		Nudge( 1 * BigNudge, 0 );
+}
+
+void CLinkageView::OnNudgeBigUp( void )
+{
+	if( !m_bSimulating && m_bAllowEdit )
+		Nudge( 0, 1 * BigNudge );
+}
+
+void CLinkageView::OnNudgeBigDown( void )
+{
+	if( !m_bSimulating && m_bAllowEdit )
+		Nudge( 0, -1 * BigNudge );
 }
 
 void CLinkageView::OnMechanismQuicksim()
@@ -9176,15 +9311,95 @@ void CLinkageView::OnKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CView::OnKeyUp(nChar, nRepCnt, nFlags);
 }
 
+static const int SHIFT_FLAG = 0x01;
+static const int CONTROL_FLAG = 0x02;
+static const int ALT_FLAG = 0x04;
+
+bool CLinkageView::HandleShortcutKeys( UINT nChar, unsigned int MyFlags )
+{
+	static const unsigned long Shortcuts[][3] =
+	{
+		{ '-', ID_VIEW_ZOOMOUT, 0 },
+		{ '_', ID_VIEW_ZOOMOUT, 0 },
+		{ '+', ID_VIEW_ZOOMIN, 0 },
+		{ '=', ID_VIEW_ZOOMIN, 0 },
+		{ 'A', ID_EDIT_ADDCONNECTOR, 0 },
+		{ 'A', ID_EDIT_SELECT_ALL, CONTROL_FLAG },
+		{ 'B', ID_EDIT_COMBINE, 0 },
+		{ 'C', ID_EDIT_CONNECT, 0 },
+		{ 'C', ID_EDIT_COPY, CONTROL_FLAG },
+		{ 'D', ID_VIEW_DIMENSIONS, 0 },
+		{ 'E', ID_EDIT_SELECTLINK, 0 },
+		{ 'F', ID_EDIT_FASTEN, 0},
+		{ 'G', ID_EDIT_MAKEANCHOR, 0 },
+		{ 'J', ID_EDIT_JOIN, 0 },
+		{ 'K', ID_EDIT_LOCK, 0 },
+		{ 'L', ID_EDIT_SLIDE, 0 },
+		{ 'N', ID_FILE_NEW, CONTROL_FLAG },
+		{ 'O', ID_FILE_OPEN, CONTROL_FLAG },
+		{ 'P', ID_FILE_PRINT, CONTROL_FLAG },
+		{ 'P', ID_PROPERTIES_PROPERTIES, 0 },
+		{ 'R', ID_SIMULATION_RUN, 0 },
+		{ 'S', ID_SIMULATION_STOP, 0 },
+		{ 'S', ID_FILE_SAVE, CONTROL_FLAG },
+		{ 'T', ID_EDIT_SPLIT, 0 },
+		{ 'U', ID_EDIT_UNFASTEN, 0 },
+		{ 'V', ID_EDIT_PASTE, CONTROL_FLAG },
+		{ 'V', ID_VIEW_ANICROP, 0 },
+		{ 'X', ID_EDIT_CUT, CONTROL_FLAG },
+		{ 'Z', ID_EDIT_UNDO, CONTROL_FLAG },
+		{ VK_INSERT, ID_EDIT_COPY, CONTROL_FLAG },
+		{ VK_INSERT, ID_EDIT_PASTE, SHIFT_FLAG },
+		{ VK_DELETE, ID_EDIT_CUT, SHIFT_FLAG },
+		{ VK_DELETE, ID_EDIT_DELETESELECTED},
+		{ VK_BACK, ID_EDIT_UNDO, ALT_FLAG },
+		{ VK_TAB, ID_SELECT_NEXT, 0 },
+		{ VK_TAB, ID_SELECT_PREVIOUS, SHIFT_FLAG },
+
+		{ VK_LEFT, ID_NUDGE_LEFT, 0 },
+		{ VK_RIGHT, ID_NUDGE_RIGHT, 0 },
+		{ VK_UP, ID_NUDGE_UP, 0 },
+		{ VK_DOWN, ID_NUDGE_DOWN, 0 },
+		{ VK_LEFT, ID_NUDGE_BIGLEFT, SHIFT_FLAG },
+		{ VK_RIGHT, ID_NUDGE_BIGRIGHT, SHIFT_FLAG },
+		{ VK_UP, ID_NUDGE_BIGUP, SHIFT_FLAG },
+		{ VK_DOWN, ID_NUDGE_BIGDOWN, SHIFT_FLAG },
+		{ VK_LEFT, ID_NUDGE_BIGLEFT, CONTROL_FLAG },
+		{ VK_RIGHT, ID_NUDGE_BIGRIGHT, CONTROL_FLAG },
+		{ VK_UP, ID_NUDGE_BIGUP, CONTROL_FLAG },
+		{ VK_DOWN, ID_NUDGE_BIGDOWN, CONTROL_FLAG },
+
+		{ '<', ID_SIMULATE_BACKWARD, 0 },
+		{ '[', ID_SIMULATE_BACKWARD, 0 },
+		{ '>', ID_SIMULATE_FORWARD, 0 },
+		{ ']', ID_SIMULATE_FORWARD, 0 },
+		{ VK_ESCAPE, ID_SIMULATION_STOP, 0 },
+		{ 0, 0, 0 }
+	};
+
+	for( int Index = 0; Shortcuts[Index][0] != 0; ++Index )
+	{
+		if( Shortcuts[Index][0] == nChar && Shortcuts[Index][2] == MyFlags )
+		{
+			this->SendMessage( WM_COMMAND, Shortcuts[Index][1] );
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void CLinkageView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+	if( !HandleShortcutKeys( nChar, 0 ) )
+		CView::OnChar(nChar, nRepCnt, nFlags);
 	/*
 	 * Handle a few special keys here because accelerators cannot be used
 	 * for them. The accelerators keep the characters from being used in
 	 * an edit control in the ribbon bar.
 	 */
 
-	switch( nChar )
+	/*switch( nChar )
 	{
 		case '-':
 		case '_':
@@ -9195,11 +9410,22 @@ void CLinkageView::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 			OnViewZoomin();
 			break;
 	}
-	CView::OnChar(nChar, nRepCnt, nFlags);
+	CView::OnChar(nChar, nRepCnt, nFlags);*/
 }
 
 void CLinkageView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
+	unsigned int MyFlags = 0;
+	if( ( GetKeyState( VK_SHIFT ) & 0x8000 ) != 0 )
+		MyFlags |= SHIFT_FLAG;
+	else if( ( GetKeyState( VK_CONTROL ) & 0x8000 ) != 0)
+		MyFlags |= CONTROL_FLAG;
+
+	if( !HandleShortcutKeys( nChar, MyFlags ) )
+		CView::OnKeyDown( nChar, nRepCnt, nFlags );
+
+	return;
+
 	bool ShiftControlPressed = false;
 	if( ( GetKeyState( VK_SHIFT ) & 0x8000 ) != 0 )
 		ShiftControlPressed = true;
@@ -9824,4 +10050,20 @@ void CLinkageView::OnFileSave()
 	CLinkageApp *pApp = (CLinkageApp*)AfxGetApp();
 	if( pApp != 0 )
 		pApp->SaveStdProfileSettings();
+}
+
+
+void CLinkageView::OnSetFocus(CWnd* pOldWnd)
+{
+	CView::OnSetFocus(pOldWnd);
+
+	// TODO: Add your message handler code here
+}
+
+
+void CLinkageView::OnKillFocus(CWnd* pNewWnd)
+{
+	CView::OnKillFocus(pNewWnd);
+
+	// TODO: Add your message handler code here
 }

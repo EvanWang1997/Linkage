@@ -6,6 +6,15 @@
 #include "AboutDialog.h"
 #include "afxdialogex.h"
 
+// Check windows
+#if _WIN32 || _WIN64
+#if _WIN64
+#define ENVIRONMENT64
+#else
+#define ENVIRONMENT32
+#endif
+#endif
+
 // CAboutDialog dialog
 
 IMPLEMENT_DYNAMIC(CAboutDialog, CMyDialog)
@@ -65,6 +74,12 @@ static CString GetVersionInfo( void )
 		Result.Format( "%d.%d.%d" , dwLeftMost, dwSecondLeft, dwSecondRight, dwRightMost);
 	else
 		Result.Format( "%d.%d" , dwLeftMost, dwSecondLeft, dwSecondRight, dwRightMost);
+
+	#ifdef ENVIRONMENT64
+		Result += " (64 bit)";
+	#else
+		Result += " (32 bit)";
+	#endif
 
 	return Result;
 }

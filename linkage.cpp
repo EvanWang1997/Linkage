@@ -124,7 +124,8 @@ BOOL CLinkageApp::InitInstance()
 	InitContextMenuManager();
 	InitShellManager();
 
-	InitKeyboardManager();
+	InitKeyboardManager(); // This is what loads accelerators from registry
+	GetKeyboardManager()->ResetAll(); // This may also clear the registry and is probably better than the above kludge. Both are here for now.
 
 	InitTooltipManager();
 	CMFCToolTipInfo ttParams;
@@ -181,6 +182,17 @@ BOOL CLinkageApp::InitInstance()
 	return TRUE;
 }
 
+BOOL CLinkageApp::PreTranslateMessage(MSG *pMsg)
+{
+	//if (menu.m_hAccelTable)
+	//{
+		//if (::TranslateAccelerator(m_pMainWnd->m_hWnd, menu.m_hAccelTable, pMsg))
+		//{
+		//	return(TRUE);
+		//}
+	//}
+	return CWinApp::PreTranslateMessage(pMsg);
+}
 void CLinkageApp::SaveStdProfileSettings( void )
 {
 	CWinApp::SaveStdProfileSettings();

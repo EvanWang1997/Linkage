@@ -1178,6 +1178,19 @@ bool CLinkageDoc::SelectElement( void )
 	return false;
 }
 
+bool CLinkageDoc::SelectElement( CElement *pElement )
+{
+	if( pElement->IsSelected() )
+		return false;
+
+	if( pElement->IsLink() )
+		SelectElement( (CLink*)pElement );
+	else
+		SelectElement( (CConnector*)pElement );
+
+	return true;
+}
+
 bool CLinkageDoc::SelectElement( CLink *pLink )
 {
 	if( pLink->IsSelected() )
@@ -1240,7 +1253,7 @@ bool CLinkageDoc::SelectElement( CFRect Rect, double SolidLinkExpansion, bool bM
 	while( Position != 0 )
 	{
 		CLink* pLink = m_Links.GetNext( Position );
-		if( pLink == 0 || ( pLink->GetLayers() & m_EditLayers ) == 0 )
+		if( pLink == 0 || ( pLink->GetLayers() & m_UsableLayers ) == 0 )
 			continue;
 		CFRect Area;
 		pLink->GetAdjustArea( m_GearConnectionList, Area );
@@ -1251,7 +1264,7 @@ bool CLinkageDoc::SelectElement( CFRect Rect, double SolidLinkExpansion, bool bM
 	while( Position != 0 )
 	{
 		CConnector* pConnector = m_Connectors.GetNext( Position );
-		if( pConnector == 0 || ( pConnector->GetLayers() & m_EditLayers ) == 0 )
+		if( pConnector == 0 || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
 			continue;
 		CFPoint Point = pConnector->GetPoint();
 		if( Point.IsInsideOf( Rect ) )
@@ -1275,7 +1288,7 @@ bool CLinkageDoc::FindElement( CFPoint Point, double GrabDistance, double SolidL
 	{
 		CConnector* pConnector = m_Connectors.GetNext( Position );
 		if( pConnector != 0 && pConnector->PointOnConnector( Point, GrabDistance )
-		    && ( pConnector->GetLayers() & m_EditLayers ) != 0 )
+		    && ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 		{
 			pFoundConnector = pConnector;
 			return true;
@@ -1286,7 +1299,7 @@ bool CLinkageDoc::FindElement( CFPoint Point, double GrabDistance, double SolidL
 	{
 		CLink* pLink = m_Links.GetNext( Position );
 		if( pLink != 0 && pLink->PointOnLink( m_GearConnectionList, Point, GrabDistance, SolidLinkExpansion )
-		    && ( pLink->GetLayers() & m_EditLayers ) != 0 )
+		    && ( pLink->GetLayers() & m_UsableLayers ) != 0 )
 		{
 			pFoundLink = pLink;
 			return true;
@@ -1351,14 +1364,14 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			CControlKnob *pControlKnob = pConnector->GetControlKnob();
 			if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
 				&& pControlKnob->IsShowOnParentSelect()
-				&& ( pConnector->GetLayers() & m_EditLayers ) != 0 )
+				&& ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 			{
 				pSelectingControlKnob = pControlKnob;
 				bClearExistingSelection = false;
 				break;
 			}
 			else if( pConnector->PointOnConnector( Point, GrabDistance )
-				&& ( pConnector->GetLayers() & m_EditLayers ) != 0 )
+				&& ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 			{
 				pSelectingConnector = pConnector;
 				break;
@@ -1377,14 +1390,14 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 				CControlKnob *pControlKnob = pLink->GetControlKnob();
 				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
 					&& pControlKnob->IsShowOnParentSelect()
-					&& ( pLink->GetLayers() & m_EditLayers ) != 0 )
+					&& ( pLink->GetLayers() & m_UsableLayers ) != 0 )
 				{
 					bClearExistingSelection = false;
 					pSelectingControlKnob = pControlKnob;
 					break;
 				}
 				else if( pLink != 0 && pLink->PointOnLink( m_GearConnectionList, Point, GrabDistance, SolidLinkExpansion )
-					&& ( pLink->GetLayers() & m_EditLayers ) != 0 )
+					&& ( pLink->GetLayers() & m_UsableLayers ) != 0 )
 				{
 					if( pLink->GetConnectorCount() == 1 && !pLink->IsGear() )
 						pSelectingConnector = pLink->GetConnector( 0 );
@@ -1411,7 +1424,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 				CControlKnob *pControlKnob = pLink->GetControlKnob();
 				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
 				    && !pControlKnob->IsShowOnParentSelect()
-				    && ( pLink->GetLayers() & m_EditLayers ) != 0 )
+				    && ( pLink->GetLayers() & m_UsableLayers ) != 0 )
 				{
 					pSelectingControlKnob = pControlKnob;
 					break;
@@ -1431,7 +1444,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 				CControlKnob *pControlKnob = pConnector->GetControlKnob();
 				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
 				    && !pControlKnob->IsShowOnParentSelect()
-				    && ( pConnector->GetLayers() & m_EditLayers ) != 0 )
+				    && ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 				{
 					pSelectingControlKnob = pControlKnob;
 					break;
@@ -1447,7 +1460,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 		{
 			CConnector* pConnector = m_Connectors.GetNext( Position );
 			if( pConnector != 0 && pConnector->PointOnConnector( Point, GrabDistance )
-			    && ( pConnector->GetLayers() & m_EditLayers ) != 0 )
+			    && ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 			{
 				pSelectingConnector = pConnector;
 				break;
@@ -1462,7 +1475,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 		{
 			CLink* pLink = m_Links.GetNext( Position );
 			if( pLink != NULL && pLink->PointOnLink( m_GearConnectionList, Point, GrabDistance, 0 )
-			    && ( pLink->GetLayers() & m_EditLayers ) != 0 )
+			    && ( pLink->GetLayers() & m_UsableLayers ) != 0 )
 			{
 				if( pLink->GetConnectorCount() == 1 && !pLink->IsGear() )
 					pSelectingConnector = pLink->GetConnector( 0 );
@@ -1617,7 +1630,7 @@ bool CLinkageDoc::StretchSelected( double Percentage )
 		CConnector* pConnector = m_Connectors.GetNext( Position );
 		if( pConnector == 0 )
 			continue;
-		if( pConnector->IsSelected() || pConnector->IsLinkSelected() )
+		if( pConnector->IsSelected() || pConnector->IsLinkSelected() || ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 		{
 			AveragePoint += pConnector->GetOriginalPoint();
 			++Points;
@@ -1651,7 +1664,7 @@ bool CLinkageDoc::StretchSelected( CFRect OriginalRect, CFRect NewRect, _Directi
 		if( !pConnector->IsSelected() && !pConnector->IsLinkSelected() )
 			continue;
 
-		if( pConnector->IsLocked() )
+		if( pConnector->IsLocked() || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
 			continue;
 
 		CFPoint Scale( OriginalRect.Width() == 0 ? 1 : NewRect.Width() / OriginalRect.Width(), OriginalRect.Height() == 0 ? 1 : NewRect.Height() / OriginalRect.Height() );
@@ -1777,7 +1790,7 @@ bool CLinkageDoc::CheckForSliderElementSnap( CConnector *pConnector, double Snap
 	while( Position2 != 0 )
 	{
 		CConnector* pCheckConnector = m_Connectors.GetNext( Position2 );
-		if( pCheckConnector == 0 || ( pConnector->GetLayers() & m_EditLayers ) == 0 )
+		if( pCheckConnector == 0 || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
 			continue;
 
 		if( pCheckConnector->IsSelected() || pCheckConnector->IsLinkSelected() )
@@ -1852,7 +1865,7 @@ bool CLinkageDoc::CheckForElementSnap( CConnector *pConnector, double SnapDistan
 	while( Position2 != 0 )
 	{
 		CConnector* pCheckConnector = m_Connectors.GetNext( Position2 );
-		if( pCheckConnector == 0 || ( pConnector->GetLayers() & m_EditLayers ) == 0 )
+		if( pCheckConnector == 0 || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
 			continue;
 
 		if( pCheckConnector->IsSelected() || pCheckConnector->IsLinkSelected() )
@@ -1973,7 +1986,7 @@ CFPoint CLinkageDoc::CheckForSnap( ConnectorList &SelectedConnectors, double Sna
 		while( Position != 0 && !bSnapItem )
 		{
 			CConnector* pConnector = SelectedConnectors.GetNext( Position );
-			if( pConnector == 0 || ( pConnector->GetLayers() & m_EditLayers ) == 0 )
+			if( pConnector == 0 || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
 				continue;
 
 			if( !pConnector->IsSelected() && !pConnector->IsLinkSelected() )
@@ -2121,7 +2134,7 @@ bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap
 	if( m_SelectedConnectors.GetCount() == 1 && m_SelectedLinks.GetCount() == 0 )
 	{
 		CConnector *pConnector = m_SelectedConnectors.GetHead();
-		if( pConnector != 0 && pConnector == m_pCapturedConnector && !pConnector->IsLocked() )
+		if( pConnector != 0 && pConnector == m_pCapturedConnector && !pConnector->IsLocked() && ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 		{
 			int LockedLinkCount = 0;
 			CLink *pLockedLink = 0;
@@ -2366,7 +2379,7 @@ bool CLinkageDoc::RotateSelected( CFPoint CenterPoint, double Angle )
 	while( Position != 0 )
 	{
 		CConnector* pConnector = RotateConnectors.GetNext( Position );
-		if( pConnector == 0 )
+		if( pConnector == 0 || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
 			continue;
 
 		pConnector->MovePoint( pConnector->GetOriginalPoint() );
@@ -2698,7 +2711,7 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 	return true;
 }
 
-void CLinkageDoc::ConnectSelected( void )
+CLink* CLinkageDoc::ConnectSelected( void )
 {
 	PushUndo();
 
@@ -2706,11 +2719,11 @@ void CLinkageDoc::ConnectSelected( void )
 	// Do not move anything.
 
 	if( GetSelectedConnectorCount() <= 1 )
-		return;
+		return 0;
 
 	CLink *pLink = new CLink();
 	if( pLink == 0 )
-		return;
+		return 0;
 
 	int NewID = m_IdentifiedLinks.FindAndSetBit();
 	if( NewID > m_HighestLinkID )
@@ -2750,6 +2763,8 @@ void CLinkageDoc::ConnectSelected( void )
 	SetSelectedModifiableCondition();
 
     SetModifiedFlag( true );
+
+	return pLink;
 }
 
 void CLinkageDoc::RawAngleSelected( double Angle )
@@ -3113,7 +3128,7 @@ void CLinkageDoc::DeleteSelected( void )
 	{
 		POSITION DeletePosition = Position;
 		CLink *pLink = m_Links.GetNext( Position );
-		if( pLink == 0 || !pLink->IsSelected() )
+		if( pLink == 0 || !pLink->IsSelected() || ( pLink->GetLayers() & m_UsableLayers ) == 0 )
 			continue;
 
 		DeleteLink( pLink );
@@ -3127,7 +3142,7 @@ void CLinkageDoc::DeleteSelected( void )
 	{
 		POSITION DeletePosition = Position;
 		CConnector* pConnector = m_Connectors.GetNext( Position );
-		if( pConnector == 0 || !pConnector->IsSelected() )
+		if( pConnector == 0 || !pConnector->IsSelected()  || ( pConnector->GetLayers() & m_UsableLayers ) == 0)
 			continue;
 
 		DeleteConnector( pConnector );
@@ -3318,32 +3333,46 @@ void CLinkageDoc::NormalizeConnectorLinks( void )
 		}
 	}
 }
-void CLinkageDoc::SetViewLayers( unsigned int Layers )
-{
-	m_ViewLayers = Layers;
-	SetEditLayers( m_EditLayers & m_ViewLayers );
-}
 
-void CLinkageDoc::SetEditLayers( unsigned int Layers )
+void CLinkageDoc::KeepLayerSelections( unsigned int Layers )
 {
-	m_EditLayers = Layers;
-
+	bool bChanged = false;
 	// Make sure that nothing is selected unless it is on one of the specified layers.
 	POSITION Position = m_Connectors.GetHeadPosition();
 	while( Position != NULL )
 	{
 		CConnector* pConnector = m_Connectors.GetNext( Position );
-		if( pConnector != 0 && ( pConnector->GetLayers() & m_EditLayers ) == 0 )
+		if( pConnector != 0 && ( pConnector->GetLayers() & Layers ) == 0 )
+		{
 			DeSelectElement( pConnector );
+			bChanged = true;
+		}
 	}
 
 	Position = m_Links.GetHeadPosition();
 	while( Position != NULL )
 	{
 		CLink* pLink = m_Links.GetNext( Position );
-		if( pLink != 0 && ( pLink->GetLayers() & m_EditLayers ) == 0 )
+		if( pLink != 0 && ( pLink->GetLayers() & Layers ) == 0 )
+		{
 			DeSelectElement( pLink );
+			bChanged = true;
+		}
 	}
+}
+
+void CLinkageDoc::SetViewLayers( unsigned int Layers )
+{
+	m_ViewLayers = Layers;
+	m_UsableLayers = m_EditLayers & m_ViewLayers;
+	KeepLayerSelections( m_UsableLayers );
+}
+
+void CLinkageDoc::SetEditLayers( unsigned int Layers )
+{
+	m_EditLayers = Layers;
+	m_UsableLayers = m_EditLayers & m_ViewLayers;
+	KeepLayerSelections( m_UsableLayers );
 }
 
 int CLinkageDoc::GetSelectedConnectorCount( void )
@@ -3393,7 +3422,7 @@ bool CLinkageDoc::FindRoomFor( CFRect NeedRect, CFPoint &PlaceHere )
 		while( Position != NULL )
 		{
 			CLink* pLink = m_Links.GetNext( Position );
-			if( pLink == 0 || ( pLink->GetLayers() & m_EditLayers ) == 0 )
+			if( pLink == 0 || ( pLink->GetLayers() & m_UsableLayers ) == 0 )
 				continue;
 			CFRect Rect;
 			pLink->GetArea( m_GearConnectionList, Rect );
@@ -3634,7 +3663,7 @@ void CLinkageDoc::SelectAll( void )
 	while( Position != NULL )
 	{
 		CConnector* pConnector = m_Connectors.GetNext( Position );
-		if( pConnector == 0 || ( pConnector->GetLayers() & m_EditLayers ) == 0 )
+		if( pConnector == 0 || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
 			continue;
 		SelectElement( pConnector );
 	}
@@ -3642,7 +3671,7 @@ void CLinkageDoc::SelectAll( void )
 	while( Position != NULL )
 	{
 		CLink* pLink = m_Links.GetNext( Position );
-		if( pLink == 0 || ( pLink->GetLayers() & m_EditLayers ) == 0 )
+		if( pLink == 0 || ( pLink->GetLayers() & m_UsableLayers ) == 0 )
 			continue;
 		SelectElement( pLink );
 	}
@@ -4450,6 +4479,8 @@ CConnector* CLinkageDoc::GetSelectedConnector( int Index )
 	while( Position != 0 )
 	{
 		CConnector *pConnector = m_SelectedConnectors.GetPrev( Position );
+		if( ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
+			continue;
 		if( Index == 0 )
 			return pConnector;
 		--Index;

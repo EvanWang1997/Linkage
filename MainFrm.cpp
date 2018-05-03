@@ -77,6 +77,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	InitializeRibbon();
 
+	HACCEL ha = this->GetDefaultAccelerator();
+
 	if (!m_wndStatusBar.Create(this))
 	{
 		TRACE0("Failed to create status bar\n");
