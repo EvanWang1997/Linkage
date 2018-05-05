@@ -1339,7 +1339,6 @@ class CSimulatorImplementation
 
 		// NewTemp now ends at the expected location of the pThis1 connector.
 
-		DebugItemList.AddTail( new CDebugItem( NewTemp.GetEnd(), RGB( 0, 0, 255 ) ) );
 
 		pThis1->SetRotationAngle( ChangeAngle );
 		pThis1->MovePoint( NewTemp.m_End );
