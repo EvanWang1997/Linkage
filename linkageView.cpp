@@ -101,6 +101,13 @@ static char THIS_FILE[] = __FILE__;
 
 static const int VIRTUAL_PIXEL_SNAP_DISTANCE = 6;
 
+static void swap( int& a, int& b )
+{
+	int temp = a;
+	a = b;
+	b = temp;
+}
+
 wchar_t* ToUnicode( const char *pString )
 {
 	size_t origsize = strlen( pString ) + 1;
@@ -484,7 +491,9 @@ CLinkageView::CLinkageView()
 	m_pCachedRenderBitmap = 0;
 	m_CachedBitmapWidth = 0;
 	m_CachedBitmapHeight = 0;
-
+	m_PrintOrientationMode = DMORIENT_PORTRAIT;
+	m_PrintWidthInPages = 1;
+	m_VisiblePageNumber = 0;
 
 	m_bRequestAbort = false;
 	m_bProcessingVideoThread = false;
@@ -967,13 +976,10 @@ void CLinkageView::DrawAdjustmentControls( CRenderer *pRenderer )
 	pRenderer->SelectObject( pOldPen );
 }
 
-int CLinkageView::GetPrintPageCount( CDC *pDC, CPrintInfo *pPrintInfo, bool bPrintActualSize )
+int CLinkageView::GetPrintPageCount( CDC *pDC, bool bPrintActualSize, CFRect DocumentArea, int &UseOrientation, int &WidthInPages )
 {
 	if( !bPrintActualSize )
 		return 1;
-
-	int cx = pDC->GetDeviceCaps(HORZRES);
-	int cy = pDC->GetDeviceCaps(VERTRES);
 
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
@@ -983,19 +989,40 @@ int CLinkageView::GetPrintPageCount( CDC *pDC, CPrintInfo *pPrintInfo, bool bPri
 	int PixelsPerInch = pDC->GetDeviceCaps( LOGPIXELSX );
 	double ScaleFactor = MyLogicalPixels / PixelsPerInch;
 
-	CRect DrawingRect;
-	DrawingRect.SetRect( 0, 0, (int)( cx * ScaleFactor ), (int)( cy * ScaleFactor ) );
-
-	CFRect Area = GetDocumentArea();
+	CFRect Area = GetDocumentArea( m_bShowDimensions );
 	Area.Normalize();
 	CFRect PixelRect = Area;
 
-	//PixelRect = Scale( PixelRect );
+	int cx = pDC->GetDeviceCaps(HORZRES);
+	int cy = pDC->GetDeviceCaps(VERTRES);
 
-	int WidthInPages = (int)( ( ( PixelRect.Width() / ScaleFactor ) / cx ) + 0.999999999999999999 );
-	int HeightInPages = (int)( ( ( PixelRect.Height() / ScaleFactor ) / cy ) + 0.999999999999999999 );
+	if( cx > cy )
+		swap( cx, cy );
+	// The size info is now for portrait mode
 
-	return WidthInPages * HeightInPages;
+	//CRect DrawingRect( 0, 0, (int)( cx * ScaleFactor ), (int)( cy * ScaleFactor ) );
+	int ySpace = pDC->GetTextExtent( "N", 1 ).cy;
+	//DrawingRect.bottom -= cy;
+
+	PixelRect.bottom -= ySpace * ScaleFactor;
+
+	int WidthInPagesP = (int)( ceil( PixelRect.Width() / ScaleFactor / cx ) );
+	int HeightInPagesP = (int)( ceil( PixelRect.Height() / ScaleFactor / cy ) );
+	int WidthInPagesL = (int)( ceil( PixelRect.Width() / ScaleFactor / cy ) );
+	int HeightInPagesL = (int)( ceil( PixelRect.Height() / ScaleFactor / cx ) );
+
+	if( WidthInPagesL + HeightInPagesL < WidthInPagesP + HeightInPagesP )
+	{
+		UseOrientation = DMORIENT_LANDSCAPE;
+		WidthInPages = WidthInPagesL;
+		return WidthInPagesL * HeightInPagesL;
+	}
+	else
+	{
+		UseOrientation = DMORIENT_PORTRAIT;
+		WidthInPages = WidthInPagesP;
+		return WidthInPagesP * HeightInPagesP;
+	}
 }
 
 CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBitmap *pBitmap, CDC *pDC, double ScalingValue, bool bScaleToFit, double MarginScale, double UnscaledUnitSize, bool bForScreen, bool bAntiAlias, bool bActualSize, int PageNumber )
@@ -1062,7 +1089,15 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 		Renderer.SetSize( cx, cy );
 		Renderer.SetScale( DETAILSCALE );
 
-		CFRect Area = GetDocumentArea();
+		int ySpace = Renderer.GetTextExtent( "N", 1 ).y;
+		m_DrawingRect.bottom -= ySpace;
+
+
+		// need to get the difference between dimensions and no dimensions
+		// for doing the shrink-to-fit scaling, just like the fit function 
+		// for the screen.
+
+		CFRect Area = GetDocumentArea( m_bShowDimensions );
 		Area.Normalize();
 		CFRect PixelRect = Area;
 
@@ -1070,14 +1105,15 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 		pDC->SetWindowExt( (int)( m_DrawingRect.Width() * DETAILSCALE ), (int)( m_DrawingRect.Height() * DETAILSCALE ) );
 		pDC->SetViewportExt( cx, cy );
 
+		pDC->IntersectClipRect( CRect( 0, 0, (int)( m_DrawingRect.Width() * DETAILSCALE ), (int)( m_DrawingRect.Height() * DETAILSCALE ) ) );
+
 		/*
-		 * Mechanisms are drawn actual size. The view zoom lets the user do this but printing
-		 * does not use the screen Unscale. Shrink the drawing to fit on the page if it is too big.
+		 * Shrink the drawing to fit on the page if it is too big.
 		 */
 		double ExtraScaling = 1.0;
 		// Get a usable area that has an extra 1/2 margin around it.
-		double xUsable = m_DrawingRect.Width() - MyLogicalPixels;
-		double yUsable = m_DrawingRect.Height() - MyLogicalPixels;
+		double xUsable = m_DrawingRect.Width();// - MyLogicalPixels;
+		double yUsable = m_DrawingRect.Height();// - MyLogicalPixels;
 		if( !bActualSize && ( PixelRect.Width() > xUsable || PixelRect.Height() > yUsable ) )
 			ExtraScaling = min( yUsable / PixelRect.Height(), xUsable / PixelRect.Width() );
 
@@ -1087,19 +1123,19 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 
 		if( bActualSize )
 		{
-			int WidthInPages = (int)( ( ( PixelRect.Width() / ScaleFactor ) / cx ) + 0.999999999999999999 );
-			int HeightInPages = (int)( ( ( PixelRect.Height() / ScaleFactor ) / cy ) + 0.999999999999999999 );
-
-			int HorizontalPage = PageNumber % WidthInPages;
-			int VerticalPage = PageNumber / WidthInPages;
+			int HorizontalPage = PageNumber % m_PrintWidthInPages;
+			int VerticalPage = PageNumber / m_PrintWidthInPages;
 
 			m_ScrollPosition.x = PixelRect.left + ( m_DrawingRect.Width() * HorizontalPage );
 			m_ScrollPosition.y = PixelRect.top + ( m_DrawingRect.Height() * VerticalPage );
 		}
 		else
 		{
-			m_ScrollPosition.x = (int)( PixelRect.left + ( PixelRect.Width() / 2 ) - ( m_DrawingRect.Width() / 2 ) );
-			m_ScrollPosition.y = (int)( PixelRect.top + ( PixelRect.Height() / 2 ) - ( m_DrawingRect.Height() / 2 ) );
+			//m_ScrollPosition.x = (int)( PixelRect.left + ( PixelRect.Width() / 2 ) - ( m_DrawingRect.Width() / 2 ) );
+			//m_ScrollPosition.y = (int)( PixelRect.top + ( PixelRect.Height() / 2 ) - ( m_DrawingRect.Height() / 2 ) );
+
+			m_ScrollPosition.x = PixelRect.left;
+			m_ScrollPosition.y = PixelRect.top;
 		}
 	}
 	else
@@ -1194,9 +1230,9 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 			m_Zoom = Ratio;
 
 			/*
-			 * Now that there us a zoom level that might work, check to see if the dimensions actual fit.
+			 * Now that there is a zoom level that might work, check to see if the dimensions actual fit.
 			 * it is possible that the dimensioned document now is too big or too small because of diagonal
-			 * measurement lines. Try to find a better fit bassed on this starting zoom level.
+			 * measurement lines. Try to find a better fit based on this starting zoom level.
 			 */
 
 			cx = cxOriginal;
@@ -1592,7 +1628,7 @@ CFRect CLinkageView::GetDocumentArea( bool bWithDimensions, bool bSelectedOnly )
 		bool bTemp = m_bShowDimensions;
 //		m_bShowDimensions = bWithDimensions;
 		DocumentArea = DrawPartsList( &NullRenderer );
-//		m_bShowDimensions = bTemp;d
+//		m_bShowDimensions = bTemp;
 	}
 	else
 	{
@@ -2455,9 +2491,25 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 
 	if( pDC->IsPrinting() )
 	{
+		if( pPrintInfo != 0 )
+		{
+			CString Number;
+			Number.Format( "Page %d", pPrintInfo->m_nCurPage ); 
+			// Print page numbers. Give it a try...
+			pDC->SelectClipRgn( 0 );
+			int x = m_DrawingRect.left + m_DrawingRect.Width() / 2;
+			int y = m_DrawingRect.bottom;
+			Renderer.SetTextAlign( TA_CENTER | TA_TOP ); // Using TA_TOP since the bottom of the drawing rect is where there is room for a page number.
+			Renderer.TextOutA( x, y, Number );
+		}
+		//CFRect Rect( -(m_pBackgroundBitmap->width/2), -(m_pBackgroundBitmap->height/2), -(m_pBackgroundBitmap->width/2) + m_pBackgroundBitmap->width, -(m_pBackgroundBitmap->height/2) + m_pBackgroundBitmap->height );
+		//Rect = Scale( Rect );
+
+		//pPrintInfo == 0 ? 0 : pPrintInfo->m_nCurPage
+
 		/*
 		 * Printing is done using the print DC directly. There is no
-		 * copy operating and no video creation so this there is
+		 * copy operating and no video creation so there is
 		 * no further action to take in this function.
 		 */
 		Renderer.Detach();
@@ -5612,22 +5664,9 @@ void CLinkageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 	CView::OnUpdate( pSender, lHint, pHint );
 }
 
-void CLinkageView::SetPrinterOrientation( void )
-{
-	CLinkageApp *pApp = (CLinkageApp*)AfxGetApp();
-	if( pApp == 0 )
-		return;
-	CFRect DocumentArea = GetDocumentArea( m_bShowDimensions );
-
-	if( fabs( DocumentArea.Width() ) >= fabs( DocumentArea.Height() ) )
-		pApp->SetPrinterOrientation( DMORIENT_LANDSCAPE );
-	else
-		pApp->SetPrinterOrientation( DMORIENT_PORTRAIT );
-}
-
 void CLinkageView::OnFilePrintSetup()
 {
-	SetPrinterOrientation();
+	//SetPrinterOrientation();
 
 	CLinkageApp *pApp = (CLinkageApp*)AfxGetApp();
 	if( pApp != 0 )
@@ -5645,18 +5684,70 @@ void CLinkageView::OnUpdatePrintFull( CCmdUI *pCmdUI )
 	pCmdUI->SetCheck( m_bPrintFullSize );
 }
 
-BOOL CLinkageView::OnPreparePrinting(CPrintInfo* pInfo)
+BOOL CLinkageView::OnPreparePrinting( CPrintInfo* pInfo )
 {
-	SetPrinterOrientation();
 
-	CDC dc ;
-	AfxGetApp()->CreatePrinterDC(dc) ;
+	/*
 
-	pInfo->SetMaxPage( GetPrintPageCount( &dc, 0, m_bPrintFullSize ) );
 
-	dc.DeleteDC() ;
+	This line of code below will show the print dialog box if actually printing. The problem
+	is that tehre is no way to know if the printer selection changes. Because of that, there
+	is also no way to change the page count depending on the paper size for the selected printer.
+	This is a huge flaw in the built-in printing process and one that can be fixded by creating a
+	fully custum print dialog, or something like that.
 
-	return DoPreparePrinting( pInfo );
+	For now, show the print dialog first then give a warning of the document needs more than some 
+	hard-coded number of pages. if the user tries to print a huge machine actual size and has 
+	hundreds of pages to print then they need to apporve of that!
+
+	None of this is a problem if they print to fit on the page.
+
+	*/
+
+	pInfo->SetMinPage( 1 );
+	pInfo->SetMaxPage( m_bPrintFullSize ? 1000 : 1 );
+	pInfo->m_pPD->m_pd.Flags |= PD_NOPAGENUMS;
+	BOOL bResult = DoPreparePrinting( pInfo );
+	if( bResult == FALSE )
+		return FALSE;
+
+	if( pInfo->m_pPD == 0 )
+		return bResult;
+
+	/*
+	 * Calculate page count and orientation. Both are automatic.
+	 */
+	CDC dc;
+	dc.Attach( pInfo->m_pPD->m_pd.hDC );
+
+	CLinkageApp *pApp = (CLinkageApp*)AfxGetApp();
+	if( pApp == 0 )
+		return bResult;
+
+	CFRect Area = GetDocumentArea( m_bShowDimensions );
+	if( m_bPrintFullSize )
+	{
+		int Count = GetPrintPageCount( &dc, m_bPrintFullSize, Area, m_PrintOrientationMode, m_PrintWidthInPages );
+		pInfo->SetMaxPage( Count );
+	}
+	else
+	{
+		if( fabs( Area.Width() ) >= fabs( Area.Height() ) )
+			m_PrintOrientationMode = DMORIENT_LANDSCAPE;
+		else
+			m_PrintOrientationMode = DMORIENT_PORTRAIT;
+		pInfo->SetMaxPage( 1 );
+	}
+
+	pApp->SetPrinterOrientation( m_PrintOrientationMode );
+	DEVMODE* pDevMode = pInfo->m_pPD->GetDevMode();
+	pDevMode->dmOrientation = m_PrintOrientationMode;
+	pDevMode->dmFields |= DM_ORIENTATION;
+	dc.ResetDC( pDevMode );
+
+	dc.Detach();
+
+	return bResult;
 }
 
 void CLinkageView::OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo)
@@ -8652,14 +8743,8 @@ void CLinkageView::OnPrepareDC(CDC* pDC, CPrintInfo* pInfo)
 {
 	if( pDC->IsPrinting() )
 	{
-		CFRect DocumentArea = GetDocumentArea( m_bShowDimensions );
-
 		DEVMODE* pDevMode = pInfo->m_pPD->GetDevMode();
-		if( fabs( DocumentArea.Width() ) >= fabs( DocumentArea.Height() ) )
-			pDevMode->dmOrientation = DMORIENT_LANDSCAPE;
-		else
-			pDevMode->dmOrientation = DMORIENT_PORTRAIT;
-
+		pDevMode->dmOrientation = m_PrintOrientationMode;
 		pDevMode->dmFields |= DM_ORIENTATION;
 		pDC->ResetDC( pDevMode );
 	}

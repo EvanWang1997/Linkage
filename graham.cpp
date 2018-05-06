@@ -130,7 +130,7 @@ CFPoint* GetHull( ConnectorList* pConnectors, int &ReturnedPointCount, bool bUse
 		}
 
 		ReturnedPointCount = Graham( PointArray, PointStack, Count );
-		CFPoint *OutputPoints = new CFPoint[ReturnedPointCount];
+		OutputPoints = new CFPoint[ReturnedPointCount];
 		if( PointStack == 0 )
 		{
 			delete [] PointStack;

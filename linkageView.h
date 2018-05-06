@@ -187,6 +187,9 @@ private:
 	unsigned int m_SelectedEditLayers;
 	unsigned int m_SelectedViewLayers;
 	bool m_bAllowEdit;
+	int m_PrintOrientationMode;
+	int m_PrintWidthInPages;
+	int m_VisiblePageNumber;
 
 	CBitmap *m_pCachedRenderBitmap;
 	int m_CachedBitmapWidth;
@@ -243,7 +246,7 @@ private:
 	void EndTimer( void );
 
 	CRect PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBitmap *pBitmap, CDC *pDC, double ForceScaling, bool bScaleToFit, double MarginScale, double UnscaledUnitSize, bool bForScreen, bool bAntiAlias, bool bActualSize, int PageNumber );
-	int GetPrintPageCount( CDC *pDC, CPrintInfo *pPrintInfo, bool bPrintActualSize );
+	int GetPrintPageCount( CDC *pDC, bool bPrintActualSize, CFRect DocumentArea, int &UseOrientation, int &WidthInPages );
 	void DrawAdjustmentControls( CRenderer *pRenderer );
 	void DrawRotationControl( CRenderer *pRenderer, CFRect &Rect, enum CLinkageView::_AdjustmentControl AdjustmentControl );
 	void GetAdjustmentControlRect( AdjustmentControl Control, CRect &Rect );

@@ -355,6 +355,7 @@ void CMainFrame::CreatePrintPanel( CMFCRibbonCategory* pCategory )
 {
 	CMFCRibbonPanel* pPanePrint = AddPanel( pCategory, IDS_RIBBON_PRINT, m_PanelImages.ExtractIcon(33) );
 
+	AddRibbonButton( pPanePrint, IDS_RIBBON_PRINT, ID_FILE_PRINT, 6, LARGE );
 	AddRibbonButton( pPanePrint, IDS_RIBBON_PRINT_QUICK, ID_FILE_PRINT_DIRECT, 7, LARGE );
 	AddRibbonButton( pPanePrint, IDS_RIBBON_PRINT_PREVIEW, ID_FILE_PRINT_PREVIEW, 8, LARGE );
 }
