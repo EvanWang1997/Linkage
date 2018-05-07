@@ -218,6 +218,12 @@ class CFRect
 		right += Point.x;
 	}
 
+	void operator*=( double Value )
+	{
+		bottom = top + Height() * Value;
+		right = left + Width() * Value;
+	}
+
 	bool IsOverlapped( CFRect &Rect );
 	
 	bool IsInsideOf( CFRect &Rect );

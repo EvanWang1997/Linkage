@@ -1006,10 +1006,10 @@ int CLinkageView::GetPrintPageCount( CDC *pDC, bool bPrintActualSize, CFRect Doc
 
 	PixelRect.bottom -= ySpace * ScaleFactor;
 
-	int WidthInPagesP = (int)( ceil( PixelRect.Width() / ScaleFactor / cx ) );
-	int HeightInPagesP = (int)( ceil( PixelRect.Height() / ScaleFactor / cy ) );
-	int WidthInPagesL = (int)( ceil( PixelRect.Width() / ScaleFactor / cy ) );
-	int HeightInPagesL = (int)( ceil( PixelRect.Height() / ScaleFactor / cx ) );
+	int WidthInPagesP = (int)( ceil( PixelRect.Width() / ( ScaleFactor * cx ) ) );
+	int HeightInPagesP = (int)( ceil( PixelRect.Height() / ( ScaleFactor * cy ) ) );
+	int WidthInPagesL = (int)( ceil( PixelRect.Width() / ( ScaleFactor * cy ) ) );
+	int HeightInPagesL = (int)( ceil( PixelRect.Height() / ( ScaleFactor * cx ) ) );
 
 	if( WidthInPagesL + HeightInPagesL < WidthInPagesP + HeightInPagesP )
 	{
@@ -1043,12 +1043,23 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 
 	m_bShowSelection = bForScreen && !m_bSimulating && m_bAllowEdit;
 
+	// Reset zoom, scroll, and DIP adjustment values before calcuating them.
+	// Some calculations leave them as-is.
 	m_Zoom = 1.0;
 	m_ScrollPosition.SetPoint( 0, 0 );
+	m_DPIScale = 1.0;
 
     if( Renderer.IsPrinting() )
     {
 		ASSERT( pDC != 0 );
+
+		/*
+		* The 8.0 scale allows the drawing functions to draw to a much larger area and the window/viewport
+		* scaling combined with the device context scaling makes it the correct size for the page. This has
+		* the advantage of allowing a higher resolution to be drawn to than the document 96 DPI while still
+		* making fonts, lines, arrowheads, all look correct on the page. This is forced here for printing.
+		*/
+		ScalingValue = 8.0;
 
 		m_bShowSelection = false;
 
@@ -1075,23 +1086,18 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 		int PixelsPerInch = pDC->GetDeviceCaps( LOGPIXELSX );
 		double ScaleFactor = MyLogicalPixels / PixelsPerInch;
 
-		/*
-		 * The detail scale allows the drawing functions to draw to a much larger area and the window/viewport
-		 * scaling combined with the device context scaling makes it the correct size for the page. This has
-		 * the advantage of allowing a higher resolution to be drawn to than the document 96 DPI while still
-		 * making fonts, lines, arrowheads, all look correct on the page.
-		 */
-		static double DETAILSCALE = 8.0;
+		// if( pDrawRect == 0 )
+		m_DrawingRect.SetRect( 0, 0, (int)( cx * ScaleFactor ), (int)( cy * ScaleFactor ) );
 
-		if( pDrawRect == 0 )
-			m_DrawingRect.SetRect( 0, 0, (int)( cx * ScaleFactor ), (int)( cy * ScaleFactor ) );
-
+		Renderer.SetOffset( 0, 0 );
+		Renderer.SetScale( ScalingValue );
 		Renderer.SetSize( cx, cy );
-		Renderer.SetScale( DETAILSCALE );
+		Renderer.BeginDraw();
+		Renderer.Clear();
 
-		int ySpace = Renderer.GetTextExtent( "N", 1 ).y;
+		// Room for page number.
+		int ySpace = (int)Renderer.GetTextExtent( "N", 1 ).y;
 		m_DrawingRect.bottom -= ySpace;
-
 
 		// need to get the difference between dimensions and no dimensions
 		// for doing the shrink-to-fit scaling, just like the fit function 
@@ -1102,24 +1108,24 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 		CFRect PixelRect = Area;
 
 		pDC->SetMapMode( MM_ISOTROPIC );
-		pDC->SetWindowExt( (int)( m_DrawingRect.Width() * DETAILSCALE ), (int)( m_DrawingRect.Height() * DETAILSCALE ) );
+		pDC->SetWindowExt( (int)( m_DrawingRect.Width() * ScalingValue ), (int)( m_DrawingRect.Height() * ScalingValue ) );
 		pDC->SetViewportExt( cx, cy );
 
-		pDC->IntersectClipRect( CRect( 0, 0, (int)( m_DrawingRect.Width() * DETAILSCALE ), (int)( m_DrawingRect.Height() * DETAILSCALE ) ) );
+		pDC->IntersectClipRect( CRect( 0, 0, (int)( m_DrawingRect.Width() * ScalingValue ), (int)( m_DrawingRect.Height() * ScalingValue ) ) );
 
 		/*
 		 * Shrink the drawing to fit on the page if it is too big.
 		 */
-		double ExtraScaling = 1.0;
+		//double ExtraScaling = 1.0;
 		// Get a usable area that has an extra 1/2 margin around it.
-		double xUsable = m_DrawingRect.Width();// - MyLogicalPixels;
-		double yUsable = m_DrawingRect.Height();// - MyLogicalPixels;
-		if( !bActualSize && ( PixelRect.Width() > xUsable || PixelRect.Height() > yUsable ) )
-			ExtraScaling = min( yUsable / PixelRect.Height(), xUsable / PixelRect.Width() );
+		//double xUsable = m_DrawingRect.Width();// - MyLogicalPixels;
+		//double yUsable = m_DrawingRect.Height();// - MyLogicalPixels;
+		//if( !bActualSize && ( PixelRect.Width() > xUsable || PixelRect.Height() > yUsable ) )
+		//	ExtraScaling = min( yUsable / PixelRect.Height(), xUsable / PixelRect.Width() );
 
-		if( ExtraScaling < 1.0 )
-			m_Zoom = ExtraScaling;
-		PixelRect = Scale( PixelRect );
+		//if( ExtraScaling < 1.0 )
+		//	m_Zoom = ExtraScaling;
+		//PixelRect = Scale( PixelRect );
 
 		if( bActualSize )
 		{
@@ -1131,15 +1137,24 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 		}
 		else
 		{
+			ZoomToFit( m_DrawingRect, 0, 1.0, false );
+
 			//m_ScrollPosition.x = (int)( PixelRect.left + ( PixelRect.Width() / 2 ) - ( m_DrawingRect.Width() / 2 ) );
 			//m_ScrollPosition.y = (int)( PixelRect.top + ( PixelRect.Height() / 2 ) - ( m_DrawingRect.Height() / 2 ) );
 
-			m_ScrollPosition.x = PixelRect.left;
-			m_ScrollPosition.y = PixelRect.top;
+			//m_ScrollPosition.x = PixelRect.left;
+			//m_ScrollPosition.y = PixelRect.top;
 		}
 	}
 	else
 	{
+		if( bForScreen )
+		{
+			m_Zoom = m_ScreenZoom;
+			m_ScrollPosition = m_ScreenScrollPosition;
+			m_DPIScale = m_ScreenDPIScale;
+		}
+
 		if( pDrawRect == 0 )
 			GetClientRect( &m_DrawingRect );
 
@@ -1173,115 +1188,9 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 
 		if( bScaleToFit )
 		{
-			if( bEmpty && m_pBackgroundBitmap == 0 )
-			{
-				m_Zoom = 1;
-				m_ScrollPosition.x = 0;
-				m_ScrollPosition.y = 0;
-				return m_DrawingRect;
-			}
-
-			double cx = m_DrawingRect.Width() / m_DPIScale;
-			double cy = m_DrawingRect.Height() / m_DPIScale;
-
-			double xMargin = cx * MarginScale;
-			double yMargin = cy * MarginScale;
-
-			// Some margin because the dimensions are not done well and we can't predict them just yet.
-			cx -= xMargin;
-			cy -= yMargin;
-
-			cx -= CONNECTORRADIUS * 2;
-			cy -= CONNECTORRADIUS * 2;
-
-			cx -= 1;
-			cy -= 1;
-
-			double cxOriginal = cx;
-			double cyOriginal = cy;
-
-			/*
-			 * Start with a zoom of 1. The document dimensions are the same as the DPI adjusted pixel dimensions.
-			 * Take the dimensioned document area and the non-dimensioned document area and the difference is how
-			 * much room is need around the undimensioned document for the dimensions IF THERE ARE NO DIAGONAL MEASUREMENT LINES.
-			 * The accuracy of the later calculated zoom is tested for cases where diagonal measurement lines have caused
-			 * an innaccurate result.
-			 */
-			m_Zoom = 1.0;
-
-			CFRect NoDimArea = GetDocumentArea( false );
-			NoDimArea.Normalize();
-			CFRect DimArea = GetDocumentArea( m_bShowDimensions );
-			DimArea.Normalize();
-
-			double nodimwidth = NoDimArea.Width();
-			double dimwidth = DimArea.Width();
-			double WidthDiff = dimwidth - nodimwidth;
-
-			// Take drawing rect and shrink it by the difference between the dimensioned and non-dimensioned document. This 
-			// is a good starting point to determining how much room is needed for the dimension lines.
-			cx -= ( DimArea.Width() - NoDimArea.Width() ) * 1;
-			cy -= ( DimArea.Height() - NoDimArea.Height() ) * 1;
-
-			double xRatio = cx / NoDimArea.Width();
-			double yRatio = cy / NoDimArea.Height();
-			double Ratio = min( xRatio, yRatio );
-				
-			m_Zoom = Ratio;
-
-			/*
-			 * Now that there is a zoom level that might work, check to see if the dimensions actual fit.
-			 * it is possible that the dimensioned document now is too big or too small because of diagonal
-			 * measurement lines. Try to find a better fit based on this starting zoom level.
-			 */
-
-			cx = cxOriginal;
-			cy = cyOriginal;
-
-			CFRect Area = GetDocumentArea( m_bShowDimensions );
-			Area.Normalize();
-			xRatio = cx / Area.Width();
-			yRatio = cy / Area.Height();
-			Ratio = min( xRatio, yRatio );
-
-			int Direction = Ratio - m_Zoom >= 0 ? 1 : -1;
-			while( fabs( Ratio - m_Zoom ) > 0.01 )
-			{
-				int NewDirection = Ratio - m_Zoom >= 0 ? 1 : -1;
-				if( NewDirection != Direction )
-					break;
-				double Difference = Ratio - m_Zoom;
-				m_Zoom += Difference * 0.5;
-
-				Area = GetDocumentArea( m_bShowDimensions );
-				Area.Normalize();
-				xRatio = cx / Area.Width();
-				yRatio = cy / Area.Height();
-				Ratio = min( xRatio, yRatio );
-			}
-
-			if( bForScreen )
-			{
-				m_Zoom = pow( ZOOM_AMOUNT, floor( log( m_Zoom ) / log( ZOOM_AMOUNT ) ) );
-			}
-
-			Area = GetDocumentArea( m_bShowDimensions );
-			Area.Normalize();
-
-			// Center the mechanism.
-			m_ScrollPosition.x = m_Zoom * ( Area.left + Area.Width() / 2 );
-			m_ScrollPosition.y = m_Zoom * -( Area.top + Area.Height() / 2 );
-		}
-		else if( bForScreen )
-		{
-			m_Zoom = m_ScreenZoom;
-			m_ScrollPosition = m_ScreenScrollPosition;
-
-			//int cx = m_DrawingRect.Width();
-			//int cy = m_DrawingRect.Height();
-			//pDC->SetMapMode(MM_ANISOTROPIC);
-			//pDC->SetWindowExt((int)(m_DrawingRect.Width()), (int)(m_DrawingRect.Height()));
-			//pDC->SetViewportExt((int)( cx * 2 ), (int)(cy*2));
+			CFRect Temp = m_DrawingRect;
+			Temp *= 1.0 / m_DPIScale;
+			ZoomToFit( Temp, MarginScale, 1.0, bForScreen );
 		}
 	}
 
@@ -5575,7 +5484,114 @@ void CLinkageView::GetDocumentViewArea( CFRect &Rect, CLinkageDoc *pDoc )
 
 	CFRect Area = GetDocumentArea();
 	CFRect PixelRect = Area;
+}
+
+void CLinkageView::ZoomToFit( CFRect Container, double MarginScale, double UnscaledUnitSize, bool bShrinkToZoomStep )
+{
+	/*
+	 * Adjust the scroll offset and zoom to fit the document to the specified area.
+	 */
+
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	
+	//m_YUpDirection = ( Renderer.GetYOrientation() < 0 ) ? -1 : 1;
+	m_BaseUnscaledUnit = UnscaledUnitSize;
+	m_ConnectorRadius = CONNECTORRADIUS * UnscaledUnitSize;
+	m_ConnectorTriangle = CONNECTORTRIANGLE * UnscaledUnitSize;
+	m_ArrowBase = ANCHORBASE * UnscaledUnitSize;
+	m_Zoom = 1.0;
+	m_ScrollPosition.SetPoint( 0, 0 );
+
+	if( pDoc->IsEmpty() && m_pBackgroundBitmap == 0 )
+		return;
+
+	double cx = Container.Width();
+	double cy = Container.Height();
+
+	double xMargin = cx * MarginScale;
+	double yMargin = cy * MarginScale;
+	cx -= xMargin;
+	cy -= yMargin;
+
+	// Connector radius on every side of the mechanism. This is wrong (more than needed) if there are just drawing elements at the edges of the mechanism.
+	cx -= CONNECTORRADIUS * 2;
+	cy -= CONNECTORRADIUS * 2;
+
+	cx -= 1;
+	cy -= 1;
+
+	double cxOriginal = cx;
+	double cyOriginal = cy;
+
+	/*
+	* Start with a zoom of 1. The document dimensions are the same as the DPI adjusted pixel dimensions.
+	* Take the dimensioned document area and the non-dimensioned document area and the difference is how
+	* much room is need around the undimensioned document for the dimensions IF THERE ARE NO DIAGONAL MEASUREMENT LINES.
+	* The accuracy of the later calculated zoom is tested for cases where diagonal measurement lines have caused
+	* an innaccurate result.
+	*/
+
+	CFRect NoDimArea = GetDocumentArea( false );
+	NoDimArea.Normalize();
+	CFRect DimArea = GetDocumentArea( m_bShowDimensions );
+	DimArea.Normalize();
+
+	// Take drawing rect and shrink it by the difference between the dimensioned and non-dimensioned document. This 
+	// is a good starting point to determining how much room is needed for the dimension lines.
+	cx -= ( DimArea.Width() - NoDimArea.Width() ) * 1;
+	cy -= ( DimArea.Height() - NoDimArea.Height() ) * 1;
+
+	double xRatio = cx / NoDimArea.Width();
+	double yRatio = cy / NoDimArea.Height();
+	double Ratio = min( xRatio, yRatio );
+
+	m_Zoom = Ratio;
+
+	/*
+	* Now that there is a zoom level that might work, check to see if the dimensions actual fit.
+	* it is possible that the dimensioned document now is too big or too small because of diagonal
+	* measurement lines. Try to find a better fit based on this starting zoom level.
+	*/
+
+	cx = cxOriginal;
+	cy = cyOriginal;
+
+	CFRect Area = GetDocumentArea( m_bShowDimensions );
+	Area.Normalize();
+	xRatio = cx / Area.Width();
+	yRatio = cy / Area.Height();
+	Ratio = min( xRatio, yRatio );
+
+	int Direction = Ratio - m_Zoom >= 0 ? 1 : -1;
+	while( fabs( Ratio - m_Zoom ) > 0.01 )
+	{
+		int NewDirection = Ratio - m_Zoom >= 0 ? 1 : -1;
+		if( NewDirection != Direction )
+			break;
+		double Difference = Ratio - m_Zoom;
+		m_Zoom += Difference * 0.5;
+
+		Area = GetDocumentArea( m_bShowDimensions );
+		Area.Normalize();
+		xRatio = cx / Area.Width();
+		yRatio = cy / Area.Height();
+		Ratio = min( xRatio, yRatio );
 	}
+
+	if( bShrinkToZoomStep )
+	{
+		m_Zoom = pow( ZOOM_AMOUNT, floor( log( m_Zoom ) / log( ZOOM_AMOUNT ) ) );
+	}
+
+	Area = GetDocumentArea( m_bShowDimensions );
+	Area.Normalize();
+
+	// Center the mechanism.
+	m_ScrollPosition.x = m_Zoom * ( Area.left + Area.Width() / 2 );
+	m_ScrollPosition.y = m_Zoom * -( Area.top + Area.Height() / 2 );
+}
+
 
 void CLinkageView::OnMenuZoomfit()
 {
@@ -5594,8 +5610,12 @@ void CLinkageView::OnMenuZoomfit()
 		return;
 	}
 
+	/*
+	 * Render using a null renderer using the scale-to-fit flag to scale the document to fit the window.
+	 * The regular drawing later will have the zoom and scroll positions set from this one-time null rendering.
+	 */ 
 	CRenderer NullRenderer( CRenderer::NULL_RENDERER );
-    PrepareRenderer( NullRenderer, 0, 0, 0, 1.0, true, 0.0, 1.0, true, false, m_bPrintFullSize, 0 );
+	PrepareRenderer( NullRenderer, 0, 0, 0, 1.0, true, 0.0, 1.0, true, false, m_bPrintFullSize, 0 );
 
 	m_ScreenZoom = m_Zoom;
 	m_ScreenScrollPosition = m_ScrollPosition;
@@ -5723,6 +5743,8 @@ BOOL CLinkageView::OnPreparePrinting( CPrintInfo* pInfo )
 	CLinkageApp *pApp = (CLinkageApp*)AfxGetApp();
 	if( pApp == 0 )
 		return bResult;
+
+	m_Zoom = 1.0;
 
 	CFRect Area = GetDocumentArea( m_bShowDimensions );
 	if( m_bPrintFullSize )
@@ -9318,9 +9340,9 @@ int CLinkageView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	#if defined( LINKAGE_USE_DIRECT2D )
 		CWindowDC DC( this );
 		int PPI = DC.GetDeviceCaps( LOGPIXELSX );
-		m_DPIScale = (double)PPI / 96.0;
+		m_ScreenDPIScale = (double)PPI / 96.0;
 	#else
-		m_DPIScale = 1.0;
+		m_ScreenDPIScale = 1.0;
 	#endif
 
 	CLinkageDoc* pDoc = GetDocument();

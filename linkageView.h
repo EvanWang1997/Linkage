@@ -118,6 +118,7 @@ private:
 
 	CSimulator m_Simulator;
 
+	double m_ScreenDPIScale;
 	double m_DPIScale;
 	ULONG_PTR m_gdiplusToken;
 	CFPoint m_PreviousDragPoint;
@@ -354,6 +355,7 @@ private:
 	void ShowSelectedElementStatus( void );
 	void GetSetViewSpecificDimensionVisbility( bool bSave );
 	void SaveSettings( void );
+	void ZoomToFit( CFRect FitIn, double MarginScale, double UnscaledUnitSize, bool bShrinkToZoomStep );
 
 	bool AnyAlwaysManual( void );
 
