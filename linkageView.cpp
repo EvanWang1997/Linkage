@@ -5592,7 +5592,6 @@ void CLinkageView::ZoomToFit( CFRect Container, double MarginScale, double Unsca
 	m_ScrollPosition.y = m_Zoom * -( Area.top + Area.Height() / 2 );
 }
 
-
 void CLinkageView::OnMenuZoomfit()
 {
 	if( m_bSimulating )
@@ -9034,10 +9033,42 @@ void CLinkageView::OnFilePrint()
 {
 }
 
+class CMyPreviewView : public CPreviewView
+{
+	public:
+	CDialogBar *GetToolBar( void ) { return m_pToolBar; }
+};
+
 void CLinkageView::OnFilePrintPreview()
 {
 	ShowPrintPreviewCategory();
 	CView::OnFilePrintPreview();
+
+	/*
+	 * The code below is a bit of a klude that relies on the print preview working
+	 * in a very specific way. There is a CDialogBar that is created by the print preview
+	 * code and it sits on top of the windows title bar. This has the effect of disabling
+	 * the close button, as well as the min and max buttons. But it fails and the close button
+	 * malfunctions when it is pressed causing a short hang in the program (or longer).
+	 *
+	 * So this code uses a short child class of the CPreviewView class to allow us to
+	 * get the dialog bar and hide it. There seem to be no controls in it at this time so
+	 * it is safe to hide. The mainframe code is then allowed to handle the close message
+	 * as it sees fit (usually closing the print preview and not the whole window).
+	 * This code will fail if the pointers are to objects other than what is expected!
+	 */
+
+	CMainFrame *pFrame = (CMainFrame*)AfxGetMainWnd();
+	if( pFrame == 0 )
+		return;
+	CView *pView = pFrame->GetActiveView();
+	if( pView == 0 )
+		return;
+	CMyPreviewView *pPreview = (CMyPreviewView*)pView;
+	CDialogBar *pPreviewToolBar = pPreview->GetToolBar();
+	if( pPreviewToolBar == 0 )
+		return;
+	pPreviewToolBar->ShowWindow( SW_HIDE );
 }
 
 void CLinkageView::OnEndPrintPreview( CDC* pDC, CPrintInfo* pInfo, POINT point, CPreviewView* pView )

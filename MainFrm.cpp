@@ -33,6 +33,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_SETCURSOR()
 	ON_WM_DROPFILES()
 	ON_WM_TIMER()
+	ON_WM_CLOSE()
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -780,6 +781,7 @@ void CMainFrame::InitializeRibbon()
 {
 	m_wndRibbonBar.SetWindows7Look( TRUE );
 	m_wndRibbonBar.EnablePrintPreview( 1 );
+
 	//m_wndRibbonBar.SetTooltipFixedWidth( 500, 500 );  DON'T SET THIS SINCE THE m_nMaxDescrWidth PARAM BELOW WILL MAKE THE TOOLTIP WINDOW WIDER.
 
 	CWinAppEx *pAppEx = (CWinAppEx *)AfxGetApp();
@@ -1082,4 +1084,16 @@ BOOL CMainFrame::OnSetCursor( CWnd* pWnd, UINT nHitTest, UINT message )
 	}
 
 	return CWnd::OnSetCursor( pWnd, nHitTest, message );
+}
+
+
+void CMainFrame::OnClose()
+{
+	if( IsPrintPreview() )
+	{
+		PostMessage(WM_COMMAND, AFX_ID_PREVIEW_CLOSE);
+		return;
+	}
+
+	CFrameWndEx::OnClose();
 }
