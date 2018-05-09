@@ -2156,6 +2156,9 @@ bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap
 
 			if( LockedLinkCount == 1 )
 			{
+				if( pConnector->IsSlider() )
+					return true; // Moved it to same location (since it never moved).
+
 				// Rotate the locked link around it's other connector to get the
 				// selected connector to be as close to the desired position as possible.
 				CConnector *pCenter = pLockedLink->GetConnector( 0 );
@@ -3460,6 +3463,9 @@ CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoin
 	if( ConnectorCount == 0 )
 		return 0;
 
+	if( ( Layers & m_EditLayers ) == 0 )
+		return 0;
+
 	static const int MAX_CONNECTOR_COUNT = 4;
 
 	/*
@@ -3568,7 +3574,7 @@ CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoin
 		Connectors[Counter]->SetIdentifier( NewID );
 		Connectors[Counter]->SetColor( ( Layers & DRAWINGLAYER ) != 0 ? RGB( 200, 200, 200 ) : Colors[Connectors[Counter]->GetIdentifier() % COLORS_COUNT] );
 		m_Connectors.AddTail( Connectors[Counter] );
-		if( bSelectInsert )
+		if( bSelectInsert && ( m_UsableLayers & Layers ) != 0 )
 			SelectElement( Connectors[Counter] );
 	}
 
@@ -3582,7 +3588,7 @@ CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoin
 	pLink->SetGear( bGear );
 	pLink->SetColor( ( Layers & DRAWINGLAYER ) != 0 ? RGB( 200, 200, 200 ) : Colors[pLink->GetIdentifier() % COLORS_COUNT] );
 	pLink->SetMeasurementElement( bMeasurement && ( Layers & DRAWINGLAYER ) != 0, false );
-	if( bSelectInsert )
+	if( bSelectInsert && ( m_UsableLayers & Layers ) != 0 )
 		SelectElement( pLink );
 
 	SetSelectedModifiableCondition();
