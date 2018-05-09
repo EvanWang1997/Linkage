@@ -48,4 +48,6 @@ public:
 	CButton m_PolylineButton;
 	int m_Polygon;
 	bool m_bColorIsSet;
+	CButton OffsetLineControl;
+	BOOL m_bOffsetMeassurementLine;
 };

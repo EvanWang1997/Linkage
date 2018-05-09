@@ -142,7 +142,7 @@ public:
 	bool ConnectGears( CLink *pLink1, CLink *pLink2, double Size1, double Size2 );
 	bool DisconnectGear( CLink *pLink1 );
 	
-	void InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bAnchor, bool bRotating, bool bSlider, bool bActuator, bool bMeasurement, bool bSolid, bool bGear );
+	CLink* InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bAnchor, bool bRotating, bool bSlider, bool bActuator, bool bMeasurement, bool bSolid, bool bGear );
 	void InsertConnector( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, false, false, false, false, false, false, false ); }
 	void InsertAnchor( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, true, false, false, false, false, bSolid, false ); }
 	void InsertAnchorLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, true, false, false, false, false, bSolid, false ); }
@@ -150,7 +150,7 @@ public:
 	void InsertSlider( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, false, false, true, false, false, false, false ); }
 	void InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bSolid ) { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, ConnectorCount, false, false, false, false, false, bSolid, false ); }
 	void InsertActuator( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, false, false, false, true, false, bSolid, false ); }
-	void InsertMeasurement( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, false, false, false, false, true, false, false ); }
+	CLink* InsertMeasurement( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { return InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, false, false, false, false, true, false, false ); }
 	void InsertGear( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )   { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, false, false, false, false, false, false, true ); }
 	//bool GetExampleName( int Index, CString &Name );
 	//bool GetExampleText( int Index, CString &Text );
@@ -163,6 +163,10 @@ public:
 	
 	CLink* ConnectSelected( void );
 	bool FastenSelected( void );
+	void FastenThese( CConnector *pFastenThis, CLink *pFastenToThis );
+	void FastenThese( CLink *pFastenThis, CLink *pFastenToThis );
+	void FastenThese( CLink *pFastenThis, CConnector *pFastenToThis );
+	void FastenThese( CConnector *pFastenThis, CConnector *pFastenToThis );
 	bool UnfastenSelected( void );
 	bool JoinSelected( bool bSaveUndoState );
 	bool LockSelected( void );
@@ -346,11 +350,6 @@ private:
 
 	// void DeleteConnector( POSITION Position, CConnector *pConnector );
 	// CGearConnection * GetSelectedGearLinks( CLink *&pLink1, CLink *&pLink2 );
-
-	void FastenThese( CConnector *pFastenThis, CLink *pFastenToThis );
-	void FastenThese( CLink *pFastenThis, CLink *pFastenToThis );
-	void FastenThese( CLink *pFastenThis, CConnector *pFastenToThis );
-	void FastenThese( CConnector *pFastenThis, CConnector *pFastenToThis );
 
 	//bool Unfasten( CLink *pFastenedTo );
 	bool Unfasten( CElement *pElement );

@@ -70,8 +70,9 @@ class CElement
 	void SetLayers( unsigned int Layers ) { m_Layers = Layers; }
 	unsigned int GetLayers( void ) { return m_Layers; }
 	bool IsOnLayers( int Layers ) { return ( m_Layers & Layers ) != 0; }
-	void SetMeasurementElement( bool bSet ) { m_bMeasurementElement = bSet; }
-	bool IsMeasurementElement( void ) { return m_bMeasurementElement; }
+	void SetMeasurementElement( bool bSet, bool bUseOffset ) { m_bMeasurementElement = bSet; m_bMeasurementElementOffset = bUseOffset; }
+	bool IsMeasurementElement( bool *pbUseOffset = 0 ) 
+		{ if( pbUseOffset != 0 ) { *pbUseOffset = m_bMeasurementElementOffset; } return m_bMeasurementElement; }
 
 	void SetPositionValid( bool bSet ) { m_bPositionValid = bSet; }
 	bool IsPositionValid( void ) { return m_bPositionValid; }
@@ -124,5 +125,6 @@ class CElement
 	CControlKnob m_ControlKnob;
 	bool m_bLocked;
 	int m_LineSize;
+	bool m_bMeasurementElementOffset;
 };
 

@@ -40,6 +40,7 @@
 #define IDC_RADIO5                      1011
 #define IDC_RADIO6                      1011
 #define IDC_SPIN2                       1011
+#define IDC_CHECK7                      1011
 #define IDC_RADIO9                      1012
 #define IDC_BUTTON1                     1018
 #define IDC_COMMAND4                    1019
@@ -94,8 +95,8 @@
 #define IDS_RIBBON_APPEARANCE           3030
 #define ID_BACKGROUND_DELETE            3031
 #define IDS_RIBBON_BACKGROUND_DELETE    3032
-#define ID_SIMULATION_ONECYCLE			3033
-#define ID_SIMULATION_ONECYCLEX			3034
+#define ID_SIMULATION_ONECYCLE          3033
+#define ID_SIMULATION_ONECYCLEX         3034
 #define IDB_INSERT_POPUP_GALLERY        4000
 #define IDB_NAVIGATION_LARGE_HC         4100
 #define IDB_PAGES                       4101
@@ -259,14 +260,14 @@
 #define ID_SELECT_NEXT                  4851
 #define ID_VIEW_ANGLES                  4852
 #define ID_SELECT_PREVIOUS              4853
-#define ID_NUDGE_LEFT					4854
-#define ID_NUDGE_RIGHT					4855
-#define ID_NUDGE_UP						4856
-#define ID_NUDGE_DOWN					4857
-#define ID_NUDGE_BIGLEFT				4858
-#define ID_NUDGE_BIGRIGHT				4859
-#define ID_NUDGE_BIGUP					4860
-#define ID_NUDGE_BIGDOWN				4861
+#define ID_NUDGE_LEFT                   4854
+#define ID_NUDGE_RIGHT                  4855
+#define ID_NUDGE_UP                     4856
+#define ID_NUDGE_DOWN                   4857
+#define ID_NUDGE_BIGLEFT                4858
+#define ID_NUDGE_BIGRIGHT               4859
+#define ID_NUDGE_BIGUP                  4860
+#define ID_NUDGE_BIGDOWN                4861
 #define ID_EDIT_SLIDE                   4863
 #define ID_EDIT_SLIDE32865              4865
 #define IDB_WRITESMALL                  4867
@@ -335,7 +336,7 @@
 #define IDS_RIBBON_MEET                 4935
 #define ID_ALIGN_MEET                   4936
 #define ID_VIEW_DRAWINGLAYERDIMENSIONS  4937
-#define ID_VIEW_DIMENSIONSLABEL			4938
+#define ID_VIEW_DIMENSIONSLABEL         4938
 #define IDS_SAMPLE_SIMPLE               5011
 #define IDS_SAMPLE_JANSEN               5012
 #define IDS_SAMPLE_KLANN                5013
@@ -396,7 +397,7 @@
 #define ID_SAMPLE_ROSSYOKE              5135
 #define ID_SAMPLE_RHOMBIC               5136
 #define ID_SAMPLE_GEARRHOMBIC           5137
-#define ID_SAMPLE_TRAMMEL	            5138
+#define ID_SAMPLE_TRAMMEL               5138
 #define ID_SAMPLE_UNUSED22              5139
 #define ID_SAMPLE_UNUSED23              5140
 #define ID_SAMPLE_UNUSED24              5141
@@ -448,7 +449,7 @@
 #define ID_EDIT_FASTEN                  5237
 #define ID_INSERT_ANCHORLINK            5238
 #define IDS_SAMPLE_LIFTER               5240
-#define ID_EDIT_SELECTLINK				5241
+#define ID_EDIT_SELECTLINK              5241
 #define IDC_COPYRIGHT                   5303
 #define IDC_COMBO1                      5303
 #define IDC_COMBO2                      5304
@@ -516,7 +517,7 @@
 #define IDS_SAMPLE_RHOMBIC              5432
 #define IDS_SAMPLE_GEARRHOMBIC          5433
 #define ID_FILE_PRINTFULL               5935
-#define IDS_SAMPLE_TRAMMEL				5936
+#define IDS_SAMPLE_TRAMMEL              5936
 #define IDD_EXPORTIMAGE                 6000
 #define IDD_SELECTELEMENTS              6006
 #define IDB_BITMAP7                     6008

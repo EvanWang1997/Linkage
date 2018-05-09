@@ -385,7 +385,9 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			Value = pNode->GetAttribute( "alwaysmanual" );
 			pConnector->SetAlwaysManual( Value == "true" );
 			Value = pNode->GetAttribute( "measurementelement" );
-			pConnector->SetMeasurementElement( Value == "true" );
+			bool bMeasurementElement = Value == "true";
+			Value = pNode->GetAttribute( "measurementuseoffset" );
+			pConnector->SetMeasurementElement( bMeasurementElement, Value == "true" );
 			Value = pNode->GetAttribute( "name" );
 			pConnector->SetName( Value );
 			Value = pNode->GetAttribute( "locked" );
@@ -442,7 +444,9 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			Value = pNode->GetAttribute( "locked" );
 			pLink->SetLocked( Value == "true" );
 			Value = pNode->GetAttribute( "measurementelement" );
-			pLink->SetMeasurementElement( Value == "true" );
+			bool bMeasurementElement = Value == "true";
+			Value = pNode->GetAttribute( "measurementuseoffset" );
+			pLink->SetMeasurementElement( bMeasurementElement, Value == "true" );
 			Value = pNode->GetAttribute( "name" );
 			pLink->SetName( Value );
 			Value = pNode->GetAttribute( "selected" );
@@ -886,7 +890,9 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "locked", pConnector->IsLocked(), pConnector->IsLocked() && pConnector->IsAnchor() );
 		AppendXMLAttribute( TempString, "input", pConnector->IsInput(), pConnector->IsInput() );
 		AppendXMLAttribute( TempString, "draw", pConnector->IsDrawing(), pConnector->IsDrawing() );
-		AppendXMLAttribute( TempString, "measurementelement", pConnector->IsMeasurementElement(), pConnector->IsMeasurementElement() );
+		bool MeasurementUseOffset = false;
+		AppendXMLAttribute( TempString, "measurementelement", pConnector->IsMeasurementElement( &MeasurementUseOffset ), pConnector->IsMeasurementElement() );
+		AppendXMLAttribute( TempString, "measurementuseoffset", MeasurementUseOffset, pConnector->IsMeasurementElement() );
 		AppendXMLAttribute( TempString, "rpm", pConnector->GetRPM(), pConnector->IsInput() );
 		AppendXMLAttribute( TempString, "limitangle", pConnector->GetLimitAngle(), pConnector->GetLimitAngle() > 0 && pConnector->IsInput() );
 		AppendXMLAttribute( TempString, "startoffset", pConnector->GetStartOffset(), pConnector->GetLimitAngle() > 0 && pConnector->IsInput() );
@@ -3447,12 +3453,12 @@ bool CLinkageDoc::FindRoomFor( CFRect NeedRect, CFPoint &PlaceHere )
 	return false;
 }
 
-void CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bAnchor, bool bRotating, bool bSlider, bool bActuator, bool bMeasurement, bool bSolid, bool bGear )
+CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bAnchor, bool bRotating, bool bSlider, bool bActuator, bool bMeasurement, bool bSolid, bool bGear )
 {
 	static bool bSelectInsert = true;
 
 	if( ConnectorCount == 0 )
-		return;
+		return 0;
 
 	static const int MAX_CONNECTOR_COUNT = 4;
 
@@ -3461,7 +3467,7 @@ void CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint D
 	 * the new connectors so 3 is the maximum.
 	 */
 	if( ConnectorCount > MAX_CONNECTOR_COUNT )
-		return;
+		return 0;
 
 	PushUndo();
 
@@ -3477,7 +3483,7 @@ void CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint D
 
 	CConnector **Connectors = new CConnector* [ConnectorCount];
 	if( Connectors == 0 )
-		return;
+		return 0;
 	int Index;
 	for( Index = 0; Index < ConnectorCount; ++Index )
 		Connectors[Index] = 0;
@@ -3486,7 +3492,7 @@ void CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint D
 	if( pLink == 0 )
 	{
 		delete [] Connectors;
-		return;
+		return 0;
 	}
 
 	for( Index = 0; Index < ConnectorCount; ++Index )
@@ -3502,7 +3508,7 @@ void CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint D
 			delete [] Connectors;
 			RemoveGearRatio( 0, pLink );
 			delete pLink;
-			return;
+			return 0;
 		}
 		Connectors[Index] = pConnector;
 		pConnector->SetLayers( Layers );
@@ -3575,7 +3581,7 @@ void CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint D
 	pLink->SetSolid( bSolid );
 	pLink->SetGear( bGear );
 	pLink->SetColor( ( Layers & DRAWINGLAYER ) != 0 ? RGB( 200, 200, 200 ) : Colors[pLink->GetIdentifier() % COLORS_COUNT] );
-	pLink->SetMeasurementElement( bMeasurement && ( Layers & DRAWINGLAYER ) != 0 );
+	pLink->SetMeasurementElement( bMeasurement && ( Layers & DRAWINGLAYER ) != 0, false );
 	if( bSelectInsert )
 		SelectElement( pLink );
 
@@ -3586,6 +3592,8 @@ void CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint D
 	FinishChangeSelected();
 
 	delete [] Connectors;
+
+	return pLink;
 }
 
 void CLinkageDoc::DeleteContents( bool bDeleteUndoInfo )

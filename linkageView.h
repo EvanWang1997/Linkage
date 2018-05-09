@@ -355,7 +355,7 @@ private:
 	void ShowSelectedElementStatus( void );
 	void GetSetViewSpecificDimensionVisbility( bool bSave );
 	void SaveSettings( void );
-	void ZoomToFit( CFRect FitIn, double MarginScale, double UnscaledUnitSize, bool bShrinkToZoomStep );
+	void ZoomToFit( CFRect FitIn, bool bAllowEnlarge, double MarginScale, double UnscaledUnitSize, bool bShrinkToZoomStep );
 
 	bool AnyAlwaysManual( void );
 

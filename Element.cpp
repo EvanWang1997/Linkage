@@ -12,6 +12,7 @@ CElement::CElement(void)
 	m_bLocked = false;
 	m_LineSize = 1;
 	m_bUserColor = false;
+	m_bMeasurementElementOffset = false;
 }
 
 CElement::~CElement(void)
@@ -38,6 +39,7 @@ CElement::CElement( const CElement &ExistingElement )
 	m_bUserColor = ExistingElement.m_bUserColor;
 	m_FastenedTo = CElementItem();
 	m_bLocked = ExistingElement.m_bLocked;
+	m_bMeasurementElementOffset = ExistingElement.m_bMeasurementElementOffset;
 	m_LineSize = ExistingElement.m_LineSize;
 	// The fastening is not copied because that seems just wrong - someother element can't be fastened to more than one element at a time.
 }

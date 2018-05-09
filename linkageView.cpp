@@ -1137,7 +1137,7 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 		}
 		else
 		{
-			ZoomToFit( m_DrawingRect, 0, 1.0, false );
+			ZoomToFit( m_DrawingRect, false, 0, 1.0, false );
 
 			//m_ScrollPosition.x = (int)( PixelRect.left + ( PixelRect.Width() / 2 ) - ( m_DrawingRect.Width() / 2 ) );
 			//m_ScrollPosition.y = (int)( PixelRect.top + ( PixelRect.Height() / 2 ) - ( m_DrawingRect.Height() / 2 ) );
@@ -1190,7 +1190,7 @@ CRect CLinkageView::PrepareRenderer( CRenderer &Renderer, CRect *pDrawRect, CBit
 		{
 			CFRect Temp = m_DrawingRect;
 			Temp *= 1.0 / m_DPIScale;
-			ZoomToFit( Temp, MarginScale, 1.0, bForScreen );
+			ZoomToFit( Temp, true, MarginScale, 1.0, bForScreen );
 		}
 	}
 
@@ -4376,8 +4376,24 @@ void CLinkageView::InsertMeasurement( CFPoint *pPoint )
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	pDoc->InsertMeasurement( CLinkageDoc::DRAWINGLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0 );
+	CConnector *pConnector0 = pDoc->GetSelectedConnector( 0 );
+	CConnector *pConnector1 = pDoc->GetSelectedConnector( 1 );
+	bool bFastenIt = pDoc->GetSelectedConnectorCount() == 2 && pDoc->GetSelectedLinkCount( true ) == 0;
+	CLink *pLink = pDoc->InsertMeasurement( CLinkageDoc::DRAWINGLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0 );
 	m_bSuperHighlight = true;
+
+	if( bFastenIt && pLink != 0 )
+	{
+		CConnector *pStart = pLink->GetConnector( 0 );
+		CConnector *pEnd = pLink->GetConnector( 1 );
+		if( pStart != 0 && pEnd != 0 )
+		{
+			pDoc->FastenThese( pStart, pConnector0 );
+			pStart->SetPoint( pConnector0->GetPoint() );
+			pDoc->FastenThese( pEnd, pConnector1 );
+			pEnd->SetPoint( pConnector1->GetPoint() );
+		}
+	}
 
 	UpdateForDocumentChange();
 	SelectionChanged();
@@ -5486,7 +5502,7 @@ void CLinkageView::GetDocumentViewArea( CFRect &Rect, CLinkageDoc *pDoc )
 	CFRect PixelRect = Area;
 }
 
-void CLinkageView::ZoomToFit( CFRect Container, double MarginScale, double UnscaledUnitSize, bool bShrinkToZoomStep )
+void CLinkageView::ZoomToFit( CFRect Container, bool bAllowEnlarge, double MarginScale, double UnscaledUnitSize, bool bShrinkToZoomStep )
 {
 	/*
 	 * Adjust the scroll offset and zoom to fit the document to the specified area.
@@ -5583,6 +5599,9 @@ void CLinkageView::ZoomToFit( CFRect Container, double MarginScale, double Unsca
 	{
 		m_Zoom = pow( ZOOM_AMOUNT, floor( log( m_Zoom ) / log( ZOOM_AMOUNT ) ) );
 	}
+
+	if( m_Zoom > 1.0 && !bAllowEnlarge )
+		m_Zoom = 1.0;
 
 	Area = GetDocumentArea( m_bShowDimensions );
 	Area.Normalize();
@@ -7895,16 +7914,22 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 		}
 	}
 
-	if( pLink->IsMeasurementElement() )
+	bool bUseOffset = false;
+	if( pLink->IsMeasurementElement( &bUseOffset ) )
 	{
+		COLORREF Color = pLink->GetColor();
+		COLORREF LightColor = LightenColor( Color, 0.75 );
 		CPen Pen;
-		Pen.CreatePen( PS_SOLID, 1, RGB( 192, 192, 192 ) );
+		Pen.CreatePen( PS_SOLID, 1, Color );
+		CPen LightPen;
+		LightPen.CreatePen( PS_SOLID, 1, LightColor );
 		CPen *pOldPen = pRenderer->SelectObject( &Pen );
 		COLORREF OldFontColor = pRenderer->GetTextColor();
+
 		pRenderer->SetTextColor( RGB( 96, 96, 96 ) );
-		pRenderer->SetBkMode( OPAQUE );
+		pRenderer->SetBkMode( TRANSPARENT );
 		pRenderer->SetTextAlign( TA_LEFT | TA_TOP );
-		pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
+		//pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
 
 		int PointCount = 0;
 		CFPoint* Points = pLink->GetHull( PointCount );
@@ -7912,7 +7937,13 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 		for( int Index = 0; Index < PointCount - 1; ++Index )
 		{
 			CFLine Line( Points[Index], Points[Index+1] );
-			DrawMeasurementLine( pRenderer, Line, 0, true, true );
+			if( bUseOffset )
+			{
+				pRenderer->SelectObject( &LightPen );
+				pRenderer->DrawLine( Scale( Line ) );
+			}
+			pRenderer->SelectObject( &Pen );
+			DrawMeasurementLine( pRenderer, Line, bUseOffset ? OFFSET_INCREMENT : 0, true, true );
 		}
 		pRenderer->SelectObject( pOldPen );
 	}
@@ -8699,6 +8730,7 @@ bool CLinkageView::LineProperties( CLink *pLink )
 		Dialog.m_LineSize = 1;
 		Dialog.m_SelectedLinkCount = 0;
 		Dialog.m_bMeasurementLine = FALSE;
+		Dialog.m_bOffsetMeassurementLine = FALSE;
 		Dialog.m_Label = "Multiple Line/Link Properties";
 //		Dialog.m_Color = pLink->GetColor();
 //		Dialog.m_bPolygon = !pLink->IsPolyline();
@@ -8718,7 +8750,9 @@ bool CLinkageView::LineProperties( CLink *pLink )
 	else
 	{
 		Dialog.m_LineSize = pLink->GetLineSize();
-		Dialog.m_bMeasurementLine = pLink->IsMeasurementElement() ? TRUE : FALSE;
+		bool bUseLineOffset = false;
+		Dialog.m_bMeasurementLine = pLink->IsMeasurementElement( &bUseLineOffset ) ? TRUE : FALSE;
+		Dialog.m_bOffsetMeassurementLine = bUseLineOffset ? TRUE : FALSE;
 		Dialog.m_SelectedLinkCount = 1;
 		Dialog.m_Label = pLink->GetIdentifierString( m_bShowDebug );
 		Dialog.m_Label += " - Line Properties";
@@ -8750,7 +8784,7 @@ bool CLinkageView::LineProperties( CLink *pLink )
 		{
 			pLink->SetLineSize( Dialog.m_LineSize );
 			pLink->SetName( Dialog.m_Name );
-			pLink->SetMeasurementElement( Dialog.m_bMeasurementLine != FALSE );
+			pLink->SetMeasurementElement( Dialog.m_bMeasurementLine != FALSE, Dialog.m_bOffsetMeassurementLine != FALSE );
 			pLink->SetColor( Dialog.m_Color );
 			pLink->SetPolyline( Dialog.m_Polygon == 0 ? false : true );
 		}
