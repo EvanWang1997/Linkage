@@ -890,10 +890,10 @@ void CLink::SetStroke( double Stroke )
 	m_ActuatorExtension = 0;
 	m_TempActuatorExtension = 0;
 
-	UpdateControlKnob();
+	UpdateControlKnobs();
 }
 
-void CLink::UpdateControlKnob( void )
+void CLink::UpdateControlKnobs( void )
 {
 	if( !IsActuator() )
 		return;
@@ -903,7 +903,7 @@ void CLink::UpdateControlKnob( void )
 	m_ControlKnob.SetPoint( Point );
 }
 
-void CLink::UpdateControlKnob( CFPoint Point )
+void CLink::UpdateControlKnob( CControlKnob *pKnob, CFPoint Point )
 {
 	CControlKnob *pControlKnob = GetControlKnob();
 	if( !IsActuator() || pControlKnob == 0 )
@@ -1165,6 +1165,6 @@ bool CLink::IsGearAnchored( void )
 
 CControlKnob *CLink::GetControlKnob( void ) 
 {
-	UpdateControlKnob();
+	UpdateControlKnobs();
 	return IsActuator() ? &m_ControlKnob : 0; 
 }

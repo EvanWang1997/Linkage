@@ -148,8 +148,8 @@ class CLink : public CElement
 	void SetExtension( double Value );
 	double GetExtendedDistance( void );
 	// double GetOffsetAdjustedExtendedDistance( void );
-	void UpdateControlKnob( CFPoint Point );
-	void UpdateControlKnob( void );
+	virtual void UpdateControlKnobs( void );
+	virtual void UpdateControlKnob( CControlKnob *pKnob, CFPoint Point );
 	CConnector *GetConnector( int Index ) const;
 	int GetConnectedSliderCount( void ) { return (int)m_ConnectedSliders.GetCount(); }
 	CConnector *GetConnectedSlider( int Index );

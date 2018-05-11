@@ -70,8 +70,8 @@ public:
 	double GetStartOffset( void ) { return IsInput() ? m_InputStartOffset : 0; }
 	void SetStartOffset( double Value ) { m_InputStartOffset = Value; }
 
-	void UpdateControlKnob( void );
-	void UpdateControlKnob( CFPoint Point );
+	virtual void UpdateControlKnobs( void );
+	virtual void UpdateControlKnob( CControlKnob *pKnob, CFPoint Point );
 	bool IsLinkSelected( void );
 	bool IsAnchor( void ) { return m_bAnchor; }
 	bool IsInput( void ) { return m_bInput; }

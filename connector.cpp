@@ -45,7 +45,7 @@ void CConnector::Reset( void )
 	m_SlideRadius = 0;
 	m_OriginalSlideRadius = 0;
 	m_Color = RGB( 200, 200, 200 );
-	UpdateControlKnob();
+	UpdateControlKnobs();
 }
 
 CConnector::CConnector()
@@ -126,9 +126,10 @@ int CConnector::GetSelectedLinkCount( void )
 	return Count;
 }
 
-void CConnector::UpdateControlKnob( void )
+void CConnector::UpdateControlKnobs( void )
 {
-	CControlKnob *pControlKnob = GetControlKnob();
+	int Knobs = 0;
+	CControlKnob *pControlKnob = GetControlKnobs( Knobs );
 	if( m_DrawCircleRadius == 0.0 || pControlKnob == 0 )
 		return;
 
@@ -142,9 +143,10 @@ void CConnector::UpdateControlKnob( void )
 	pControlKnob->SetPoint( Line.GetEnd() );
 }
 
-void CConnector::UpdateControlKnob( CFPoint Point )
+void CConnector::UpdateControlKnob( CControlKnob *pKnob, CFPoint Point )
 {
-	CControlKnob *pControlKnob = GetControlKnob();
+	int Knobs = 0;
+	CControlKnob *pControlKnob = GetControlKnobs( Knobs );
 	if( m_DrawCircleRadius == 0.0 || pControlKnob == 0 )
 		return;
 
@@ -160,14 +162,15 @@ void CConnector::SetDrawCircleRadius( double Radius )
 {
 	bool bNeedControlKnob = m_DrawCircleRadius == 0.0;
 
-	CControlKnob *pControlKnob = GetControlKnob();
+	int Knobs = 0;
+	CControlKnob *pControlKnob = GetControlKnobs( Knobs );
 	pControlKnob->SetParent( Radius == 0 ? 0 : this );
 	//pControlKnob->SetSlideLimits( this, 0 );
 	pControlKnob->SetShowOnParentSelect( true );
 		
 	m_DrawCircleRadius = fabs( Radius );
 	m_OriginalDrawCircleRadius = fabs( Radius );
-	UpdateControlKnob();
+	UpdateControlKnobs();
 }
 
 void CConnector::RotateAround( CFPoint& Point, double Angle )

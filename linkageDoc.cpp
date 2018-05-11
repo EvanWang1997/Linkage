@@ -1367,7 +1367,8 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 		CConnector* pConnector = m_Connectors.GetNext( Position );
 		if( pConnector != 0 && pConnector->IsSelected() )
 		{
-			CControlKnob *pControlKnob = pConnector->GetControlKnob();
+			int Knobs = 0;
+			CControlKnob *pControlKnob = pConnector->GetControlKnobs( Knobs );
 			if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
 				&& pControlKnob->IsShowOnParentSelect()
 				&& ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
@@ -1447,7 +1448,8 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			CConnector* pConnector = m_Connectors.GetNext( Position );
 			if( pConnector != 0 )
 			{
-				CControlKnob *pControlKnob = pConnector->GetControlKnob();
+				int Knobs = 0;
+				CControlKnob *pControlKnob = pConnector->GetControlKnobs( Knobs );
 				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
 				    && !pControlKnob->IsShowOnParentSelect()
 				    && ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
@@ -1488,6 +1490,24 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 				else
 					pSelectingLink = pLink;
 				break;
+			}
+		}
+	}
+
+	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingControlKnob == 0 )
+	{
+		Position = m_Connectors.GetHeadPosition();
+		while( Position != 0 )
+		{
+			CConnector* pConnector = m_Connectors.GetNext( Position );
+			if( pConnector != 0 && ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
+			{
+				double Distance = pConnector->GetPoint().DistanceToPoint( Point );
+				if( fabs( Distance - pConnector->GetDrawCircleRadius() ) < GrabDistance )
+				{
+					pSelectingConnector = pConnector;
+					break;
+				}
 			}
 		}
 	}
@@ -1769,7 +1789,7 @@ bool CLinkageDoc::MoveCapturedController( CFPoint Point )
 	if( pElement == 0 )
 		return false;
 
-	pElement->UpdateControlKnob( Point );
+	pElement->UpdateControlKnob( m_pCapturedConrolKnob, Point );
 
 	return true;
 }
@@ -2343,7 +2363,7 @@ bool CLinkageDoc::FixupSliderLocations( void )
 			if( pConnector == 0 )
 				continue;
 
-			pConnector->UpdateControlKnob();
+			pConnector->UpdateControlKnobs();
 
 			if( !pConnector->IsSlider() )
 				continue;
@@ -2359,7 +2379,7 @@ bool CLinkageDoc::FixupSliderLocations( void )
 			if( pLink == 0 )
 				continue;
 
-			pLink->UpdateControlKnob();
+			pLink->UpdateControlKnobs();
 		}
 	}
 
@@ -3312,7 +3332,7 @@ void CLinkageDoc::NormalizeConnectorLinks( void )
 				continue;
 			if( pCheckConnector->IsSelected() )
 			{
-				pLink->UpdateControlKnob();
+				pLink->UpdateControlKnobs();
 				break;
 			}
 		}
@@ -4228,7 +4248,7 @@ bool CLinkageDoc::ConnectSliderLimits( bool bTestOnly )
 		CLink *pLink = pUseConnectors[Slider]->GetLinkList()->GetNext( Position );
 		if( pLink == 0 )
 			continue;
-		pLink->UpdateControlKnob();
+		pLink->UpdateControlKnobs();
 	}
 
     SetModifiedFlag( true );

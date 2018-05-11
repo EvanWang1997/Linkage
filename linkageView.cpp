@@ -1951,7 +1951,8 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 		CConnector* pConnector = pConnectors->GetNext( Position );
 		if( pConnector != 0 )
 		{
-			CControlKnob *pControlKnob = pConnector->GetControlKnob();
+			int Knobs = 0;
+			CControlKnob *pControlKnob = pConnector->GetControlKnobs( Knobs );
 			if( pConnector != 0 )
 				DrawControlKnob( pRenderer, m_SelectedViewLayers, pControlKnob );
 		}
@@ -8600,6 +8601,7 @@ bool CLinkageView::PointProperties( CConnector *pConnector )
 		{
 			pConnector->SetPoint( Dialog.m_xPosition / DocumentScale, Dialog.m_yPosition / DocumentScale );
 		}
+		pConnector->UpdateControlKnobs();
 
 		return true;
 	}

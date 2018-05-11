@@ -735,7 +735,7 @@ class CSimulatorImplementation
 			if( pLink == 0 )
 				continue;
 			pLink->MakePermanent();
-			pLink->UpdateControlKnob();
+			pLink->UpdateControlKnobs();
 		}
 
 		return true;
