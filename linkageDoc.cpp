@@ -1197,6 +1197,19 @@ bool CLinkageDoc::SelectElement( CElement *pElement )
 	return true;
 }
 
+bool CLinkageDoc::DeSelectElement( CElement *pElement )
+{
+	if( !pElement->IsSelected() )
+		return false;
+
+	if( pElement->IsLink() )
+		DeSelectElement( (CLink*)pElement );
+	else
+		DeSelectElement( (CConnector*)pElement );
+
+	return true;
+}
+
 bool CLinkageDoc::SelectElement( CLink *pLink )
 {
 	if( pLink->IsSelected() )

@@ -129,7 +129,14 @@ BOOL CSelectElementsDialog::OnInitDialog()
 		AddListData( m_ListControl2, Row, 0, "" );
 		AddListData( m_ListControl2, Row, 1, (const char*)pElement->GetTypeString() );
 		CString Name = pElement->GetIdentifierString( m_bShowDebug );
-		if( pElement->GetName().IsEmpty() && ( pElement->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) == 0 )
+		if( pElement->IsMeasurementElement() && pElement->IsLink() )
+		{
+			CLink *pLink = (CLink*)pElement;
+			double DocumentScale = m_pDocument->GetUnitScale();
+			double Length = DocumentScale * pLink->GetLinkLength( pLink->GetConnector( 0 ), pLink->GetConnector( 1 ) );
+			Name.Format( "%.4lf", Length );
+		}
+		else if( pElement->GetName().IsEmpty() && ( pElement->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) == 0 )
 			Name += "  (unlabeled)";
 
 		AddListData( m_ListControl2, Row, 2, (const char*)Name );
@@ -161,9 +168,10 @@ void CSelectElementsDialog::OnItemchangedList2(NMHDR* pNMHDR, LRESULT* pResult)
 			CElement *pElement = (CElement*)m_ListControl2.GetItemData( Index );
 			if( pElement == 0 )
 				continue;
-			if( m_pDocument != 0 )
+			if( m_pDocument != 0 && m_ListControl2.GetCheck( Index ) != FALSE )
 				m_pDocument->SelectElement( pElement );
-				//pElement->Select( m_ListControl2.GetCheck( Index ) != FALSE );
+			else
+				m_pDocument->DeSelectElement( pElement );
 		}
 
 		if( m_pDocument != 0 )
