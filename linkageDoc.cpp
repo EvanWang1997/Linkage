@@ -1361,7 +1361,7 @@ bool CLinkageDoc::AutoJoinSelected( void )
 	return true;
 }
 
-bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double SolidLinkExpansion, bool bMultiSelect, bool &bSelectionChanged )
+bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double SolidLinkExpansion, bool bMultiSelect, int SelectionDepth, bool &bSelectionChanged )
 {
 	CConnector* pSelectingConnector = 0;
 	CLink *pSelectingLink = 0;
@@ -1369,64 +1369,75 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 
 	bSelectionChanged = false;
 	bool bClearExistingSelection = true;
+	POSITION Position = 0;
 
 	// Check only the already selected items first before checking all items.
 	// This makes it easier to drag a pasted item that is selected but not
 	// checked first otherwise.
 
-	POSITION Position = m_Connectors.GetHeadPosition();
-	while( Position != 0 )
+	if( SelectionDepth == 0 )
 	{
-		CConnector* pConnector = m_Connectors.GetNext( Position );
-		if( pConnector != 0 && pConnector->IsSelected() )
+		Position = m_Connectors.GetHeadPosition();
+		while( Position != 0 )
 		{
-			int Knobs = 0;
-			CControlKnob *pControlKnob = pConnector->GetControlKnobs( Knobs );
-			if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
-				&& pControlKnob->IsShowOnParentSelect()
-				&& ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
+			CConnector* pConnector = m_Connectors.GetNext( Position );
+			if( pConnector != 0 && pConnector->IsSelected() )
 			{
-				pSelectingControlKnob = pControlKnob;
-				bClearExistingSelection = false;
-				break;
+				int Knobs = 0;
+				CControlKnob *pControlKnob = pConnector->GetControlKnobs( Knobs );
+				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
+					&& pControlKnob->IsShowOnParentSelect()
+					&& ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
+				{
+					pSelectingControlKnob = pControlKnob;
+					bClearExistingSelection = false;
+					break;
+				}
+			
+				if( pConnector->PointOnConnector( Point, GrabDistance )
+					&& ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
+				{
+					pSelectingConnector = pConnector;
+					break;
+				}
 			}
-			else if( pConnector->PointOnConnector( Point, GrabDistance )
-				&& ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
+		}
+
+		if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingControlKnob == 0 )
+		{
+			Position = m_Links.GetHeadPosition();
+			while( Position != NULL )
 			{
-				pSelectingConnector = pConnector;
-				break;
+				CLink* pLink = m_Links.GetNext( Position );
+				if( pLink != 0 && pLink->IsSelected() )
+				{
+					CControlKnob *pControlKnob = pLink->GetControlKnob();
+					if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
+						&& pControlKnob->IsShowOnParentSelect()
+						&& ( pLink->GetLayers() & m_UsableLayers ) != 0 )
+					{
+						bClearExistingSelection = false;
+						pSelectingControlKnob = pControlKnob;
+						break;
+					}
+				
+					if( pLink != 0 && pLink->PointOnLink( m_GearConnectionList, Point, GrabDistance, SolidLinkExpansion )
+						&& ( pLink->GetLayers() & m_UsableLayers ) != 0 )
+					{
+						if( pLink->GetConnectorCount() == 1 && !pLink->IsGear() )
+							pSelectingConnector = pLink->GetConnector( 0 );
+						else
+							pSelectingLink = pLink;
+						break;
+					}
+				}
 			}
 		}
 	}
-
-	if( pSelectingConnector == 0 && pSelectingLink == 0 && pSelectingControlKnob == 0 )
+	else
 	{
-		Position = m_Links.GetHeadPosition();
-		while( Position != NULL )
-		{
-			CLink* pLink = m_Links.GetNext( Position );
-			if( pLink != 0 && pLink->IsSelected() )
-			{
-				CControlKnob *pControlKnob = pLink->GetControlKnob();
-				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
-					&& pControlKnob->IsShowOnParentSelect()
-					&& ( pLink->GetLayers() & m_UsableLayers ) != 0 )
-				{
-					bClearExistingSelection = false;
-					pSelectingControlKnob = pControlKnob;
-					break;
-				}
-				else if( pLink != 0 && pLink->PointOnLink( m_GearConnectionList, Point, GrabDistance, SolidLinkExpansion )
-					&& ( pLink->GetLayers() & m_UsableLayers ) != 0 )
-				{
-					if( pLink->GetConnectorCount() == 1 && !pLink->IsGear() )
-						pSelectingConnector = pLink->GetConnector( 0 );
-					else
-						pSelectingLink = pLink;
-					break;
-				}
-			}
-		}
+		// Clear previous selections.
+		ClearSelection();
 	}
 
 	/*
@@ -1446,8 +1457,13 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 				    && !pControlKnob->IsShowOnParentSelect()
 				    && ( pLink->GetLayers() & m_UsableLayers ) != 0 )
 				{
-					pSelectingControlKnob = pControlKnob;
-					break;
+					if( SelectionDepth == 0 )
+					{
+						pSelectingControlKnob = pControlKnob;
+						break;
+					}
+					else
+						--SelectionDepth;
 				}
 			}
 		}
@@ -1467,8 +1483,13 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 				    && !pControlKnob->IsShowOnParentSelect()
 				    && ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 				{
-					pSelectingControlKnob = pControlKnob;
-					break;
+					if( SelectionDepth == 0 )
+					{
+						pSelectingControlKnob = pControlKnob;
+						break;
+					}
+					else
+						--SelectionDepth;
 				}
 			}
 		}
@@ -1483,8 +1504,13 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			if( pConnector != 0 && pConnector->PointOnConnector( Point, GrabDistance )
 			    && ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 			{
-				pSelectingConnector = pConnector;
-				break;
+				if( SelectionDepth == 0 )
+				{
+					pSelectingConnector = pConnector;
+					break;
+				}
+				else
+					--SelectionDepth;
 			}
 		}
 	}
@@ -1498,11 +1524,16 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			if( pLink != NULL && pLink->PointOnLink( m_GearConnectionList, Point, GrabDistance, 0 )
 			    && ( pLink->GetLayers() & m_UsableLayers ) != 0 )
 			{
-				if( pLink->GetConnectorCount() == 1 && !pLink->IsGear() )
-					pSelectingConnector = pLink->GetConnector( 0 );
+				if( SelectionDepth == 0 )
+				{
+					if( pLink->GetConnectorCount() == 1 && !pLink->IsGear() )
+						pSelectingConnector = pLink->GetConnector( 0 );
+					else
+						pSelectingLink = pLink;
+					break;
+				}
 				else
-					pSelectingLink = pLink;
-				break;
+					--SelectionDepth;
 			}
 		}
 	}
@@ -1513,13 +1544,18 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 		while( Position != 0 )
 		{
 			CConnector* pConnector = m_Connectors.GetNext( Position );
-			if( pConnector != 0 && ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
+			if( pConnector != 0 && ( pConnector->GetLayers() & m_UsableLayers ) != 0 && pConnector->GetDrawCircleRadius() > 0 )
 			{
 				double Distance = pConnector->GetPoint().DistanceToPoint( Point );
 				if( fabs( Distance - pConnector->GetDrawCircleRadius() ) < GrabDistance )
 				{
-					pSelectingConnector = pConnector;
-					break;
+					if( SelectionDepth == 0 )
+					{
+						pSelectingConnector = pConnector;
+						break;
+					}
+					else
+						--SelectionDepth;
 				}
 			}
 		}

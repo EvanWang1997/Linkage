@@ -94,7 +94,7 @@ public:
 	bool SelectElement( CElement *pElement );
 	bool SelectElement( CConnector *pConnector );
 	bool SelectElement( CLink *pLink );
-	bool SelectElement( CFPoint Point, double GrabDistance, double SolidLinkExpansion, bool bMultiSelect, bool &bSelectionChanged );
+	bool SelectElement( CFPoint Point, double GrabDistance, double SolidLinkExpansion, bool bMultiSelect, int SelectionDepth, bool &bSelectionChanged );
 	bool SelectElement( CFRect Rect, double SolidLinkExpansion, bool bMultiSelect, bool &bSelectionChanged );
 	bool SelectElement( void );
 	bool DeSelectElement( CElement *pElement );

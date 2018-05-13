@@ -494,6 +494,7 @@ CLinkageView::CLinkageView()
 	m_PrintOrientationMode = DMORIENT_PORTRAIT;
 	m_PrintWidthInPages = 1;
 	m_VisiblePageNumber = 0;
+	m_SelectionDepth = 0;
 
 	m_bRequestAbort = false;
 	m_bProcessingVideoThread = false;
@@ -2837,13 +2838,31 @@ bool CLinkageView::SelectDocumentItem( UINT nFlags, CFPoint point )
 	ASSERT_VALID(pDoc);
 
 	bool bMultiSelect = ( nFlags & ( MK_CONTROL | MK_SHIFT ) ) != 0;
+	bool DepthSelect = ( nFlags & ( MK_CONTROL | MK_SHIFT ) ) == ( MK_CONTROL | MK_SHIFT );
+	if( !DepthSelect )
+		m_SelectionDepth = 0;
 
 	CFPoint AdjustedPoint = Unscale( point );
 
 	double GrabDistance = Unscale( GRAB_DISTANCE ); // The mouse point has already been adjusted for the DPI so the grab distance is not.
 
 	bool bSelectionChanged = false;
-	m_MouseAction = pDoc->SelectElement( AdjustedPoint, GrabDistance, 0, bMultiSelect, bSelectionChanged ) ? ACTION_DRAG : ACTION_NONE;
+	m_MouseAction = pDoc->SelectElement( AdjustedPoint, GrabDistance, 0, bMultiSelect, m_SelectionDepth, bSelectionChanged ) ? ACTION_DRAG : ACTION_NONE;
+
+	if( DepthSelect )
+	{
+		if( m_MouseAction != ACTION_NONE )
+			++m_SelectionDepth;
+		else
+		{
+			m_SelectionDepth = 0;
+			// Try again at zero depth to try to find something to select.
+			//m_SelectionDepth = 0;
+			//m_MouseAction = pDoc->SelectElement( AdjustedPoint, GrabDistance, 0, bMultiSelect, m_SelectionDepth, bSelectionChanged ) ? ACTION_DRAG : ACTION_NONE;
+			//if( m_MouseAction != ACTION_NONE )
+			//	++m_SelectionDepth;
+		}
+	}
 
 	SelectionChanged();
 	//if( pDoc->IsSelectionAdjustable() )
@@ -9596,50 +9615,6 @@ void CLinkageView::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		MyFlags |= CONTROL_FLAG;
 
 	if( !HandleShortcutKeys( nChar, MyFlags ) )
-		CView::OnKeyDown( nChar, nRepCnt, nFlags );
-
-	return;
-
-	bool ShiftControlPressed = false;
-	if( ( GetKeyState( VK_SHIFT ) & 0x8000 ) != 0 )
-		ShiftControlPressed = true;
-	else if( ( GetKeyState( VK_CONTROL ) & 0x8000 ) != 0)
-		ShiftControlPressed = true;
-
-	CLinkageDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-
-	double Nudge = Unscale( 1.0 / m_DPIScale ) * ( ShiftControlPressed ? 5 : 1 );
-
-	if( nChar == VK_TAB )
-	{
-
-		if( pDoc->SelectNext( ShiftControlPressed ? pDoc->PREVIOUS : pDoc->NEXT ) )
-		{
-			ShowSelectedElementStatus();
-			UpdateForDocumentChange();
-			SelectionChanged();
-		}
-	}
-	else if( nChar == VK_LEFT || nChar == VK_RIGHT )
-	{
-		if( m_bSimulating )
-			OnSimulateStep( nChar == VK_RIGHT ? 1 : 0, ShiftControlPressed );
-		else if( m_bAllowEdit )
-		{
-			pDoc->MoveSelected( CFPoint( nChar == VK_RIGHT ? Nudge : -Nudge, 0 ) );
-			UpdateForDocumentChange();
-		}
-	}
-	else if( nChar == VK_UP || nChar == VK_DOWN )
-	{
-		if( !m_bSimulating )
-		{
-			pDoc->MoveSelected( CFPoint( 0, nChar == VK_UP ? Nudge : -Nudge ) );
-			UpdateForDocumentChange();
-		}
-	}
-	else
 		CView::OnKeyDown( nChar, nRepCnt, nFlags );
 }
 

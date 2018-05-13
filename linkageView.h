@@ -161,6 +161,7 @@ private:
 	CFPoint m_ScreenScrollPosition;
 	CFPoint m_DragStartPoint;
 	bool m_bSelectModeChange;
+	int m_SelectionDepth;
 	bool m_bChangeAdjusters;
 	CFPoint m_DragOffset;
 	bool m_bMouseMovedEnough;
