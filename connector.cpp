@@ -160,15 +160,20 @@ void CConnector::UpdateControlKnob( CControlKnob *pKnob, CFPoint Point )
 
 void CConnector::SetDrawCircleRadius( double Radius )
 {
-	bool bNeedControlKnob = m_DrawCircleRadius == 0.0;
+	m_DrawCircleRadius = fabs( Radius );
+	CFPoint Temp = GetPoint();
+	if( m_DrawCircleRadius == 0 )
+		Temp += 1000;
+	CFLine Line( GetPoint(), Temp );
 
 	int Knobs = 0;
 	CControlKnob *pControlKnob = GetControlKnobs( Knobs );
 	pControlKnob->SetParent( Radius == 0 ? 0 : this );
-	//pControlKnob->SetSlideLimits( this, 0 );
+	Line.SetLength( m_DrawCircleRadius );
+
+	pControlKnob->SetPoint( Line.GetEnd() );
 	pControlKnob->SetShowOnParentSelect( true );
 		
-	m_DrawCircleRadius = fabs( Radius );
 	m_OriginalDrawCircleRadius = fabs( Radius );
 	UpdateControlKnobs();
 }
