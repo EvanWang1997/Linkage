@@ -139,7 +139,6 @@ BOOL CLinkageDoc::OnNewDocument()
 	if (!CDocument::OnNewDocument())
 		return FALSE;
 
-	m_pCapturedConnector = 0;
 	m_SelectedConnectors.RemoveAll();
 	m_SelectedLinks.RemoveAll();
 
@@ -3726,6 +3725,7 @@ void CLinkageDoc::DeleteContents( bool bDeleteUndoInfo )
 	}
 
 	m_pCapturedConnector = 0;
+	m_pCapturedConrolKnob = 0;
 	m_SelectedConnectors.RemoveAll();
 
 	m_IdentifiedConnectors.SetLength( 0 );

@@ -2837,8 +2837,8 @@ bool CLinkageView::SelectDocumentItem( UINT nFlags, CFPoint point )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	bool bMultiSelect = ( nFlags & ( MK_CONTROL | MK_SHIFT ) ) != 0;
 	bool DepthSelect = ( nFlags & ( MK_CONTROL | MK_SHIFT ) ) == ( MK_CONTROL | MK_SHIFT );
+	bool bMultiSelect = ( nFlags & ( MK_CONTROL | MK_SHIFT ) ) != 0 && !DepthSelect;
 	if( !DepthSelect )
 		m_SelectionDepth = 0;
 
@@ -3244,7 +3244,7 @@ void CLinkageView::OnMouseEndDrag(UINT nFlags, CFPoint point)
 		ShowSelectedElementStatus();
 	}
 
-	if( m_bSnapOn && m_bAutoJoin &&
+	if( m_bMouseMovedEnough && m_bSnapOn && m_bAutoJoin &&
 	    pDoc->GetSelectedLinkCount( true ) == 0 && pDoc->GetSelectedConnectorCount() == 1 )
 	{
 		pDoc->AutoJoinSelected();
