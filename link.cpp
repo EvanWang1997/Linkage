@@ -893,6 +893,11 @@ void CLink::SetStroke( double Stroke )
 	UpdateControlKnobs();
 }
 
+int CLink::GetControlKnobCount( void )
+{
+	return IsActuator() ? 1 : 0;
+}
+
 void CLink::UpdateControlKnobs( void )
 {
 	if( !IsActuator() )

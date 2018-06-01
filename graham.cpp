@@ -89,10 +89,6 @@ CFPoint* GetHull( ConnectorList* pConnectors, int &ReturnedPointCount, bool bUse
 	}
 
 	MoveLowest( PointArray, Count );
-	DebugItemList.RemoveAll();
-
-	//for( int derf = 0; derf < Count; ++derf )
-	//	DebugItemList.AddTail( new CDebugItem( PointArray[derf], RGB( 0, 200, 0 ) ) );
 
 	pSortPoints = PointArray;
 

@@ -1940,8 +1940,9 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 		CLink* pLink = pLinkList->GetNext( Position );
 		if( pLink != 0 )
 		{
-			CControlKnob *pControlKnob = pLink->GetControlKnob();
-			if( pControlKnob != 0 )
+			int Knobs = 0;
+			CControlKnob *pControlKnob = pLink->GetControlKnobs( Knobs );
+			if( Knobs > 0 && pControlKnob != 0 )
 				DrawControlKnob( pRenderer, m_SelectedViewLayers, pControlKnob );
 		}
 	}
@@ -1954,7 +1955,7 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 		{
 			int Knobs = 0;
 			CControlKnob *pControlKnob = pConnector->GetControlKnobs( Knobs );
-			if( pConnector != 0 )
+			if( Knobs > 0 && pConnector != 0 )
 				DrawControlKnob( pRenderer, m_SelectedViewLayers, pControlKnob );
 		}
 	}
@@ -8144,6 +8145,8 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 		if( pLink->IsGear() )
 		{
 			COLORREF GearColor = Color;
+			if( ( m_SelectedEditLayers & CLinkageDoc::MECHANISMLAYERS ) == 0 )
+				GearColor = LightenColor( DesaturateColor( Color, 0.5 ), 0.6 );
 
 			CElementItem *pFastenedTo = pLink->GetFastenedTo();
 			if( pFastenedTo != 0 && pFastenedTo->GetElement() != 0 )

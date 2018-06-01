@@ -1465,6 +1465,54 @@ class CSimulatorImplementation
 		if( !pLink->RotateAround( pFixedConnector ) )
 			return false;
 
+		// Test both links to see if they cause any other links to get mangled. Start with the pLink link then switch to the pOtherLink link.
+		CLink *pTestLink = pLink;
+		// for( int Link = 0; Link < 2; ++Link )
+		{
+			for( POSITION Position = pLink->GetConnectorList()->GetHeadPosition() ; Position != 0; )
+			{
+				CConnector* pTestConnector = pLink->GetConnectorList()->GetNext( Position );
+				// Skip this connector if it is the fixed one or the common one.
+				// We are just looking for the other connectors of the link
+				if( pTestConnector == 0 || pTestConnector == pFixedConnector )
+					continue;
+
+				for( POSITION Position2 = pTestConnector->GetLinkList()->GetHeadPosition(); Position2 != 0; )
+				{
+					CLink *pTestLink = pTestConnector->GetLinkList()->GetNext( Position2 );
+					if( pTestLink == 0 || pTestLink == pLink || pTestLink == pOtherToRotate )
+						continue;
+
+					// Check to see if this link is going to get mangled by the movement.
+					CConnector *pCheckConnector = pTestLink->GetConnector( 0 );
+					if( pCheckConnector == pTestConnector )
+						CConnector *pCheckConnector = pTestLink->GetConnector( 1 );
+					if( pCheckConnector == 0 )
+						continue;
+
+					if( pTestLink->IsActuator() )
+					{
+						; // Not sure how to test to see if the actuator is getting stretched!
+					}
+					else
+					{
+						double d1 = Distance( pTestConnector->GetOriginalPoint(), pCheckConnector->GetOriginalPoint() );
+						double d2 = Distance( pTestConnector->GetTempPoint(), pCheckConnector->GetTempPoint() );
+						if( fabs( d1 - d2 ) > 0.00000001 )
+						{
+							pTestConnector->SetPositionValid( false );
+							DebugItemList.AddTail( new CDebugItem( pTestConnector->GetTempPoint() ) );
+							DebugItemList.AddTail( new CDebugItem( CFLine( pTestConnector->GetTempPoint(), pCheckConnector->GetTempPoint() ) ) );
+							return false;
+						}
+					}
+				}
+			}
+			//pTestLink = pOtherToRotate;
+		}
+			
+			
+			
 		/*
 		 * The movement of the current link could cause other links to "follow". They might be attached to this
 		 * link and are not this link and are not the "other" link that is moving, or being moved by this one.

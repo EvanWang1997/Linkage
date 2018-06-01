@@ -1384,7 +1384,7 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			{
 				int Knobs = 0;
 				CControlKnob *pControlKnob = pConnector->GetControlKnobs( Knobs );
-				if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
+				if( !bMultiSelect && Knobs > 0 && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
 					&& pControlKnob->IsShowOnParentSelect()
 					&& ( pConnector->GetLayers() & m_UsableLayers ) != 0 )
 				{
@@ -1410,8 +1410,9 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 				CLink* pLink = m_Links.GetNext( Position );
 				if( pLink != 0 && pLink->IsSelected() )
 				{
-					CControlKnob *pControlKnob = pLink->GetControlKnob();
-					if( !bMultiSelect && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
+					int Knobs = 0;
+					CControlKnob *pControlKnob = pLink->GetControlKnobs( Knobs );
+					if( !bMultiSelect && Knobs > 0 && pControlKnob != 0 && pControlKnob->PointOnControlKnob( Point, GrabDistance )
 						&& pControlKnob->IsShowOnParentSelect()
 						&& ( pLink->GetLayers() & m_UsableLayers ) != 0 )
 					{

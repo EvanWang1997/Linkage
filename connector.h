@@ -72,6 +72,7 @@ public:
 
 	virtual void UpdateControlKnobs( void );
 	virtual void UpdateControlKnob( CControlKnob *pKnob, CFPoint Point );
+	virtual int GetControlKnobCount( void );
 	bool IsLinkSelected( void );
 	bool IsAnchor( void ) { return m_bAnchor; }
 	bool IsInput( void ) { return m_bInput; }

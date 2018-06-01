@@ -158,6 +158,11 @@ void CConnector::UpdateControlKnob( CControlKnob *pKnob, CFPoint Point )
 	m_OriginalDrawCircleRadius = m_DrawCircleRadius;
 }
 
+int CConnector::GetControlKnobCount( void )
+{
+	return m_OriginalDrawCircleRadius != 0.0 ? 1 : 0;
+}
+
 void CConnector::SetDrawCircleRadius( double Radius )
 {
 	m_DrawCircleRadius = fabs( Radius );

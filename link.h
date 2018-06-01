@@ -148,6 +148,7 @@ class CLink : public CElement
 	void SetExtension( double Value );
 	double GetExtendedDistance( void );
 	// double GetOffsetAdjustedExtendedDistance( void );
+	virtual int GetControlKnobCount( void );
 	virtual void UpdateControlKnobs( void );
 	virtual void UpdateControlKnob( CControlKnob *pKnob, CFPoint Point );
 	CConnector *GetConnector( int Index ) const;

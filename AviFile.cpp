@@ -307,7 +307,7 @@ HRESULT CAviFile::AppendFrameUsual( CDIBSection *pDIBSection, int Count )
 {
 	while( Count > 0 )
 	{
-		if(FAILED(AVIStreamWrite(m_pAviCompressedStream,m_lSample++,1,pDIBSection->m_pBits,pDIBSection->m_bmpInfo.bmiHeader.biSizeImage,0,NULL,NULL)))
+		if(FAILED(AVIStreamWrite(m_pAviCompressedStream,m_lSample++,1,pDIBSection->m_pBits,pDIBSection->m_bmpInfo.bmiHeader.biSizeImage,AVIIF_KEYFRAME,NULL,NULL)))
 		{
 			SetErrorMessage(_T("Unable to Write Video Stream to the output Movie File"));
 

@@ -105,7 +105,8 @@ class CElement
 	virtual bool IsLink( void ) = 0;
 	virtual bool IsConnector( void ) = 0;
 
-	virtual CControlKnob *GetControlKnobs( int &Count ) { Count = 1; return &m_ControlKnob; }
+	virtual int GetControlKnobCount( void ) = 0;
+	virtual CControlKnob *GetControlKnobs( int &Count ) { Count = GetControlKnobCount(); return &m_ControlKnob; }
 	virtual CFPoint GetLocation( void ) = 0;
 	virtual void UpdateControlKnobs( void ) = 0;
 	virtual void UpdateControlKnob( CControlKnob *pKnob, CFPoint Point ) = 0;
