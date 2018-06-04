@@ -625,7 +625,7 @@ void CMainFrame::CreateMainCategory( void )
 {
 	CValidatedString strTemp;
 
-	m_wndRibbonBar.SetApplicationButton (&m_MainButton, CSize (64, 32) );
+	m_wndRibbonBar.SetApplicationButton (&m_MainButton, CSize (50, 32) );
 
 	CMFCRibbonMainPanel* pMainPanel = m_wndRibbonBar.AddMainCategory(strTemp, IDB_FILESMALL, IDB_FILELARGE, CSize( 16, 16 ), CSize( 32, 32 ) );
 
