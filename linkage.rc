@@ -9,7 +9,8 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -203,7 +204,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Select &All\tCtrl-A",         ID_EDIT_SELECT_ALL
         MENUITEM SEPARATOR
-        MENUITEM "Connect",                     ID_EDIT_CONNECT
+        MENUITEM "Link",						ID_EDIT_CONNECT
         MENUITEM "Join",                        ID_EDIT_JOIN
         MENUITEM "Combine",                     ID_EDIT_COMBINE
         MENUITEM "Slide",                       ID_EDIT_SLIDE
@@ -279,7 +280,6 @@ BEGIN
     "A",            ID_EDIT_ADDCONNECTOR,   VIRTKEY, NOINVERT
     "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
     "B",            ID_EDIT_COMBINE,        VIRTKEY, NOINVERT
-    "C",            ID_EDIT_CONNECT,        VIRTKEY, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "D",            ID_VIEW_DIMENSIONS,     VIRTKEY, NOINVERT
     "E",            ID_EDIT_SELECTLINK,     VIRTKEY, NOINVERT
@@ -287,7 +287,6 @@ BEGIN
     "G",            ID_EDIT_MAKEANCHOR,     VIRTKEY, NOINVERT
     "J",            ID_EDIT_JOIN,           VIRTKEY, NOINVERT
     "K",            ID_EDIT_LOCK,           VIRTKEY, NOINVERT
-    "L",            ID_EDIT_SLIDE,          VIRTKEY, NOINVERT
     "P",            ID_PROPERTIES_PROPERTIES, VIRTKEY, NOINVERT
     "R",            ID_SIMULATION_RUN,      VIRTKEY, NOINVERT
     "S",            ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
@@ -1216,7 +1215,7 @@ END
 STRINGTABLE
 BEGIN
     IDS_RIBBON_ACTION       "Modify"
-    IDS_RIBBON_CONNECT      "Connect\nc"
+    IDS_RIBBON_CONNECT      "Link\nl"
     IDS_RIBBON_JOIN         "Join\nj"
     IDS_RIBBON_COMBINE      "Combine\nb"
     IDS_RIBBON_SLIDE        "Slide\nl"
@@ -1299,7 +1298,7 @@ END
 STRINGTABLE
 BEGIN
     ID_EDIT_COMBINE         "Change all of the selected connectors and links to be a single link.\nCombine"
-    ID_EDIT_CONNECT         "Create a link between all selected connectors.\nConnect"
+    ID_EDIT_CONNECT         "Create a link between all selected connectors.\nLink"
     ID_EDIT_DELETESELECTED  "Delete the selection\tDelete"
 END
 

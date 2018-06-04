@@ -4449,12 +4449,17 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 	else
 	{
 		CConnector* pConnector2 = GetSelectedConnector( 1 );
-		m_bSelectionCombinable = SelectedLinks > 1 && Actuators == 0 && SelectedGears == 0;
-		m_bSelectionConnectable = SelectedRealLinks == 0 && SelectedConnectors == 2 && pConnector1->GetSharingLink( pConnector2 ) == 0 && !pConnector1->IsSlider();
+		m_bSelectionCombinable = SelectedRealLinks >= 1 && ( SelectedRealLinks + SelectedConnectors > 1 ) && Actuators == 0 && SelectedGears == 0;
 		m_bSelectionJoinable = ( SelectedConnectors > 1 && Sliders <= 1 ) || ( SelectedConnectors == 1 && SelectedRealLinks >= 1 );
 		m_bSelectionSlideable = ConnectSliderLimits( true );
 		m_bSelectionLockable = SelectedAnchors > 0 || SelectedRealLinks > 0;
 		m_bSelectionMakeAnchor = SelectedConnectors > 0 && SelectedRealLinks == 0;
+
+		m_bSelectionConnectable = SelectedRealLinks == 0 && SelectedConnectors >= 2;
+		// ADD A TEST FOR WEIRD THINGS LIKE...
+		// If one of the connectors is a slider and one of the others is one if it's limits, that's no good.
+		// if there is a link that uses esxactly all of these connectors then that is no good.
+		// BUT FOR NOW, JUST HOPE FOR THE BEST.
 	}
 
 	m_bSelectionSplittable = SelectedRealLinks == 0 && SelectedConnectors == 1;

@@ -793,6 +793,7 @@ exit 0
     <ClInclude Include="LinkPropertiesDialog.h" />
     <ClInclude Include="LocationDialog.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MyMFCRibbonApplicationButton.h" />
     <ClInclude Include="MyCheckListBox.h" />
     <ClInclude Include="MyDialog.h" />
     <ClInclude Include="MyMFCRibbonBar.h" />
@@ -950,6 +951,7 @@ exit 0
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="MyMFCRibbonApplicationButton.cpp" />
     <ClCompile Include="MyCheckListBox.cpp" />
     <ClCompile Include="MyDialog.cpp" />
     <ClCompile Include="MyMFCRibbonBar.cpp" />

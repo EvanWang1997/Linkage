@@ -15,6 +15,7 @@
 #pragma once
 #include "Resource.h"
 #include "MyMFCRibbonBar.h"
+#include "MyMFCRibbonApplicationButton.h"
 
 //class COutlookBar : public CMFCOutlookBar
 //{
@@ -51,7 +52,7 @@ public:
 	CMyMFCRibbonBar     m_wndRibbonBar;
 
 protected:  // control bar embedded members
-	CMFCRibbonApplicationButton m_MainButton;
+	CMyMFCRibbonApplicationButton m_MainButton;
 	CMFCToolBarImages m_PanelImages;
 	//CImageList m_PanelImagesList;
 

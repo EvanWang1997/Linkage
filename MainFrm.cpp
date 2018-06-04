@@ -624,9 +624,6 @@ void CMainFrame::CreateSimulationPanel( CMFCRibbonCategory* pCategory )
 void CMainFrame::CreateMainCategory( void )
 {
 	CValidatedString strTemp;
-	m_MainButton.SetImage( IDB_MAIN );
-	m_MainButton.SetText( "File\nf" );
-	m_MainButton.SetToolTipText( strTemp );
 
 	m_wndRibbonBar.SetApplicationButton (&m_MainButton, CSize (64, 32) );
 
@@ -781,8 +778,6 @@ void CMainFrame::InitializeRibbon()
 {
 	m_wndRibbonBar.SetWindows7Look( TRUE );
 	m_wndRibbonBar.EnablePrintPreview( 1 );
-
-	//m_wndRibbonBar.SetTooltipFixedWidth( 500, 500 );  DON'T SET THIS SINCE THE m_nMaxDescrWidth PARAM BELOW WILL MAKE THE TOOLTIP WINDOW WIDER.
 
 	CWinAppEx *pAppEx = (CWinAppEx *)AfxGetApp();
 	if( pAppEx != 0 )

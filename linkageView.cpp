@@ -9530,7 +9530,7 @@ bool CLinkageView::HandleShortcutKeys( UINT nChar, unsigned int MyFlags )
 		{ 'G', ID_EDIT_MAKEANCHOR, 0 },
 		{ 'J', ID_EDIT_JOIN, 0 },
 		{ 'K', ID_EDIT_LOCK, 0 },
-		{ 'L', ID_EDIT_SLIDE, 0 },
+		{ 'L', ID_EDIT_CONNECT, 0 }, // CHANGED FROM ID_EDIT_SLIDE 6/4/2018
 		{ 'N', ID_FILE_NEW, CONTROL_FLAG },
 		{ 'O', ID_FILE_OPEN, CONTROL_FLAG },
 		{ 'P', ID_FILE_PRINT, CONTROL_FLAG },
