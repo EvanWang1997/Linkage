@@ -358,7 +358,7 @@ class CRendererImplementation
 			if( bFill )
 			{
 				if( ArcDirection != 0 )
-					Pie( pPoints[Counter].x, pPoints[Counter].y, ExpansionDistance, TempPoint1.x, TempPoint1.y, TempPoint1.x, TempPoint1.y, true );
+					Pie( pPoints[Counter].x, pPoints[Counter].y, ExpansionDistance, TempPoint1.x, TempPoint1.y, TempPoint1.x, TempPoint1.y, false );
 				Scale( TempPoint1.x, TempPoint1.y );
 				pRegionPoints[FillPoint++].SetPoint( (int)TempPoint1.x, (int)TempPoint1.y );
 				int BackPoints = 1;
@@ -408,7 +408,7 @@ class CRendererImplementation
 		if( bFill )
 		{
 			if( ExpansionDistance > 0 )
-				Pie( pPoints[0].x, pPoints[0].y, ExpansionDistance, FirstPoint1.x, FirstPoint1.y, FirstPoint1.x, FirstPoint1.y, true );
+				Pie( pPoints[0].x, pPoints[0].y, ExpansionDistance, FirstPoint1.x, FirstPoint1.y, FirstPoint1.x, FirstPoint1.y, false );
 
 			FillRgn( pRegionPoints, FillPoint, &Brush );
 			

@@ -438,8 +438,21 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			pLink->SetLineSize( atoi( Value ) );
 			Value = pNode->GetAttribute( "solid" );
 			pLink->SetSolid( Value == "true" );
+
 			Value = pNode->GetAttribute( "polyline" );
-			pLink->SetPolyline( Value == "true" );
+			if( Value == "true" )
+				pLink->SetShapeType( CLink::HULL );
+			else
+			{
+				Value = pNode->GetAttribute( "shapetype" );
+				if( Value == "polygon" )
+					pLink->SetShapeType( CLink::POLYGON );
+				else if( Value == "polyline" )
+					pLink->SetShapeType( CLink::POLYLINE );
+				else
+					pLink->SetShapeType( CLink::HULL );
+			}
+
 			Value = pNode->GetAttribute( "locked" );
 			pLink->SetLocked( Value == "true" );
 			Value = pNode->GetAttribute( "measurementelement" );
@@ -970,7 +983,12 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "measurementelement", pLink->IsMeasurementElement(), pLink->IsMeasurementElement() );
 		AppendXMLAttribute( TempString, "throw", pLink->GetStroke(), pLink->IsActuator() );
 		AppendXMLAttribute( TempString, "cpm", pLink->GetCPM(), pLink->IsActuator() );
-		AppendXMLAttribute( TempString, "polyline", pLink->IsPolyline(), pLink->IsPolyline() );
+		if( pLink->GetShapeType() == CLink::POLYGON )
+			AppendXMLAttribute( TempString, "shapetype", "polygon", true );
+		else if( pLink->GetShapeType() == CLink::POLYLINE )
+			AppendXMLAttribute( TempString, "shapetype", "polyline", true );
+		else
+			AppendXMLAttribute( TempString, "shapetype", "hull", true );
 		AppendXMLAttribute( TempString, "fastenlink", pLink->GetFastenedToLink() == 0 ? 0 : pLink->GetFastenedToLink()->GetIdentifier(), pLink->GetFastenedToLink() != 0 );
 		AppendXMLAttribute( TempString, "fastenconnector", pLink->GetFastenedToConnector() == 0 ? 0 : pLink->GetFastenedToConnector()->GetIdentifier(), pLink->GetFastenedToConnector() != 0 );
 		AppendXMLAttribute( TempString, "gear", pLink->IsGear(), pLink->IsGear() );
@@ -4839,7 +4857,7 @@ CString CLinkageDoc::GetSelectedElementCoordinates( CString *pHintText )
 				Temp.Format( "%d", (int)Size1 );
 			else
 			{
-				Temp.Format( "%.4lf", Size1 );
+				Temp.Format( "%.3lf", Size1 );
 				Temp.TrimRight( "0" );
 			}
 			Text = Temp;
@@ -4848,7 +4866,7 @@ CString CLinkageDoc::GetSelectedElementCoordinates( CString *pHintText )
 				Temp.Format( "%d", (int)Size2 );
 			else
 			{
-				Temp.Format( "%.4lf", Size2 );
+				Temp.Format( "%.3lf", Size2 );
 				Temp.TrimRight( "0" );
 			}
 			Text += Temp;
@@ -4910,7 +4928,7 @@ CString CLinkageDoc::GetSelectedElementCoordinates( CString *pHintText )
 			if( GetSelectedLinkCount( false ) > 0 )
 				return "";
 
-			Text.Format( "%.4lf,%.4lf", Point0.x, Point0.y );
+			Text.Format( "%.3lf,%.3lf", Point0.x, Point0.y );
 			if( pHintText != 0 )
 				*pHintText = "X,Y Coordinates";
 			break;
@@ -4932,7 +4950,7 @@ CString CLinkageDoc::GetSelectedElementCoordinates( CString *pHintText )
 			Point1.y *= DocumentScale;
 
 			double distance = Distance( Point0, Point1 );
-			Text.Format( "%.4lf", distance );
+			Text.Format( "%.3lf", distance );
 			if( pHintText != 0 )
 			{
 				if( bLinkSelected )
@@ -4950,7 +4968,7 @@ CString CLinkageDoc::GetSelectedElementCoordinates( CString *pHintText )
 			double Angle = GetAngle( pConnector1->GetOriginalPoint(), pConnector0->GetOriginalPoint(), pConnector2->GetOriginalPoint() );
 			if( Angle < 0 )
 				Angle += 360.0; // Because the hint mark for the angle is never shown on the "negative" side of the angle, don't show the number as negative.
-			Text.Format( "%.4lf", Angle );
+			Text.Format( "%.3lf", Angle );
 			if( pHintText != 0 )
 				*pHintText = "°Angle";
 

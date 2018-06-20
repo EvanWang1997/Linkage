@@ -29,7 +29,7 @@ CLink::CLink()
 	m_Color = RGB( 200, 200, 200 );
 	m_bLocked = false;
 	m_ActuatorStartOffset = 0;
-	m_bPolyline = false;
+	m_ShapeType = HULL;
 }
 
 CLink::CLink( const CLink &ExistingLink )
@@ -53,7 +53,7 @@ CLink::CLink( const CLink &ExistingLink )
 	m_Color = ExistingLink.m_Color;
 	m_bActuator = ExistingLink.m_bActuator;
 	m_bNoRotateWithAnchor = ExistingLink.m_bNoRotateWithAnchor;
-	m_bPolyline = ExistingLink.m_bPolyline;
+	m_ShapeType = ExistingLink.m_ShapeType;
 	m_pHull = 0;
 	m_HullCount = 0;
 
@@ -190,15 +190,19 @@ bool CLink::PointOnLink( const GearConnectionList &GearConnections, CFPoint Poin
 		return false;
 
 	int PointCount = 0;
-	CFPoint* Points = GetHull( PointCount );
+	CFPoint* Points = 0;
+	if( m_ShapeType == HULL )
+		Points = GetHull( PointCount );
+	else
+		Points = GetPoints( PointCount );
 
 	// Point within the polygon first. This doesn't allow for any grab distance outside of the polygon.
-	if( !m_bPolyline && IsPointInPoly( PointCount, Points, Point ) )
+	if( m_ShapeType != POLYLINE && IsPointInPoly( PointCount, Points, Point ) )
 		return true;
 
 	if( m_ConnectedSliders.GetCount() > 0 )
 	{
-		// Someday, links may get drawn with curves for teh hull slider paths instead of the dotted lines.
+		// Someday, links may get drawn with curves for the hull slider paths instead of the dotted lines.
 		// When that day comes, check for a point being inside of the arc.
 	}
 

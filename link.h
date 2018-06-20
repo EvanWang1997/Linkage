@@ -63,6 +63,8 @@ class CLink : public CElement
 {
 	public:
 	
+	enum _ShapeType { HULL = 0, POLYLINE, POLYGON };
+		
 	CLink();
 	CLink( const CLink &ExistingLink );
 	virtual ~CLink();
@@ -142,8 +144,8 @@ class CLink : public CElement
 	void SetStroke( double Stroke );
 	double GetCPM( void ) { return m_ActuatorCPM; }
 	void SetCPM( double CPM ) { m_ActuatorCPM = CPM; }
-	void SetPolyline( bool bSet ) { m_bPolyline = bSet; }
-	bool IsPolyline( void ) { return m_bPolyline; }
+	void SetShapeType( enum _ShapeType ShapeType ) { m_ShapeType = ShapeType; }
+	enum _ShapeType GetShapeType( void ) { return m_ShapeType; }
 	void IncrementExtension( double Increment );
 	void SetExtension( double Value );
 	double GetExtendedDistance( void );
@@ -195,7 +197,7 @@ class CLink : public CElement
 	CFPoint *m_pHull;
 	int m_HullCount;
 	double m_ActuatorStartOffset;
-	bool m_bPolyline;
+	enum _ShapeType m_ShapeType;
 
 	bool m_bLinkTriangle;
 

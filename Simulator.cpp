@@ -1490,6 +1490,9 @@ class CSimulatorImplementation
 					if( pCheckConnector == 0 )
 						continue;
 
+					if( !pCheckConnector->IsTempFixed() && !pCheckConnector->IsFixed() )
+						continue;
+
 					if( pTestLink->IsActuator() )
 					{
 						; // Not sure how to test to see if the actuator is getting stretched!
@@ -1501,6 +1504,10 @@ class CSimulatorImplementation
 						if( fabs( d1 - d2 ) > 0.00000001 )
 						{
 							pTestConnector->SetPositionValid( false );
+
+							DebugItemList.AddTail( new CDebugItem( pFixedConnector->GetTempPoint(), RGB( 0, 255, 0 ) ) );
+							DebugItemList.AddTail( new CDebugItem( pCommonConnector->GetTempPoint(), RGB( 0, 0, 255 ) ) );
+
 							DebugItemList.AddTail( new CDebugItem( pTestConnector->GetTempPoint() ) );
 							DebugItemList.AddTail( new CDebugItem( CFLine( pTestConnector->GetTempPoint(), pCheckConnector->GetTempPoint() ) ) );
 							return false;
@@ -1510,8 +1517,6 @@ class CSimulatorImplementation
 			}
 			//pTestLink = pOtherToRotate;
 		}
-			
-			
 			
 		/*
 		 * The movement of the current link could cause other links to "follow". They might be attached to this

@@ -44,10 +44,11 @@ public:
 	afx_msg void OnStnClickedColor();
 	CColorStatic m_ColorControl;
 	CNullableColor m_Color;
-	CButton m_PolygonControl;
-	CButton m_PolylineButton;
+	//CButton m_PolygonControl;
+	//CButton m_PolylineButton;
 	int m_Polygon;
 	bool m_bColorIsSet;
 	CButton OffsetLineControl;
 	BOOL m_bOffsetMeassurementLine;
+	int m_ShapeType;
 };

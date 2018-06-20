@@ -16,8 +16,8 @@ CLinePropertiesDialog::CLinePropertiesDialog(CWnd* pParent /*=NULL*/)
 	, m_Name(_T(""))
 	, m_bMeasurementLine(FALSE)
 	, m_FastenTo( _T( "" ) )
-	, m_Polygon(0)
 	, m_bOffsetMeassurementLine(FALSE)
+	, m_ShapeType(0)
 {
 	m_bColorIsSet = false;
 	m_Color = RGB( 200, 200, 200 );
@@ -40,12 +40,10 @@ void CLinePropertiesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CHECK1, m_MeasurementLineControl);
 	DDX_Control(pDX, IDC_RPMPROMPT, m_LineSizeControl);
 	DDX_Control(pDX, IDC_EDIT1, m_LineSizeInputControl);
-	DDX_Control(pDX, IDC_RADIO1, m_PolygonControl);
-	DDX_Control(pDX, IDC_RADIO2, m_PolylineButton);
-	DDX_Radio(pDX, IDC_RADIO1, m_Polygon);
 	DDX_Control(pDX, IDC_FASTENEDTO, m_FastenToControl);
 	DDX_Text(pDX, IDC_FASTENEDTO, m_FastenTo);
 	DDX_Control(pDX, IDC_COLOR, m_ColorControl);
+	DDX_Radio(pDX, IDC_RADIO3, m_ShapeType);
 
 	m_SpinControl.SetRange(1, 4);
 
@@ -81,8 +79,8 @@ void CLinePropertiesDialog::OnBnClickedCheck1()
 	m_LineSizeControl.EnableWindow( bUnchecked );
 	m_LineSizeInputControl.EnableWindow( bUnchecked );
 	m_SpinControl.EnableWindow( bUnchecked );
-	m_PolygonControl.EnableWindow( bUnchecked );
-	m_PolylineButton.EnableWindow( bUnchecked );
+	//m_PolygonControl.EnableWindow( bUnchecked );
+	//m_PolylineButton.EnableWindow( bUnchecked );
 }
 
 void CLinePropertiesDialog::OnStnClickedColor()

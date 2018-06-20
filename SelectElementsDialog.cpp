@@ -134,7 +134,7 @@ BOOL CSelectElementsDialog::OnInitDialog()
 			CLink *pLink = (CLink*)pElement;
 			double DocumentScale = m_pDocument->GetUnitScale();
 			double Length = DocumentScale * pLink->GetLinkLength( pLink->GetConnector( 0 ), pLink->GetConnector( 1 ) );
-			Name.Format( "%.4lf", Length );
+			Name.Format( "%.3lf", Length );
 		}
 		else if( pElement->GetName().IsEmpty() && ( pElement->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) == 0 )
 			Name += "  (unlabeled)";

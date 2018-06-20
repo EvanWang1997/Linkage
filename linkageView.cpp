@@ -1211,11 +1211,11 @@ class CConnectorTextData : public ConnectorListOperation
 	{
 		CString TempString;
 		if( m_bShowDebug )
-			TempString.Format( "      Connector %s [%d]: %.4lf, %.4lf\n",
+			TempString.Format( "      Connector %s [%d]: %.3lf, %.3lf\n",
 							   (const char*)pConnector->GetIdentifierString( m_bShowDebug ), pConnector->GetIdentifier(),
 							   pConnector->GetPoint().x, pConnector->GetPoint().y );
 		else
-			TempString.Format( "      Connector %s: %.4lf, %.4lf\n",
+			TempString.Format( "      Connector %s: %.3lf, %.3lf\n",
 							   (const char*)pConnector->GetIdentifierString( m_bShowDebug ),
 							   pConnector->GetPoint().x, pConnector->GetPoint().y );
 		m_Text += TempString;
@@ -1235,7 +1235,7 @@ class CConnectorDistanceData : public ConnectorListOperation
 		{
 			double Dist = Distance( m_pLastConnector->GetPoint(), pConnector->GetPoint() );
 			CString TempString;
-			TempString.Format( "      Distance %s%s %.4lf\n",
+			TempString.Format( "      Distance %s%s %.3lf\n",
 							   (const char*)m_pLastConnector->GetIdentifierString( false ), (const char*)pConnector->GetIdentifierString( false ), Dist );
 			m_Text += TempString;
 		}
@@ -2586,7 +2586,7 @@ void CLinkageView::DrawRuler( CRenderer *pRenderer )
 		}
 
 		CString Measure;
-		Measure.Format( "%.4lf", GapDistance * Counter );
+		Measure.Format( "%.3lf", GapDistance * Counter );
 		pRenderer->SetTextAlign( TA_CENTER | TA_TOP );
 		pRenderer->TextOut( Line.GetStart().x, Line.GetStart().y + UnscaledUnits( SCALE_LINE_TICK_HEIGHT + 1 ), Measure );
 	}
@@ -3066,7 +3066,7 @@ void CLinkageView::OnMouseMoveRotate(UINT nFlags, CFPoint point)
 	{
 		InvalidateRect( 0 );
 		CString Temp;
-		Temp.Format( "%.4lf°", Change );
+		Temp.Format( "%.3lf°", Change );
 		SetStatusText( Temp );
 	}
 }
@@ -3198,7 +3198,7 @@ void CLinkageView::OnMouseMoveStretch(UINT nFlags, CFPoint point, bool bEndStret
 		Ratio1 = Ratio2;
 
 	CString Temp;
-	Temp.Format( "%.4lf%%", Ratio1 * 100 );
+	Temp.Format( "%.3lf%%", Ratio1 * 100 );
 	SetStatusText( isnan( Ratio1 ) ? "" : Temp );
 
 
@@ -3396,7 +3396,7 @@ void CLinkageView::SetLocationAsStatus( CFPoint &Point )
 	CString Location;
 	double DocumentScale = pDoc->GetUnitScale();
 
-	Location.Format( "%.4lf,%.4lf", Point.x * DocumentScale, Point.y * DocumentScale );
+	Location.Format( "%.3lf,%.3lf", Point.x * DocumentScale, Point.y * DocumentScale );
 	SetStatusText( Location );
 }
 
@@ -6559,7 +6559,7 @@ void CLinkageView::DebugDrawLink( CRenderer* pRenderer, unsigned int OnLayers, C
 
 			CString String;
 			double DocumentScale = pDoc->GetUnitScale();
-			String.Format( "ext %.4lf", pLink->GetExtendedDistance() * DocumentScale );
+			String.Format( "ext %.3lf", pLink->GetExtendedDistance() * DocumentScale );
 
 			double Radius = m_ConnectorRadius * 5;
 
@@ -7114,7 +7114,7 @@ CFArea CLinkageView::DrawMeasurementLine( CRenderer* pRenderer, CFLine &InputLin
 	double DocUnitLength = MeasurementLine.GetLength();
 
 	CString String;
-	String.Format( "%.4lf", Length );
+	String.Format( "%.3lf", Length );
 
 	if( bDrawLines )
 	{
@@ -7245,7 +7245,7 @@ CFArea CLinkageView::DrawCirclesRadius( CRenderer *pRenderer, CFPoint Center, st
 
 				CString String;
 				double DocumentScale = pDoc->GetUnitScale();
-				String.Format( "R%.4lf", DocumentScale * Radius );
+				String.Format( "R%.3lf", DocumentScale * Radius );
 
 				pRenderer->SetTextAlign( TA_CENTER | TA_TOP );
 				pRenderer->TextOut( MeasurementLine.GetEnd().x + UnscaledUnits( 2 ), MeasurementLine.GetEnd().y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ) - UnscaledUnits( 1 ), String );
@@ -7274,7 +7274,7 @@ CFArea CLinkageView::DrawCirclesRadius( CRenderer *pRenderer, CFPoint Center, st
 	{
 		CString String;
 		double DocumentScale = pDoc->GetUnitScale();
-		String.Format( "R%.4lf", DocumentScale * LargestRadius );
+		String.Format( "R%.3lf", DocumentScale * LargestRadius );
 
 		CFPoint Point = Scale( Point3 );
 
@@ -7343,7 +7343,7 @@ CFArea CLinkageView::DrawArcRadius( CRenderer *pRenderer, CFArc &Arc, bool bDraw
 	{
 		CString String;
 		double DocumentScale = pDoc->GetUnitScale();
-		String.Format( "R%.4lf", DocumentScale * fabs( Arc.r ) );
+		String.Format( "R%.3lf", DocumentScale * fabs( Arc.r ) );
 
 		Point4 = Scale( Point4 );
 
@@ -7396,7 +7396,7 @@ CFArea CLinkageView::DrawConnectorLinkDimensions( CRenderer* pRenderer, const Ge
 				CString String;
 				double DocumentScale = pDoc->GetUnitScale();
 				CFPoint Point = pConnector->GetPoint();
-				String.Format( "%.4lf,%.4lf", DocumentScale * Point.x, DocumentScale * Point.y );
+				String.Format( "%.3lf,%.3lf", DocumentScale * Point.x, DocumentScale * Point.y );
 
 				Point = Scale( Point );
 				pRenderer->TextOut( Point.x, Point.y + m_ConnectorRadius + UnscaledUnits( 2 ), String );
@@ -8088,7 +8088,7 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 			SliderArc = Scale( SliderArc );
 			pRenderer->Arc( SliderArc );
 		}
-		else if( pLink->IsPolyline() )
+		else if( pLink->GetShapeType() == CLink::POLYLINE )
 		{
 			int PointCount = 0;
 			CFPoint* Points = pLink->GetPoints( PointCount );
@@ -8102,7 +8102,11 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 		else
 		{
 			int PointCount = 0;
-			CFPoint* Points = pLink->GetHull( PointCount );
+			CFPoint* Points = 0;
+			if( pLink->GetShapeType() == CLink::POLYGON )
+				Points = pLink->GetPoints( PointCount );
+			else
+				Points = pLink->GetHull( PointCount );
 			CFPoint* PixelPoints = new CFPoint[PointCount];
 			double *pHullRadii = new double[PointCount];
 			// reverse the points because the -y change causes the hull to be in the wrong direction.
@@ -8784,7 +8788,12 @@ bool CLinkageView::LineProperties( CLink *pLink )
 		if( pLink->GetFastenedTo() != 0 && pLink->GetFastenedTo()->GetElement() != 0 )
 			Dialog.m_FastenTo = "Fastened to " + pLink->GetFastenedTo()->GetElement()->GetIdentifierString( m_bShowDebug );
 		Dialog.m_Color = pLink->GetColor();
-		Dialog.m_Polygon = pLink->IsPolyline() ? 1 : 0;
+		switch( pLink->GetShapeType() )
+		{
+			case CLink::POLYGON: Dialog.m_ShapeType = 1; break;
+			case CLink::POLYLINE: Dialog.m_ShapeType = 2; break;
+			case CLink::HULL: default: Dialog.m_ShapeType = 0; break;
+		}
 	}
 	if( Dialog.DoModal() == IDOK )
 	{
@@ -8810,7 +8819,12 @@ bool CLinkageView::LineProperties( CLink *pLink )
 			pLink->SetName( Dialog.m_Name );
 			pLink->SetMeasurementElement( Dialog.m_bMeasurementLine != FALSE, Dialog.m_bOffsetMeassurementLine != FALSE );
 			pLink->SetColor( Dialog.m_Color );
-			pLink->SetPolyline( Dialog.m_Polygon == 0 ? false : true );
+			switch( Dialog.m_ShapeType )
+			{
+				case 1: pLink->SetShapeType( CLink::POLYGON ); break;
+				case 2: pLink->SetShapeType( CLink::POLYLINE ); break;
+				case 0: default: pLink->SetShapeType( CLink::HULL ); break;
+			}
 		}
 
 		return true;

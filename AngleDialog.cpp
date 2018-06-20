@@ -30,7 +30,7 @@ void CAngleDialog::DoDataExchange(CDataExchange* pDX)
 	//else
 	//{
 	//	CString Text;
-	//	Text.Format( "%.4lf", m_Angle );
+	//	Text.Format( "%.3lf", m_Angle );
 	//	m_AngleTextControl.SetWindowTextA( Text );
 	//}
 }
