@@ -844,7 +844,6 @@ exit 0
     <None Include="res\main.bmp" />
     <None Include="res\play.bmp" />
     <None Include="res\popup_gallery.bmp" />
-    <None Include="res\ribbon1.mfcribbon-ms" />
     <None Include="res\sample_gallery.bmp" />
     <None Include="res\testx.ico" />
     <None Include="Linkage.pdf">

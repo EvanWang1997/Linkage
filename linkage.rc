@@ -9,7 +9,8 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -1378,7 +1379,7 @@ BEGIN
     ID_SAMPLE_JANSEN        "The Theo Jansen leg mechanism."
     ID_SAMPLE_KLANN         "The Joe Klann leg mechanism."
     ID_SAMPLE_JOULES        "Bicycle pedalling example."
-    ID_SAMPLE_HOEKEN        "Rotating to linear motion converter."
+    ID_SAMPLE_HOEKEN        "Hoeken rotating to linear motion mechanism."
     ID_SAMPLE_PARALLEL      "Factor part moving mechanism."
     ID_SAMPLE_FOLDINGTOP    "Convertible car top example."
     ID_SAMPLE_SLIDING1      "A single sliding connector rotating around an anchor."
@@ -1420,7 +1421,7 @@ BEGIN
     IDS_SAMPLE_JANSEN       "The Theo Jansen leg mechanism.\nJansen"
     IDS_SAMPLE_KLANN        "The Joe Klann leg mechanism.\nKlann"
     IDS_SAMPLE_JOULES       "Joules pedalling mechanism.\nJoules"
-    IDS_SAMPLE_HOEKEN       "Rotating to linear motion converter.\nHoeken"
+    IDS_SAMPLE_HOEKEN       "Hoeken rotating to linear motion mechanism.\nHoeken"
     IDS_SAMPLE_PARALLEL     "Parallel lifing and moving mechanism.\nParallel"
     IDS_SAMPLE_FOLDINGTOP   "Convertible car top mechanism.\nFolding Top"
     IDS_SAMPLE_SLIDING1     "Sliding connector mechanism.\nSimple Slider 1"
