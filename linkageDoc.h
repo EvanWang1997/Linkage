@@ -37,7 +37,9 @@ class CLinkageDoc : public CDocument
 
 	enum _Direction{ HORIZONTAL, VERTICAL, INLINE, INLINESPACED, FLIPHORIZONTAL, FLIPVERTICAL, DIAGONAL };
 	enum _CoordinateChange{ NONE, DISTANCE, ROTATION, SCALE, OTHER };
-
+	enum _InsertType{ LINK, CONNECTOR, CIRCLE, ANCHOR, INPUT_ANCHOR, ACTUATOR, MEASUREMENT, GEAR_LINK };
+	//bool bAnchor, bool bRotating, bool bSlider, bool bActuator, bool bMeasurement, bool bSolid, bool bGear
+	
 	static const unsigned int DRAWINGLAYER = 0x00000001;
 	static const unsigned int MECHANISMLAYER = 0x00000010;
 
@@ -102,13 +104,15 @@ public:
 	bool DeSelectElement( CConnector *pConnector );
 	bool SelectLinkFromConnectors( void );
 	bool FindElement( CFPoint Point, double GrabDistance, double SolidLinkExpansion, CLink *&pFoundLink, CConnector *&pFoundConnector );
-	CFPoint CheckForSnap( ConnectorList &SelectedConnectors, double SnapDistance, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, CFPoint &ReferencePoint );
+	CFPoint CheckForSnap( ConnectorList &SelectedConnectors, double SnapDistance, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, CFPoint &ReferencePoint, bool bSnapToSelectionPoint );
 	bool CheckForGridSnap( CConnector *pConnector, double SnapDistance, double xGrid, double yGrid, CFPoint &ReferencePoint, CFPoint &Adjustment );
-	bool CheckForElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment );
-	bool CheckForSliderElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment );
-	bool MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, double SnapDistance, CFPoint &ReferencePoint );
+	bool CheckForElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment, bool bSnapToSelectionPoint );
+	bool CheckForSliderElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment, bool bSnapToSelectionPoint );
+	bool CheckForMotionPathSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment );
+	bool MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, double SnapDistance, CFPoint &ReferencePoint, bool bSnapToSelectionPoint );
 	bool MoveSelected( CFPoint Offset );
 	CString GetSelectedElementCoordinates( CString *pHintText );
+	CString GetSelectedElementAngle( void );
 	bool RotateSelected( CFPoint CenterPoint, double Angle );
 	bool StretchSelected( CFRect OriginalRect, CFRect NewRect, _Direction Direction );
 	bool StretchSelected( double Percentage );
@@ -143,16 +147,17 @@ public:
 	bool ConnectGears( CLink *pLink1, CLink *pLink2, double Size1, double Size2 );
 	bool DisconnectGear( CLink *pLink1 );
 	
-	CLink* InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bAnchor, bool bRotating, bool bSlider, bool bActuator, bool bMeasurement, bool bSolid, bool bGear );
-	void InsertConnector( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, false, false, false, false, false, false, false ); }
-	void InsertAnchor( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, true, false, false, false, false, bSolid, false ); }
-	void InsertAnchorLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, true, false, false, false, false, bSolid, false ); }
-	void InsertRotateAnchor( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, true, true, false, false, false, bSolid, false ); }
-	void InsertSlider( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, false, false, true, false, false, false, false ); }
-	void InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bSolid ) { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, ConnectorCount, false, false, false, false, false, bSolid, false ); }
-	void InsertActuator( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, false, false, false, true, false, bSolid, false ); }
-	CLink* InsertMeasurement( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { return InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, false, false, false, false, true, false, false ); }
-	void InsertGear( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )   { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, false, false, false, false, false, false, true ); }
+	CLink* InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, _InsertType Type, bool bSolid );
+	
+	void InsertConnector( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, CONNECTOR, false ); }
+	void InsertCircle( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, CIRCLE, false ); }
+	void InsertAnchor( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, ANCHOR, bSolid ); }
+	void InsertAnchorLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, ANCHOR, bSolid ); }
+	void InsertRotateAnchor( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, INPUT_ANCHOR, bSolid ); }
+	void InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bSolid ) { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, ConnectorCount, LINK, bSolid ); }
+	void InsertActuator( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, ACTUATOR, bSolid ); }
+	CLink* InsertMeasurement( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { return InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, MEASUREMENT, false ); }
+	void InsertGear( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )   { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, GEAR_LINK, false ); }
 	//bool GetExampleName( int Index, CString &Name );
 	//bool GetExampleText( int Index, CString &Text );
 
@@ -173,7 +178,7 @@ public:
 	bool LockSelected( void );
 	void SplitSelected( void );
 	void MakeRightAngleSelected( void );
-	void MakeSelectedAtAngle( double Angle );
+	CLinkageDoc::_CoordinateChange MakeSelectedAtAngle( double Angle );
 	void MakeParallelogramSelected( bool bMakeRectangle );
 	void CombineSelected( void );
 	void MakeAnchorSelected( void );
@@ -237,12 +242,12 @@ public:
 	bool IsSelectionMeetable( void ) { return m_bSelectionMeetable; }
 
 	bool IsSelectionTriangle( void ) { return m_bSelectionTriangle; }
+	bool IsSelectionAngleable( void ) { return m_bSelectionAngleable; }
 
 	bool IsSelectionPositionable( void ) { return m_bSelectionPositionable; }
 	bool IsSelectionLengthable( void ) { return m_bSelectionLengthable; }
 	bool IsSelectionRotatable( void ) { return m_bSelectionRotatable; }
 	bool IsSelectionScalable( void ) { return m_bSelectionScalable; }
-
 
 	void GetSnapLines( CFLine &Line1, CFLine &Line2 ) { Line1 = m_SnapLine[0]; Line2 = m_SnapLine[1]; }
 	
@@ -315,6 +320,7 @@ private:
 	bool m_bSelectionSlideable;
 	bool m_bSelectionSplittable;
 	bool m_bSelectionTriangle;
+	bool m_bSelectionAngleable;
 	bool m_bSelectionRectangle;
 	bool m_bSelectionLineable;
 	bool m_bSelectionFastenable;
@@ -339,6 +345,9 @@ private:
 	CBitArray m_IdentifiedLinks;
 	int m_HighestConnectorID;
 	int m_HighestLinkID;
+
+	CFPoint m_SelectionPoint;
+	bool m_bSelectionPoint;
 
 	CFLine m_SnapLine[2];
 

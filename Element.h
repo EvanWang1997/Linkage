@@ -51,6 +51,15 @@ class ElementList : public CList< class CElementItem*, class CElementItem* >
 class CElement
 {
 	public:
+	enum _ElementError 
+	{ 
+		SUCCESS = 0,	// No error.
+		UNDEFINED,		// The simulator was not able to attempt positioning of the element due to other errors.
+		MANGLE,			// Link must stretch or shrink to reach another link.
+		RANGE,			// connector (slider most likely) can't move any further; it is being moved outside of it's range.
+		CONFLICT,		// Multiple other lements are affecting this one, like if a link has two anchors and some other link is pulling or pushing it.
+		FLOPPY			// The element is not being positioned by any other element. 
+	};
 
 	CElement(void);
 	CElement( const CElement &ExistingElement );
@@ -76,6 +85,8 @@ class CElement
 
 	void SetPositionValid( bool bSet ) { m_bPositionValid = bSet; }
 	bool IsPositionValid( void ) { return m_bPositionValid; }
+	void SetSimulationError( _ElementError Error ) { m_SimError = Error; }
+	_ElementError GetSimulationError( void ) { return m_SimError; }
 
 	CNullableColor GetColor( void ) { return m_Color; }
 	void SetColor( CNullableColor Color ) { m_Color = Color; }
@@ -127,5 +138,6 @@ class CElement
 	bool m_bLocked;
 	int m_LineSize;
 	bool m_bMeasurementElementOffset;
+	_ElementError m_SimError;
 };
 

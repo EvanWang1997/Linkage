@@ -428,7 +428,10 @@ class CSimulatorImplementation
 					}
 
 					if( pLink->GetFixedConnectorCount() > 1 )
+					{
 						pLink->GetConnector( 1 )->SetPositionValid( false );
+						pLink->SetSimulationError( CElement::MANGLE );
+					}
 				}
 
 				bResult = MoveSimulation( pDoc );
@@ -483,6 +486,7 @@ class CSimulatorImplementation
 			if( !pCheckConnector->IsFixed() )
 			{
 				pCheckConnector->SetPositionValid( false );
+				//pCheckConnector->SetSimulationError( CElement::UNDEFINED );
 				bResult = false;
 			}
 		}
@@ -496,6 +500,7 @@ class CSimulatorImplementation
 			if( !pLink->IsTempFixed() )
 			{
 				pLink->SetPositionValid( false );
+				//pLink->SetSimulationError( CElement::UNDEFINED );
 				bResult = false;
 			}
 		}
@@ -931,6 +936,7 @@ class CSimulatorImplementation
 		if( !LinkArc.PointOnArc( pActualSlider1->GetPoint() ) )
 		{
 			pSlider1->SetPositionValid( false );
+			pSlider1->SetSimulationError( CElement::RANGE );
 			pLink->ResetMoveCount();
 			return false;
 		}
@@ -938,6 +944,7 @@ class CSimulatorImplementation
 		if( !LinkArc2.PointOnArc( pActualSlider2->GetPoint() ) )
 		{
 			pSlider2->SetPositionValid( false );
+			pSlider2->SetSimulationError( CElement::RANGE );
 			pLink->ResetMoveCount();
 			return false;
 		}
@@ -1350,12 +1357,14 @@ class CSimulatorImplementation
 		if( !TestPoint.SnapToLine( SlideLimitLine, true ) )
 		{
 			pSlider1->SetPositionValid( false );
+			pSlider1->SetSimulationError( CElement::RANGE );
 			return false;
 		}
 		TestPoint = pSlider2->GetTempPoint();
 		if( !TestPoint.SnapToLine( SlideLimitLine, true ) )
 		{
 			pSlider2->SetPositionValid( false );
+			pSlider2->SetSimulationError( CElement::RANGE );
 			return false;
 		}
 
@@ -1504,6 +1513,8 @@ class CSimulatorImplementation
 						if( fabs( d1 - d2 ) > 0.00000001 )
 						{
 							pTestConnector->SetPositionValid( false );
+							pLink->SetPositionValid( false );
+							pLink->SetSimulationError( CElement::MANGLE );
 
 							DebugItemList.AddTail( new CDebugItem( pFixedConnector->GetTempPoint(), RGB( 0, 255, 0 ) ) );
 							DebugItemList.AddTail( new CDebugItem( pCommonConnector->GetTempPoint(), RGB( 0, 0, 255 ) ) );
@@ -1621,6 +1632,8 @@ class CSimulatorImplementation
 				if( pTestLink->GetFixedConnectorCount() != 0 )
 				{
 					pCommonConnector->SetPositionValid( false );
+					pTestLink->SetSimulationError( CElement::MANGLE );
+					pLink->SetSimulationError( CElement::MANGLE );
 					return false;
 				}
 			}
@@ -1643,6 +1656,8 @@ class CSimulatorImplementation
 				if( pTestLink->GetFixedConnectorCount() != 0 )
 				{
 					pCommonConnector->SetPositionValid( false );
+					pTestLink->SetSimulationError( CElement::MANGLE );
+					pOtherToRotate->SetSimulationError( CElement::MANGLE );
 					return false;
 				}
 			}
@@ -1658,7 +1673,13 @@ class CSimulatorImplementation
 		CFPoint Intersect2;
 
 		if( !Circle1.CircleIntersection( Circle2, &Intersect, &Intersect2 ) )
+		{
+			pLink->SetPositionValid( false );
+			pLink->SetSimulationError( CElement::MANGLE );
+			pOtherToRotate->SetPositionValid( false );
+			pOtherToRotate->SetSimulationError( CElement::MANGLE );
 			return false;
+		}
 
 		// Try to give the point momentum by determining where it would be if
 		// it moved from a previous point through it's current point to some
@@ -1943,6 +1964,7 @@ class CSimulatorImplementation
 				if( pTestLink->GetFixedConnectorCount() != 0 )
 				{
 					pCommonConnector->SetPositionValid( false );
+					pTestLink->SetSimulationError( CElement::MANGLE );
 					return false;
 				}
 			}
@@ -1965,6 +1987,7 @@ class CSimulatorImplementation
 				if( pTestLink->GetFixedConnectorCount() != 0 )
 				{
 					pCommonConnector->SetPositionValid( false );
+					pOtherToRotate->SetSimulationError( CElement::MANGLE );
 					return false;
 				}
 			}

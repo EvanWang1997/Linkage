@@ -12,6 +12,7 @@
 #define ID_SIMULATE_INTERACTIVE         133
 #define ID_INSERT_ACTUATOR              134
 #define IDS_RIBBON_INSERT_ACTUATOR      135
+#define IDS_STRING137                   137
 #define IDD_CONNECTOR_PROPERTIES        139
 #define IDB_BITMAP1                     142
 #define IDI_ICON1                       143
@@ -448,6 +449,7 @@
 #define IDS_RIBBON_FASTEN               5236
 #define ID_EDIT_FASTEN                  5237
 #define ID_INSERT_ANCHORLINK            5238
+#define ID_INSERT_CIRCLE                5239
 #define IDS_SAMPLE_LIFTER               5240
 #define ID_EDIT_SELECTLINK              5241
 #define IDC_COPYRIGHT                   5303
@@ -516,6 +518,7 @@
 #define IDS_SAMPLE_ROSSYOKE             5431
 #define IDS_SAMPLE_RHOMBIC              5432
 #define IDS_SAMPLE_GEARRHOMBIC          5433
+#define ID_ESCAPE                       5434
 #define ID_FILE_PRINTFULL               5935
 #define IDS_SAMPLE_TRAMMEL              5936
 #define IDD_EXPORTIMAGE                 6000

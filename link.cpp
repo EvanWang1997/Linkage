@@ -303,6 +303,8 @@ bool CLink::RotateAround( CConnector* pConnector )
 						pUseConnector->SetPositionValid( false );
 						pUseConnector->SetTempFixed( false );
 						pUseConnector->SetPositionValid( false );
+						SetPositionValid( false );
+						SetSimulationError( CONFLICT );
 						return false;
 					}
 				}

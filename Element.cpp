@@ -8,6 +8,7 @@ CElement::CElement(void)
 	m_Layers = 0;
 	m_bMeasurementElement = false;
 	m_bPositionValid = true;
+	m_SimError = SUCCESS;
 	m_FastenedTo = CElementItem();
 	m_bLocked = false;
 	m_LineSize = 1;
@@ -35,6 +36,7 @@ CElement::CElement( const CElement &ExistingElement )
 	m_Name = ExistingElement.m_Name;
 	m_bMeasurementElement = ExistingElement.m_bMeasurementElement;
 	m_bPositionValid = ExistingElement.m_bPositionValid;
+	m_SimError = ExistingElement.m_SimError;
 	m_Color = ExistingElement.m_Color;
 	m_bUserColor = ExistingElement.m_bUserColor;
 	m_FastenedTo = CElementItem();

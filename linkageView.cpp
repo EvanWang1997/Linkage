@@ -71,7 +71,7 @@ static COLORREF COLOR_ADJUSTMENTKNOBS = RGB( 0, 0, 0 );
 static COLORREF COLOR_BLACK = RGB( 0, 0, 0 );
 static COLORREF COLOR_NONADJUSTMENTKNOBS = RGB( 170, 170, 170 );
 static COLORREF COLOR_ALIGNMENTHINT = RGB( 170, 220, 170 );
-static COLORREF COLOR_SNAPHINT = RGB( 50, 170, 240 );
+static COLORREF COLOR_SNAPHINT = RGB( 152, 207, 239 );
 static COLORREF COLOR_SUPERHIGHLIGHT = RGB( 255, 255, 192 );
 static COLORREF COLOR_SUPERHIGHLIGHT2 = RGB( 255, 255, 128 );
 static COLORREF COLOR_TEXT = RGB( 24, 24, 24 );
@@ -168,6 +168,9 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_SIMULATE_BACKWARD, &CLinkageView::OnSimulateBackward)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATE_BACKWARD, &CLinkageView::OnUpdateSimulateForwardBackward)
 
+	ON_COMMAND(ID_ESCAPE, &CLinkageView::OnEscape)
+	ON_UPDATE_COMMAND_UI(ID_ESCAPE, &CLinkageView::OnUpdateEscape)
+
 	ON_COMMAND(ID_SIMULATE_FORWARD_BIG, &CLinkageView::OnSimulateForwardBig)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATE_FORWARD_BIG, &CLinkageView::OnUpdateSimulateForwardBackward)
 	ON_COMMAND(ID_SIMULATE_BACKWARD_BIG, &CLinkageView::OnSimulateBackwardBig)
@@ -223,6 +226,7 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI( ID_FILE_PRINTFULL, OnUpdatePrintFull )
 
 	ON_COMMAND( ID_FILE_PRINT_SETUP, OnFilePrintSetup )
+	ON_COMMAND(ID_INSERT_CIRCLE, (AFX_PMSG)&CLinkageView::OnInsertCircle)
 	ON_COMMAND(ID_INSERT_CONNECTOR, (AFX_PMSG)&CLinkageView::OnInsertConnector)
 	ON_COMMAND(ID_INSERT_POINT,(AFX_PMSG)&CLinkageView::OnInsertPoint)
 	ON_COMMAND(ID_INSERT_LINE,(AFX_PMSG)&CLinkageView::OnInsertLine)
@@ -236,6 +240,7 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_INSERT_INPUT, (AFX_PMSG)&CLinkageView::OnInsertRotatinganchor)
 	ON_UPDATE_COMMAND_UI(ID_INSERT_POINT, &CLinkageView::OnUpdateEdit)
 	ON_UPDATE_COMMAND_UI(ID_INSERT_LINE, &CLinkageView::OnUpdateEdit)
+	ON_UPDATE_COMMAND_UI(ID_INSERT_CIRCLE, &CLinkageView::OnUpdateEdit)
 	ON_UPDATE_COMMAND_UI(ID_INSERT_CONNECTOR, &CLinkageView::OnUpdateEdit)
 	ON_UPDATE_COMMAND_UI(ID_INSERT_LINK2, &CLinkageView::OnUpdateEdit)
 	ON_UPDATE_COMMAND_UI(ID_INSERT_LINK3, &CLinkageView::OnUpdateEdit)
@@ -400,7 +405,6 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_WM_VSCROLL()
 	ON_COMMAND(ID_EDIT_SLIDE, &CLinkageView::OnEditSlide)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SLIDE, &CLinkageView::OnUpdateEditSlide)
-	ON_COMMAND(ID_INSERT_SLIDER, (AFX_PMSG)&CLinkageView::OnInsertlinkSlider)
 	ON_UPDATE_COMMAND_UI(ID_INSERT_SLIDER, &CLinkageView::OnUpdateEdit)
 	//ON_UPDATE_COMMAND_UI( ID_RIBBON_SAMPLE_GALLERY, &CLinkageView::OnUpdateEdit)
 	ON_COMMAND(ID_INSERT_ACTUATOR, (AFX_PMSG)&CLinkageView::OnInsertActuator)
@@ -517,7 +521,7 @@ CLinkageView::CLinkageView()
 	m_pPopupGallery = new CPopupGallery( ID_POPUP_GALLERY, IDB_INSERT_POPUP_GALLERY, 48 );
 	if( m_pPopupGallery != 0 )
 	{
-		m_pPopupGallery->SetRows( 2 );
+		m_pPopupGallery->SetRows( 3 );
 		m_pPopupGallery->SetTooltip( 0, ID_INSERT_CONNECTOR );
 		m_pPopupGallery->SetTooltip( 1, ID_INSERT_ANCHOR );
 		m_pPopupGallery->SetTooltip( 2, ID_INSERT_LINK2 );
@@ -526,10 +530,12 @@ CLinkageView::CLinkageView()
 		m_pPopupGallery->SetTooltip( 5, ID_INSERT_ACTUATOR );
 		m_pPopupGallery->SetTooltip( 6, ID_INSERT_LINK3 );
 		m_pPopupGallery->SetTooltip( 7, ID_INSERT_LINK4 );
-		m_pPopupGallery->SetTooltip( 8, ID_INSERT_POINT );
-		m_pPopupGallery->SetTooltip( 9, ID_INSERT_LINE );
-		m_pPopupGallery->SetTooltip( 10, ID_INSERT_MEASUREMENT );
-		m_pPopupGallery->SetTooltip( 11, ID_INSERT_GEAR );
+		m_pPopupGallery->SetTooltip( 8, ID_INSERT_GEAR );
+		//m_pPopupGallery->SetTooltip( 9, nothing );
+		m_pPopupGallery->SetTooltip( 10, ID_INSERT_POINT );
+		m_pPopupGallery->SetTooltip( 11, ID_INSERT_LINE );
+		m_pPopupGallery->SetTooltip( 12, ID_INSERT_MEASUREMENT );
+		m_pPopupGallery->SetTooltip( 13, ID_INSERT_CIRCLE );
 	}
 
 	m_SmallFont.CreateFont( -SMALL_FONT_SIZE, 0, 0, 0, FW_LIGHT, 0, 0, 0,
@@ -1409,12 +1415,13 @@ void CLinkageView::DrawAlignmentHintLines( CRenderer *pRenderer )
 		}
 	}
 
-	double Angle = GetAngle( Points[1], Points[0], Points[2] );
-	if( Angle < 0 )
-		Angle += 360;
 
 	if( PointCount == 3 ) // && fabs( Angle ) >= 0.5 && fabs( Angle ) < 359.5 )
 	{
+		double Angle = GetAngle( Points[1], Points[0], Points[2] );
+		if( Angle < 0 )
+			Angle += 360;
+
 		CFPoint TempPoint;
 		TempPoint = Scale( Points[0] );
 		Points[0].SetPoint( CPoint( (int)TempPoint.x, (int)TempPoint.y ) );
@@ -1436,11 +1443,7 @@ void CLinkageView::DrawAlignmentHintLines( CRenderer *pRenderer )
 
 		pRenderer->SelectObject( &Pen );
 
-		if( Angle <= 180 )
-			pRenderer->Arc( Points[1].x, Points[1].y, ArcRadius, Points[2].x, Points[2].y, Points[0].x, Points[0].y );
-		else
-			pRenderer->Arc( Points[1].x, Points[1].y, ArcRadius, Points[2].x, Points[2].y, Points[0].x, Points[0].y );
-			//pRenderer->Arc( Points[1].x, Points[1].y, ArcRadius, Points[0].x, Points[0].y, Points[2].x, Points[2].y );
+		pRenderer->Arc( Points[1].x, Points[1].y, ArcRadius, Points[0].x, Points[0].y, Points[2].x, Points[2].y );
 	}
 
 	pRenderer->SelectObject( pOldPen );
@@ -1484,12 +1487,19 @@ void CLinkageView::DrawSnapLines( CRenderer *pRenderer )
 		pRenderer->DrawLine( Scale( SnapLine1 ) );
 		//pRenderer->MoveTo( Scale( SnapLine1.GetStart() ) );
 		//pRenderer->LineTo( Scale( SnapLine1.GetEnd() ) );
+		CFArc HintArc( SnapLine1.GetStart(), Unscale( m_ConnectorRadius ), SnapLine1.GetStart(), SnapLine1.GetStart() );
+		pRenderer->Arc( Scale( HintArc ) );
 	}
 	if( SnapLine2.GetStart() != SnapLine2.GetEnd() )
 	{
 		pRenderer->DrawLine( Scale( SnapLine2 ) );
+
+
+
 		//pRenderer->MoveTo( Scale( SnapLine2.GetStart() ) );
 		//pRenderer->LineTo( Scale( SnapLine2.GetEnd() ) );
+		CFArc HintArc( SnapLine2.GetStart(), Unscale( m_ConnectorRadius ), SnapLine2.GetStart(), SnapLine2.GetStart() );
+		pRenderer->Arc( Scale( HintArc ) );
 	}
 
 	pRenderer->SelectObject( pOldPen );
@@ -1582,7 +1592,7 @@ CFArea CLinkageView::DoDraw( CRenderer* pRenderer )
 
 	CFArea Area;
 
-	if( m_bShowDebug )
+	if( m_bShowDebug && false )
 	{
 		// As drawn
 		CFRect Derfus = GetDocumentArea( true ) ;
@@ -2855,19 +2865,10 @@ bool CLinkageView::SelectDocumentItem( UINT nFlags, CFPoint point )
 		if( m_MouseAction != ACTION_NONE )
 			++m_SelectionDepth;
 		else
-		{
 			m_SelectionDepth = 0;
-			// Try again at zero depth to try to find something to select.
-			//m_SelectionDepth = 0;
-			//m_MouseAction = pDoc->SelectElement( AdjustedPoint, GrabDistance, 0, bMultiSelect, m_SelectionDepth, bSelectionChanged ) ? ACTION_DRAG : ACTION_NONE;
-			//if( m_MouseAction != ACTION_NONE )
-			//	++m_SelectionDepth;
-		}
 	}
 
 	SelectionChanged();
-	//if( pDoc->IsSelectionAdjustable() )
-	//	SetStatusText( m_MouseAction == ACTION_ROTATE ? "0.0000°" : ( m_MouseAction == ACTION_STRETCH ? "100.000%" : "" ) );
 
 	MarkSelection( bSelectionChanged );
 	ShowSelectedElementCoordinates();
@@ -3034,7 +3035,7 @@ void CLinkageView::OnMouseMoveDrag(UINT nFlags, CFPoint point)
 
 	if( m_bAllowEdit )
 	{
-		if( pDoc->MoveSelected( AdjustedPoint, bElementSnap, bGridSnap,  xGapDistance / pDoc->GetUnitScale(),  yGapDistance / pDoc->GetUnitScale(), Unscale( VIRTUAL_PIXEL_SNAP_DISTANCE ), ReferencePoint ) )
+		if( pDoc->MoveSelected( AdjustedPoint, bElementSnap, bGridSnap,  xGapDistance / pDoc->GetUnitScale(),  yGapDistance / pDoc->GetUnitScale(), Unscale( VIRTUAL_PIXEL_SNAP_DISTANCE ), ReferencePoint, true ) )
 			InvalidateRect( 0 );
 	}
 
@@ -3986,7 +3987,7 @@ void CLinkageView::OnUpdateAlignButton(CCmdUI *pCmdUI)
 
 	bool bEnable = pDoc->GetAlignConnectorCount() > 1
 				   || Selected > 1
-				   || pDoc->IsSelectionTriangle()
+				   || pDoc->IsSelectionAngleable()
 				   || pDoc->IsSelectionRectangle()
 				   || pDoc->IsSelectionAdjustable()
 				   || pDoc->IsSelectionLengthable()
@@ -4442,6 +4443,17 @@ void CLinkageView::InsertConnector( CFPoint *pPoint )
 	SelectionChanged();
 }
 
+void CLinkageView::InsertCircle( CFPoint *pPoint )
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pDoc->InsertCircle( CLinkageDoc::DRAWINGLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0 );
+	m_bSuperHighlight = true;
+
+	UpdateForDocumentChange();
+	SelectionChanged();
+}
+
 void CLinkageView::InsertAnchor( CFPoint *pPoint )
 {
 	CLinkageDoc* pDoc = GetDocument();
@@ -4813,10 +4825,13 @@ void CLinkageView::OnAlignSetAngle()
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	CAngleDialog dlg;
-	dlg.m_Angle = pDoc->GetSelectedElementCoordinates( 0 );
+	dlg.m_Angle = pDoc->GetSelectedElementAngle();
 	if( dlg.DoModal() == IDOK )
 	{
-		pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, dlg.m_Angle );
+		if( dlg.m_Angle.Find( "*" ) == dlg.m_Angle.GetLength() - 2 )
+			pDoc->SetSelectedElementCoordinates( &m_SelectionRotatePoint, dlg.m_Angle );
+		else
+			pDoc->MakeSelectedAtAngle( atof( dlg.m_Angle ) );
 		UpdateForDocumentChange();
 	}
 
@@ -4851,8 +4866,8 @@ void CLinkageView::OnUpdateAlignSetAngle( CCmdUI *pCmdUI )
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	CConnector *pThird = pDoc->GetSelectedConnector( 2 );
-	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionTriangle() && pThird != 0 && !pThird->IsSlider() && m_bAllowEdit );
+	// CConnector *pThird = pDoc->GetSelectedConnector( 2 );
+	pCmdUI->Enable( !m_bSimulating && pDoc->IsSelectionAngleable() && m_bAllowEdit );
 }
 
 void CLinkageView::OnAddConnector()
@@ -6081,8 +6096,24 @@ double CLinkageView::UnscaledUnits( double Count )
 	return Count * m_BaseUnscaledUnit;
 }
 
-void CLinkageView::DrawFailureMarks( CRenderer* pRenderer, unsigned int OnLayers, CFPoint Point, double Radius )
+static CString GetErrorText( CElement::_ElementError Error )
 {
+	switch( Error )
+	{
+		case CElement::SUCCESS: return "";
+		case CElement::UNDEFINED: return " Unable to simulate this element.";
+		case CElement::MANGLE: return "The link is being mangled (stretch, compressed, altered).";
+		case CElement::RANGE: return "The connector is being moved outside of its valid range.";
+		case CElement::CONFLICT: return "Other elements are making conflicting attempts to move this element.";
+		case CElement::FLOPPY: return "The result is unpredictable (floppy) for this element.";
+	}
+	return "";
+}
+
+void CLinkageView::DrawFailureMarks( CRenderer* pRenderer, unsigned int OnLayers, CFPoint Point, double Radius, CElement::_ElementError Error )
+{
+	if( Error == CElement::SUCCESS )
+		return;
 	CPen RedPen( PS_SOLID, 3, RGB( 255, 32, 32 ) );
 	CPen *pOldPen = pRenderer->SelectObject( &RedPen );
 	double Distance1 = Radius + UnscaledUnits( 4 );
@@ -6108,6 +6139,11 @@ void CLinkageView::DrawFailureMarks( CRenderer* pRenderer, unsigned int OnLayers
 	pRenderer->LineTo( Point.x + Distance2, Point.y + AdjustYCoordinate( Distance2 ) );
 	pRenderer->MoveTo( Point.x - Distance1, Point.y - AdjustYCoordinate( Distance1 ) );
 	pRenderer->LineTo( Point.x - Distance2, Point.y - AdjustYCoordinate( Distance2 ) );
+
+	pRenderer->SetTextAlign( TA_TOP | TA_LEFT );
+	pRenderer->SetBkMode( TRANSPARENT );
+	pRenderer->TextOut( Point.x + UnscaledUnits( 11 ), Point.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ), GetErrorText( Error ) );
+
 	pRenderer->SelectObject( pOldPen );
 }
 
@@ -6385,7 +6421,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 		}
 
 		if( !pConnector->IsPositionValid() )
-			DrawFailureMarks( pRenderer, OnLayers, Point, m_ConnectorRadius );
+			DrawFailureMarks( pRenderer, OnLayers, Point, m_ConnectorRadius, pConnector->GetSimulationError() );
 	}
 
 	double Radius = pConnector->GetDrawCircleRadius();
@@ -7980,6 +8016,8 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 	if( ( m_SelectedEditLayers & CLinkageDoc::MECHANISMLAYERS ) == 0 )
 		Color = LightenColor( DesaturateColor( Color, 0.5 ), 0.6 );
 
+	CFPoint Average;
+
 	if( bShowlabels && ( Count > 1 || pLink->IsGear() ) )
 	{
 		/*
@@ -7988,16 +8026,14 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 		 * assigned by the user.
 		 */
 		CString &Name = pLink->GetName();
-		if( !Name.IsEmpty() || ( pLink->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) != 0 || m_bShowDebug )
+		//if( !Name.IsEmpty() || ( pLink->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) != 0 || m_bShowDebug )
 		{
 			pRenderer->SetBkMode( TRANSPARENT );
 			CString Number = pLink->GetIdentifierString( m_bShowDebug );
 
 			CConnector *pConnector1 = pLink->GetConnectorList()->GetHead();
 
-			CFPoint Average;
 			double LinkLabelOffset;
-
 			if( pLink->IsGear() )
 			{
 				pRenderer->SetTextAlign( TA_BOTTOM | TA_RIGHT );
@@ -8221,10 +8257,15 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 					pRenderer->SelectObject( pOldBrush );
 					pRenderer->SelectObject( (CPen*)0 );
 
-					if( !pLink->IsPositionValid() )
-						DrawFailureMarks( pRenderer, OnLayers, Point, Scale( LargestRadius ) );
+					if( !pLink->IsPositionValid() && bShowlabels )
+						DrawFailureMarks( pRenderer, OnLayers, Point, Scale( LargestRadius ), pLink->GetSimulationError() );
 				}
 			}
+		}
+		else
+		{
+			if( !pLink->IsPositionValid() && bShowlabels )
+				DrawFailureMarks( pRenderer, OnLayers, Average, m_ConnectorRadius, pLink->GetSimulationError() );
 		}
 	}
 
@@ -8461,46 +8502,6 @@ void CLinkageView::OnUpdateEditSlide(CCmdUI *pCmdUI)
 	ASSERT_VALID(pDoc);
 
 	pCmdUI->Enable( pDoc->IsSelectionSlideable() && !m_bSimulating && m_bAllowEdit );
-}
-
-void CLinkageView::InsertlinkSlider( CFPoint *pPoint )
-{
-	CLinkageDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-	pDoc->InsertLink(  CLinkageDoc::MECHANISMLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0, 1, false, false, true, false, false, false, false );
-	m_bSuperHighlight = true;
-	UpdateForDocumentChange();
-	SelectionChanged();
-}
-
-void CLinkageView::InsertSliderCombo( CFPoint *pPoint )
-{
-	#if 0
-	CLinkageDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
-
-	static const char *SLIDER_COMBO_XML =
-		"<Linkage>\
-		<connector anchor=\"true\" x=\"520\" y=\"160\" id=\"0\"/>\
-		<connector anchor=\"true\" x=\"647\" y=\"160\" id=\"1\"/>\
-		<connector x=\"591\" y=\"160\" id=\"2\" slider=\"true\">\
-			<slidelimit id=\"0\"/>\
-			<slidelimit id=\"1\"/>\
-		</connector>\
-		<Link id=\"0\" linesize=\"1\" solid=\"true\">\
-			<connector id=\"0\"/>\
-			<connector id=\"1\"/>\
-		</Link>\
-		<Link id=\"2\" linesize=\"1\" actuator=\"true\" throw=\"38\" cpm=\"20\" >\
-			<connector id=\"0\"/>\
-			<connector id=\"2\"/>\
-		</Link>\
-		</Linkage>";
-
-	pDoc->InsertXml( pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0, SLIDER_COMBO_XML );
-	m_bSuperHighlight = true;
-	UpdateForDocumentChange();
-	#endif
 }
 
 bool CLinkageView::ConnectorProperties( CConnector *pConnector )
@@ -9076,27 +9077,41 @@ void CLinkageView::OnFileSaveMotion()
 		CConnector *pConnector = pConnectors->GetNext( Position );
 		if( pConnector == 0 )
 			continue;
-		if( !pConnector->IsDrawing() )
+		if( !pConnector->IsDrawing() && !pConnector->IsAnchor() )
 			continue;
 
-		int DrawPoint = 0;
-		int PointCount = 0;
-		int MaxPoints = 0;
-		CFPoint *pPoints = pConnector->GetMotionPath( DrawPoint, PointCount, MaxPoints );
-
-		CString Name = "Connector ";
-		Name += pConnector->GetIdentifierString( m_bShowDebug );
-		Name += "\r\n";
-		OutputFile.Write( Name, Name.GetLength() );
-
-		CString Temp;
-		Temp.Format( "%d\r\n", PointCount );
-		OutputFile.Write( Temp, Temp.GetLength() );
-
-		for( int Counter = 0; Counter < PointCount; ++Counter )
+		if( pConnector->IsAnchor() )
 		{
-			Temp.Format( "%.6f,%.6f\r\n", pPoints[Counter].x * DocumentScale, pPoints[Counter].y * DocumentScale );
+			CFPoint Point = pConnector->GetOriginalPoint();
+			CString Name = "Anchor ";
+			Name += pConnector->GetIdentifierString( m_bShowDebug );
+			Name += "\r\n";
+			OutputFile.Write( Name, Name.GetLength() );
+			CString Temp;
+			Temp.Format( "%.6f,%.6f\r\n", Point.x * DocumentScale, Point.y * DocumentScale );
 			OutputFile.Write( (const char*)Temp, Temp.GetLength() );
+		}
+		else
+		{
+			int DrawPoint = 0;
+			int PointCount = 0;
+			int MaxPoints = 0;
+			CFPoint *pPoints = pConnector->GetMotionPath( DrawPoint, PointCount, MaxPoints );
+
+			CString Name = "Connector ";
+			Name += pConnector->GetIdentifierString( m_bShowDebug );
+			Name += "\r\n";
+			OutputFile.Write( Name, Name.GetLength() );
+
+			CString Temp;
+			Temp.Format( "%d\r\n", PointCount );
+			OutputFile.Write( Temp, Temp.GetLength() );
+
+			for( int Counter = 0; Counter < PointCount; ++Counter )
+			{
+				Temp.Format( "%.6f,%.6f\r\n", pPoints[Counter].x * DocumentScale, pPoints[Counter].y * DocumentScale );
+				OutputFile.Write( (const char*)Temp, Temp.GetLength() );
+			}
 		}
 	}
 }
@@ -9243,6 +9258,26 @@ void CLinkageView::OnSimulateOneCycleX()
 	m_TimerID = timeSetEvent( 33, 1, TimeProc, (DWORD_PTR)this, 0 );
 }
 
+void CLinkageView::OnEscape()
+{
+	if( m_bSimulating )
+		StopSimulation();
+
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	pDoc->Reset( true, true );
+
+	UpdateForDocumentChange();
+}
+
+void CLinkageView::OnUpdateEscape(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( true );
+}
+
 void CLinkageView::StartTimer( void )
 {
 	timeBeginPeriod( TimerMinimumResolution );
@@ -9356,9 +9391,9 @@ void CLinkageView::OnInsertConnector()
 	InsertConnector( 0 );
 }
 
-void CLinkageView::OnInsertlinkSlider()
+void CLinkageView::OnInsertCircle()
 {
-	InsertlinkSlider( 0 );
+	InsertCircle( 0 );
 }
 
 void CLinkageView::OnInsertTriple()
@@ -9417,10 +9452,12 @@ void CLinkageView::OnPopupGallery()
 		case 5: InsertActuator( &PopupPoint ); break;
 		case 6: InsertTriple( &PopupPoint ); break;
 		case 7: InsertQuad( &PopupPoint ); break;
-		case 8: InsertPoint( &PopupPoint ); break;
-		case 9: InsertLine( &PopupPoint ); break;
-		case 10: InsertMeasurement( &PopupPoint ); break;
-		case 11: InsertGear( &PopupPoint ); break;
+		case 8: InsertGear( &PopupPoint ); break;
+		case 9: break; // Blank spot
+		case 10: InsertPoint( &PopupPoint ); break;
+		case 11: InsertLine( &PopupPoint ); break;
+		case 12: InsertMeasurement( &PopupPoint ); break;
+		case 13: InsertCircle( &PopupPoint ); break;
 		default: return;
 	}
 }
@@ -9429,7 +9466,7 @@ void CLinkageView::InsertActuator( CFPoint *pPoint )
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	pDoc->InsertLink( CLinkageDoc::MECHANISMLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0, 2, false, false, false, true, false, m_bNewLinksSolid, false );
+	pDoc->InsertLink( CLinkageDoc::MECHANISMLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0, 2, CLinkageDoc::ACTUATOR, m_bNewLinksSolid );
 	m_bSuperHighlight = true;
 	UpdateForDocumentChange();
 	SelectionChanged();
@@ -9583,7 +9620,7 @@ bool CLinkageView::HandleShortcutKeys( UINT nChar, unsigned int MyFlags )
 		{ '[', ID_SIMULATE_BACKWARD, 0 },
 		{ '>', ID_SIMULATE_FORWARD, 0 },
 		{ ']', ID_SIMULATE_FORWARD, 0 },
-		{ VK_ESCAPE, ID_SIMULATION_STOP, 0 },
+		{ VK_ESCAPE, ID_ESCAPE, 0 },
 		{ 0, 0, 0 }
 	};
 

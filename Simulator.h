@@ -27,6 +27,7 @@ class CSimulatorError
 class CSimulator
 {
 public:
+
 	CSimulator();
 	~CSimulator();
 

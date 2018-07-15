@@ -369,7 +369,7 @@ static inline double GetAngle( CFPoint CenterPoint, CFPoint Point1, CFPoint Poin
 		Angle1 += 360;
 	if( Angle2 < -180 ) //if( Angle2 < 0 )
 		Angle2 += 360;
-	double Angle = Angle1 - Angle2;
+	double Angle = Angle2 - Angle1;
 	//if( Angle1 < Angle2 )
 	//	Angle += 360;
 	return Angle;

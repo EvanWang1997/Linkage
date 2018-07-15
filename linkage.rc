@@ -595,8 +595,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,8,0,0
- PRODUCTVERSION 3,8,0,0
+ FILEVERSION 3,8,1,0
+ PRODUCTVERSION 3,8,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -612,12 +612,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.8.0.0"
+            VALUE "FileVersion", "3.8.1.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2018 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.8.0.0"
+            VALUE "ProductVersion", "3.8.1.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -956,6 +956,7 @@ BEGIN
     IDS_RIBBON_FASTEN       "Fasten\nf"
     ID_EDIT_FASTEN          "Fasten the selected drawing elements or gears to the selected link.\nFasten"
     ID_INSERT_ANCHORLINK    "Add a link with an anchor and a connector.\nInsert Anchor Link"
+    ID_INSERT_CIRCLE        "Add a circle to the drawing layer\nInsert Circle"
     IDS_SAMPLE_LIFTER       "Two-stage ball lifting mechanism.\nBall Lifter"
 END
 

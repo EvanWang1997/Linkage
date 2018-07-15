@@ -100,6 +100,7 @@ CLinkageDoc::CLinkageDoc()
 	m_bSelectionSlideable = false;
 	m_bSelectionSplittable = false;
 	m_bSelectionTriangle = false;
+	m_bSelectionAngleable = false;
 	m_bSelectionRectangle = false;
 	m_bSelectionLineable = false;
 	m_bSelectionFastenable = false;
@@ -111,6 +112,8 @@ CLinkageDoc::CLinkageDoc()
 	m_bSelectionRotatable = false;
 	m_bSelectionScalable = false;
 	m_bSelectionMeetable = false;
+
+	m_bSelectionPoint = false;
 
 	m_AlignConnectorCount = 0;
 	m_HighestConnectorID = -1;
@@ -156,6 +159,7 @@ BOOL CLinkageDoc::OnNewDocument()
 	m_bSelectionSlideable = false;
 	m_bSelectionSplittable = false;
 	m_bSelectionTriangle = false;
+	m_bSelectionAngleable = false;
 	m_bSelectionRectangle = false;
 	m_bSelectionLineable = false;
 	m_bSelectionFastenable = false;
@@ -166,6 +170,8 @@ BOOL CLinkageDoc::OnNewDocument()
 	m_bSelectionLengthable = false;
 	m_bSelectionRotatable = false;
 	m_bSelectionScalable = false;
+
+	m_bSelectionPoint = false;
 
 	m_AlignConnectorCount = 0;
 	m_HighestConnectorID = -1;
@@ -1388,6 +1394,8 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 	bool bClearExistingSelection = true;
 	POSITION Position = 0;
 
+	m_bSelectionPoint = false;
+
 	// Check only the already selected items first before checking all items.
 	// This makes it easier to drag a pasted item that is selected but not
 	// checked first otherwise.
@@ -1597,6 +1605,9 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 
 	if( pSelectingConnector != 0 )
 	{
+		m_SelectionPoint = pSelectingConnector->GetOriginalPoint();
+		m_bSelectionPoint = true;
+
 		if( bMultiSelect )
 		{
 			if( pSelectingConnector->IsSelected() )
@@ -1646,6 +1657,10 @@ bool CLinkageDoc::SelectElement( CFPoint Point, double GrabDistance, double Soli
 			m_CaptureOffset.x = Point.x - pSelectingConnector->GetPoint().x;
 			m_CaptureOffset.y = Point.y - pSelectingConnector->GetPoint().y;
 		}
+
+		// Uncomment this in order to only snap to a connector previous position if it is the only thing selected.
+		//if( m_SelectedConnectors.GetCount() + m_SelectedLinks.GetCount() > 1 )
+		//	m_bSelectionPoint = false;
 
 		SetSelectedModifiableCondition();
 
@@ -1861,7 +1876,7 @@ bool CLinkageDoc::MoveCapturedController( CFPoint Point )
 	return true;
 }
 
-bool CLinkageDoc::CheckForSliderElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment )
+bool CLinkageDoc::CheckForSliderElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment, bool bSnapToSelectionPoint )
 {	
 	if( !pConnector->IsSlider() )
 		return false;
@@ -1879,15 +1894,29 @@ bool CLinkageDoc::CheckForSliderElementSnap( CConnector *pConnector, double Snap
 	 * closest snap point is used if multiple qualify.
 	 */ 
 	double FoundDistance = SnapDistance * 1.41421356237;
-	POSITION Position2 = m_Connectors.GetHeadPosition();
-	while( Position2 != 0 )
-	{
-		CConnector* pCheckConnector = m_Connectors.GetNext( Position2 );
-		if( pCheckConnector == 0 || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
-			continue;
 
-		if( pCheckConnector->IsSelected() || pCheckConnector->IsLinkSelected() )
-			continue;
+	POSITION Position2 = bSnapToSelectionPoint ? 0 : m_Connectors.GetHeadPosition();
+	while( bSnapToSelectionPoint || Position2 != 0 )
+	{
+		CFPoint CheckPoint;
+		if( Position2 == 0 )
+		{
+			CheckPoint = m_SelectionPoint;
+			Position2 = m_Connectors.GetHeadPosition();
+			bSnapToSelectionPoint = false;
+		}
+		else
+		{
+			CConnector* pCheckConnector = m_Connectors.GetNext( Position2 );
+
+			if( pCheckConnector == 0 || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
+				continue;
+
+			if( pCheckConnector->IsSelected() || pCheckConnector->IsLinkSelected() )
+				continue;
+
+			CheckPoint = pCheckConnector->GetOriginalPoint();
+		}
 
 		/*
 		* This is a snap to the intersection of the slider track and the horizontal position
@@ -1898,7 +1927,6 @@ bool CLinkageDoc::CheckForSliderElementSnap( CConnector *pConnector, double Snap
 		CFPoint Intersect[4];
 		bool bIntersect[4] = { false, false, false, false };
 
-		CFPoint CheckPoint = pCheckConnector->GetOriginalPoint();
 		CFLine HorizontalLine( CheckPoint.x - 1, CheckPoint.y, CheckPoint.x + 1, CheckPoint.y );
 		CFLine VerticalLine( CheckPoint.x, CheckPoint.y - 1, CheckPoint.x, CheckPoint.y + 1 );
 
@@ -1949,7 +1977,12 @@ bool CLinkageDoc::CheckForSliderElementSnap( CConnector *pConnector, double Snap
 	return bSnapItem;
 }
 
-bool CLinkageDoc::CheckForElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment )
+bool CLinkageDoc::CheckForMotionPathSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment )
+{
+	return false;
+}
+
+bool CLinkageDoc::CheckForElementSnap( CConnector *pConnector, double SnapDistance, CFPoint &ReferencePoint, CFPoint &Adjustment, bool bSnapToSelectionPoint )
 {
 	bool bSnapItem = false;
 	CFPoint ConnectorPoint = pConnector->GetPoint();
@@ -1964,11 +1997,9 @@ bool CLinkageDoc::CheckForElementSnap( CConnector *pConnector, double SnapDistan
 		if( pCheckConnector->IsSelected() || pCheckConnector->IsLinkSelected() )
 			continue;
 
-		/*
-			* This is a snap to the horizontal or vertical position of the
-			* connector, not a snap to both coordinates. Check the distance
-			* in each direction instead of an absolute distance.
-			*/
+		/* 
+		 * Check for both x and y snapping before checking for one of the other.
+		 */
 
 		CFPoint CheckPoint = pCheckConnector->GetOriginalPoint();
 		if( fabs( ConnectorPoint.x - CheckPoint.x ) < SnapDistance )
@@ -1983,6 +2014,24 @@ bool CLinkageDoc::CheckForElementSnap( CConnector *pConnector, double SnapDistan
 			bSnapItem = true;
 			Adjustment.y = CheckPoint.y - ConnectorPoint.y;
 			m_SnapLine[1].SetLine( CheckPoint, CFPoint( ConnectorPoint.x, ConnectorPoint.y + Adjustment.y ) );
+			ReferencePoint.y = ConnectorPoint.y + Adjustment.y;
+		}
+	}
+
+	if( bSnapToSelectionPoint )
+	{
+		if( fabs( ConnectorPoint.x - m_SelectionPoint.x ) < SnapDistance )
+		{
+			bSnapItem = true;
+			Adjustment.x = m_SelectionPoint.x - ConnectorPoint.x;
+			m_SnapLine[0].SetLine( m_SelectionPoint, CFPoint( ConnectorPoint.x + Adjustment.x, ConnectorPoint.y ) );
+			ReferencePoint.x = ConnectorPoint.x + Adjustment.x;
+		}
+		if( fabs( ConnectorPoint.y - m_SelectionPoint.y ) < SnapDistance )
+		{
+			bSnapItem = true;
+			Adjustment.y = m_SelectionPoint.y - ConnectorPoint.y;
+			m_SnapLine[1].SetLine( m_SelectionPoint, CFPoint( ConnectorPoint.x, ConnectorPoint.y + Adjustment.y ) );
 			ReferencePoint.y = ConnectorPoint.y + Adjustment.y;
 		}
 	}
@@ -2034,11 +2083,13 @@ bool CLinkageDoc::CheckForGridSnap( CConnector *pConnector, double SnapDistance,
 }
 
 
-CFPoint CLinkageDoc::CheckForSnap( ConnectorList &SelectedConnectors, double SnapDistance, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, CFPoint &ReferencePoint )
+CFPoint CLinkageDoc::CheckForSnap( ConnectorList &SelectedConnectors, double SnapDistance, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, CFPoint &ReferencePoint, bool bSnapToSelectionPoint )
 {
 	CFPoint Adjustment( 0, 0 );
 
 	bool bSnapGrid = false;
+
+	bSnapToSelectionPoint = bSnapToSelectionPoint & m_bSelectionPoint;
 
 	if( bGridSnap )
 	{
@@ -2076,7 +2127,7 @@ CFPoint CLinkageDoc::CheckForSnap( ConnectorList &SelectedConnectors, double Sna
 		 */
 
 		POSITION Position = SelectedConnectors.GetHeadPosition();
-		while( Position != 0 && !bSnapItem )
+		while( Position != 0 )
 		{
 			CConnector* pConnector = SelectedConnectors.GetNext( Position );
 			if( pConnector == 0 || ( pConnector->GetLayers() & m_UsableLayers ) == 0 )
@@ -2087,15 +2138,15 @@ CFPoint CLinkageDoc::CheckForSnap( ConnectorList &SelectedConnectors, double Sna
 
 			if( pConnector->IsSlider() )
 			{
-				bSnapItem = CheckForSliderElementSnap( pConnector, SnapDistance, ReferencePoint, Adjustment );
-				if( bSnapItem )
-					break;	
+				bSnapItem |= CheckForSliderElementSnap( pConnector, SnapDistance, ReferencePoint, Adjustment, bSnapToSelectionPoint );
+				//if( bSnapItem )
+				//	break;	
 			}
 			else
 			{
-				bSnapItem = CheckForElementSnap( pConnector, SnapDistance, ReferencePoint, Adjustment );
-				if( bSnapItem )
-					break;	
+				bSnapItem |= CheckForElementSnap( pConnector, SnapDistance, ReferencePoint, Adjustment, bSnapToSelectionPoint );
+				//if( bBoth )
+				//	break;
 			}		
 		}
 	}
@@ -2200,7 +2251,7 @@ int CLinkageDoc::BuildSelectedLockGroup( ConnectorList *pLockGroup )
 	return (int)pLockGroup->GetCount();
 }
 
-bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, double SnapDistance, CFPoint &ReferencePoint )
+bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap, double xGrid, double yGrid, double SnapDistance, CFPoint &ReferencePoint, bool bSnapToSelectionPoint )
 {
 	m_SnapLine[0].SetLine( 0, 0, 0, 0 );
 	m_SnapLine[1].SetLine( 0, 0, 0, 0 );
@@ -2281,7 +2332,7 @@ bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap
 	if( bElementSnap || bGridSnap )
 	{
 		CFPoint SnapReference = ReferencePoint;
-		CFPoint Adjustment = CheckForSnap( MoveConnectors, SnapDistance, bElementSnap, bGridSnap, xGrid, yGrid, SnapReference );
+		CFPoint Adjustment = CheckForSnap( MoveConnectors, SnapDistance, bElementSnap, bGridSnap, xGrid, yGrid, SnapReference, bSnapToSelectionPoint );
 
 		if( Adjustment.x != 0 || Adjustment.y != 0 )
 		{
@@ -2507,7 +2558,7 @@ bool CLinkageDoc::FinishChangeSelected( void )
 		pConnector->SetPoint( pConnector->GetPoint() );
 		pConnector->SetDrawCircleRadius( pConnector->GetDrawCircleRadius() );
 		pConnector->SetSlideRadius( pConnector->GetSlideRadius() );
-		pConnector->Reset( true );
+		pConnector->Reset( false );
 	}
 
 	if( m_pCapturedConrolKnob != 0 )
@@ -2865,20 +2916,33 @@ CLink* CLinkageDoc::ConnectSelected( void )
 
 void CLinkageDoc::RawAngleSelected( double Angle )
 {
+	if( GetSelectedConnectorCount() < 1 || GetSelectedConnectorCount() > 3 )
+		return;
+
 	CConnector *pConnectors[3];
 
-	for( int Counter = 0; Counter < 3; ++Counter )
+	int SelectedConnector = GetSelectedConnectorCount() - 1;
+	int Counter = 2;
+	for( ; Counter >= 0 && SelectedConnector >= 0; --Counter, --SelectedConnector )
 	{
-		pConnectors[Counter] = (CConnector*)GetSelectedConnector( Counter );
+		pConnectors[Counter] = (CConnector*)GetSelectedConnector( SelectedConnector );
 		if( pConnectors[Counter] == 0 )
 			return;
 	}
-	double OldAngle = GetAngle( pConnectors[1]->GetPoint(), pConnectors[0]->GetPoint(), pConnectors[2]->GetPoint() );
-	double ChangeAngle;
-	if( OldAngle <= 180 )
-		ChangeAngle = OldAngle - Angle;
+	double OldAngle = 0;
+	if( Counter < 0 )
+		OldAngle = GetAngle( pConnectors[1]->GetPoint(), pConnectors[0]->GetPoint(), pConnectors[2]->GetPoint() );
 	else
-		ChangeAngle = OldAngle - ( 360 - Angle );
+	{
+		CFPoint FirstPoint( pConnectors[1]->GetPoint().x + 1000, pConnectors[1]->GetPoint().y );
+		OldAngle = GetAngle( pConnectors[1]->GetPoint(), FirstPoint, pConnectors[2]->GetPoint() );
+	}
+
+	double ChangeAngle;
+	//if( OldAngle <= 180 )
+		ChangeAngle = Angle - OldAngle;
+	//else
+	//	ChangeAngle = OldAngle - ( 360 - Angle );
 
 	CFPoint MovePoint = pConnectors[2]->GetPoint();
 
@@ -2886,10 +2950,40 @@ void CLinkageDoc::RawAngleSelected( double Angle )
 	pConnectors[2]->SetPoint( MovePoint );
 }
 
-void CLinkageDoc::MakeSelectedAtAngle( double Angle )
+CString CLinkageDoc::GetSelectedElementAngle( void )
 {
-	if( !IsSelectionTriangle() )
-		return;
+	if( !IsSelectionAngleable() )
+		return "";
+	if( GetSelectedConnectorCount() == 3 )
+		return GetSelectedElementCoordinates( 0 );
+	else if( GetSelectedConnectorCount() == 2 )
+	{
+		// Compute line angle, not angle between to different lines.
+		CConnector *pConnector0 = GetSelectedConnector( 0 );
+		CConnector *pConnector1 = GetSelectedConnector( 1 );
+		double Angle = GetAngle( pConnector0->GetOriginalPoint(), pConnector1->GetOriginalPoint() );
+		if( Angle < 0 )
+			Angle += 360.0; // Because the hint mark for the angle is never shown on the "negative" side of the angle, don't show the number as negative.
+		CString Text;
+		Text.Format( "%.3lf", Angle );
+		return Text;
+	}
+	else
+		return "";
+}
+
+CLinkageDoc::_CoordinateChange CLinkageDoc::MakeSelectedAtAngle( double Angle )
+{
+	if( !IsSelectionAngleable() )
+		return _CoordinateChange::NONE;
+
+	int SelectedConnectorCount = GetSelectedConnectorCount();
+	CConnector *pLastConnector = GetSelectedConnector( SelectedConnectorCount - 1 );
+	if( pLastConnector != 0 && pLastConnector->IsSlider() )
+		return _CoordinateChange::NONE;
+
+	if( IsLinkLocked( pLastConnector ) )
+		return _CoordinateChange::NONE;
 
 	PushUndo();
 
@@ -2900,6 +2994,8 @@ void CLinkageDoc::MakeSelectedAtAngle( double Angle )
 	NormalizeConnectorLinks();
 
 	SetSelectedModifiableCondition();
+
+	return _CoordinateChange::ROTATION;
 }
 
 void CLinkageDoc::MakeRightAngleSelected( void )
@@ -3543,7 +3639,7 @@ bool CLinkageDoc::FindRoomFor( CFRect NeedRect, CFPoint &PlaceHere )
 	return false;
 }
 
-CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bAnchor, bool bRotating, bool bSlider, bool bActuator, bool bMeasurement, bool bSolid, bool bGear )
+CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, _InsertType Type, bool bSolid )
 {
 	static bool bSelectInsert = true;
 
@@ -3556,9 +3652,9 @@ CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoin
 	static const int MAX_CONNECTOR_COUNT = 4;
 
 	/*
-	 * right now, there is no clever way to generate the location for
-	 * the new connectors so 3 is the maximum.
-	 */
+	* right now, there is no clever way to generate the location for
+	* the new connectors so 3 is the maximum.
+	*/
 	if( ConnectorCount > MAX_CONNECTOR_COUNT )
 		return 0;
 
@@ -3588,6 +3684,9 @@ CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoin
 		return 0;
 	}
 
+	bool bAnchor = Type == ANCHOR || Type == INPUT_ANCHOR;
+	bool bRotating = Type == INPUT_ANCHOR;
+
 	for( Index = 0; Index < ConnectorCount; ++Index )
 	{
 		CConnector *pConnector = new CConnector;
@@ -3610,6 +3709,7 @@ CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoin
 		pConnector->SetRPM( DEFAULT_RPM );
 		pConnector->SetPoint( CFPoint( AddPoints[ConnectorCount-1][Index].x * ScaleFactor, AddPoints[ConnectorCount-1][Index].y * ScaleFactor ) );
 		pConnector->AddLink( pLink );
+		pConnector->SetDrawCircleRadius( Type == CIRCLE ? ScaleFactor : 0 );
 		pLink->AddConnector( pConnector );
 
 		bAnchor = false;
@@ -3665,16 +3765,13 @@ CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoin
 			SelectElement( Connectors[Counter] );
 	}
 
-	if( ConnectorCount != 2 )
-		bActuator = false;
-
 	pLink->SetLayers( Layers );
-	pLink->SetActuator( bActuator );
+	pLink->SetActuator( ConnectorCount && Type == ACTUATOR );
 	pLink->SetCPM( DEFAULT_RPM );
 	pLink->SetSolid( bSolid );
-	pLink->SetGear( bGear );
+	pLink->SetGear( Type == GEAR_LINK );
 	pLink->SetColor( ( Layers & DRAWINGLAYER ) != 0 ? RGB( 200, 200, 200 ) : Colors[pLink->GetIdentifier() % COLORS_COUNT] );
-	pLink->SetMeasurementElement( bMeasurement && ( Layers & DRAWINGLAYER ) != 0, false );
+	pLink->SetMeasurementElement( Type == MEASUREMENT && ( Layers & DRAWINGLAYER ) != 0, false );
 	if( bSelectInsert && ( m_UsableLayers & Layers ) != 0 )
 		SelectElement( pLink );
 
@@ -4495,6 +4592,7 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 
 	m_bSelectionPositionable = SelectedConnectors == 1 && SelectedRealLinks == 0;
 	m_bSelectionLengthable = ( SelectedConnectors == 2 && SelectedRealLinks == 0 ) || ( SelectedConnectors == 0 && SelectedRealLinks == 1 && SelectedLinkConnectorCount == 2 );
+	m_bSelectionAngleable = m_bSelectionTriangle || m_bSelectionLengthable;
 	m_bSelectionRotatable = SelectedRealLinks > 0 || SelectedConnectors> 1;
 	m_bSelectionScalable = SelectedRealLinks > 0 || SelectedConnectors> 1;
 
@@ -4886,30 +4984,30 @@ CString CLinkageDoc::GetSelectedElementCoordinates( CString *pHintText )
 
 	bool bEnableEdit = true;
 
-	int SelectedCount = GetSelectedConnectorCount();
+	int SelectedConnectors = GetSelectedConnectorCount();
 	int SelectedLinks = GetSelectedLinkCount( false );
 	bool bLinkSelected = false;
 
 	pConnector0 = GetSelectedConnector( 0 );
 	if( pConnector0 == 0 )
 	{
-		if( GetSelectedLinkCount( false ) != 1 )
-			return "";
+		if( GetSelectedLinkCount( false ) == 1 )
+		{
+			CLink *pSelectedLink = GetSelectedLink( 0, false );
+			if( pSelectedLink == 0 )
+				return "";
 
-		CLink *pSelectedLink = GetSelectedLink( 0, false );
-		if( pSelectedLink == 0 )
-			return "";
+			if( pSelectedLink->GetConnectorCount() == 2 )
+			{
+				pConnector0 = pSelectedLink->GetConnector( 0 );
+				pConnector1 = pSelectedLink->GetConnector( 1 );
 
-		if( pSelectedLink->GetConnectorCount() != 2 )
-			return "";
+				SelectedLinks = 0; // Just using the connectors from the link and not the link.
+				bLinkSelected = true; // For test hint info.
 
-		pConnector0 = pSelectedLink->GetConnector( 0 );
-		pConnector1 = pSelectedLink->GetConnector( 1 );
-
-		SelectedLinks = 0; // Just using the connectors from the link and not the link.
-		bLinkSelected = true; // For test hint info.
-
-		SelectedCount = 2;
+				SelectedConnectors = 2;
+			}
+		}
 	}
 	else
 	{
@@ -4917,64 +5015,81 @@ CString CLinkageDoc::GetSelectedElementCoordinates( CString *pHintText )
 		pConnector2 = GetSelectedConnector( 2 );
 	}
 
-	CFPoint Point0 = pConnector0->GetOriginalPoint();
-	Point0.x *= DocumentScale;
-	Point0.y *= DocumentScale;
-
-	switch( SelectedCount )
+	if( SelectedConnectors > 0 && SelectedLinks == 0 )
 	{
-		case 1:
+		CFPoint Point0 = pConnector0->GetOriginalPoint();
+		Point0.x *= DocumentScale;
+		Point0.y *= DocumentScale;
+
+		switch( SelectedConnectors )
 		{
-			if( GetSelectedLinkCount( false ) > 0 )
+			case 0:
+				if( pHintText != 0 )
+					*pHintText = "";
 				return "";
 
-			Text.Format( "%.3lf,%.3lf", Point0.x, Point0.y );
-			if( pHintText != 0 )
-				*pHintText = "X,Y Coordinates";
-			break;
-		}
-
-		case 2:
-		{
-			if( pConnector1 == 0 )
-				return "";
-
-			if( pConnector0->IsAlone() )
-				--SelectedLinks;
-			if( pConnector0->IsAlone() )
-				--SelectedLinks;
-			if( SelectedLinks > 0 )
-				return "";
-			CFPoint Point1 = pConnector1->GetOriginalPoint();
-			Point1.x *= DocumentScale;
-			Point1.y *= DocumentScale;
-
-			double distance = Distance( Point0, Point1 );
-			Text.Format( "%.3lf", distance );
-			if( pHintText != 0 )
+			case 1:
 			{
-				if( bLinkSelected )
-					*pHintText = " Length";
-				else
-					*pHintText = " Distance";
+				if( GetSelectedLinkCount( false ) > 0 )
+					break;
+
+				Text.Format( "%.3lf,%.3lf", Point0.x, Point0.y );
+				if( pHintText != 0 )
+					*pHintText = "X,Y Coordinates";
+				return Text;
 			}
-			break;
-		}
 
-		case 3:
-		{
-			if( pConnector1 == 0 || pConnector2 == 0 )
-				return "";
-			double Angle = GetAngle( pConnector1->GetOriginalPoint(), pConnector0->GetOriginalPoint(), pConnector2->GetOriginalPoint() );
-			if( Angle < 0 )
-				Angle += 360.0; // Because the hint mark for the angle is never shown on the "negative" side of the angle, don't show the number as negative.
-			Text.Format( "%.3lf", Angle );
-			if( pHintText != 0 )
-				*pHintText = "°Angle";
+			case 2:
+			{
+				if( pConnector1 == 0 )
+					return "";
 
-			break;
+				if( pConnector0->IsAlone() )
+					--SelectedLinks;
+				if( pConnector0->IsAlone() )
+					--SelectedLinks;
+				if( SelectedLinks > 0 )
+					return "";
+				CFPoint Point1 = pConnector1->GetOriginalPoint();
+				Point1.x *= DocumentScale;
+				Point1.y *= DocumentScale;
+
+				double distance = Distance( Point0, Point1 );
+				Text.Format( "%.3lf", distance );
+				if( pHintText != 0 )
+				{
+					if( bLinkSelected )
+						*pHintText = " Length";
+					else
+						*pHintText = " Distance";
+				}
+				return Text;
+			}
+
+			case 3:
+			{
+				if( pConnector1 == 0 || pConnector2 == 0 )
+					return "";
+				double Angle = GetAngle( pConnector1->GetOriginalPoint(), pConnector0->GetOriginalPoint(), pConnector2->GetOriginalPoint() );
+				if( Angle < 0 )
+					Angle += 360.0; // Because the hint mark for the angle is never shown on the "negative" side of the angle, don't show the number as negative.
+				Text.Format( "%.3lf", Angle );
+				if( pHintText != 0 )
+					*pHintText = "°Angle";
+
+				return Text;
+			}
 		}
 	}
+
+	if( SelectedConnectors + SelectedLinks > 0 )
+	{
+		// More than 3, show "scale" info
+		Text = "100%";
+		if( pHintText != 0 )
+			*pHintText = "Scale";
+	}
+			
 	return Text;
 }
 
@@ -5103,7 +5218,6 @@ CLinkageDoc::_CoordinateChange CLinkageDoc::SetSelectedElementCoordinates( CFPoi
 		if( IsLinkLocked( pConnector2 ) )
 			return _CoordinateChange::NONE;
 
-		PushUndo();
 		MakeSelectedAtAngle( Angle );
 		return _CoordinateChange::OTHER;
 	}

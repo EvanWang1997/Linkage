@@ -273,7 +273,7 @@ private:
 	void DrawDebugItems( CRenderer *pRenderer );
 	void ClearDebugItems( void );
 	void DrawChain( CRenderer* pRenderer, unsigned int OnLayers, CGearConnection *pGearConnection );
-	void DrawFailureMarks( CRenderer* pRenderer, unsigned int OnLayers, CFPoint Point, double Radius );
+	void DrawFailureMarks( CRenderer* pRenderer, unsigned int OnLayers, CFPoint Point, double Radius, CElement::_ElementError Error );
 	CFArea DrawMeasurementLine( CRenderer* pRenderer, CFLine &InputLine, CFPoint &Firstpoint, CFPoint &SecondPoint, double Offset, bool bDrawLines, bool bDrawText );
 	CFLine CreateMeasurementEndLine( CFLine &InputLine, CFPoint &MeasurementPoint, CFPoint &MeasurementLinePoint, int InputLinePointIndex, double Offset );
 	void DrawMeasurementLine( CRenderer* pRenderer, CFLine &InputLine, double Offset, bool bDrawLines, bool bDrawText );
@@ -326,6 +326,7 @@ private:
 	void InsertPoint( CFPoint *pPoint );
 	void InsertLine( CFPoint *pPoint );
 	void InsertMeasurement( CFPoint *pPoint );
+	void InsertCircle( CFPoint *pPoint );
 	void InsertConnector( CFPoint *pPoint );
 	void InsertAnchor( CFPoint *pPoint );
 	void InsertAnchorLink( CFPoint *pPoint );
@@ -334,9 +335,7 @@ private:
 	void InsertDouble( CFPoint *pPoint );
 	void InsertTriple( CFPoint *pPoint );
 	void InsertQuad( CFPoint *pPoint );
-	void InsertlinkSlider( CFPoint *pPoint );
 	void InsertActuator( CFPoint *pPoint );
-	void InsertSliderCombo( CFPoint *pPoint );
 	void InsertGear( CFPoint *pPoint );
 
 	void Scale( double &x, double &y );
@@ -434,12 +433,8 @@ public:
 	afx_msg void OnEditScale();
 	afx_msg void OnUpdateEditScale(CCmdUI *pCmdUI);
 
-
-
-
-
-
-
+	afx_msg void OnEscape();
+	afx_msg void OnUpdateEscape(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateButtonRun(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateButtonStop(CCmdUI *pCmdUI);
 	afx_msg void OnButtonRun();
@@ -448,6 +443,7 @@ public:
 	afx_msg void OnUpdateButtonPin(CCmdUI *pCmdUI);
 
 	afx_msg void OnInsertConnector();
+	afx_msg void OnInsertCircle();
 	afx_msg void OnInsertAnchor();
 	afx_msg void OnInsertAnchorLink();
 	afx_msg void OnInsertRotatinganchor();
@@ -455,7 +451,6 @@ public:
 	afx_msg void OnInsertDouble();
 	afx_msg void OnInsertTriple();
 	afx_msg void OnInsertQuad();
-	afx_msg void OnInsertlinkSlider();
 	afx_msg void OnInsertActuator();
 	afx_msg void OnInsertPoint();
 	afx_msg void OnInsertLine();
