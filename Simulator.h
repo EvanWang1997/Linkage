@@ -38,6 +38,7 @@ public:
 	CElement * GetCycleElement( CLinkageDoc *pDoc );
 	bool IsSimulationValid( void );
 	void Options( bool bUseIncreasedMomentum );
+	static double GetStepsPerMinute( void ) { return 3600.0; }
 
 private:
 	class CSimulatorImplementation *m_pImplementation;

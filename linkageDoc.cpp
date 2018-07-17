@@ -3513,6 +3513,7 @@ void CLinkageDoc::NormalizeConnectorLinks( void )
 
 		if( pConnector == 0 || ( pConnector->GetLinkCount() > 1 && !pLink->IsGear() ) )
 		{
+			Unfasten( pLink );
 			pLink->RemoveAllConnectors();
 			if( pConnector != 0 )
 				pConnector->RemoveLink( pLink );

@@ -3,6 +3,7 @@
 #include "Element.h"
 #include "geometry.h"
 
+
 class ConnectorListOperation
 {
 	public:
@@ -112,6 +113,8 @@ public:
 	void AddLink( class CLink* pLink );
 	void RemoveAllLinks( void ) { RemoveLink( 0 ); }
 	void RemoveLink( CLink *pLink );
+
+	double GetSpeed( void );
 
 private:
 	CFPoint m_Point;

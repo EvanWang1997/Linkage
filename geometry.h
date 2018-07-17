@@ -405,6 +405,7 @@ double FindRadius( double ChordLength, double DistanceFromChord );
 bool GetTangents( const CFCircle &Circle1, const CFCircle &Circle2, CFLine &Result1, CFLine &Result2 );
 
 double GetClosestAngle( double OldAngle, double NewAngle );
+double GetSmallestAngle( double Angle );
 
 double OscillatedAngle( double TotalAngle, double OscillationLimit );
 double OscillatedDistance( double TotalDistance, double OscillationLimit );

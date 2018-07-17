@@ -170,17 +170,21 @@ class CLink : public CElement
 
 	int GetFixedConnectorCount( void );
 	CConnector* GetFixedConnector( void );
+	CConnector* GetFixedConnector( int Index );
 	bool RotateAround( CConnector* pConnector );
 	bool FixAll( void );
 	static CConnector* GetCommonConnector( CLink *pLink1, CLink *pLink2 );
 
 	virtual CControlKnob *GetControlKnob( void );
 
+	double GetRPM( void ) { return m_FoundRPM; }
+
 	private:
 	
 	ConnectorList m_Connectors;
 	ConnectorList m_ConnectedSliders;	// Sliders that slide between connectors on this link, not sliders that are part of this link.
 	
+	double m_FoundRPM;
 	bool m_bGear;
 	bool m_bTempFixed;
 	double m_RotationAngle;

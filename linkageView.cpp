@@ -1832,16 +1832,6 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 			pLink->ComputeHull();
 	}
 
-	ConnectorList* pConnectors = pDoc->GetConnectorList();
-	Position = pConnectors->GetHeadPosition();
-	while( Position != NULL )
-	{
-		CConnector* pConnector = pConnectors->GetNext( Position );
-		if( pConnector == 0 )
-			continue;
-		DebugDrawConnector( pRenderer, m_SelectedViewLayers, pConnector, m_bShowLabels );
-	}
-
 	static const int Steps = 2;
 	static const int LayersOnStep[Steps] = { CLinkageDoc::DRAWINGLAYER, CLinkageDoc::MECHANISMLAYER };
 
@@ -1857,13 +1847,7 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 		}
 	}
 
-	Position = pLinkList->GetHeadPosition();
-	while( Position != NULL )
-	{
-		CLink* pLink = pLinkList->GetNext( Position );
-		if( pLink != 0  )
-			DebugDrawLink( pRenderer, m_SelectedViewLayers, pLink, false, true, true );
-	}
+	ConnectorList* pConnectors = pDoc->GetConnectorList();
 
 	for( int Step = 0; Step < 2; ++Step )
 	{
@@ -1968,6 +1952,23 @@ CFArea CLinkageView::DrawMechanism( CRenderer* pRenderer )
 			if( Knobs > 0 && pConnector != 0 )
 				DrawControlKnob( pRenderer, m_SelectedViewLayers, pControlKnob );
 		}
+	}
+
+	Position = pLinkList->GetHeadPosition();
+	while( Position != NULL )
+	{
+		CLink* pLink = pLinkList->GetNext( Position );
+		if( pLink != 0  )
+			DebugDrawLink( pRenderer, m_SelectedViewLayers, pLink, false, true, true );
+	}
+
+	Position = pConnectors->GetHeadPosition();
+	while( Position != NULL )
+	{
+		CConnector* pConnector = pConnectors->GetNext( Position );
+		if( pConnector == 0 )
+			continue;
+		DebugDrawConnector( pRenderer, m_SelectedViewLayers, pConnector, m_bShowLabels );
 	}
 
 	DrawStackedConnectors( pRenderer, m_SelectedViewLayers );
@@ -6002,13 +6003,39 @@ void CLinkageView::OnMechanismQuicksim()
 	InvalidateRect( 0 );
 }
 
-void CLinkageView::DebugDrawConnector( CRenderer* pDC, unsigned int OnLayers, CConnector* pConnector, bool bShowlabels, bool bUnused, bool bHighlight, bool bDrawConnectedLinks )
+void CLinkageView::DebugDrawConnector( CRenderer* pRenderer, unsigned int OnLayers, CConnector* pConnector, bool bShowlabels, bool bUnused, bool bHighlight, bool bDrawConnectedLinks )
 {
 	if( !m_bShowDebug )
 		return;
 
-	if( ( pConnector->GetLayers() & OnLayers ) == 0 )
-		return;
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	CPen CustomPen;
+	CustomPen.CreatePen( PS_USERSTYLE, 1, RGB( 0, 0, 0 ) );
+	CPen *pOldPen = pRenderer->SelectObject( &CustomPen );
+
+	if( pConnector != 0 )
+	{
+		CFPoint Point = pConnector->GetPoint();
+		Point = Scale( Point );
+
+		pRenderer->SetTextColor( RGB( 25, 0, 0 ) );
+		pRenderer->SetBkMode( OPAQUE );
+		pRenderer->SetTextAlign( TA_LEFT | TA_TOP );
+		pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
+
+		CString String;
+		double DocumentScale = pDoc->GetUnitScale();
+		String.Format( "%s/M %.6lf", pDoc->GetUnitsString( pDoc->GetUnits(), true ), pConnector->GetSpeed() * pDoc->GetUnitScale() );
+
+		double Radius = m_ConnectorRadius * 5;
+
+		pRenderer->TextOut( Point.x + Radius, Point.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) * 2 ), String );
+	}
+
+	pRenderer->SelectObject( pOldPen );
+
 }
 
 double CLinkageView::AdjustYCoordinate( double y )
@@ -6578,30 +6605,23 @@ void CLinkageView::DebugDrawLink( CRenderer* pRenderer, unsigned int OnLayers, C
 	CustomPen.CreatePen( PS_USERSTYLE, 1, RGB( 0, 0, 0 ) );
 	CPen *pOldPen = pRenderer->SelectObject( &CustomPen );
 
-	if( pLink->IsGear() || pLink->GetRotationAngle() != 0 )
-	{
-		CFPoint AveragePoint;
-		pLink->GetAveragePoint( *pDoc->GetGearConnections(), AveragePoint );
-		CConnector* pConnector = pLink->GetConnector( 0 );
-		if( pConnector != 0 )
-		{
-			CFPoint Point = pConnector->GetPoint();
-			Point = Scale( AveragePoint );
+	CFPoint AveragePoint;
+	pLink->GetAveragePoint( *pDoc->GetGearConnections(), AveragePoint );
+	CFPoint Point = Scale( AveragePoint );
 
-			pRenderer->SetTextColor( RGB( 25, 0, 0 ) );
-			pRenderer->SetBkMode( OPAQUE );
-			pRenderer->SetTextAlign( TA_LEFT | TA_TOP );
-			pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
+	pRenderer->SetTextColor( RGB( 25, 0, 0 ) );
+	pRenderer->SetBkMode( OPAQUE );
+	pRenderer->SetTextAlign( TA_LEFT | TA_TOP );
+	pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
 
-			CString String;
-			double DocumentScale = pDoc->GetUnitScale();
-			String.Format( "ext %.3lf", pLink->GetExtendedDistance() * DocumentScale );
+	CString String;
+	double DocumentScale = pDoc->GetUnitScale();
+	String.Format( "RPM %.6lf", pLink->GetRPM() );
 
-			double Radius = m_ConnectorRadius * 5;
+	double Radius = m_ConnectorRadius * 5;
 
-			pRenderer->TextOut( Point.x + Radius, Point.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ), String );
-		}
-	}
+	pRenderer->TextOut( Point.x + Radius, Point.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ), String );
+
 	pRenderer->SelectObject( pOldPen );
 }
 

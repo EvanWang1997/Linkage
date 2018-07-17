@@ -3,6 +3,7 @@
 #include "link.h"
 #include "connector.h"
 #include "math.h"
+#include "simulator.h"
 
 static const char *ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
@@ -47,6 +48,8 @@ void CConnector::Reset( void )
 	m_Color = RGB( 200, 200, 200 );
 	UpdateControlKnobs();
 }
+
+double CConnector::GetSpeed( void ) { return Distance( m_PreviousPoint, m_Point ) * CSimulator::GetStepsPerMinute(); }
 
 CConnector::CConnector()
 {

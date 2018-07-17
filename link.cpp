@@ -5,6 +5,7 @@
 #include "connector.h"
 #include "graham.h"
 #include "DebugItem.h"
+#include "simulator.h"
 
 extern CDebugItemList DebugItemList;
 
@@ -30,6 +31,7 @@ CLink::CLink()
 	m_bLocked = false;
 	m_ActuatorStartOffset = 0;
 	m_ShapeType = HULL;
+	m_FoundRPM = 0;
 }
 
 CLink::CLink( const CLink &ExistingLink )
@@ -56,6 +58,7 @@ CLink::CLink( const CLink &ExistingLink )
 	m_ShapeType = ExistingLink.m_ShapeType;
 	m_pHull = 0;
 	m_HullCount = 0;
+	m_FoundRPM = 0;
 
 	POSITION Position = ExistingLink.m_Connectors.GetHeadPosition();
 	while( Position != 0 )
@@ -503,7 +506,28 @@ CConnector * CLink::GetFixedConnector( void )
 			++Count;
 		}
 	}
-	return Count == 1 ? pFixedConnector : 0 ;
+	return Count == 1 ? pFixedConnector : 0;
+}
+
+CConnector * CLink::GetFixedConnector( int Index )
+{
+	int Count = 0;
+
+	POSITION Position = m_Connectors.GetHeadPosition();
+	while( Position != 0 )
+	{
+		CConnector* pConnector = m_Connectors.GetNext( Position );
+		if( pConnector == 0 )
+			continue;
+
+		if( pConnector->IsAnchor() || pConnector->IsTempFixed() )
+		{
+			if( Count == Index )
+				return pConnector;
+			++Count;
+		}
+	}
+	return 0;
 }
 
 CConnector* CLink::GetCommonConnector( CLink *pLink1, CLink *pLink2 )
@@ -940,6 +964,7 @@ void CLink::UpdateControlKnob( CControlKnob *pKnob, CFPoint Point )
 void CLink::MakePermanent( void )
 {
 	m_ActuatorExtension = m_TempActuatorExtension;
+	m_FoundRPM = ( fabs( m_TempRotationAngle - m_RotationAngle ) / 360.0 ) * CSimulator::GetStepsPerMinute(); // Assumes 30 FPS animation speed, which is really controlled by the simulator code - this coiuuld be wrong in the future.
 	m_RotationAngle = m_TempRotationAngle;
 }
 

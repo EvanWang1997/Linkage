@@ -647,7 +647,7 @@ class CSimulatorImplementation
 		 * both links.
 		 */
 
-		CConnector *pFixedConnector = pLink->GetFixedConnector();
+		CConnector *pFixedConnector = pLink->GetFixedConnector( 0 );
 		if( pFixedConnector == 0 )
 			return false;
 
@@ -897,7 +897,7 @@ class CSimulatorImplementation
 
 		CFPoint OrignalPoint = pCommonConnector->GetOriginalPoint();
 		OrignalPoint += Offset;
-		double Angle = GetAngle( LinkArc.GetCenter(), OrignalPoint, Intersect );
+		double Angle = GetAngle( LinkArc.GetCenter(), Intersect, OrignalPoint );
 
 		// Cheat and move the common connector to the exact intersection location
 		// in case the math caused it to be off a tiny bit. It shouldn't happen
@@ -1459,7 +1459,7 @@ class CSimulatorImplementation
 		if( d2 < d1 )
 			Intersect = Intersect2;
 
-		double Angle = GetAngle( pFixedConnector->GetTempPoint(), pSlider->GetTempPoint(), Intersect );
+		double Angle = GetAngle( pFixedConnector->GetTempPoint(), Intersect, pSlider->GetTempPoint() );
 		Angle = GetClosestAngle( pFixedConnector->GetRotationAngle(), Angle );
 		pFixedConnector->SetRotationAngle( Angle );
 		if( !pLink->RotateAround( pFixedConnector ) )
@@ -1697,7 +1697,7 @@ class CSimulatorImplementation
 			Intersect = Intersect2;
 
 		double Angle = GetAngle( pFixedConnector->GetTempPoint(), Intersect, pFixedConnector->GetOriginalPoint(), pCommonConnector->GetOriginalPoint() );
-		Angle = GetClosestAngle( pFixedConnector->GetRotationAngle(), Angle );
+		Angle = GetSmallestAngle( Angle );
 		pFixedConnector->SetRotationAngle( Angle );
 
 

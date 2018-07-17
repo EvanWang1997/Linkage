@@ -673,6 +673,16 @@ double GetClosestAngle( double OldAngle, double NewAngle )
 	return NewAngle;
 }
 
+double GetSmallestAngle( double Angle )
+{
+	while( Angle > 360 )
+		Angle -= 360;
+	while( Angle < -360 )
+		Angle += 360;
+
+	return Angle;
+}
+
 double OscillatedAngle( double TotalAngle, double OscillationLimit )
 {
 	OscillationLimit = fabs( OscillationLimit );
