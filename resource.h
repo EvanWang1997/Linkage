@@ -172,6 +172,7 @@
 #define IDS_RIBBON_COMBINE              4179
 #define IDS_RIBBON_SLIDE                4180
 #define IDS_RIBBON_SPLIT                4181
+#define ID_SIMULATION_RUNTOGGLE         4182
 #define ID_RIBBON_SAMPLE_GALLERY        4187
 #define ID_WRITE_PASTEASHYPERLINK       4188
 #define ID_VIEW_ZOOMFIT                 4189

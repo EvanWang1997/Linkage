@@ -67,6 +67,7 @@ public:
 
 	void Copy( bool bCut );
 	void Paste( void );
+	void CLinkageDoc::ClearDocument( void );
 
 	LinkList* GetLinkList( void ) { return &m_Links; }
 	ConnectorList* GetConnectorList( void ) { return &m_Connectors; }

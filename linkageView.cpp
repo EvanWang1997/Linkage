@@ -211,6 +211,7 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_WM_SIZE()
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_RUN, &CLinkageView::OnUpdateButtonRun)
 	ON_COMMAND(ID_SIMULATION_RUN, &CLinkageView::OnButtonRun)
+	ON_COMMAND(ID_SIMULATION_RUNTOGGLE, &CLinkageView::OnButtonRun) // run-toggle is not affected by the enabling and disabling of the Run button and will always cal the function when the command is recieved.
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_STOP, &CLinkageView::OnUpdateButtonStop)
 	ON_COMMAND(ID_SIMULATION_STOP, &CLinkageView::OnButtonStop)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_PIN, &CLinkageView::OnUpdateButtonPin)
@@ -9614,7 +9615,7 @@ bool CLinkageView::HandleShortcutKeys( UINT nChar, unsigned int MyFlags )
 		{ 'O', ID_FILE_OPEN, CONTROL_FLAG },
 		{ 'P', ID_FILE_PRINT, CONTROL_FLAG },
 		{ 'P', ID_PROPERTIES_PROPERTIES, 0 },
-		{ 'R', ID_SIMULATION_RUN, 0 },
+		{ 'R', ID_SIMULATION_RUNTOGGLE, 0 },
 		{ 'S', ID_EDIT_SLIDE, 0 },
 		{ 'S', ID_FILE_SAVE, CONTROL_FLAG },
 		{ 'T', ID_EDIT_SPLIT, 0 },

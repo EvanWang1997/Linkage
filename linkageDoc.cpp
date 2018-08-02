@@ -139,8 +139,19 @@ CLinkageDoc::~CLinkageDoc()
 
 BOOL CLinkageDoc::OnNewDocument()
 {
+	ClearDocument();
+
+	// Insert an anchor and then unselect it.
+	InsertAnchor( MECHANISMLAYER, 1, CFPoint( 0, 0 ), true, false );
+	SelectElement();
+
+	return TRUE;
+}
+
+void CLinkageDoc::ClearDocument( void )
+{
 	if (!CDocument::OnNewDocument())
-		return FALSE;
+		return;
 
 	m_SelectedConnectors.RemoveAll();
 	m_SelectedLinks.RemoveAll();
@@ -187,12 +198,6 @@ BOOL CLinkageDoc::OnNewDocument()
 
 	m_BackgroundTransparency = 0.0;
 	m_BackgroundImageData = "";
-
-	// Insert an anchor and then unselect it.
-	InsertAnchor( MECHANISMLAYER, 1, CFPoint( 0, 0 ), true, false );
-	SelectElement();
-
-	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -4063,7 +4068,7 @@ void CLinkageDoc::SelectSample( int Index )
 	if (!SaveModified())
 		return;
 
-	OnNewDocument();
+	ClearDocument();
 
 	SetTitle( ExampleName );
 

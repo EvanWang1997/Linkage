@@ -44,9 +44,9 @@ class CControlWindowImplementation
 		m_pCaptureControl = 0;
 		m_ControlCount = 0;
 		m_ControlWidth = MAXCONTROLWIDTH;
-		m_ControlHeight = CONTROLHEIGHT;
-		m_Border = BORDER;
-		m_HandleSize = HANDLESIZE;
+		m_ControlHeight = CONTROLHEIGHT * m_DPIScale;
+		m_Border = BORDER * m_DPIScale;
+		m_HandleSize = HANDLESIZE * m_DPIScale;
 		m_MaxTextWidth = 0;
 		m_CaptureControl = -1;
 		m_Font.CreateFont( (int)( -11 * m_DPIScale ), 0, 0, 0, FW_NORMAL, 0, 0, 0,
@@ -75,7 +75,7 @@ class CControlWindowImplementation
 
 	int GetDesiredHeight( void )
 	{
-		return (int)( ( BORDER * 2 ) + ( m_ControlCount * CONTROLHEIGHT * m_DPIScale ) );
+		return (int)( ( BORDER * 2 ) + ( m_ControlCount * m_ControlHeight ) );
 	}
 
 	bool GetCaptureRange( CWnd *pWnd, int ControlIndex, CRect &Rect )
@@ -106,9 +106,9 @@ class CControlWindowImplementation
 		if( ScaleFactor > 1.0 )
 			ScaleFactor = 1.0;
 
-		m_ControlHeight = (int)( CONTROLHEIGHT * ScaleFactor );
-		m_Border = (int)( BORDER * ScaleFactor );
-		m_HandleSize = (int)( HANDLESIZE * ScaleFactor );
+		m_ControlHeight = (int)( CONTROLHEIGHT * ScaleFactor * m_DPIScale );
+		m_Border = (int)( BORDER * ScaleFactor * m_DPIScale );
+		m_HandleSize = (int)( HANDLESIZE * ScaleFactor * m_DPIScale );
 
 		m_MaxTextWidth = 0;
 		if( pWnd != 0 )
@@ -261,20 +261,20 @@ void CControlWindow::OnPaint()
 
 	m_pImplementation->SetSizingValues( this, Rect.Width(), Rect.Height() );
 
-	CPen BlackPen( PS_SOLID, 1, RGB( 0, 0, 0 ) );
+	CPen BlackPen( PS_SOLID, (int)( 1.0 * m_pImplementation->m_DPIScale ), RGB( 0, 0, 0 ) );
 	CBrush BlackBrush( RGB( 0, 0, 0 ) );
 	CBrush WhiteBrush( RGB( 255, 255, 255 ) );
 
 	int x = Rect.left + ( Rect.Width() / 2 ) - ( ( m_pImplementation->m_ControlWidth + m_pImplementation->m_MaxTextWidth ) / 2 );
 	int x2 = x + m_pImplementation->m_MaxTextWidth;
-	x = x2 - ( BORDER * 2 );
+	x = x2 - ( m_pImplementation->m_Border * 2 );
 	int y = m_pImplementation->m_Border + ( m_pImplementation->m_ControlHeight / 2 );
 	int HalfSize = m_pImplementation->m_HandleSize / 2;
 	int Extra = 2;
 
 	for( int Counter = 0; Counter < m_pImplementation->m_ControlCount && Counter < m_pImplementation->m_MAXCONTROLS; ++Counter )
 	{
-		MemoryDC.TextOut( x, (int)( y - ( HalfSize * m_pImplementation->m_DPIScale ) - 1 ), m_pImplementation->m_Controls[Counter].m_Description );
+		MemoryDC.TextOut( x, (int)( y - HalfSize - 1 ), m_pImplementation->m_Controls[Counter].m_Description );
 
 		MemoryDC.SelectObject( &BlackPen );
 		MemoryDC.MoveTo( x2, y );
@@ -289,14 +289,10 @@ void CControlWindow::OnPaint()
 			xTemp = x2 + ( m_pImplementation->m_ControlWidth / 2 ) + (int)( ( m_pImplementation->m_ControlWidth / 2 ) * m_pImplementation->m_Controls[Counter].m_Position );
 		else
 			xTemp = x2 + (int)( m_pImplementation->m_ControlWidth * m_pImplementation->m_Controls[Counter].m_Position );
-		int Offset = (int)( HalfSize * m_pImplementation->m_DPIScale );
+		int Offset = HalfSize;
 
 		CRect Box( xTemp - Offset, y - Offset, xTemp + Offset + 1, y + Offset + 1 );
-		MemoryDC.FrameRect( &Box, &BlackBrush );
-		Box.InflateRect( -1, -1 );
-		MemoryDC.FrameRect( &Box, &BlackBrush );
-		Box.InflateRect( -1, -1 );
-		MemoryDC.FillRect( &Box, &WhiteBrush );
+		MemoryDC.FillRect( &Box, &BlackBrush );
 
 		y += m_pImplementation->m_ControlHeight;
 	}
