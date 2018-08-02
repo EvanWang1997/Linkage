@@ -395,7 +395,7 @@ CConnector::CConnector( const CConnector &ExistingConnector ) : CElement( Existi
 //	}
 }
 
-void CConnector::SlideBetween( class CConnector *pConnector1, class CConnector *pConnector2 )
+bool CConnector::SlideBetween( class CConnector *pConnector1, class CConnector *pConnector2 )
 {
 	if( pConnector2 == 0 )
 		pConnector1 = 0;
@@ -407,8 +407,8 @@ void CConnector::SlideBetween( class CConnector *pConnector1, class CConnector *
 	{
 		pLink = pConnector1->GetSharingLink( pConnector2 );
 		// The two connectors must share a link.
-		if( pLink == 0 )
-			return;
+		if( pLink == 0 && ( !pConnector1->IsAnchor() || !pConnector2->IsAnchor() ) )
+			return false;
 	}
 	else if( m_pSlideLimits[0] != 0 && m_pSlideLimits[1] != 0 )
 		pLink = m_pSlideLimits[0]->GetSharingLink( m_pSlideLimits[1] );
@@ -418,6 +418,8 @@ void CConnector::SlideBetween( class CConnector *pConnector1, class CConnector *
 
 	m_pSlideLimits[0] = pConnector1;
 	m_pSlideLimits[1] = pConnector2;
+
+	return true;
 }
 
 bool ConnectorList::Iterate( ConnectorListOperation &Operation )

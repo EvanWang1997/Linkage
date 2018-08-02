@@ -105,7 +105,7 @@ public:
 	bool IsAlone( void );
 	// CConnector *GetCircleSizeConnector( int Index );
 	
-	void SlideBetween( class CConnector *pConnector1 = 0, class CConnector *pConnector2 = 0 );
+	bool SlideBetween( class CConnector *pConnector1 = 0, class CConnector *pConnector2 = 0 );
 	
 	CLink * GetSharingLink( CConnector *pOtherConnector );
 	bool IsSharingLink( CConnector *pOtherConnector );

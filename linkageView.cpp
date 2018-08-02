@@ -4338,8 +4338,11 @@ void CLinkageView::OnButtonRun()
 		return;
 	if( m_bSimulating )
 	{
+		// If it is paused, get it running again. If it's running normally, stop it.
 		if( m_SimulationControl == STEP )
 			m_SimulationControl = AUTO;
+		else
+			StopMechanismSimulate();
 	}
 	else
 	{
@@ -9612,7 +9615,7 @@ bool CLinkageView::HandleShortcutKeys( UINT nChar, unsigned int MyFlags )
 		{ 'P', ID_FILE_PRINT, CONTROL_FLAG },
 		{ 'P', ID_PROPERTIES_PROPERTIES, 0 },
 		{ 'R', ID_SIMULATION_RUN, 0 },
-		{ 'S', ID_SIMULATION_STOP, 0 },
+		{ 'S', ID_EDIT_SLIDE, 0 },
 		{ 'S', ID_FILE_SAVE, CONTROL_FLAG },
 		{ 'T', ID_EDIT_SPLIT, 0 },
 		{ 'U', ID_EDIT_UNFASTEN, 0 },

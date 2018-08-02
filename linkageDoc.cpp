@@ -4385,7 +4385,8 @@ bool CLinkageDoc::ConnectSliderLimits( bool bTestOnly )
 	if( bTestOnly )
 		return true;
 
-	pUseConnectors[Slider]->SlideBetween( pUseConnectors[FirstLimit], pUseConnectors[SecondLimit] );
+	if( !pUseConnectors[Slider]->SlideBetween( pUseConnectors[FirstLimit], pUseConnectors[SecondLimit] ) )
+		return false;
 
 	// Test code... pUseConnectors[Slider]->SetSlideRadius( 400 );
 
