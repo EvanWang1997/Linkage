@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "math.h"
 #include "geometry.h"
+#include "DebugItem.h"
+
+extern CDebugItemList DebugItemList;
 
 bool CFPoint::SnapToLine( CFLine &Line, bool bToSegment, bool bStartToInfinity )
 {
@@ -569,6 +572,9 @@ double FindRadius( double ChordLength, double DistanceFromChord )
 CFPoint CFPoint::SnapToArc( CFArc &TheArc )
 {
 	CFLine AngleLine( TheArc.x, TheArc.y, x, y );
+
+	//DebugItemList.AddTail( new CDebugItem( TheArc, RGB( 255, 0, 0 ) ) );
+
 	AngleLine.SetLength( fabs( TheArc.r ) );
 	CFPoint Point = AngleLine.GetEnd();
 

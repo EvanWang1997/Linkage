@@ -2461,6 +2461,8 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 
 	Renderer.EndDraw();
 
+	DebugItemList.Clear();
+
 
 	/*
 	 * Copy the image to the window.

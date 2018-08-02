@@ -2420,30 +2420,12 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector, CFPoint &NewPoint
 		}
 		else
 		{
-			// Use the original points to find where the line out to the slider hits the straight
-			// line between the start and end. This gives a ratio that can be used to position the
-			// slider on the arc in the right spot.
-			// First use the originbal arc.
 			CFArc TheArc;
-			if( !pConnector->GetSliderArc( TheArc, true ) )
-				return false;
-
-			double OriginalAngleSpan = TheArc.AngleSpan();
-			TheArc.m_End = pConnector->GetOriginalPoint();
-			double OriginalAngle = TheArc.AngleSpan();
-
-			// Now use the new arc.
 			if( !pConnector->GetSliderArc( TheArc, false ) )
 				return false;
 
-			double NewAngleSpan = TheArc.AngleSpan();
-			double NewAngle = OriginalAngle * ( NewAngleSpan / OriginalAngleSpan );
-
-
-			CFPoint RotatedPoint( TheArc.GetStart() );
-			RotatedPoint.RotateAround( TheArc.GetCenter(), NewAngle * 2 ); // I have no idea why *2 is needed here, but it works.
-
-			NewPoint = RotatedPoint;
+			NewPoint = pConnector->GetOriginalPoint();
+			NewPoint.SnapToArc( TheArc );
 		}
 	}
 	else //if( pConnector->IsSelected() || pConnector->IsLinkSelected() )
