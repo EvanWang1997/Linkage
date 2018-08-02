@@ -188,6 +188,10 @@ BOOL CLinkageDoc::OnNewDocument()
 	m_BackgroundTransparency = 0.0;
 	m_BackgroundImageData = "";
 
+	// Insert an anchor and then unselect it.
+	InsertAnchor( MECHANISMLAYER, 1, CFPoint( 0, 0 ), true, false );
+	SelectElement();
+
 	return TRUE;
 }
 
@@ -2407,15 +2411,12 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector, CFPoint &NewPoint
 	if( pStart->IsSelected() || pEnd->IsSelected()
 		|| pStart->IsLinkSelected() || pEnd->IsLinkSelected() )
 	{
-		// The slider needs to be placed on the path at a position that
-		// is the same relative distance along the path as it was originally.
-		// This is because it is the path that is being changed at this time.
+		// Find the closest place on the path for the slider.
 		if( pConnector->GetSlideRadius() == 0 )
 		{
-			double DistanceRatio = pStart->GetOriginalPoint().DistanceToPoint( pConnector->GetOriginalPoint() ) / pStart->GetOriginalPoint().DistanceToPoint( pEnd->GetOriginalPoint() );
 			CFLine Line( pStart->GetPoint(), pEnd->GetPoint() );
-			Line.SetLength( Line.GetLength() * DistanceRatio );
-			NewPoint = Line.GetEnd();
+			NewPoint = pConnector->GetOriginalPoint();
+			NewPoint.SnapToLine( Line, true );
 		}
 		else
 		{

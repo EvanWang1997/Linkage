@@ -453,6 +453,9 @@
     <Image Include="res\filesmallscaled150.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\buttons2.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="res\linkage64.xml">

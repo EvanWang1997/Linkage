@@ -247,7 +247,7 @@ void CConnector::RemoveLink( CLink *pLink )
 		if( pCheckLink != 0 && ( pLink == 0 || pCheckLink == pLink ) )
 		{
 			m_Links.RemoveAt( RemovePosition );
-			pCheckLink->SetActuator( pCheckLink->IsActuator() && pCheckLink->GetConnectorCount() == 2 );
+			pCheckLink->SetActuator( false ); // If the link used this connector then there is no way it could still be an actuator since it would now have one connector.
 		}
 	}
 }

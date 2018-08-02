@@ -843,6 +843,8 @@ void CMainFrame::Dump(CDumpContext& dc) const
 }
 #endif //_DEBUG
 
+#define TESTCOLOR RGB( 255, 0, 0 )
+
 class CMFCVisualManagerWindows7Dave : public CMFCVisualManagerWindows7
 {
 	DECLARE_DYNCREATE( CMFCVisualManagerWindows7Dave )
@@ -857,6 +859,35 @@ public:
 		DWORD dwFlags,
 		int nGlowSize = 0,
 		COLORREF clrText = (COLORREF)-1);
+
+		virtual COLORREF GetHighlightedMenuItemTextColor(CMFCToolBarMenuButton* pButton) { return 0; }
+		virtual COLORREF GetCaptionBarTextColor(CMFCCaptionBar* pBar) { return 0; }
+		virtual COLORREF GetMenuItemTextColor(
+			CMFCToolBarMenuButton* pButton,  
+			BOOL bHighlighted,  
+			BOOL bDisabled) { return 0; }
+		virtual COLORREF GetRibbonHyperlinkTextColor(CMFCRibbonLinkCtrl* pHyperLink) { return 0; }
+		virtual COLORREF GetRibbonQuickAccessToolBarTextColor(BOOL bDisabled = FALSE) { return 0; }
+		virtual COLORREF GetRibbonStatusBarTextColor(CMFCRibbonStatusBar* pStatusBar) { return 0; }
+		virtual COLORREF GetStatusBarPaneTextColor(
+			CMFCStatusBar* pStatusBar,  
+			CMFCStatusBarPaneInfo* pPane) { return 0; }
+		virtual COLORREF GetTabTextColor(
+			const CMFCBaseTabCtrl* pTabWnd,  
+			int iTab,  
+			BOOL bIsActive) { return 0; }
+		virtual COLORREF GetToolbarButtonTextColor(
+			CMFCToolBarButton* pButton,  
+			CMFCVisualManager::AFX_BUTTON_STATE state) { return 0; }
+
+		// The following function only seems to get called for the Align menu button, not even for other non-menu buttons!
+		// And since it's disabled, it is commented out since disabled colors are not adjusted by this code.
+		//virtual COLORREF GetToolbarDisabledTextColor() { return TESTCOLOR; }
+
+		virtual COLORREF OnDrawRibbonButtonsGroup(
+			CDC* pDC,  
+			CMFCRibbonButtonsGroup* pGroup,  
+			CRect rectGroup) { return 0; }
 };
 
 IMPLEMENT_DYNCREATE( CMFCVisualManagerWindows7Dave, CMFCVisualManagerWindows7 )

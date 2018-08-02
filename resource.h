@@ -530,6 +530,7 @@
 #define IDD_SCALE                       6012
 #define IDD_SCALE1                      6013
 #define IDD_USERGRID                    6014
+#define IDB_BITMAP8                     6015
 #define ID_BUTTON2                      7004
 #define IDC_PREVIEW                     8000
 #define IDC_LIST1                       8001
@@ -546,7 +547,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6012
+#define _APS_NEXT_RESOURCE_VALUE        6016
 #define _APS_NEXT_COMMAND_VALUE         7005
 #define _APS_NEXT_CONTROL_VALUE         8011
 #define _APS_NEXT_SYMED_VALUE           9000

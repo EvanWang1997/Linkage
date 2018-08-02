@@ -997,6 +997,7 @@ exit 0
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\buttons2.bmp" />
     <Image Include="res\filesmallscaled150.bmp" />
     <Image Include="res\icon9.ico" />
     <Image Include="res\popup_gallery_2.bmp" />

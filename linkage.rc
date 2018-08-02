@@ -9,8 +9,7 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -120,6 +119,8 @@ IDB_PLAY                BITMAP                  "res\\play.bmp"
 IDB_BITMAP3             BITMAP                  "res\\bitmap3.bmp"
 
 IDB_BITMAP7             BITMAP                  "res\\filesmallscaled150.bmp"
+
+IDB_BITMAP8             BITMAP                  "res\\buttons2.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -276,38 +277,37 @@ END
 
 22 ACCELERATORS
 BEGIN
-    VK_RETURN,      ID_PROPERTIES_PROPERTIES, VIRTKEY, NOINVERT
     "A",            ID_EDIT_ADDCONNECTOR,   VIRTKEY, NOINVERT
-    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
     "B",            ID_EDIT_COMBINE,        VIRTKEY, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
-    "D",            ID_VIEW_DIMENSIONS,     VIRTKEY, NOINVERT
-    "E",            ID_EDIT_SELECTLINK,     VIRTKEY, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE,      ID_EDIT_DELETESELECTED, VIRTKEY, NOINVERT
     "F",            ID_EDIT_FASTEN,         VIRTKEY, NOINVERT
-    "G",            ID_EDIT_MAKEANCHOR,     VIRTKEY, NOINVERT
     "J",            ID_EDIT_JOIN,           VIRTKEY, NOINVERT
     "K",            ID_EDIT_LOCK,           VIRTKEY, NOINVERT
-    "P",            ID_PROPERTIES_PROPERTIES, VIRTKEY, NOINVERT
-    "R",            ID_SIMULATION_RUN,      VIRTKEY, NOINVERT
-    "S",            ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
-    "T",            ID_EDIT_SPLIT,          VIRTKEY, NOINVERT
-    "U",            ID_EDIT_UNFASTEN,       VIRTKEY, NOINVERT
+    "G",            ID_EDIT_MAKEANCHOR,     VIRTKEY, NOINVERT
     "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
-    "V",            ID_VIEW_ANICROP,        VIRTKEY, NOINVERT
-    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
-    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
-    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
-    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
-    VK_DELETE,      ID_EDIT_DELETESELECTED, VIRTKEY, NOINVERT
+    "A",            ID_EDIT_SELECT_ALL,     VIRTKEY, CONTROL, NOINVERT
+    "E",            ID_EDIT_SELECTLINK,     VIRTKEY, NOINVERT
+    "T",            ID_EDIT_SPLIT,          VIRTKEY, NOINVERT
     VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "U",            ID_EDIT_UNFASTEN,       VIRTKEY, NOINVERT
+    "P",            ID_PROPERTIES_PROPERTIES, VIRTKEY, NOINVERT
+    VK_RETURN,      ID_PROPERTIES_PROPERTIES, VIRTKEY, NOINVERT
     VK_TAB,         ID_SELECT_NEXT,         VIRTKEY, NOINVERT
     VK_TAB,         ID_SELECT_PREVIOUS,     VIRTKEY, SHIFT, NOINVERT
     "<",            ID_SIMULATE_BACKWARD,   ASCII,  NOINVERT
     "[",            ID_SIMULATE_BACKWARD,   ASCII,  NOINVERT
     ">",            ID_SIMULATE_FORWARD,    ASCII,  NOINVERT
     "]",            ID_SIMULATE_FORWARD,    ASCII,  NOINVERT
-    VK_ESCAPE,      ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
+    "R",            ID_SIMULATION_RUN,      VIRTKEY, NOINVERT
+    "S",            ID_SIMULATION_STOP,     VIRTKEY, NOINVERT
+    "V",            ID_VIEW_ANICROP,        VIRTKEY, NOINVERT
+    "D",            ID_VIEW_DIMENSIONS,     VIRTKEY, NOINVERT
 END
 
 
@@ -578,7 +578,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Grid Settings"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    CONTROL         "Show The Grid",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,81,15,63,10
+    CONTROL         "Show the Grid",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,81,15,63,10
     CONTROL         "Automatic Grid",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON | WS_GROUP,81,38,63,10
     CONTROL         "These Grid Settings:",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,81,52,80,10
     LTEXT           "Horizontal Spacing",IDC_PROMPT1,55,67,60,8
@@ -596,8 +596,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,8,1,0
- PRODUCTVERSION 3,8,1,0
+ FILEVERSION 3,8,2,0
+ PRODUCTVERSION 3,8,2,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -613,12 +613,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.8.1.0"
+            VALUE "FileVersion", "3.8.2.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2018 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.8.1.0"
+            VALUE "ProductVersion", "3.8.2.0"
         END
     END
     BLOCK "VarFileInfo"

@@ -4662,7 +4662,9 @@ void CLinkageView::OnEditSelectall()
 		                                 ( m_SelectionContainerRect.top + m_SelectionContainerRect.bottom ) / 2 );
 		m_VisibleAdjustment = ADJUSTMENT_STRETCH;
 	}
-	InvalidateRect( 0 );
+	ShowSelectedElementStatus();
+	UpdateForDocumentChange();
+	SelectionChanged();
 }
 
 void CLinkageView::OnUpdateSelectall( CCmdUI *pCmdUI )
@@ -9286,6 +9288,7 @@ void CLinkageView::OnEscape()
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
+	pDoc->ClearSelection();
 	pDoc->Reset( true, true );
 
 	UpdateForDocumentChange();
