@@ -19,12 +19,16 @@ bool CFPoint::SnapToLine( CFLine &Line, bool bToSegment, bool bStartToInfinity )
 		 {
 			t = 0.0f;
 			bOnAllowedSegment = false;
-		}
+			DebugItemList.AddTail( new CDebugItem( Line, RGB( 0, 255, 0 ) ) );
+			DebugItemList.AddTail( new CDebugItem( *this, RGB( 255, 0, 0 ) ) );
+		 }
          else if( !bStartToInfinity && t > 1.0f )
 		 {
 			t = 1.0f;
 			bOnAllowedSegment = false;
-		}
+			DebugItemList.AddTail( new CDebugItem( Line, RGB( 0, 255, 0 ) ) );
+			DebugItemList.AddTail( new CDebugItem( *this, RGB( 255, 0, 0 ) ) );
+		 }
     }
 
 	x = Line.m_Start.x + ( AB.x * t );

@@ -453,6 +453,7 @@
 #define ID_INSERT_CIRCLE                5239
 #define IDS_SAMPLE_LIFTER               5240
 #define ID_EDIT_SELECTLINK              5241
+#define IDS_RIBBON_REDO                 5242
 #define IDC_COPYRIGHT                   5303
 #define IDC_COMBO1                      5303
 #define IDC_COMBO2                      5304

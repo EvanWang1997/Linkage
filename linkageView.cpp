@@ -402,6 +402,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, &CLinkageView::OnUpdateEditUndo)
 	ON_COMMAND(ID_EDIT_UNDO, &CLinkageView::OnEditUndo)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_REDO, &CLinkageView::OnUpdateEditRedo)
+	ON_COMMAND(ID_EDIT_REDO, &CLinkageView::OnEditRedo)
 	ON_WM_HSCROLL()
 	ON_WM_VSCROLL()
 	ON_COMMAND(ID_EDIT_SLIDE, &CLinkageView::OnEditSlide)
@@ -1593,21 +1595,9 @@ CFArea CLinkageView::DoDraw( CRenderer* pRenderer )
 
 	CFArea Area;
 
-	if( m_bShowDebug && false )
+	if( m_bShowDebug )
 	{
-		// As drawn
-		CFRect Derfus = GetDocumentArea( true ) ;
-		CPen aPen( PS_SOLID, 1, RGB( 90, 255, 90 ) );
-		CPen *pOldPen = pRenderer->SelectObject( &aPen );
-		pRenderer->DrawRect( Scale( Derfus ) );
-		pRenderer->SelectObject( pOldPen );
 
-		// Original document
-		pDoc->GetDocumentArea( Derfus );
-		CPen xxxPen( PS_SOLID, 1, RGB( 0, 180, 0 ) );
-		pOldPen = pRenderer->SelectObject( &xxxPen );
-		pRenderer->DrawRect( Scale( Derfus ) );
-		pRenderer->SelectObject( pOldPen );
 	}
 
 	if( m_bShowParts )
@@ -1739,7 +1729,7 @@ void CLinkageView::DrawDebugItems( CRenderer *pRenderer )
 		if( pDebugItem == 0 )
 			break;
 
-		CPen Pen( PS_SOLID, 1, pDebugItem->m_Color );
+		CPen Pen( PS_SOLID, pDebugItem->m_Type == pDebugItem->DEBUG_OBJECT_LINE ? 3 : 1, pDebugItem->m_Color );
 		CPen *pOldPen = pRenderer->SelectObject( &Pen );
 
 		Label.Format( "DEBUG %d", Count );
@@ -5386,7 +5376,7 @@ void CLinkageView::OnUpdateEditPaste(CCmdUI *pCmdUI)
     UINT CF_Linkage = RegisterClipboardFormat( "RECTORSQUID_Linkage_CLIPBOARD_XML_FORMAT" );
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	pCmdUI->Enable( !m_bSimulating && ::IsClipboardFormatAvailable( CF_Linkage ) != 0 && m_bAllowEdit );
+	pCmdUI->Enable( !m_bSimulating && ( ::IsClipboardFormatAvailable( CF_Linkage ) != 0 || ::IsClipboardFormatAvailable( CF_TEXT ) != 0 ) && m_bAllowEdit );
 }
 
 void CLinkageView::OnRButtonDown(UINT nFlags, CPoint MousePoint)
@@ -6039,7 +6029,7 @@ void CLinkageView::DebugDrawConnector( CRenderer* pRenderer, unsigned int OnLaye
 
 		double Radius = m_ConnectorRadius * 5;
 
-		pRenderer->TextOut( Point.x + Radius, Point.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) * 2 ), String );
+		//pRenderer->TextOut( Point.x + Radius, Point.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) * 2 ), String );
 	}
 
 	pRenderer->SelectObject( pOldPen );
@@ -6628,7 +6618,7 @@ void CLinkageView::DebugDrawLink( CRenderer* pRenderer, unsigned int OnLayers, C
 
 	double Radius = m_ConnectorRadius * 5;
 
-	pRenderer->TextOut( Point.x + Radius, Point.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ), String );
+	//pRenderer->TextOut( Point.x + Radius, Point.y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ), String );
 
 	pRenderer->SelectObject( pOldPen );
 }
@@ -8348,9 +8338,27 @@ void CLinkageView::OnEditUndo()
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	pDoc->Undo();
+	pDoc->PopUndo();
 	//if( m_bShowParts )
-		//pDoc->SelectElement();
+	//pDoc->SelectElement();
+	UpdateForDocumentChange();
+	SelectionChanged();
+}
+
+void CLinkageView::OnUpdateEditRedo(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( pDoc->CanRedo() && !m_bSimulating );
+}
+
+void CLinkageView::OnEditRedo()
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pDoc->PopRedo();
+	//if( m_bShowParts )
+	//pDoc->SelectElement();
 	UpdateForDocumentChange();
 	SelectionChanged();
 }
@@ -9623,6 +9631,7 @@ bool CLinkageView::HandleShortcutKeys( UINT nChar, unsigned int MyFlags )
 		{ 'V', ID_EDIT_PASTE, CONTROL_FLAG },
 		{ 'V', ID_VIEW_ANICROP, 0 },
 		{ 'X', ID_EDIT_CUT, CONTROL_FLAG },
+		{ 'Y', ID_EDIT_REDO, CONTROL_FLAG },
 		{ 'Z', ID_EDIT_UNDO, CONTROL_FLAG },
 		{ VK_INSERT, ID_EDIT_COPY, CONTROL_FLAG },
 		{ VK_INSERT, ID_EDIT_PASTE, SHIFT_FLAG },

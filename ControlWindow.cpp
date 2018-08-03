@@ -44,9 +44,9 @@ class CControlWindowImplementation
 		m_pCaptureControl = 0;
 		m_ControlCount = 0;
 		m_ControlWidth = MAXCONTROLWIDTH;
-		m_ControlHeight = CONTROLHEIGHT * m_DPIScale;
-		m_Border = BORDER * m_DPIScale;
-		m_HandleSize = HANDLESIZE * m_DPIScale;
+		m_ControlHeight = (int)( CONTROLHEIGHT * m_DPIScale );
+		m_Border = (int)( BORDER * m_DPIScale );
+		m_HandleSize = (int)( HANDLESIZE * m_DPIScale );
 		m_MaxTextWidth = 0;
 		m_CaptureControl = -1;
 		m_Font.CreateFont( (int)( -11 * m_DPIScale ), 0, 0, 0, FW_NORMAL, 0, 0, 0,

@@ -29,7 +29,7 @@ static char THIS_FILE[] = __FILE__;
 static const char *CRLF = "\r\n";
 
 static const int DEFAULT_RPM = 15;
-
+static const int MAX_UNDO = 300;
 static const int INTERMEDIATE_STEPS = 2;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -89,9 +89,6 @@ CLinkageDoc::CLinkageDoc()
 {
 	m_pCapturedConnector = 0;
 	m_pCapturedConrolKnob = 0;
-	m_pUndoList = 0;
-	m_pUndoListEnd = 0;
-	m_UndoCount = 0;
 
 	m_bSelectionMakeAnchor = false;
 	m_bSelectionConnectable = false;
@@ -144,12 +141,20 @@ BOOL CLinkageDoc::OnNewDocument()
 	// Insert an anchor and then unselect it.
 	InsertAnchor( MECHANISMLAYER, 1, CFPoint( 0, 0 ), true, false );
 	SelectElement();
+	SetModifiedFlag( false );
+
+	// The op added to the undo stack so remove it now.
+	for( std::deque<CMemorySaveRecord*>::iterator it = m_UndoStack.begin(); it != m_UndoStack.end(); ++it )
+		delete *it;
+	m_UndoStack.clear();
 
 	return TRUE;
 }
 
 void CLinkageDoc::ClearDocument( void )
 {
+	DeleteContents(); // the framework probably called this already, but in case this function gets used outside of the framework, call it now.
+
 	if (!CDocument::OnNewDocument())
 		return;
 
@@ -158,9 +163,6 @@ void CLinkageDoc::ClearDocument( void )
 
 	m_pCapturedConnector = 0;
 	m_pCapturedConrolKnob = 0;
-	m_pUndoList = 0;
-	m_pUndoListEnd = 0;
-	m_UndoCount = 0;
 	m_bUseGrid = false;
 
 	m_bSelectionMakeAnchor = false;
@@ -2616,8 +2618,8 @@ bool CLinkageDoc::LockSelected( void )
 	if( m_SelectedConnectors.GetCount() == 0 && m_SelectedLinks.GetCount() == 0 )
 		return false;
 
-	PushUndo();
-	int Count = 0;
+	bool bNeedPush = true;
+
 	POSITION Position = m_SelectedLinks.GetHeadPosition();
 	while( Position != NULL )
 	{
@@ -2625,6 +2627,9 @@ bool CLinkageDoc::LockSelected( void )
 		if( pLink == 0 )
 			continue;
 
+		if( bNeedPush )
+			PushUndo();
+		bNeedPush = false;
 		pLink->SetLocked( true );
 	}
 	Position = m_SelectedConnectors.GetHeadPosition();
@@ -2634,13 +2639,13 @@ bool CLinkageDoc::LockSelected( void )
 		if( pConnector == 0 || !pConnector->IsAnchor() )
 			continue;
 
+		if( bNeedPush )
+			PushUndo();
+		bNeedPush = false;
 		pConnector->SetLocked( true );
 	}
 
-	if( Count == 0 )
-		PopUndoDelete();
-
-	return Count > 0;
+	return !bNeedPush;
 }
 
 bool CLinkageDoc::IsLinkLocked( CConnector *pConnector )
@@ -3806,6 +3811,8 @@ void CLinkageDoc::DeleteContents( bool bDeleteUndoInfo )
 	}
 	m_Links.RemoveAll();
 
+
+
 	// This, and even the code to delete gear connections in one of the loops above, is redundant. Better safe than sorry.
 	Position = m_GearConnectionList.GetHeadPosition();
 	while( Position != 0 )
@@ -3819,14 +3826,12 @@ void CLinkageDoc::DeleteContents( bool bDeleteUndoInfo )
 
 	if( bDeleteUndoInfo )
 	{
-		while( m_pUndoList != 0 )
-		{
-			CUndoRecord *pNext = m_pUndoList->m_pNext;
-			delete m_pUndoList;
-			m_pUndoList = pNext;
-		}
-		m_UndoCount = 0;
-		m_pUndoListEnd = 0;
+		for( std::deque<CMemorySaveRecord*>::iterator it = m_UndoStack.begin(); it != m_UndoStack.end(); ++it )
+			delete *it;
+		m_UndoStack.clear();
+		for( std::deque<CMemorySaveRecord*>::iterator it = m_RedoStack.begin(); it != m_RedoStack.end(); ++it )
+			delete *it;
+		m_RedoStack.clear();
 	}
 
 	m_pCapturedConnector = 0;
@@ -3867,9 +3872,7 @@ void CLinkageDoc::SelectAll( void )
 
 void CLinkageDoc::SplitSelected( void )
 {
-	PushUndo();
-
-	int SplitCount = 0;
+	bool bNeedPush = true;
 
 	POSITION Position = m_Connectors.GetHeadPosition();
 	while( Position != NULL )
@@ -3883,10 +3886,13 @@ void CLinkageDoc::SplitSelected( void )
 
 		if( pConnector->IsSlider() )
 		{
+			if( bNeedPush )
+				PushUndo();
+			bNeedPush = false;
+
 			// Remove the slid limits when splitting a slider. A second split might
 			// be needed to actually split this into two connectors if possible.
 			pConnector->SlideBetween();
-			++SplitCount;
 			continue;
 		}
 
@@ -3901,11 +3907,13 @@ void CLinkageDoc::SplitSelected( void )
 		POSITION Position2 = pConnector->GetLinkList()->GetHeadPosition();
 		while( Position2 != 0 )
 		{
+			if( bNeedPush )
+				PushUndo();
+			bNeedPush = false;
+
 			CLink *pLink = pConnector->GetLinkList()->GetNext( Position2 );
 			if( pLink == 0 )
 				continue;
-
-			++SplitLinkCount;
 		}
 
 		if( SplitLinkCount > 1 )
@@ -3920,6 +3928,10 @@ void CLinkageDoc::SplitSelected( void )
 				CConnector *pNewConnector = new CConnector( *pConnector );
 				if( pNewConnector == 0 )
 					continue;
+
+				if( bNeedPush )
+					PushUndo();
+				bNeedPush = false;
 
 				pLink->RemoveConnector( pConnector );
 				pLink->AddConnector( pNewConnector );
@@ -3939,7 +3951,6 @@ void CLinkageDoc::SplitSelected( void )
 //				pNewConnector->SetPoint( Point );
 
 				SetModifiedFlag( true );
-				++SplitCount;
 			}
 
 			RemoveGearRatio( pConnector, 0 );
@@ -3948,14 +3959,12 @@ void CLinkageDoc::SplitSelected( void )
 		}
 	}
 
-	if( SplitCount > 0 )
+	if( !bNeedPush )
 	{
 		NormalizeConnectorLinks();
 		FixupSliderLocations();
 		FinishChangeSelected();
 	}
-	else
-		PopUndoDelete();
 }
 
 void CLinkageDoc::Copy( bool bCut )
@@ -3993,13 +4002,22 @@ void CLinkageDoc::Copy( bool bCut )
 
 void CLinkageDoc::Paste( void )
 {
-    UINT CF_Linkage = RegisterClipboardFormat( "RECTORSQUID_Linkage_CLIPBOARD_XML_FORMAT" );
+	CWnd *pWnd = AfxGetMainWnd();
+	if( !::OpenClipboard( pWnd == 0 ? 0 : pWnd->GetSafeHwnd() ) )
+		return;
+
+	UINT CF_Linkage = RegisterClipboardFormat( "RECTORSQUID_Linkage_CLIPBOARD_XML_FORMAT" );
+	UINT UseFormat = CF_Linkage;
     if( ::IsClipboardFormatAvailable( CF_Linkage ) == 0 )
-		return;
-    CWnd *pWnd = AfxGetMainWnd();
-    if( !::OpenClipboard( pWnd == 0 ? 0 : pWnd->GetSafeHwnd() ) )
-		return;
-    HANDLE hMemory = ::GetClipboardData( CF_Linkage );
+	{
+		if( ::IsClipboardFormatAvailable( CF_TEXT ) == 0 )
+		{
+			AfxMessageBox( "The pasted data is not recognized. It was ignored." );
+			return;
+		}
+		UseFormat = CF_TEXT;
+	}
+    HANDLE hMemory = ::GetClipboardData( UseFormat );
     if( hMemory == 0 )
     {
 		::CloseClipboard();
@@ -4013,13 +4031,43 @@ void CLinkageDoc::Paste( void )
 		return;
     }
 
+	// Test this if it's not the linkage format
+	if( UseFormat != CF_Linkage )
+	{
+		// We only check for CF_TEXT right now so abort if it's not text.
+		if( UseFormat != CF_TEXT )
+		{
+			AfxMessageBox( "The pasted data is not recognized. It was ignored." );
+			return;
+		}
+		int Size = (int)strlen( (char*)pMemory );
+		if( Size == 0 )
+		{
+			GlobalUnlock( hMemory );
+			::CloseClipboard();
+			return;
+		}
+
+		// Test the data to see if it might parse ok.
+		QuickXMLNode XMLData;
+		if( XMLData.Parse( (char*)pMemory ) )
+		{
+			QuickXMLNode *pRootNode = XMLData.GetFirstChild();
+			if( pRootNode == 0 || !pRootNode->IsElement() || pRootNode->GetText() != "linkage2" )
+			{
+				AfxMessageBox( "The pasted data is not recognized. It was ignored." );
+				return;
+			}
+		}
+	}
+
 	SelectElement();
 
     /*
      * There is  no way to query how much data is available on the clipboard.
      * The application (us) is responsible for figuring it out based on the
      * clipboard format. In our case, the data is a null terminated string
-     * a strlen will give us the size. it is not a comfortable operation
+     * a strlen will give us the size. It is not a comfortable operation
      * since someone could write data in "our" format but leave off the
      * terminating null.
      */
@@ -4194,19 +4242,14 @@ bool CLinkageDoc::IsSelectionAdjustable( void )
 	return false;
 }
 
-CUndoRecord::CUndoRecord( BYTE *pData )
+
+
+CMemorySaveRecord::CMemorySaveRecord( BYTE *pData )
 {
 	m_pData = pData;
 }
 
-CUndoRecord::~CUndoRecord()
-{
-	if( m_pData != 0 )
-		delete [] m_pData;
-	m_pData = 0;
-}
-
-void CUndoRecord::ClearContent( BYTE **ppData )
+void CMemorySaveRecord::ClearContent( BYTE **ppData )
 {
 	if( ppData == 0 )
 		return;
@@ -4214,98 +4257,91 @@ void CUndoRecord::ClearContent( BYTE **ppData )
 	m_pData = 0;
 }
 
-void CLinkageDoc::PushUndo( void )
+CMemorySaveRecord::~CMemorySaveRecord()
 {
-	static const int MAX_UNDO = 300;
+	if( m_pData != 0 )
+		delete [] m_pData;
+	m_pData = 0;
+}
 
-    CMemFile mFile;
-    CArchive ar( &mFile,CArchive::store );
-    WriteOut( ar, false, false );
-    ar.Write( "\0", 1 );
-    ar.Close();
+void CLinkageDoc::PushUndoRedo( std::deque<class CMemorySaveRecord *> &TheStack )
+{
 
-    int Size = (int)mFile.GetLength();
-    BYTE* pData = mFile.Detach();
+	CMemFile mFile;
+	CArchive ar( &mFile,CArchive::store );
+	WriteOut( ar, false, false );
+	ar.Write( "\0", 1 );
+	ar.Close();
 
-	CUndoRecord *pNewRecord = new CUndoRecord( pData );
+	int Size = (int)mFile.GetLength();
+	BYTE* pData = mFile.Detach();
+
+	CMemorySaveRecord *pNewRecord = new CMemorySaveRecord( pData );
 	if( pNewRecord == 0 )
 		return;
 
-	++m_UndoCount;
-
-	if( m_UndoCount > MAX_UNDO )
+	if( TheStack.size() > MAX_UNDO )
 	{
-		// Delete the tail item in the list.
-		if( m_pUndoListEnd != 0 )
-		{
-			CUndoRecord *pSecondToLast = m_pUndoListEnd->m_pPrevious;
-			if( pSecondToLast != 0 )
-			{
-				pSecondToLast->m_pNext = 0;
-				delete m_pUndoListEnd;
-				m_pUndoListEnd = pSecondToLast;
-				--m_UndoCount;
-			}
-		}
+		CMemorySaveRecord *pRemoving = TheStack.back();
+		TheStack.pop_back();
+		if( pRemoving != 0 )
+			delete pRemoving;
 	}
 
-	if( m_pUndoList != 0 )
-		m_pUndoList->m_pPrevious = pNewRecord;
+	TheStack.push_front( pNewRecord );
+}
 
-	pNewRecord->m_pNext = m_pUndoList;
-	m_pUndoList = pNewRecord;
+void CLinkageDoc::PushUndo( void )
+{
+	PushUndoRedo( m_UndoStack );
 
-	if( m_pUndoListEnd == 0 )
-		m_pUndoListEnd = pNewRecord;
+	// Also clear the redo stack since it is no longer valid (the user has essentially created a new timeline and the old one is obsolete).
+	for( std::deque<CMemorySaveRecord*>::iterator it = m_RedoStack.begin(); it != m_RedoStack.end(); ++it )
+		delete *it;
+	m_RedoStack.clear();
 
     SetModifiedFlag( true );
+}
+
+void CLinkageDoc::PushRedo( void )
+{
+	PushUndoRedo( m_RedoStack );
+
+	SetModifiedFlag( true );
 }
 
 void CLinkageDoc::PopUndo( void )
 {
-	if( m_UndoCount == 0 || m_pUndoList == 0 )
-		return;
+	PushUndoRedo( m_RedoStack );
+	PopUndoRedo( m_UndoStack );
+}
+
+void CLinkageDoc::PopRedo( void )
+{
+	PushUndoRedo( m_UndoStack );
+	PopUndoRedo( m_RedoStack );
+}
+
+bool CLinkageDoc::PopUndoRedo( std::deque<CMemorySaveRecord*> &TheStack )
+{
+	if( TheStack.size() == 0 )
+		return false;
 
 	DeleteContents( false );
 
+	CMemorySaveRecord *pUsing = TheStack.front();
+	TheStack.pop_front();
+
 	BYTE *pData = 0;
-	m_pUndoList->ClearContent( &pData );
+	pUsing->ClearContent( &pData );
+	delete pUsing;
 
-    CMemFile mFile;
-    mFile.Attach( pData, (int)strlen( (char*)pData ), 0 );
-    CArchive ar( &mFile, CArchive::load );
+	CMemFile mFile;
+	mFile.Attach( pData, (int)strlen( (char*)pData ), 0 );
+	CArchive ar( &mFile, CArchive::load );
 
-    ReadIn( ar, false, false, true, false, false );
-    mFile.Detach();
-
-	PopUndoDelete();
-
-    SetModifiedFlag( true );
-
-    UpdateAllViews( 0, 1 );
-}
-
-void CLinkageDoc::PopUndoDelete( void )
-{
-	CUndoRecord *pNewUndoList = m_pUndoList->m_pNext;
-	delete m_pUndoList;
-	m_pUndoList = pNewUndoList;
-	--m_UndoCount;
-
-	if( m_pUndoList == 0 )
-	{
-		m_UndoCount = 0; // Make sure this is correct now.
-		m_pUndoListEnd = 0;
-	}
-}
-
-bool CLinkageDoc::Undo( void )
-{
-	bool bResult = m_UndoCount > 0 && m_pUndoList != 0;
-
-	PopUndo();
-//	m_pCapturedConnector = 0;
-//	m_SelectedConnectors.RemoveAll();
+	ReadIn( ar, false, false, true, false, false );
+	mFile.Detach();
 
 	// Set the identifier bits in the new document.
 	POSITION Position = m_Connectors.GetHeadPosition();
@@ -4332,7 +4368,11 @@ bool CLinkageDoc::Undo( void )
 		m_IdentifiedLinks.SetBit( NewID );
 	}
 
-	return bResult;
+	SetModifiedFlag( true );
+
+	UpdateAllViews( 0, 1 );
+
+	return true;
 }
 
 bool CLinkageDoc::ConnectSliderLimits( bool bTestOnly )

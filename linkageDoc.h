@@ -10,20 +10,19 @@
 #include "bitarray.h"
 #include "ControlWindow.h"
 #include "ControlKnob.h"
+#include <deque>
 
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
 
-class CUndoRecord
+class CMemorySaveRecord
 {
-	public:
-	CUndoRecord( BYTE *pData );
+public:
+	CMemorySaveRecord( BYTE *pData );
 	void ClearContent( BYTE **ppData );
-	~CUndoRecord();
+	~CMemorySaveRecord();
 	BYTE *m_pData;
-	class CUndoRecord *m_pNext;
-	class CUndoRecord *m_pPrevious;
 };
 
 class CLinkageDoc : public CDocument
@@ -219,11 +218,15 @@ public:
 		return m_SelectedLinks.GetHeadPosition() == 0 ? 0 : m_SelectedLinks.GetTail(); 
 	}
 	
-	bool CanUndo( void ) { return m_UndoCount > 0; }
-	
+	bool CanUndo( void ) { return m_UndoStack.size() > 0; }
+	bool CanRedo( void ) { return m_RedoStack.size() > 0; }
+
 	void SelectSample( int Index );
 
-	bool Undo( void );
+	void PushUndo( void );
+	void PushRedo( void );
+	void PopUndo( void );
+	void PopRedo( void );
 
 	bool AutoJoinSelected( void );
 	
@@ -252,8 +255,6 @@ public:
 
 	void GetSnapLines( CFLine &Line1, CFLine &Line2 ) { Line1 = m_SnapLine[0]; Line2 = m_SnapLine[1]; }
 	
-	void PushUndo( void );
-
 	void SetSelectedModifiableCondition( void );
 
 	static CString GetUnitsString( CLinkageDoc::_Units Units, bool bShortVersion = false );
@@ -282,12 +283,8 @@ private:
 	CFPoint m_UserGrid;
 	bool m_bUseGrid;
 
-//	int m_SimulationStep;
-//	int m_DesiredSimulationStep;
-
-	CUndoRecord *m_pUndoList;
-	CUndoRecord *m_pUndoListEnd;
-	int m_UndoCount;
+	std::deque<class CMemorySaveRecord *> m_UndoStack;
+	std::deque<class CMemorySaveRecord *> m_RedoStack;
 
 	double m_BackgroundTransparency;
 	std::string m_BackgroundImageData;
@@ -298,6 +295,10 @@ private:
 	CControlKnob *m_pCapturedConrolKnob;
 	CFPoint m_CaptureOffset;
 	
+	void PushUndoRedo( std::deque<class CMemorySaveRecord *> &TheStack );
+	
+	bool PopUndoRedo( std::deque<CMemorySaveRecord*> &TheStack );
+
 	bool FindRoomFor( CFRect NeedRect, CFPoint &PlaceHere );
 
 	void SetLinkConnector( CLink* pLink, CConnector* pConnector );
@@ -308,8 +309,7 @@ private:
 	bool WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnly = false );
 	
 	void RawAngleSelected( double Angle );
-	void PopUndo( void );
-	void PopUndoDelete( void );
+
 
 	// void MovePartsLinkToOrigin( CFPoint Origin, CLink *pPartsLink );
  	

@@ -1312,10 +1312,14 @@ class CSimulatorImplementation
 		NewConnectedLine += pTargetConnector->GetPoint();
 		NewConnectedLine.m_End.RotateAround( NewConnectedLine.m_Start, ChangeAngle );
 
+
 		// Get the intersection of the connected line and the slide path line.
 		CFPoint Intersect;
 		if( !Intersects( ConnectedLine, SlideLine, Intersect ) )
 			return false;
+
+		DebugItemList.AddTail( new CDebugItem(NewConnectedLine, RGB( 0, 255, 0 ) ) );
+		DebugItemList.AddTail( new CDebugItem(Intersect, RGB( 0, 0, 255 ) ) );
 
 		// Get the new intersection of the new connected line and the new slide path line.
 		CFPoint NewIntersect;
@@ -1516,11 +1520,11 @@ class CSimulatorImplementation
 							pLink->SetPositionValid( false );
 							pLink->SetSimulationError( CElement::MANGLE );
 
-							DebugItemList.AddTail( new CDebugItem( pFixedConnector->GetTempPoint(), RGB( 0, 255, 0 ) ) );
-							DebugItemList.AddTail( new CDebugItem( pCommonConnector->GetTempPoint(), RGB( 0, 0, 255 ) ) );
+							//DebugItemList.AddTail( new CDebugItem( pFixedConnector->GetTempPoint(), RGB( 0, 255, 0 ) ) );
+							//DebugItemList.AddTail( new CDebugItem( pCommonConnector->GetTempPoint(), RGB( 0, 0, 255 ) ) );
 
-							DebugItemList.AddTail( new CDebugItem( pTestConnector->GetTempPoint() ) );
-							DebugItemList.AddTail( new CDebugItem( CFLine( pTestConnector->GetTempPoint(), pCheckConnector->GetTempPoint() ) ) );
+							//DebugItemList.AddTail( new CDebugItem( pTestConnector->GetTempPoint() ) );
+							//DebugItemList.AddTail( new CDebugItem( CFLine( pTestConnector->GetTempPoint(), pCheckConnector->GetTempPoint() ) ) );
 							return false;
 						}
 					}
@@ -2459,6 +2463,9 @@ class CSimulatorImplementation
 		CConnector *pSlider1 = 0;
 		CConnector *pSlider2 = 0;
 
+		if( !pLink->CanOnlySlide( &pLimit1, &pLimit2, &pSlider1, &pSlider2, 0 ) )
+			return false;
+
 		int SliderCount = 0;
 
 		POSITION Position = pLinkList->GetHeadPosition();
@@ -2475,15 +2482,19 @@ class CSimulatorImplementation
 				if( pConnector == 0 || !pConnector->IsFixed() || !pConnector->IsSlider() )
 					continue;
 
-				CConnector *pLimit1;
-				CConnector *pLimit2;
-				if( !pConnector->GetSlideLimits( pLimit1, pLimit2 ) )
+				// If the tested sliding connector is the same one as this link slides on, this is not the right connector.
+				if( pConnector == pSlider1 || pConnector == pSlider2 )
 					continue;
 
-				if( !pLink->IsConnected( pLimit1 ) )
+				CConnector *pLimitA;
+				CConnector *pLimitB;
+				if( !pConnector->GetSlideLimits( pLimitA, pLimitB ) )
 					continue;
 
-				return SlideToSlider( pLink, pConnector, pLimit1, pLimit2 );
+				if( !pLink->IsConnected( pLimitA ) )
+					continue;
+
+				return SlideToSlider( pLink, pConnector, pLimitA, pLimitB );
 			}
 		}
 

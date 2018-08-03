@@ -495,6 +495,7 @@ void CMainFrame::CreateAlignPanel( CMFCRibbonCategory* pCategory )
 	CMFCRibbonPanel* pPaneAlign = AddPanel( pCategory, IDS_RIBBON_ALIGN, m_PanelImages.ExtractIcon(35) );
 
 	AddRibbonButton( pPaneAlign, IDS_RIBBON_UNDO, ID_EDIT_UNDO, 19, LARGE );
+	AddRibbonButton( pPaneAlign, IDS_RIBBON_REDO, ID_EDIT_REDO, 107, LARGE );
 
 	AddRibbonCheckbox( pPaneAlign, IDS_RIBBON_EDITDRAWING, ID_EDIT_DRAWING );
 	AddRibbonCheckbox( pPaneAlign, IDS_RIBBON_EDITMECHANISM, ID_EDIT_MECHANISM );

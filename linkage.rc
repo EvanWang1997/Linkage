@@ -9,7 +9,8 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -596,8 +597,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 3,8,2,0
- PRODUCTVERSION 3,8,2,0
+ FILEVERSION 3,9,0,0
+ PRODUCTVERSION 3,9,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -613,12 +614,12 @@ BEGIN
         BLOCK "080004e4"
         BEGIN
             VALUE "FileDescription", "linkage Application"
-            VALUE "FileVersion", "3.8.2.0"
+            VALUE "FileVersion", "3.9.0.0"
             VALUE "InternalName", "Linkage"
             VALUE "LegalCopyright", "Copyright © 2002 - 2018 David Rector"
             VALUE "OriginalFilename", "Linkage.exe"
             VALUE "ProductName", "Linkage Application"
-            VALUE "ProductVersion", "3.8.2.0"
+            VALUE "ProductVersion", "3.9.0.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -1012,8 +1013,9 @@ BEGIN
     ID_EDIT_MECHANISM       "Edit the mechanism layer.\nEdit Mechanism"
     IDS_RIBBON_EDITMECHANISM "Mechanism"
     ID_ALIGN_SNAPBUTTON     "Enable grid snap, element snap, and auto join options.\nSnap"
-    IDS_RIBBON_UNDO         "Undo"
-    ID_ALIGN_DETAILSBUTTON  "Show and hide machanism details like labels, dimensions, angle hints, etc.\nDetails"
+	IDS_RIBBON_UNDO         "Undo"
+	IDS_RIBBON_REDO         "Redo"
+	ID_ALIGN_DETAILSBUTTON  "Show and hide machanism details like labels, dimensions, angle hints, etc.\nDetails"
     ID_EDIT_ADDCONNECTOR    "Add a connector the the selected link.\nAdd Connector"
     IDS_RIBBON_ADDCONNECTOR "Add"
 END
