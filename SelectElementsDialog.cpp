@@ -65,18 +65,27 @@ bool CompareElementsEx ( CElement *lhs, CElement *rhs)
 {
 	if( lhs == 0 || rhs == 0 )
 		return false;
-	CString Left = lhs->GetIdentifierString( false );
-	CString Right = rhs->GetIdentifierString( false );
 
-	if( IsNumber( Left ) && IsNumber( Right ) )
+	int lhl = lhs->GetName().GetLength();
+	int rhl = rhs->GetName().GetLength();
+
+	if( rhl > 0 )
 	{
-		if( Left.GetLength() < Right.GetLength() )
-			return true;
-		else if( Right.GetLength() < Left.GetLength() )
+		if( lhl > 0 )
+			return lhs->GetName() < rhs->GetName();
+		else
 			return false;
 	}
+	else if( lhl > 0 )
+		return true;
 
-	return lhs->GetIdentifierString( false ) < rhs->GetIdentifierString( false ); 
+	if( lhs->GetLayers() != rhs->GetLayers() )
+		return ( lhs->GetLayers() & CLinkageDoc::DRAWINGLAYER ) == 0;
+
+	if( lhs->IsConnector() != rhs->IsConnector() )
+		return lhs->IsConnector();
+
+	return lhs->GetIdentifier() < rhs->GetIdentifier();
 }
 
 BOOL CSelectElementsDialog::OnInitDialog()
