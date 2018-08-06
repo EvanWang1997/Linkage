@@ -9,8 +9,7 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -430,50 +429,52 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,119,53,50,14
 END
 
-IDD_POINT_PROPERTIES DIALOGEX 0, 0, 245, 150
+IDD_POINT_PROPERTIES DIALOGEX 0, 0, 255, 150
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Point Properties"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Name:",IDC_NAMEPROMPT,51,18,22,8
-    EDITTEXT        IDC_EDIT3,76,16,117,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT3,76,16,127,12,ES_AUTOHSCROLL
     CONTROL         "Draw Circle",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,51,36,52,10
-    RTEXT           "Radius:",IDC_RADIUSPROMPT,106,37,32,8
-    EDITTEXT        IDC_EDIT6,140,35,53,12,ES_AUTOHSCROLL
-    RTEXT           "Line Size:",IDC_LINEPROMPT,106,52,32,8
-    EDITTEXT        IDC_EDIT1,140,51,53,12,ES_AUTOHSCROLL
-    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,199,50,18,14
+    RTEXT           "Radius:",IDC_RADIUSPROMPT,104,37,44,8
+    EDITTEXT        IDC_EDIT6,150,36,53,12,ES_AUTOHSCROLL
+    RTEXT           "Line Size:",IDC_LINEPROMPT,116,52,32,8
+    EDITTEXT        IDC_EDIT1,150,51,53,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,204,50,18,14
     LTEXT           "Coordinates:",IDC_STATIC,51,71,42,8
-    EDITTEXT        IDC_EDIT2,96,69,43,12,ES_AUTOHSCROLL
-    LTEXT           ",",IDC_STATIC,142,71,8,8
-    EDITTEXT        IDC_EDIT4,150,69,43,12,ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "OK",IDOK,49,131,66,14
-    PUSHBUTTON      "Cancel",IDCANCEL,127,131,66,14
-    LTEXT           "Fastened to Link",IDC_FASTENEDTO,50,107,139,8
+    EDITTEXT        IDC_EDIT2,106,69,43,12,ES_AUTOHSCROLL
+    LTEXT           ",",IDC_STATIC,152,71,8,8
+    EDITTEXT        IDC_EDIT4,160,69,43,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,54,131,66,14
+    PUSHBUTTON      "Cancel",IDCANCEL,132,131,66,14
+    LTEXT           "Fastened to Link",IDC_FASTENEDTO,50,107,149,8
     LTEXT           "Color:",IDC_STATIC,51,91,20,8
-    CONTROL         "",IDC_COLOR,"Static",SS_GRAYRECT | SS_NOTIFY,140,88,53,13
+    CONTROL         "",IDC_COLOR,"Static",SS_GRAYRECT | SS_NOTIFY,150,88,53,13
 END
 
-IDD_DRAWINGLINK_PROPERTIES DIALOGEX 0, 0, 246, 213
+IDD_DRAWINGLINK_PROPERTIES DIALOGEX 0, 0, 251, 233
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Line Properties"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Name:",IDC_NAMEPROMPT,51,18,22,8
-    EDITTEXT        IDC_EDIT3,76,16,117,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT3,76,16,122,12,ES_AUTOHSCROLL
     CONTROL         "Measurement Line",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,51,38,74,10
-    CONTROL         "Offset Measurement Line",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,63,51,95,10
-    CONTROL         "Hull",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON | WS_GROUP,51,70,28,10
-    CONTROL         "Polygon",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,51,83,41,10
-    CONTROL         "Polyline",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,51,96,40,10
-    LTEXT           "Line Size:",IDC_RPMPROMPT,51,115,31,8
-    EDITTEXT        IDC_EDIT1,140,113,53,12,ES_AUTOHSCROLL
-    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,198,112,18,14
-    LTEXT           "Color:",IDC_STATIC,51,134,20,8
-    CONTROL         "",IDC_COLOR,"Static",SS_GRAYRECT | SS_NOTIFY,140,131,53,13
-    LTEXT           "Fastened to Link",IDC_FASTENEDTO,51,156,139,8
-    DEFPUSHBUTTON   "OK",IDOK,50,193,66,14
-    PUSHBUTTON      "Cancel",IDCANCEL,129,193,66,14
+    CONTROL         "Lengths",IDC_RADIO8,"Button",BS_AUTORADIOBUTTON | WS_GROUP,63,52,41,10
+    CONTROL         "Angles",IDC_RADIO10,"Button",BS_AUTORADIOBUTTON,63,66,37,10
+    CONTROL         "Offset Measurement Line",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,107,52,95,10
+    CONTROL         "Hull",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON | WS_GROUP,51,90,28,10
+    CONTROL         "Polygon",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,51,103,41,10
+    CONTROL         "Polyline",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,51,116,40,10
+    LTEXT           "Line Size:",IDC_RPMPROMPT,51,135,31,8
+    EDITTEXT        IDC_EDIT1,145,133,53,12,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS,198,132,18,14
+    LTEXT           "Color:",IDC_STATIC,51,154,20,8
+    CONTROL         "",IDC_COLOR,"Static",SS_GRAYRECT | SS_NOTIFY,145,151,53,13
+    LTEXT           "Fastened to Link",IDC_FASTENEDTO,51,176,139,8
+    DEFPUSHBUTTON   "OK",IDOK,52,213,66,14
+    PUSHBUTTON      "Cancel",IDCANCEL,131,213,66,14
 END
 
 IDD_GEAR_RATIO_DIALOG DIALOGEX 0, 0, 239, 160
@@ -687,7 +688,7 @@ BEGIN
     IDD_POINT_PROPERTIES, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 236
+        RIGHTMARGIN, 246
         TOPMARGIN, 7
         BOTTOMMARGIN, 143
     END
@@ -695,9 +696,9 @@ BEGIN
     IDD_DRAWINGLINK_PROPERTIES, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 235
+        RIGHTMARGIN, 240
         TOPMARGIN, 7
-        BOTTOMMARGIN, 206
+        BOTTOMMARGIN, 226
     END
 
     IDD_GEAR_RATIO_DIALOG, DIALOG
@@ -873,6 +874,7 @@ BEGIN
     ID_ALIGN_MEET           "Rotate the two middle connectors around the outer connectors to be in the same place.\nRotate To Meet"
     ID_VIEW_DRAWINGLAYERDIMENSIONS 
                             "Show dimensions on the drawing layer.\nDrawing Layer Dimensions"
+    ID_VIEW_USEDIAMETER     "Show circular dimensions as a diameter, not a radius\nShow as Diameter"
 END
 
 STRINGTABLE
@@ -947,6 +949,7 @@ BEGIN
     IDS_RIBBON_LOCK         "Lock"
     IDS_RIBBON_GROUNDDIMENSIONS "Ground Dimensions"
     IDS_RIBBON_DRAWINGLAYERDIMENSIONS "Drawing Layer Dimensions"
+    IDS_RIBBON_USEDIAMETER  "Show as Diameter"
 END
 
 STRINGTABLE
@@ -960,6 +963,7 @@ BEGIN
     ID_INSERT_ANCHORLINK    "Add a link with an anchor and a connector.\nInsert Anchor Link"
     ID_INSERT_CIRCLE        "Add a circle to the drawing layer\nInsert Circle"
     IDS_SAMPLE_LIFTER       "Two-stage ball lifting mechanism.\nBall Lifter"
+    IDS_RIBBON_REDO         "Redo"
 END
 
 STRINGTABLE
@@ -1013,9 +1017,8 @@ BEGIN
     ID_EDIT_MECHANISM       "Edit the mechanism layer.\nEdit Mechanism"
     IDS_RIBBON_EDITMECHANISM "Mechanism"
     ID_ALIGN_SNAPBUTTON     "Enable grid snap, element snap, and auto join options.\nSnap"
-	IDS_RIBBON_UNDO         "Undo"
-	IDS_RIBBON_REDO         "Redo"
-	ID_ALIGN_DETAILSBUTTON  "Show and hide machanism details like labels, dimensions, angle hints, etc.\nDetails"
+    IDS_RIBBON_UNDO         "Undo"
+    ID_ALIGN_DETAILSBUTTON  "Show and hide machanism details like labels, dimensions, angle hints, etc.\nDetails"
     ID_EDIT_ADDCONNECTOR    "Add a connector the the selected link.\nAdd Connector"
     IDS_RIBBON_ADDCONNECTOR "Add"
 END

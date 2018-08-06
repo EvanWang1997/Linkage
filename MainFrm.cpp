@@ -278,6 +278,7 @@ void CMainFrame::CreateViewPanel( CMFCRibbonCategory* pCategory )
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_DIMENSIONS, ID_VIEW_DIMENSIONS, 15 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_GROUNDDIMENSIONS, ID_VIEW_GROUNDDIMENSIONS, 88 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_DRAWINGLAYERDIMENSIONS, ID_VIEW_DRAWINGLAYERDIMENSIONS, 88 );
+	AppendMenuItem( pDetailsButton, IDS_RIBBON_USEDIAMETER, ID_VIEW_USEDIAMETER, 108 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_LARGEFONT, ID_VIEW_LARGEFONT, 78 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_SOLIDLINKS, ID_VIEW_SOLIDLINKS, 75 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_AUTOGRID, ID_VIEW_SHOWGRID, 85 );
@@ -490,6 +491,9 @@ void CMainFrame::AppendMenuCheck( CMFCRibbonButton *pButton, UINT StringID, UINT
 	pButton->AddSubItem( pTemp );
 }
 
+CMenu *pDerp;
+CMFCRibbonButton *pDerpBut;
+
 void CMainFrame::CreateAlignPanel( CMFCRibbonCategory* pCategory )
 {
 	CMFCRibbonPanel* pPaneAlign = AddPanel( pCategory, IDS_RIBBON_ALIGN, m_PanelImages.ExtractIcon(35) );
@@ -544,8 +548,12 @@ void CMainFrame::CreateAlignPanel( CMFCRibbonCategory* pCategory )
 	Menu2.CreatePopupMenu();
 	pAlignButton->SetMenu( Menu2.GetSafeHmenu() );
 
+	pDerpBut = pAlignButton;
+	pDerp = &Menu2;
+
 	pPaneAlign->Add( pAlignButton );
 }
+
 
 class MyCMFCRibbonButtonsGroup : public CMFCRibbonButtonsGroup
 {

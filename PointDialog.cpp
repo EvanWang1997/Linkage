@@ -60,6 +60,16 @@ void CPointPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 		m_Color = m_ColorControl.GetColor();
 	else
 		m_ColorControl.SetColor(m_Color);
+
+	CWinApp *pApp = AfxGetApp();
+	if( pApp != 0 )
+	{
+		bool bUseDimensions = pApp->GetProfileInt( "Settings", "UseDiameterDimensions", 0 ) != 0;
+		if( bUseDimensions )
+			m_RadiusPromptControl.SetWindowText( "Diameter:" );
+		else
+			m_RadiusPromptControl.SetWindowText( "Radius:" );
+	}
 }
 
 BEGIN_MESSAGE_MAP(CPointPropertiesDialog, CMyDialog)

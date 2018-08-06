@@ -533,14 +533,23 @@ void CFLine::MoveEndsFromStart( double MoveStartDistance, double MoveEndDistance
 	m_End = NewEnd;
 }
 
-void CFLine::SetLength( const double Distance )
+void CFLine::SetLength( const double Length )
 {
 	if( m_End.x == m_Start.x && m_End.y == m_Start.y )
 		return;
 
-	double ScaleFactor = Distance / ( (double)sqrt( ( ( m_End.x - m_Start.x )  * ( m_End.x - m_Start.x ) ) + ( ( m_End.y - m_Start.y ) * ( m_End.y - m_Start.y ) ) ) );
+	double ScaleFactor = Length / ( (double)sqrt( ( ( m_End.x - m_Start.x )  * ( m_End.x - m_Start.x ) ) + ( ( m_End.y - m_Start.y ) * ( m_End.y - m_Start.y ) ) ) );
 	m_End.x = m_Start.x + ( ( m_End.x - m_Start.x ) * ScaleFactor );
 	m_End.y = m_Start.y + ( ( m_End.y - m_Start.y ) * ScaleFactor );
+}
+
+void CFLine::ReverseSetLength( const double Length )
+{
+	if( m_End.x == m_Start.x && m_End.y == m_Start.y )
+		return;
+
+	CFPoint Temp = m_End; m_End = m_Start; m_Start = Temp;
+	SetLength( Length );
 }
 
 bool IsPointInPoly( int PointCount, const CFPoint *pPoints, const CFPoint &TestPoint )

@@ -196,7 +196,7 @@ public:
 
 	bool IsSelectionAdjustable( void );
 
-	bool SetGearRatio( CLink *pGear1, CLink *pGear2, double Size1, double Size2, bool bUseSizeAsSize, CGearConnection::ConnectionType ConnectionType );
+	bool SetGearRatio( CLink *pGear1, CLink *pGear2, double Size1, double Size2, bool bUseSizeAsSize, bool bSizeIsDiameter, CGearConnection::ConnectionType ConnectionType );
 	CGearConnection *GetGearRatio( CLink *pGear1, CLink *pGear2, double *pSize1 = 0, double *pSize2 = 0 );
 	
 	void* GetLastSelectedConnector( void ) 
@@ -364,7 +364,7 @@ private:
 
 	//bool Unfasten( CLink *pFastenedTo );
 	bool Unfasten( CElement *pElement );
-	bool SetGearRatio( CLink *pGear1, CLink *pGear2, double Size1, double Size2, bool bUseSizeAsSize, CGearConnection::ConnectionType ConnectionType, bool bFromUI );
+	bool SetGearRatio( CLink *pGear1, CLink *pGear2, double Size1, double Size2, bool bUseSizeAsSize, bool bSizeIsDiameter, CGearConnection::ConnectionType ConnectionType, bool bFromUI );
 	int BuildSelectedLockGroup( ConnectorList *pLockGroup );
 	bool IsLinkLocked( CConnector *pConnector );
 	bool ChangeLinkLength( CLink *pLink, double Value, bool bPercentage );

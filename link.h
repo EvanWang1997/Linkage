@@ -88,6 +88,9 @@ class CLink : public CElement
 
 	bool IsGearAnchored( void );
 
+	void SetMeasurementUseAngles( bool bUseAngles ) { m_bShowMeasurementAngles = bUseAngles; }
+	bool IsMeasurementAngles( void ) { return m_bShowMeasurementAngles; }
+
 	void FixAllConnectors( void );
 	void Reset( void );
 
@@ -202,6 +205,7 @@ class CLink : public CElement
 	int m_HullCount;
 	double m_ActuatorStartOffset;
 	enum _ShapeType m_ShapeType;
+	bool m_bShowMeasurementAngles;
 
 	bool m_bLinkTriangle;
 

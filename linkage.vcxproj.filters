@@ -156,12 +156,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AboutDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="AngleDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AnimatedGifFile.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -210,9 +204,6 @@
     <ClInclude Include="PopupGallery.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PointDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MyMFCRibbonGallery.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -231,12 +222,6 @@
     <ClInclude Include="dimension.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TestDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RecordDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="linkageView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -249,19 +234,10 @@
     <ClInclude Include="helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ImageSelectDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LinePropertiesDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="link.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="linkage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LinkPropertiesDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DXFFile.h">
@@ -270,19 +246,10 @@
     <ClInclude Include="renderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ConnectorPropertiesDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GearRatioDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ColorStatic.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="NullableColor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ExportImageSettingsDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -292,9 +259,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Simulator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SelectElementsDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MyCheckListBox.h">
@@ -312,22 +276,7 @@
     <ClInclude Include="ControlKnob.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LocationDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LengthDistanceDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RotateDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ScaleDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Base64.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UserGridDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MyMFCRibbonLabel.h">
@@ -335,6 +284,57 @@
     </ClInclude>
     <ClInclude Include="MyMFCRibbonApplicationButton.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AboutDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="AngleDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectorPropertiesDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="ExportImageSettingsDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="GearRatioDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="ImageSelectDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="LengthDistanceDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="LinePropertiesDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="UserGridDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectElementsDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="RotateDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="RecordDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="LocationDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="LinkPropertiesDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="TestDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="ScaleDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="PointDialog.h">
+      <Filter>Header Files\Dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -436,6 +436,9 @@
     </Filter>
     <Filter Include="Source Files\Dialogs">
       <UniqueIdentifier>{e89ffeab-0372-49af-b80b-3d5b975d2901}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Dialogs">
+      <UniqueIdentifier>{c97c44cd-3ee3-4b51-85d1-dd645157d100}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

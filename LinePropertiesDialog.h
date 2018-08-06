@@ -51,4 +51,11 @@ public:
 	CButton OffsetLineControl;
 	BOOL m_bOffsetMeassurementLine;
 	int m_ShapeType;
+	CButton m_TypeControl1;
+	CButton m_TypeControl2;
+	CButton m_TypeControl3;
+	CButton m_ShowLengthsControl;
+	CButton m_ShowAnglesControl;
+	afx_msg void OnBnClickedLengthsAngles();
+	int m_LengthsAngles;
 };

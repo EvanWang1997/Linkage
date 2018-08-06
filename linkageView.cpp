@@ -319,6 +319,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_GROUNDDIMENSIONS, &CLinkageView::OnUpdateViewGroundDimensions)
 	ON_COMMAND(ID_VIEW_DRAWINGLAYERDIMENSIONS, &CLinkageView::OnViewDrawingLayerDimensions)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_DRAWINGLAYERDIMENSIONS, &CLinkageView::OnUpdateViewDrawingLayerDimensions)
+	ON_COMMAND(ID_VIEW_USEDIAMETER, &CLinkageView::OnViewUseDiameterDimensions)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_USEDIAMETER, &CLinkageView::OnUpdateViewUseDiameterDimensions)
 
 	ON_COMMAND(ID_VIEW_SOLIDLINKS, &CLinkageView::OnViewSolidLinks)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SOLIDLINKS, &CLinkageView::OnUpdateViewSolidLinks)
@@ -467,6 +469,7 @@ CLinkageView::CLinkageView()
 	m_bShowDimensions = false;
 	m_bShowGroundDimensions = true;
 	m_bShowDrawingLayerDimensions = false;
+	m_bUseDiameterDimensions = false;
 	m_bNewLinksSolid = false;
 	m_xAutoGrid = 20.0;
 	m_yAutoGrid = 20.0;
@@ -580,6 +583,8 @@ CLinkageView::CLinkageView()
 		GetSetViewSpecificDimensionVisbility( false );
 		m_SelectedEditLayers = (unsigned int)pApp->GetProfileInt( SETTINGS, "EditLayers", 0xFFFFFFFF );
 		m_SelectedViewLayers = (unsigned int)pApp->GetProfileInt( SETTINGS, "ViewLayers", 0xFFFFFFFF );
+		m_bUseDiameterDimensions = pApp->GetProfileInt( SETTINGS, "UseDiameterDimensions", 0 ) != 0;
+
 
 		m_Rotate0 = pApp->LoadIcon( IDI_ICON5 );
 		m_Rotate1 = pApp->LoadIcon( IDI_ICON1 );
@@ -668,6 +673,9 @@ void CLinkageView::SaveSettings( void )
 	GetSetViewSpecificDimensionVisbility( true );
 	pApp->WriteProfileInt( SETTINGS, "EditLayers", (int)m_SelectedEditLayers  );
 	pApp->WriteProfileInt( SETTINGS, "ViewLayers", (int)m_SelectedViewLayers );
+	pApp->WriteProfileInt( SETTINGS, "UseDiameterDimensions", m_bUseDiameterDimensions ? 1 : 0  );
+
+
 }
 
 CLinkageView::~CLinkageView()
@@ -1418,7 +1426,6 @@ void CLinkageView::DrawAlignmentHintLines( CRenderer *pRenderer )
 		}
 	}
 
-
 	if( PointCount == 3 ) // && fabs( Angle ) >= 0.5 && fabs( Angle ) < 359.5 )
 	{
 		double Angle = GetAngle( Points[1], Points[0], Points[2] );
@@ -1447,6 +1454,15 @@ void CLinkageView::DrawAlignmentHintLines( CRenderer *pRenderer )
 		pRenderer->SelectObject( &Pen );
 
 		pRenderer->Arc( Points[1].x, Points[1].y, ArcRadius, Points[0].x, Points[0].y, Points[2].x, Points[2].y );
+
+		CFLine ArrowLine( Points[1], Points[0] );
+		ArrowLine.PerpendicularLine( ArrowLine, 0 );
+		pRenderer->DrawArrow( ArrowLine.GetEnd(), ArrowLine.GetStart(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
+		
+		ArrowLine.SetLine( Points[1], Points[2] );
+		ArrowLine.PerpendicularLine( ArrowLine, 1 );
+		pRenderer->DrawArrow( ArrowLine.GetEnd(), ArrowLine.GetStart(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
+
 	}
 
 	pRenderer->SelectObject( pOldPen );
@@ -4270,6 +4286,11 @@ void CLinkageView::OnEditSetRatio()
 	{
 		dlg.m_GearChainSelection = pConnection->m_ConnectionType == CGearConnection::GEARS ? 0 : 1;
 		dlg.m_bUseRadiusValues = pConnection->m_bUseSizeAsRadius;
+		if( m_bUseDiameterDimensions )
+		{
+			dlg.m_Gear1Size *= 2.0;
+			dlg.m_Gear2Size *= 2.0;
+		}
 	}
 
 	dlg.m_Link1Name = pLink1->GetIdentifierString( m_bShowDebug );
@@ -4277,7 +4298,7 @@ void CLinkageView::OnEditSetRatio()
 
 	if( dlg.DoModal() == IDOK )
 	{
-		if( pDoc->SetGearRatio( pLink1, pLink2, dlg.m_Gear1Size, dlg.m_Gear2Size, dlg.m_bUseRadiusValues && dlg.m_GearChainSelection == 1, dlg.m_GearChainSelection == 0 ? CGearConnection::GEARS : CGearConnection::CHAIN ) )
+		if( pDoc->SetGearRatio( pLink1, pLink2, dlg.m_Gear1Size, dlg.m_Gear2Size, dlg.m_bUseRadiusValues && dlg.m_GearChainSelection == 1, m_bUseDiameterDimensions, dlg.m_GearChainSelection == 0 ? CGearConnection::GEARS : CGearConnection::CHAIN ) )
 			UpdateForDocumentChange();
 	}
 	InvalidateRect( 0 );
@@ -5068,6 +5089,19 @@ void CLinkageView::OnUpdateViewDrawingLayerDimensions(CCmdUI *pCmdUI)
 	pCmdUI->Enable( !m_bSimulating );
 }
 
+void CLinkageView::OnViewUseDiameterDimensions()
+{
+	m_bUseDiameterDimensions = !m_bUseDiameterDimensions;
+	SaveSettings();
+	InvalidateRect( 0 );
+}
+
+void CLinkageView::OnUpdateViewUseDiameterDimensions(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck( m_bUseDiameterDimensions );
+	pCmdUI->Enable( !m_bSimulating );
+}
+
 void CLinkageView::OnViewSolidLinks()
 {
 	m_bNewLinksSolid = !m_bNewLinksSolid;
@@ -5405,6 +5439,10 @@ void CLinkageView::OnMButtonDown(UINT nFlags, CPoint MousePoint)
 	m_bMouseMovedEnough	= false;
 }
 
+extern CMenu *pDerp;
+extern CMFCRibbonButton *pDerpBut;
+
+
 void CLinkageView::OnRButtonUp(UINT nFlags, CPoint MousePoint)
 {
 	ReleaseCapture();
@@ -5430,6 +5468,11 @@ void CLinkageView::OnRButtonUp(UINT nFlags, CPoint MousePoint)
 		CFPoint point = AdjustClientAreaPoint( MousePoint );
 		if( FindDocumentItem( point, pLink, pConnector ) )
 		{
+			ClientToScreen( &MousePoint );
+			pDerp->TrackPopupMenu( 0, MousePoint.x, MousePoint.y, AfxGetMainWnd(), 0 );
+			DWORD ack = GetLastError();
+			return;
+
 			bool bResult = false;
 			if( pConnector != 0 )
 				EditProperties( pConnector, 0, false );
@@ -6206,7 +6249,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 		while( Position != 0 )
 		{
 			CLink* pLink = pConnector->GetLinkList()->GetNext( Position );
-			if( pLink != 0 && !pLink->IsMeasurementElement() )
+			if( pLink != 0 && ( !pLink->IsMeasurementElement() || pLink->IsMeasurementAngles() ) )
 			{
 				bSkipConnectorDraw = false;
 				break;
@@ -6973,6 +7016,27 @@ CFArea CLinkageView::DrawGroundDimensions( CRenderer* pRenderer, CLinkageDoc *pD
 	else
 		pConnectors = pGroundLink->GetConnectorList();
 
+	GearConnectionList *pGearConnections = pDoc->GetGearConnections();
+	Position = pDoc->GetLinkList()->GetHeadPosition();
+	while( Position != 0 )
+	{
+		CLink *pLink = pDoc->GetLinkList()->GetNext( Position );
+		if( pLink == 0 || !pLink->IsGear() )
+			continue;
+		std::list<double> RadiusList;
+		pLink->GetGearRadii( *pGearConnections, RadiusList );
+		std::list<double>::iterator it = RadiusList.end();
+		--it;
+		double LargestRadius = *it;
+		CConnector* pConnector = pLink->GetConnector( 0 );
+		double x = m_bSimulating ? pConnector->GetOriginalPoint().x : pConnector->GetPoint().x;
+		double y = m_bSimulating ? pConnector->GetOriginalPoint().y : pConnector->GetPoint().y;
+		x -= LargestRadius;
+		y -= LargestRadius;
+		xAllLeftMost = min( xAllLeftMost, x );
+		yAllBottomMost = min( yAllBottomMost, y );
+	}
+
 	Position = pConnectors->GetHeadPosition();
 	while( Position != NULL )
 	{
@@ -6980,19 +7044,15 @@ CFArea CLinkageView::DrawGroundDimensions( CRenderer* pRenderer, CLinkageDoc *pD
 		if( pConnector == 0 )
 			continue;
 
-		// Keep track of the left-most and bottom-most connectors for
-		// positioning the measurement lines later.
-		if( m_bSimulating )
+		double x = m_bSimulating ? pConnector->GetOriginalPoint().x : pConnector->GetPoint().x;
+		double y = m_bSimulating ? pConnector->GetOriginalPoint().y : pConnector->GetPoint().y;
+		if( pConnector->GetDrawCircleRadius() > 0 )
 		{
-			xAllLeftMost = min( xAllLeftMost, pConnector->GetOriginalPoint().x );
-			yAllBottomMost = min( yAllBottomMost, pConnector->GetOriginalPoint().y );
+			x -= pConnector->GetDrawCircleRadius();
+			y -= pConnector->GetDrawCircleRadius();
 		}
-		else
-		{
-			// The current points are used when not simulating.
-			xAllLeftMost = min( xAllLeftMost, pConnector->GetPoint().x );
-			yAllBottomMost = min( yAllBottomMost, pConnector->GetPoint().y );
-		}
+		xAllLeftMost = min( xAllLeftMost, x );
+		yAllBottomMost = min( yAllBottomMost, y );
 
 		if( pGroundLink == 0 && !pConnector->IsAnchor() )
 			continue;
@@ -7289,6 +7349,8 @@ CFArea CLinkageView::DrawCirclesRadius( CRenderer *pRenderer, CFPoint Center, st
 			for( std::list<double>::iterator it = RadiusList.begin(); it != end; ++it )
 			{
 				double Radius = *it;
+				if( m_bUseDiameterDimensions )
+					Radius *= 2.0;
 
 				CFPoint Point = Center;
 				Point.SetPoint( Point, Radius, 45 );
@@ -7299,7 +7361,7 @@ CFArea CLinkageView::DrawCirclesRadius( CRenderer *pRenderer, CFPoint Center, st
 
 				CString String;
 				double DocumentScale = pDoc->GetUnitScale();
-				String.Format( "R%.3lf", DocumentScale * Radius );
+				String.Format( "%c%.3lf", m_bUseDiameterDimensions ? 'D': 'R', DocumentScale * Radius );
 
 				pRenderer->SetTextAlign( TA_CENTER | TA_TOP );
 				pRenderer->TextOut( MeasurementLine.GetEnd().x + UnscaledUnits( 2 ), MeasurementLine.GetEnd().y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ) - UnscaledUnits( 1 ), String );
@@ -7328,7 +7390,9 @@ CFArea CLinkageView::DrawCirclesRadius( CRenderer *pRenderer, CFPoint Center, st
 	{
 		CString String;
 		double DocumentScale = pDoc->GetUnitScale();
-		String.Format( "R%.3lf", DocumentScale * LargestRadius );
+		if( m_bUseDiameterDimensions )
+			LargestRadius *= 2.0;
+		String.Format( "%c%.3lf", m_bUseDiameterDimensions ? 'D': 'R', DocumentScale * LargestRadius );
 
 		CFPoint Point = Scale( Point3 );
 
@@ -7450,7 +7514,7 @@ CFArea CLinkageView::DrawConnectorLinkDimensions( CRenderer* pRenderer, const Ge
 				CString String;
 				double DocumentScale = pDoc->GetUnitScale();
 				CFPoint Point = pConnector->GetPoint();
-				String.Format( "%.3lf,%.3lf", DocumentScale * Point.x, DocumentScale * Point.y );
+				//String.Format( "%.3lf,%.3lf", DocumentScale * Point.x, DocumentScale * Point.y );
 
 				Point = Scale( Point );
 				pRenderer->TextOut( Point.x, Point.y + m_ConnectorRadius + UnscaledUnits( 2 ), String );
@@ -7564,6 +7628,43 @@ static int GetLongestLinearDimensionLine( CLink *pLink, int &BestEndPoint, CFPoi
 	}
 
 	return BestStartPoint;
+}
+
+static bool HasSameLine( vector<CFLine> &Lines, int Count, CFLine FindMe )
+{
+	for( int Index = 0; Index < Count; ++Index )
+	{
+		double x1 = FindMe.m_Start.x;
+		double y1 = FindMe.m_Start.y;
+		double x2 = Lines[Index].m_Start.x;
+		double y2 = Lines[Index].m_Start.y;
+
+		if( fabs( x1 - x2 ) < 0.00001 && fabs( y1 - y2 ) < 0.00001 )
+		{
+			x1 = FindMe.m_End.x;
+			y1 = FindMe.m_End.y;
+			x2 = Lines[Index].m_End.x;
+			y2 = Lines[Index].m_End.y;
+			if( fabs( x1 - x2 ) < 0.00001 && fabs( y1 - y2 ) < 0.00001 )
+				return true;
+		}
+
+		x1 = FindMe.m_Start.x;
+		y1 = FindMe.m_Start.y;
+		x2 = Lines[Index].m_End.x;
+		y2 = Lines[Index].m_End.y;
+
+		if( fabs( x1 - x2 ) < 0.00001 && fabs( y1 - y2 ) < 0.00001 )
+		{
+			x1 = FindMe.m_End.x;
+			y1 = FindMe.m_End.y;
+			x2 = Lines[Index].m_Start.x;
+			y2 = Lines[Index].m_Start.y;
+			if( fabs( x1 - x2 ) < 0.00001 && fabs( y1 - y2 ) < 0.00001 )
+				return true;
+		}
+	}
+	return false;
 }
 
 CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionList *pGearConnections, unsigned int OnLayers, CLink *pLink, bool bDrawLines, bool bDrawText )
@@ -7741,6 +7842,9 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 
 		NextOffset = /*(int)*/ConnectorReference[0].m_Distance;
 
+		vector<CFLine> PreviousLines( ConnectorCount * 4 ); // I'm 99% sure that ConnectorCount*2 is the exact right number. But I can't think of a way to verify that so I'm being safe with a 2x size for this vector.
+		int PreviousLineCount = 0;
+
 		// Points before the start point on the orientation line.
 		for( int Counter = StartPointInList - 1; Counter >= 0; --Counter )
 		{
@@ -7748,8 +7852,11 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 				continue;
 			CFLine MeasurementLine = OrientationLine;
 			MeasurementLine.SetLength( ConnectorReference[Counter].m_Distance );
-			MeasurementLine.ReverseDirection();
-			DimensionsArea += DrawMeasurementLine( pRenderer, MeasurementLine, pStartConnector->GetPoint(), ConnectorReference[Counter].m_pConnector->GetPoint(), Offset, bDrawLines, bDrawText );
+			//MeasurementLine.ReverseDirection();
+			if( HasSameLine( PreviousLines, PreviousLineCount, MeasurementLine ) )
+				continue;
+			PreviousLines[PreviousLineCount++] = MeasurementLine;
+			DimensionsArea += DrawMeasurementLine( pRenderer, MeasurementLine, ConnectorReference[Counter].m_pConnector->GetPoint(), pStartConnector->GetPoint(), Offset, bDrawLines, bDrawText );
 			Offset -= OFFSET_INCREMENT;
 		}
 
@@ -7764,6 +7871,9 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 				continue;
 			CFLine MeasurementLine = OrientationLine;
 			MeasurementLine.SetLength(  ConnectorReference[Counter].m_Distance );
+			if( HasSameLine( PreviousLines, PreviousLineCount, MeasurementLine ) )
+				continue;
+			PreviousLines[PreviousLineCount++] = MeasurementLine;
 			DimensionsArea += DrawMeasurementLine( pRenderer, MeasurementLine, ConnectorReference[Counter].m_pConnector->GetPoint(), pStartConnector->GetPoint(), Offset, bDrawLines, bDrawText );
 			Offset -= OFFSET_INCREMENT;
 		}
@@ -7789,6 +7899,9 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 				CFLine MeasurementLine = PerpOrientationLine;
 				MeasurementLine.SetLength( ConnectorReferencePerp[Counter].m_Distance );
 				MeasurementLine.ReverseDirection();
+				if( HasSameLine( PreviousLines, PreviousLineCount, MeasurementLine ) )
+					continue;
+				PreviousLines[PreviousLineCount++] = MeasurementLine;
 				DimensionsArea += DrawMeasurementLine( pRenderer, MeasurementLine, pStartConnector->GetPoint(), ConnectorReferencePerp[Counter].m_pConnector->GetPoint(), Offset, bDrawLines, bDrawText );
 				Offset -= OFFSET_INCREMENT;
 			}
@@ -7801,6 +7914,9 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 					continue;
 				CFLine MeasurementLine = PerpOrientationLine;
 				MeasurementLine.SetLength(  ConnectorReferencePerp[Counter].m_Distance );
+				if( HasSameLine( PreviousLines, PreviousLineCount, MeasurementLine ) )
+					continue;
+				PreviousLines[PreviousLineCount++] = MeasurementLine;
 				DimensionsArea += DrawMeasurementLine( pRenderer, MeasurementLine, ConnectorReferencePerp[Counter].m_pConnector->GetPoint(), pStartConnector->GetPoint(), Offset, bDrawLines, bDrawText );
 				Offset -= OFFSET_INCREMENT;
 			}
@@ -7993,33 +8109,129 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 	if( pLink->IsMeasurementElement( &bUseOffset ) )
 	{
 		COLORREF Color = pLink->GetColor();
-		COLORREF LightColor = LightenColor( Color, 0.75 );
 		CPen Pen;
 		Pen.CreatePen( PS_SOLID, 1, Color );
-		CPen LightPen;
-		LightPen.CreatePen( PS_SOLID, 1, LightColor );
 		CPen *pOldPen = pRenderer->SelectObject( &Pen );
 		COLORREF OldFontColor = pRenderer->GetTextColor();
-
 		pRenderer->SetTextColor( RGB( 96, 96, 96 ) );
 		pRenderer->SetBkMode( TRANSPARENT );
 		pRenderer->SetTextAlign( TA_LEFT | TA_TOP );
-		//pRenderer->SetBkColor( RGB( 255, 255, 255 ) );
 
 		int PointCount = 0;
-		CFPoint* Points = pLink->GetHull( PointCount );
-		// reverse the points because the -y change causes the hull to be in the wrong direction.
-		for( int Index = 0; Index < PointCount - 1; ++Index )
+		CFPoint* Points = 0;
+		Points = pLink->GetPoints( PointCount );
+
+		if( pLink->IsMeasurementAngles() )
 		{
-			CFLine Line( Points[Index], Points[Index+1] );
-			if( bUseOffset )
-			{
-				pRenderer->SelectObject( &LightPen );
-				pRenderer->DrawLine( Scale( Line ) );
-			}
 			pRenderer->SelectObject( &Pen );
-			DrawMeasurementLine( pRenderer, Line, bUseOffset ? OFFSET_INCREMENT : 0, true, true );
+
+			// Polylines are drawn first before the angles are drawn.
+			pRenderer->MoveTo( Scale( Points[0] ) );
+			for( int Index = 1; Index < PointCount; ++Index )
+				pRenderer->LineTo( Scale( Points[Index] ) );
+
+			// Angles are drawn starting at the third point using the previous points to show the angles.
+			for( int Index = 2; Index < PointCount; ++Index )
+			{
+				CFPoint Point0 = Scale( Points[Index-2] );
+				CFPoint Point1 = Scale( Points[Index-1] );
+				CFPoint Point2 = Scale( Points[Index] );
+
+				double ArcRadius = 20;
+				CFLine Line( Point1, Point0 );
+				Line.SetLength( ArcRadius );
+				Point0 = Line[1];
+
+				Line.SetLine( Point1, Point2 );
+				Line.SetLength( ArcRadius );
+				Point2 = Line[1];
+
+				if( Point1 == Point2 )
+					continue;
+
+				CPen Pen( PS_SOLID, 1, Color );
+
+				CFArc Arc( Point1, ArcRadius, Point0, Point2 );
+
+				pRenderer->Arc( Arc );
+
+				CFLine ArrowLine( Point1, Point0 );
+				ArrowLine.PerpendicularLine( ArrowLine, 0 );
+				pRenderer->DrawArrow( ArrowLine.GetEnd(), ArrowLine.GetStart(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
+
+				ArrowLine.SetLine( Point1, Point2 );
+				ArrowLine.PerpendicularLine( ArrowLine, 1 );
+				pRenderer->DrawArrow( ArrowLine.GetEnd(), ArrowLine.GetStart(), UnscaledUnits( 3 ), UnscaledUnits( 5 ) );
+
+				double TheAngle = Arc.AngleSpan();
+				CString Text;
+				Text.Format( "%3.2lf°", TheAngle );
+				CFPoint Extents = pRenderer->GetTextExtent( Text, Text.GetLength() );
+
+				Point0.RotateAround( Point1, -( TheAngle / 2 ) ); // Arc angles are direction from higher to lower, not "normally" lower to higher. So negate the rotation.
+				CFLine Nub( Point1, Point0 );
+				Nub.ReverseSetLength( -UnscaledUnits( 3 ) );
+				pRenderer->DrawLine( Nub );
+
+				// Figure out the closest the text can be to the end of the little line segment.
+				// This uses a copy of the line from 0,0 extended to where it hits the rectangle that holds the text, sort of.
+				CFLine TextPositioningLine = Nub;
+				TextPositioningLine.SetLength( Extents.x + Extents.y );
+				TextPositioningLine -= TextPositioningLine[0]; // Now starts at zero but maintains the same angle.
+				CFLine TestLine1;
+				CFLine TestLine2;
+				if( TextPositioningLine[1].y > TextPositioningLine[0].y )
+					TestLine1.SetLine( -Extents.x / 2, Extents.y / 2, Extents.x / 2, Extents.y / 2 );
+				else
+					TestLine1.SetLine( -Extents.x / 2, -Extents.y / 2, Extents.x / 2, -Extents.y / 2 );
+				if( TextPositioningLine[1].x > TextPositioningLine[0].x )
+					TestLine2.SetLine( Extents.x / 2, -Extents.y / 2, Extents.x / 2, Extents.y / 2 );
+				else
+					TestLine2.SetLine( -Extents.x / 2, -Extents.y / 2, -Extents.x / 2, Extents.y / 2 );
+
+				CFPoint Intersect1;
+				CFPoint Intersect2;
+				bool b1 = false;
+				bool b2 = false;
+				Intersects( TextPositioningLine, TestLine1, Intersect1, 0, &b1 );
+				Intersects( TextPositioningLine, TestLine2, Intersect2, 0, &b2 );
+				double Nearest = 0.0;
+
+				if( b1 && b2 )
+					Nearest = max( Distance( TextPositioningLine[0], Intersect1 ), Distance( TextPositioningLine[0], Intersect2 ) );
+				else if( b1 )
+					Nearest = Distance( TextPositioningLine[0], Intersect1 );
+				else if( b2 )
+					Nearest = Distance( TextPositioningLine[0], Intersect2 );
+
+				TextPositioningLine += Nub[0];
+				TextPositioningLine.SetLength( UnscaledUnits( 4 ) + Nearest );
+
+				pRenderer->SetTextAlign( TA_TOP | TA_CENTER );
+				pRenderer->SetBkMode( TRANSPARENT );
+
+				pRenderer->TextOut( TextPositioningLine[1].x, TextPositioningLine[1].y - ( UnscaledUnits( m_UsingFontHeight + 1 ) / 2 ), Text );
+			}
 		}
+		else
+		{
+			COLORREF LightColor = LightenColor( Color, 0.75 );
+			CPen LightPen;
+			LightPen.CreatePen( PS_SOLID, 1, LightColor );
+
+			for( int Index = 0; Index < PointCount - 1; ++Index )
+			{
+				CFLine Line( Points[Index], Points[Index+1] );
+				if( bUseOffset )
+				{
+					pRenderer->SelectObject( &LightPen );
+					pRenderer->DrawLine( Scale( Line ) );
+				}
+				pRenderer->SelectObject( &Pen );
+				DrawMeasurementLine( pRenderer, Line, bUseOffset ? OFFSET_INCREMENT : 0, true, true );
+			}
+		}
+
 		pRenderer->SelectObject( pOldPen );
 	}
 
@@ -8036,7 +8248,7 @@ void CLinkageView::DrawLink( CRenderer* pRenderer, const GearConnectionList *pGe
 
 	CFPoint Average;
 
-	if( bShowlabels && ( Count > 1 || pLink->IsGear() ) )
+	if( bShowlabels && ( Count > 1 || pLink->IsGear() ) && !pLink->IsMeasurementElement() )
 	{
 		/*
 		 * Don't draw generic ID values for drawing elements. Only
@@ -8640,6 +8852,8 @@ bool CLinkageView::PointProperties( CConnector *pConnector )
 	Dialog.m_xPosition = pConnector->GetPoint().x * DocumentScale;
 	Dialog.m_yPosition = pConnector->GetPoint().y * DocumentScale;
 	Dialog.m_Radius = pConnector->GetDrawCircleRadius() * DocumentScale;
+	if( m_bUseDiameterDimensions )
+		Dialog.m_Radius *= 2.0;
 	Dialog.m_bDrawCircle = pConnector->GetDrawCircleRadius() != 0 ? TRUE : FALSE;
 	Dialog.m_Name = pConnector->GetName();
 	Dialog.m_Label = pConnector->GetIdentifierString( m_bShowDebug );
@@ -8655,6 +8869,8 @@ bool CLinkageView::PointProperties( CConnector *pConnector )
 
 		pConnector->SetRPM( Dialog.m_RPM );
 		pConnector->SetName( Dialog.m_Name );
+		if( m_bUseDiameterDimensions )
+			Dialog.m_Radius /= 2.0;
 		pConnector->SetDrawCircleRadius( Dialog.m_bDrawCircle != FALSE ? Dialog.m_Radius / DocumentScale : 0.0 );
 		pConnector->SetColor( Dialog.m_Color );
 		pConnector->SetLineSize( Dialog.m_bDrawCircle != FALSE ? Dialog.m_LineSize : 1 );
@@ -8817,6 +9033,7 @@ bool CLinkageView::LineProperties( CLink *pLink )
 		Dialog.m_LineSize = pLink->GetLineSize();
 		bool bUseLineOffset = false;
 		Dialog.m_bMeasurementLine = pLink->IsMeasurementElement( &bUseLineOffset ) ? TRUE : FALSE;
+		Dialog.m_LengthsAngles = pLink->IsMeasurementAngles() ? 1 : 0;
 		Dialog.m_bOffsetMeassurementLine = bUseLineOffset ? TRUE : FALSE;
 		Dialog.m_SelectedLinkCount = 1;
 		Dialog.m_Label = pLink->GetIdentifierString( m_bShowDebug );
@@ -8855,6 +9072,7 @@ bool CLinkageView::LineProperties( CLink *pLink )
 			pLink->SetLineSize( Dialog.m_LineSize );
 			pLink->SetName( Dialog.m_Name );
 			pLink->SetMeasurementElement( Dialog.m_bMeasurementLine != FALSE, Dialog.m_bOffsetMeassurementLine != FALSE );
+			pLink->SetMeasurementUseAngles( Dialog.m_LengthsAngles == 1 );
 			pLink->SetColor( Dialog.m_Color );
 			switch( Dialog.m_ShapeType )
 			{
@@ -9941,7 +10159,7 @@ void CLinkageView::OnViewCoordinates()
 
 		CGearConnection *pConnection = pDoc->GetGearRatio( pLink1, pLink2 );
 
-		if( !pDoc->SetGearRatio( pLink1, pLink2, Size1, Size2, pConnection == 0 ? false : pConnection->m_bUseSizeAsRadius, pConnection == 0 ? CGearConnection::GEARS : pConnection->m_ConnectionType ) )
+		if( !pDoc->SetGearRatio( pLink1, pLink2, Size1, Size2, pConnection == 0 ? false : pConnection->m_bUseSizeAsRadius, m_bUseDiameterDimensions, pConnection == 0 ? CGearConnection::GEARS : pConnection->m_ConnectionType ) )
 			return;
 	}
 	else

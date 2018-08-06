@@ -141,6 +141,7 @@ private:
 	bool m_bShowDimensions;
 	bool m_bShowGroundDimensions;
 	bool m_bShowDrawingLayerDimensions;
+	bool m_bUseDiameterDimensions;
 	bool m_bNewLinksSolid;
 	double m_xAutoGrid;
 	double m_yAutoGrid;
@@ -531,6 +532,8 @@ public:
 	afx_msg void OnUpdateViewGroundDimensions(CCmdUI *pCmdUI);
 	afx_msg void OnViewDrawingLayerDimensions();
 	afx_msg void OnUpdateViewDrawingLayerDimensions(CCmdUI *pCmdUI);
+	afx_msg void OnViewUseDiameterDimensions();
+	afx_msg void OnUpdateViewUseDiameterDimensions(CCmdUI *pCmdUI);
 	afx_msg void OnViewSolidLinks();
 	afx_msg void OnUpdateViewSolidLinks(CCmdUI *pCmdUI);
 	afx_msg void OnViewDrawing();

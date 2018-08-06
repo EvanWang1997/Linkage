@@ -108,6 +108,7 @@ class CFLine
 	void GetParallelLine( CFLine &NewLine, double Offset );
 	
 	void ReverseDirection( void ) { CFPoint Temp = m_End; m_End = m_Start; m_Start = Temp; }
+	void ReverseSetLength( double Length );
 
 	const CFPoint &operator[]( int Index ) const { return ( Index == 0 ? m_Start : m_End); }
 	CFPoint &operator[]( int Index ) { return ( Index == 0 ? m_Start : m_End); }
@@ -119,6 +120,9 @@ class CFLine
 		{ SetLine( m_Start.x - Right.x, m_Start.y - Right.y, m_End.x - Right.x, m_End.y - Right.y ); }
 	void operator+=( const CFPoint &Right )
 		{ SetLine( m_Start.x + Right.x, m_Start.y + Right.y, m_End.x + Right.x, m_End.y + Right.y ); }
+	_inline bool operator==( const CFLine &Right ) const
+		{ return m_Start == Right.m_Start && m_End == Right.m_End; }
+
 
 	void PerpendicularPoint( CFPoint &Perp, int Direction = 1 ) const;
 	void PerpendicularLine( CFLine &Perp, int Direction = 1 ) const;
@@ -179,15 +183,12 @@ class CFArc : public CFCircle
 
 	double AngleSpan( void )
 	{
+		// Arcs have angles reversed from "normal" so do the math "oddly" to get the proper angle span.
 		double Angle = GetStartAngle();
 		double EndAngle = GetEndAngle();
-		if( Angle == EndAngle )
-			Angle = 0;
-		else if( Angle > EndAngle )
-			Angle = ( ( 360 - Angle ) + EndAngle ) / 2;
-		else
-			Angle = ( EndAngle - Angle ) / 2;
-		return Angle;
+		if( Angle < EndAngle )
+			Angle += 360;
+		return Angle - EndAngle;
 	}
 
 

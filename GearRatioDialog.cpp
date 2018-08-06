@@ -37,6 +37,16 @@ void CGearRatioDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Control( pDX, IDC_RADIO1, m_GearRadioControl );
 	DDX_Control( pDX, IDC_CHECK1, m_UseRadiiControl );
 
+	CWinApp *pApp = AfxGetApp();
+	if( pApp != 0 )
+	{
+		bool bUseDimensions = pApp->GetProfileInt( "Settings", "UseDiameterDimensions", 0 ) != 0;
+		if( bUseDimensions )
+			m_UseRadiiControl.SetWindowText( "Use values as diameters" );
+		else
+			m_UseRadiiControl.SetWindowText( "Use values as radii" );
+	}
+
 	OnBnClickedRadio();
 }
 

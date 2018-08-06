@@ -347,6 +347,7 @@ void CConnector::MakePermanent( void )
 			Temp.y += Offset.y;
 			pMoveConnector->MovePoint( Temp );
 			pMoveConnector->SetTempFixed( true );
+			pMoveConnector->MakePermanent();
 
 			if( Position2 == 0 )
 				break;

@@ -339,6 +339,7 @@
 #define ID_ALIGN_MEET                   4936
 #define ID_VIEW_DRAWINGLAYERDIMENSIONS  4937
 #define ID_VIEW_DIMENSIONSLABEL         4938
+#define ID_VIEW_USEDIAMETER             4939
 #define IDS_SAMPLE_SIMPLE               5011
 #define IDS_SAMPLE_JANSEN               5012
 #define IDS_SAMPLE_KLANN                5013
@@ -361,6 +362,7 @@
 #define IDS_RIBBON_LOCK                 5033
 #define IDS_RIBBON_GROUNDDIMENSIONS     5034
 #define IDS_RIBBON_DRAWINGLAYERDIMENSIONS 5035
+#define IDS_RIBBON_USEDIAMETER          5036
 #define ID_SAMPLE_SIMPLE                5100
 #define ID_SAMPLE_ACTUATOR              5101
 #define ID_SAMPLE_ACTUATOR2             5102
@@ -543,7 +545,9 @@
 #define IDC_PROMPT2                     8008
 #define IDC_LIMITPROMPT                 8009
 #define IDC_LIMITPROMPT2                8010
-#define IDC_LINEPROMPT                  8010
+#define IDC_LINEPROMPT                  8011
+#define IDC_RADIO8                      8012
+#define IDC_RADIO10                     8013
 
 // Next default values for new objects
 // 
@@ -551,7 +555,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        6016
 #define _APS_NEXT_COMMAND_VALUE         7005
-#define _APS_NEXT_CONTROL_VALUE         8011
+#define _APS_NEXT_CONTROL_VALUE         8013
 #define _APS_NEXT_SYMED_VALUE           9000
 #endif
 #endif

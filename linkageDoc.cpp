@@ -525,6 +525,9 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			pLink->SetStartOffset( atof( Value ) );
 			Value = pNode->GetAttribute( "gear" );
 			pLink->SetGear( Value == "true" );
+			Value = pNode->GetAttribute( "showangles" );
+			bool bShowAngles = Value == "true";
+			pLink->SetMeasurementUseAngles( bShowAngles );
 			Value = pNode->GetAttribute( "usercolor" );
 			bool bUserColor = Value == "true";
 			Value = pNode->GetAttribute( "color" );
@@ -608,6 +611,14 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 				CLink *pFastenToLink = FindLink( FastenToId );
 				if( pFastenToLink != 0 )
 					FastenThese( pConnector, pFastenToLink );
+			}
+			Value = pNode->GetAttribute( "fastenconnector" );
+			if( !Value.IsEmpty() )
+			{
+				int FastenToId = atoi( Value ) + OffsetConnectorIdentifer;
+				CConnector *pFastenToConnector = FindConnector( FastenToId );
+				if( pFastenToConnector != 0 )
+					FastenThese( pConnector, pFastenToConnector );
 			}
 
 			Value = pNode->GetAttribute( "slider" );
@@ -699,7 +710,7 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 				}
 
 				if( pLink1 != 0 && pLink2 != 0 && Size1 > 0.0 && Size2 > 0.0 )
-					SetGearRatio( pLink1, pLink2, Size1, Size2, bSizeAsSize, Type, false );
+					SetGearRatio( pLink1, pLink2, Size1, Size2, bSizeAsSize, false, Type, false );
 			}
 		}
 	}
@@ -1009,6 +1020,8 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "fastenlink", pLink->GetFastenedToLink() == 0 ? 0 : pLink->GetFastenedToLink()->GetIdentifier(), pLink->GetFastenedToLink() != 0 );
 		AppendXMLAttribute( TempString, "fastenconnector", pLink->GetFastenedToConnector() == 0 ? 0 : pLink->GetFastenedToConnector()->GetIdentifier(), pLink->GetFastenedToConnector() != 0 );
 		AppendXMLAttribute( TempString, "gear", pLink->IsGear(), pLink->IsGear() );
+		AppendXMLAttribute( TempString, "showangles", pLink->IsMeasurementAngles(), pLink->IsMeasurementAngles() && pLink->IsMeasurementElement() );
+
 		AppendXMLAttribute( TempString, "color", (unsigned int)(COLORREF)pLink->GetColor() );
 		AppendXMLAttribute( TempString, "usercolor", pLink->IsUserColor() );
 		TempString += ">";
@@ -5770,15 +5783,21 @@ CGearConnection * CLinkageDoc::GetGearRatio( CLink *pGear1, CLink *pGear2, doubl
 	return 0;
 }
 
-bool CLinkageDoc::SetGearRatio( CLink *pGear1, CLink *pGear2, double Size1, double Size2, bool bUseSizeAsSize, CGearConnection::ConnectionType ConnectionType )
+bool CLinkageDoc::SetGearRatio( CLink *pGear1, CLink *pGear2, double Size1, double Size2, bool bUseSizeAsSize, bool bSizeIsDiameter, CGearConnection::ConnectionType ConnectionType )
 {
-	return SetGearRatio( pGear1, pGear2, Size1, Size2, bUseSizeAsSize, ConnectionType, true );
+	return SetGearRatio( pGear1, pGear2, Size1, Size2, bUseSizeAsSize, bSizeIsDiameter, ConnectionType, true );
 }
 
-bool CLinkageDoc::SetGearRatio( CLink *pGear1, CLink *pGear2, double Size1, double Size2, bool bUseSizeAsSize, CGearConnection::ConnectionType ConnectionType, bool bFromUI )
+bool CLinkageDoc::SetGearRatio( CLink *pGear1, CLink *pGear2, double Size1, double Size2, bool bUseSizeAsSize, bool bSizeIsDiameter, CGearConnection::ConnectionType ConnectionType, bool bFromUI )
 {
 	if( pGear1 == 0 || pGear2 == 0 || !pGear1->IsGear() || !pGear2->IsGear() )
 		return false;
+
+	if( bSizeIsDiameter )
+	{
+		Size1 /= 2.0;
+		Size2 /= 2.0;
+	}
 
 	CGearConnection * pGearConnection = GetGearRatio( pGear1, pGear2 );
 
