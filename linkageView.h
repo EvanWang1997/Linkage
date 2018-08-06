@@ -327,6 +327,7 @@ private:
 	void InsertPoint( CFPoint *pPoint );
 	void InsertLine( CFPoint *pPoint );
 	void InsertMeasurement( CFPoint *pPoint );
+	void InsertAngleMeasurement( CFPoint *pPoint );
 	void InsertCircle( CFPoint *pPoint );
 	void InsertConnector( CFPoint *pPoint );
 	void InsertAnchor( CFPoint *pPoint );

@@ -232,6 +232,8 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_INSERT_POINT,(AFX_PMSG)&CLinkageView::OnInsertPoint)
 	ON_COMMAND(ID_INSERT_LINE,(AFX_PMSG)&CLinkageView::OnInsertLine)
 	ON_COMMAND(ID_INSERT_MEASUREMENT,(AFX_PMSG)&CLinkageView::OnInsertMeasurement)
+	ON_COMMAND(ID_INSERT_ANGLEMEASUREMENT,(AFX_PMSG)&CLinkageView::InsertAngleMeasurement)
+	
 	ON_COMMAND(ID_INSERT_GEAR,(AFX_PMSG)&CLinkageView::OnInsertGear)
 	ON_COMMAND(ID_INSERT_LINK2, (AFX_PMSG)&CLinkageView::OnInsertDouble)
 	ON_COMMAND(ID_INSERT_LINK3, (AFX_PMSG)&CLinkageView::OnInsertTriple)
@@ -541,7 +543,8 @@ CLinkageView::CLinkageView()
 		m_pPopupGallery->SetTooltip( 10, ID_INSERT_POINT );
 		m_pPopupGallery->SetTooltip( 11, ID_INSERT_LINE );
 		m_pPopupGallery->SetTooltip( 12, ID_INSERT_MEASUREMENT );
-		m_pPopupGallery->SetTooltip( 13, ID_INSERT_CIRCLE );
+		m_pPopupGallery->SetTooltip( 13, ID_INSERT_ANGLEMEASUREMENT );
+		m_pPopupGallery->SetTooltip( 14, ID_INSERT_CIRCLE );
 	}
 
 	m_SmallFont.CreateFont( -SMALL_FONT_SIZE, 0, 0, 0, FW_LIGHT, 0, 0, 0,
@@ -4412,6 +4415,17 @@ void CLinkageView::InsertLine( CFPoint *pPoint )
 	SelectionChanged();
 }
 
+void CLinkageView::InsertAngleMeasurement( CFPoint *pPoint )
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pDoc->InsertAngleMeasurement( CLinkageDoc::DRAWINGLAYER, Unscale( LINK_INSERT_PIXELS ), pPoint == 0 ? GetDocumentViewCenter() : *pPoint, pPoint != 0 );
+	m_bSuperHighlight = true;
+
+	UpdateForDocumentChange();
+	SelectionChanged();
+}
+
 void CLinkageView::InsertMeasurement( CFPoint *pPoint )
 {
 	CLinkageDoc* pDoc = GetDocument();
@@ -5468,10 +5482,10 @@ void CLinkageView::OnRButtonUp(UINT nFlags, CPoint MousePoint)
 		CFPoint point = AdjustClientAreaPoint( MousePoint );
 		if( FindDocumentItem( point, pLink, pConnector ) )
 		{
-			ClientToScreen( &MousePoint );
-			pDerp->TrackPopupMenu( 0, MousePoint.x, MousePoint.y, AfxGetMainWnd(), 0 );
-			DWORD ack = GetLastError();
-			return;
+			//ClientToScreen( &MousePoint );
+			//pDerp->TrackPopupMenu( 0, MousePoint.x, MousePoint.y, AfxGetMainWnd(), 0 );
+			//DWORD ack = GetLastError();
+			//return;
 
 			bool bResult = false;
 			if( pConnector != 0 )
@@ -9712,7 +9726,8 @@ void CLinkageView::OnPopupGallery()
 		case 10: InsertPoint( &PopupPoint ); break;
 		case 11: InsertLine( &PopupPoint ); break;
 		case 12: InsertMeasurement( &PopupPoint ); break;
-		case 13: InsertCircle( &PopupPoint ); break;
+		case 13: InsertAngleMeasurement( &PopupPoint ); break;
+		case 14: InsertCircle( &PopupPoint ); break;
 		default: return;
 	}
 }

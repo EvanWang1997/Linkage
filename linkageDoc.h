@@ -36,7 +36,7 @@ class CLinkageDoc : public CDocument
 
 	enum _Direction{ HORIZONTAL, VERTICAL, INLINE, INLINESPACED, FLIPHORIZONTAL, FLIPVERTICAL, DIAGONAL };
 	enum _CoordinateChange{ NONE, DISTANCE, ROTATION, SCALE, OTHER };
-	enum _InsertType{ LINK, CONNECTOR, CIRCLE, ANCHOR, INPUT_ANCHOR, ACTUATOR, MEASUREMENT, GEAR_LINK };
+	enum _InsertType{ LINK, CONNECTOR, CIRCLE, ANCHOR, INPUT_ANCHOR, ACTUATOR, MEASUREMENT, ANGLE_MEASUREMENT, GEAR_LINK };
 	//bool bAnchor, bool bRotating, bool bSlider, bool bActuator, bool bMeasurement, bool bSolid, bool bGear
 	
 	static const unsigned int DRAWINGLAYER = 0x00000001;
@@ -157,6 +157,7 @@ public:
 	void InsertLink( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, int ConnectorCount, bool bSolid ) { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, ConnectorCount, LINK, bSolid ); }
 	void InsertActuator( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint, bool bSolid )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, ACTUATOR, bSolid ); }
 	CLink* InsertMeasurement( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { return InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 2, MEASUREMENT, false ); }
+	void InsertAngleMeasurement( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )  { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 3, ANGLE_MEASUREMENT, false ); }
 	void InsertGear( unsigned int Layers, double ScaleFactor, CFPoint DesiredPoint, bool bForceToPoint )   { InsertLink( Layers, ScaleFactor, DesiredPoint, bForceToPoint, 1, GEAR_LINK, false ); }
 	//bool GetExampleName( int Index, CString &Name );
 	//bool GetExampleText( int Index, CString &Text );

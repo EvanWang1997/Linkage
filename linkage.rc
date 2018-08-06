@@ -9,7 +9,8 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -955,6 +956,7 @@ END
 STRINGTABLE
 BEGIN
     ID_INSERT_MEASUREMENT   "Add a measurement line to the drawing layer.\nInsert Measurement"
+	ID_INSERT_ANGLEMEASUREMENT "Add a polyline to the drawing layer showing the angle between the segments.\nInsert Angle Measurement"
     IDS_RIBBON_INSERTMEASUREMENT "Measurement"
     IDS_SAMPLE_THROW        "Linear actuator throw distance test.\nThrow Distance Test"
     IDS_SAMPLE_PISTON       "Piston and crank mechanism.\nPiston and Crank Mechanism"

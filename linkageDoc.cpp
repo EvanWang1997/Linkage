@@ -3778,7 +3778,9 @@ CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoin
 	pLink->SetSolid( bSolid );
 	pLink->SetGear( Type == GEAR_LINK );
 	pLink->SetColor( ( Layers & DRAWINGLAYER ) != 0 ? RGB( 200, 200, 200 ) : Colors[pLink->GetIdentifier() % COLORS_COUNT] );
-	pLink->SetMeasurementElement( Type == MEASUREMENT && ( Layers & DRAWINGLAYER ) != 0, false );
+	pLink->SetMeasurementElement( ( Type == MEASUREMENT || Type == ANGLE_MEASUREMENT ) && ( Layers & DRAWINGLAYER ) != 0, false );
+	if( Type == ANGLE_MEASUREMENT )
+		pLink->SetMeasurementUseAngles( true );
 	if( bSelectInsert && ( m_UsableLayers & Layers ) != 0 )
 		SelectElement( pLink );
 

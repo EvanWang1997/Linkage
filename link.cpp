@@ -32,6 +32,7 @@ CLink::CLink()
 	m_ActuatorStartOffset = 0;
 	m_ShapeType = HULL;
 	m_FoundRPM = 0;
+	m_bShowMeasurementAngles = false;
 }
 
 CLink::CLink( const CLink &ExistingLink )
@@ -56,6 +57,7 @@ CLink::CLink( const CLink &ExistingLink )
 	m_bActuator = ExistingLink.m_bActuator;
 	m_bNoRotateWithAnchor = ExistingLink.m_bNoRotateWithAnchor;
 	m_ShapeType = ExistingLink.m_ShapeType;
+	m_bShowMeasurementAngles = ExistingLink.m_bShowMeasurementAngles;
 	m_pHull = 0;
 	m_HullCount = 0;
 	m_FoundRPM = 0;
