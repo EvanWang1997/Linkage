@@ -46,6 +46,11 @@ class CValidatedString : public CString
 		ASSERT( bNameValid );
 		return bNameValid != 0;
 	}
+
+	public: const CString& operator =( const CString& stringSrc)
+	{
+		return CString::operator=( stringSrc );
+	}
 };
 
 CMainFrame::CMainFrame()
@@ -111,17 +116,119 @@ static CMFCRibbonPanel* AddPanel( CMFCRibbonCategory *pCategory, int NameID, HIC
 	CValidatedString strTemp;
 	if( NameID > 0 )
 		strTemp.LoadString( NameID );
+	if( strTemp.GetAt( 0 ) == '&' )
+		strTemp = strTemp.Mid( 1 );
 	return pCategory->AddPanel( strTemp, hIcon );
 }
 
 enum _ButtonDisplayMode { LARGE, LARGEONLY, SMALL, TEXT };
+
+// Getting a number that looks good with a 1.0 DPI scale and a 2.5 DPI scale. Not sure how others look.
+#define AFX_CHECK_BOX_DEFAULT_SIZE ( (int)( 16.0 * ( 1 + ( ( GetGlobalData()->GetRibbonImageScale() - 1 ) * 0.7 ) ) ) )
+const int nTextMarginLeft = 4;
+const int nTextMarginRight = 6;
+
+class CMyMFCRibbonCheckBox : public CMFCRibbonCheckBox
+{
+	public:
+	CMyMFCRibbonCheckBox(UINT nID, LPCTSTR lpszText) : CMFCRibbonCheckBox(nID, lpszText)
+	{
+	}
+	
+	CSize GetIntermediateSize(CDC* /*pDC*/)
+	{
+		ASSERT_VALID(this);
+		m_szMargin = CSize(2, 3);
+
+		const CSize sizeCheckBox = CSize(AFX_CHECK_BOX_DEFAULT_SIZE, AFX_CHECK_BOX_DEFAULT_SIZE);
+
+		int cx = sizeCheckBox.cx + m_sizeTextRight.cx + nTextMarginLeft + nTextMarginRight + m_szMargin.cx;
+		int cy = max(sizeCheckBox.cy, m_sizeTextRight.cy) + 2 * m_szMargin.cy;
+
+		return CSize(cx, cy);
+	}
+	
+	void OnDraw(CDC* pDC)
+	{
+		ASSERT_VALID(this);
+		ASSERT_VALID(pDC);
+
+		if (m_rect.IsRectEmpty())
+		{
+			return;
+		}
+
+		const CSize sizeCheckBox = CSize(AFX_CHECK_BOX_DEFAULT_SIZE, AFX_CHECK_BOX_DEFAULT_SIZE);
+
+		// Draw check box:
+		CRect rectCheck = m_rect;
+		rectCheck.top += GetGlobalData()->GetRibbonImageScale();
+		rectCheck.bottom += GetGlobalData()->GetRibbonImageScale();
+		rectCheck.DeflateRect(m_szMargin);
+		//rectCheck.left++;
+		rectCheck.right = rectCheck.left + sizeCheckBox.cx;
+		rectCheck.top = rectCheck.CenterPoint().y - sizeCheckBox.cx / 2;
+
+		rectCheck.bottom = rectCheck.top + sizeCheckBox.cy;
+
+		const BOOL bIsHighlighted = (IsHighlighted() || IsFocused()) && !IsDisabled();
+		int nState = 0;
+
+		if (m_bIsChecked == 2)
+		{
+			nState = 2;
+		}
+		else if (IsChecked() || (IsPressed() && bIsHighlighted))
+		{
+			nState = 1;
+		}
+
+		CMFCVisualManager::GetInstance()->OnDrawCheckBoxEx(pDC, rectCheck, nState,
+			bIsHighlighted, IsPressed() && bIsHighlighted, !IsDisabled());
+
+		// Draw text:
+		COLORREF clrTextOld = (COLORREF)-1;
+
+		if (m_bIsDisabled)
+		{
+			if (m_bQuickAccessMode)
+			{
+				clrTextOld = pDC->SetTextColor(CMFCVisualManager::GetInstance()->GetRibbonQuickAccessToolBarTextColor(TRUE));
+			}
+			else
+			{
+				clrTextOld = pDC->SetTextColor(CMFCVisualManager::GetInstance()->GetToolbarDisabledTextColor());
+			}
+		}
+
+		CRect rectText = m_rect;
+		rectText.left = rectCheck.right + nTextMarginLeft;
+
+		DrawRibbonText(pDC, m_strText, rectText, DT_SINGLELINE | DT_VCENTER);
+
+		if (clrTextOld != (COLORREF)-1)
+		{
+			pDC->SetTextColor(clrTextOld);
+		}
+
+		if (IsFocused())
+		{
+			CRect rectFocus = rectText;
+			rectFocus.OffsetRect(-nTextMarginLeft / 2, 0);
+			rectFocus.DeflateRect(0, 2);
+
+			pDC->DrawFocusRect(rectFocus);
+		}
+	}
+};
 
 static void AddRibbonButton( CMFCRibbonPanel *pPanel, int NameID, UINT CommandID, int ImageOffset = -1, enum _ButtonDisplayMode Mode = TEXT )
 {
 	CValidatedString strTemp;
 	if( NameID > 0 )
 		strTemp.LoadString( NameID );
-	pPanel->Add( new CMFCRibbonButton( CommandID, strTemp, Mode == TEXT || Mode == LARGEONLY ? -1 : ImageOffset, Mode == TEXT || Mode == SMALL ? -1 : ImageOffset) );
+	CMFCRibbonButton *pTemp = new CMFCRibbonButton( CommandID, strTemp, Mode == TEXT || Mode == LARGEONLY ? -1 : ImageOffset, Mode == TEXT || Mode == SMALL ? -1 : ImageOffset);
+	pPanel->Add( pTemp );
 }
 
 static void AddRibbonText( CMFCRibbonPanel *pPanel, int NameID )
@@ -150,7 +257,7 @@ static void AddRibbonCheckbox( CMFCRibbonPanel *pPanel, int NameID, UINT Command
 	CString strTemp;
 	if( NameID > 0 )
 		strTemp.LoadString( NameID );
-	pPanel->Add( new CMFCRibbonCheckBox( CommandID, strTemp ) );
+	pPanel->Add( new CMyMFCRibbonCheckBox( CommandID, strTemp ) );
 }
 
 static CMFCRibbonComboBox *AddRibbonCombobox( CMFCRibbonPanel *pPanel, int NameID, UINT CommandID, int Image )
@@ -376,6 +483,26 @@ void CMainFrame::CreateBackgroundPanel( CMFCRibbonCategory* pCategory )
 
 	AddRibbonButton( pPanelBackground, IDS_RIBBON_OPEN, ID_BACKGROUND_OPEN, 1, LARGE );
 	AddRibbonButton( pPanelBackground, IDS_RIBBON_BACKGROUND_DELETE, ID_BACKGROUND_DELETE, 95, LARGE );
+}
+
+void CMainFrame::CreateOptionsPanel( CMFCRibbonCategory* pCategory )
+{
+	CMFCRibbonPanel* pPanelOptions = AddPanel( pCategory, IDS_RIBBON_OPTIONS, m_PanelImages.ExtractIcon(33) );
+
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_LABELS, ID_VIEW_LABELS );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_ANGLES, ID_VIEW_ANGLES );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_ANICROP, ID_VIEW_ANICROP );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_DIMENSIONS, ID_VIEW_DIMENSIONS );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_GROUNDDIMENSIONS, ID_VIEW_GROUNDDIMENSIONS );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_DRAWINGLAYERDIMENSIONS, ID_VIEW_DRAWINGLAYERDIMENSIONS );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_USEDIAMETER, ID_VIEW_USEDIAMETER );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_LARGEFONT, ID_VIEW_LARGEFONT );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_SOLIDLINKS, ID_VIEW_SOLIDLINKS );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_AUTOGRID, ID_VIEW_SHOWGRID );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_USERGRID, ID_VIEW_EDITGRID );
+	//AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_PARTS, ID_VIEW_PARTS );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_MOMENTUM, ID_EDIT_MOMENTUM );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_DEBUG, ID_VIEW_DEBUG );
 }
 
 void CMainFrame::CreateBackgroundViewPanel( CMFCRibbonCategory* pCategory )
@@ -771,6 +898,12 @@ void CMainFrame::CreateBackgroundCategory( void )
 	CreateBackgroundViewPanel( pCategoryBackground );
 }
 
+void CMainFrame::CreateOptionsCategory( void )
+{
+	CMFCRibbonCategory* pCategoryOptions = CreateCategory( &m_wndRibbonBar, IDS_RIBBON_OPTIONS );
+	CreateOptionsPanel( pCategoryOptions );
+}
+
 void CMainFrame::CreateHomeCategory( void )
 {
 	CMFCRibbonCategory* pCategoryHome = CreateCategory( &m_wndRibbonBar, IDS_RIBBON_HOME );
@@ -828,6 +961,7 @@ void CMainFrame::InitializeRibbon()
 	#if defined( LINKAGE_USE_DIRECT2D )
 		CreateBackgroundCategory();
 	#endif
+	CreateOptionsCategory();
 	CreateHelpCategory();
 	CreateQuickAccessCommands();
 	CreateHelpButtons();
@@ -860,7 +994,61 @@ class CMFCVisualManagerWindows7Dave : public CMFCVisualManagerWindows7
 public:
 	CMFCVisualManagerWindows7Dave() {}
 	virtual ~CMFCVisualManagerWindows7Dave() {}
+
+	void SetButtonTheme( HTHEME htheme ) { m_hThemeButton = htheme; }
+	HTHEME GetButtonTheme( void ) { return m_hThemeButton; }
 	
+	void OnDrawCheckBoxEx(CDC *pDC, CRect rect, int nState, BOOL bHighlighted, BOOL bPressed, BOOL bEnabled)
+	{
+		/*
+		if (CMFCToolBarImages::m_bIsDrawOnGlass)
+		{
+			CDrawingManager dm(*pDC);
+
+			rect.DeflateRect(1, 1);
+
+			dm.DrawRect(rect, bEnabled ? GetGlobalData()->clrWindow : GetGlobalData()->clrBarFace, GetGlobalData()->clrBarShadow);
+
+			if (nState == 1)
+			{
+				CMenuImages::Draw(pDC, CMenuImages::IdCheck, rect, CMenuImages::ImageBlack);
+			}
+
+			return;
+		}*/
+
+		if (bHighlighted)
+		{
+			pDC->DrawFocusRect(rect);
+		}
+
+		rect.DeflateRect(1, 1);
+		pDC->FillSolidRect(&rect, bEnabled ? GetGlobalData()->clrWindow : GetGlobalData()->clrBarFace);
+		//pDC->Draw3dRect(&rect, GetGlobalData()->clrBarDkShadow, GetGlobalData()->clrBarHilite);
+		pDC->Draw3dRect(&rect, GetGlobalData()->clrBarDkShadow, GetGlobalData()->clrBarShadow);
+
+		rect.DeflateRect(1, 1);
+		//pDC->Draw3dRect(&rect, GetGlobalData()->clrBarShadow, GetGlobalData()->clrBarLight);
+		pDC->Draw3dRect(&rect, GetGlobalData()->clrBarShadow, GetGlobalData()->clrBarLight);
+
+		if (nState == 1)
+		{
+			// Do a small adjustment to better center the checkmark.
+			rect.top -= (int)( GetGlobalData()->GetRibbonImageScale() * 1 );
+			rect.bottom -= (int)( GetGlobalData()->GetRibbonImageScale() * 1 );
+			CMenuImages::Draw(pDC, CMenuImages::IdCheck, rect, CMenuImages::ImageBlack);
+		}
+		else if (nState == 2)
+		{
+			rect.DeflateRect(1, 1);
+
+			CBrush br;
+			br.CreateHatchBrush(HS_DIAGCROSS, GetGlobalData()->clrBtnText);
+
+			pDC->FillRect(rect, &br);
+		}
+	}
+
 	virtual BOOL DrawTextOnGlass(
 		CDC* pDC,
 		CString strText,
@@ -897,6 +1085,510 @@ public:
 			CDC* pDC,  
 			CMFCRibbonButtonsGroup* pGroup,  
 			CRect rectGroup) { return 0; }
+
+		COLORREF OnFillRibbonButton(CDC* pDC, CMFCRibbonButton* pButton)
+		{
+			ASSERT_VALID(pDC);
+			ASSERT_VALID(pButton);
+
+			if (!CanDrawImage())
+			{
+				return CMFCVisualManagerWindows::OnFillRibbonButton(pDC, pButton);
+			}
+
+			BOOL bIsMenuMode = pButton->IsMenuMode();
+
+			CRect rect(pButton->GetRect());
+
+			CMFCControlRenderer* pRenderer = NULL;
+			CMFCVisualManagerBitmapCache* pCache = NULL;
+			int index = 0;
+
+			BOOL bDisabled    = pButton->IsDisabled();
+			BOOL bWasDisabled = bDisabled;
+			BOOL bFocused     = pButton->IsFocused();
+			BOOL bDroppedDown = pButton->IsDroppedDown();
+			BOOL bPressed     = pButton->IsPressed() && !bIsMenuMode;
+			BOOL bChecked     = pButton->IsChecked();
+			BOOL bHighlighted = pButton->IsHighlighted() || bFocused;
+
+			BOOL bDefaultPanelButton = pButton->IsDefaultPanelButton() && !pButton->IsQATMode();
+			if (bFocused)
+			{
+				bDisabled = FALSE;
+			}
+
+			if (pButton->IsDroppedDown() && !bIsMenuMode)
+			{
+				bChecked     = TRUE;
+				bPressed     = FALSE;
+				bHighlighted = FALSE;
+			}
+
+			CMFCRibbonBaseElement::RibbonElementLocation location = pButton->GetLocationInGroup();
+
+			if (pButton->IsKindOf(RUNTIME_CLASS(CMFCRibbonEdit)))
+			{
+				COLORREF color1 = m_clrRibbonEdit;
+				if (bDisabled)
+				{
+					color1 = m_clrRibbonEditDisabled;
+				}
+				else if (bChecked || bHighlighted)
+				{
+					color1 = m_clrRibbonEditHighlighted;
+				}
+
+				COLORREF color2 = color1;
+
+				rect.left = pButton->GetCommandRect().left;
+
+				{
+					CDrawingManager dm(*pDC);
+					dm.FillGradient(rect, color1, color2, TRUE);
+				}
+
+				return (COLORREF)-1;
+			}
+
+			if (bChecked && bIsMenuMode && !pButton->IsGalleryIcon())
+			{
+				bChecked = FALSE;
+			}
+
+			if (location != CMFCRibbonBaseElement::RibbonElementNotInGroup && pButton->IsShowGroupBorder())
+			{
+				if (!pButton->GetMenuRect().IsRectEmpty())
+				{
+					CRect rectC = pButton->GetCommandRect();
+					CRect rectM = pButton->GetMenuRect();
+
+					CMFCControlRenderer* pRendererC = NULL;
+					CMFCControlRenderer* pRendererM = NULL;
+
+					CMFCVisualManagerBitmapCache* pCacheC = NULL;
+					CMFCVisualManagerBitmapCache* pCacheM = NULL;
+
+					if (location == CMFCRibbonBaseElement::RibbonElementSingleInGroup)
+					{
+						pRendererC = &m_ctrlRibbonBtnGroupMenu_F[0];
+						pRendererM = &m_ctrlRibbonBtnGroupMenu_L[1];
+
+						pCacheC = &m_cacheRibbonBtnGroupMenu_F[0];
+						pCacheM = &m_cacheRibbonBtnGroupMenu_L[1];
+					}
+					else if (location == CMFCRibbonBaseElement::RibbonElementFirstInGroup)
+					{
+						pRendererC = &m_ctrlRibbonBtnGroupMenu_F[0];
+						pRendererM = &m_ctrlRibbonBtnGroupMenu_F[1];
+
+						pCacheC = &m_cacheRibbonBtnGroupMenu_F[0];
+						pCacheM = &m_cacheRibbonBtnGroupMenu_F[1];
+					}
+					else if (location == CMFCRibbonBaseElement::RibbonElementLastInGroup)
+					{
+						pRendererC = &m_ctrlRibbonBtnGroupMenu_L[0];
+						pRendererM = &m_ctrlRibbonBtnGroupMenu_L[1];
+
+						pCacheC = &m_cacheRibbonBtnGroupMenu_L[0];
+						pCacheM = &m_cacheRibbonBtnGroupMenu_L[1];
+					}
+					else
+					{
+						pRendererC = &m_ctrlRibbonBtnGroupMenu_M[0];
+						pRendererM = &m_ctrlRibbonBtnGroupMenu_M[1];
+
+						pCacheC = &m_cacheRibbonBtnGroupMenu_M[0];
+						pCacheM = &m_cacheRibbonBtnGroupMenu_M[1];
+					}
+
+					int indexC = 0;
+					int indexM = 0;
+
+					BOOL bHighlightedC = pButton->IsCommandAreaHighlighted();
+					BOOL bHighlightedM = pButton->IsMenuAreaHighlighted();
+
+					if (bChecked)
+					{
+						indexC = 3;
+
+						if (bHighlighted)
+						{
+							indexM = 5;
+						}
+					}
+
+					if (bDisabled)
+					{
+						if (bChecked)
+						{
+							indexC = 5;
+							indexM = 4;
+						}
+					}
+					else
+					{
+						if (pButton->IsDroppedDown() && !bIsMenuMode)
+						{
+							indexC = pButton->IsChecked() ? 3 : 6;
+							indexM = 3;
+						}
+						else
+						{
+							if (bFocused)
+							{
+								indexC = 6;
+								indexM = 5;
+							}
+
+							if (bHighlightedC || bHighlightedM)
+							{
+								if (bChecked)
+								{
+									indexC = bHighlightedC ? 4 : 3;
+								}
+								else
+								{
+									indexC = bHighlightedC ? 1 : 6;
+								}
+
+								indexM = bHighlightedM ? 1 : 5;
+							}
+
+							if (bPressed)
+							{
+								if (bHighlightedC)
+								{
+									indexC = 2;
+								}
+							}
+						}
+					}
+
+					if (indexC != -1 && indexM != -1)
+					{
+						int nCacheIndex = -1;
+						if (pCacheC != NULL)
+						{
+							CSize size(rectC.Size());
+							nCacheIndex = pCacheC->FindIndex(size);
+							if (nCacheIndex == -1)
+							{
+								nCacheIndex = pCacheC->Cache(size, *pRendererC);
+							}
+						}
+
+						if (nCacheIndex != -1)
+						{
+							pCacheC->Get(nCacheIndex)->Draw(pDC, rectC, indexC);
+						}
+						else
+						{
+							pRendererC->Draw(pDC, rectC, indexC);
+						}
+
+						nCacheIndex = -1;
+						if (pCacheM != NULL)
+						{
+							CSize size(rectM.Size());
+							nCacheIndex = pCacheM->FindIndex(size);
+							if (nCacheIndex == -1)
+							{
+								nCacheIndex = pCacheM->Cache(size, *pRendererM);
+							}
+						}
+
+						if (nCacheIndex != -1)
+						{
+							pCacheM->Get(nCacheIndex)->Draw(pDC, rectM, indexM);
+						}
+						else
+						{
+							pRendererM->Draw(pDC, rectM, indexM);
+						}
+					}
+
+					return(COLORREF)-1;
+				}
+				else
+				{
+					if (location == CMFCRibbonBaseElement::RibbonElementSingleInGroup)
+					{
+						pRenderer = &m_ctrlRibbonBtnGroup_S;
+						pCache    = &m_cacheRibbonBtnGroup_S;
+					}
+					else if (location == CMFCRibbonBaseElement::RibbonElementFirstInGroup)
+					{
+						pRenderer = &m_ctrlRibbonBtnGroup_F;
+						pCache    = &m_cacheRibbonBtnGroup_F;
+					}
+					else if (location == CMFCRibbonBaseElement::RibbonElementLastInGroup)
+					{
+						pRenderer = &m_ctrlRibbonBtnGroup_L;
+						pCache    = &m_cacheRibbonBtnGroup_L;
+					}
+					else
+					{
+						pRenderer = &m_ctrlRibbonBtnGroup_M;
+						pCache    = &m_cacheRibbonBtnGroup_M;
+					}
+
+					if (bChecked)
+					{
+						index = 3;
+					}
+
+					if (bDisabled && !bFocused)
+					{
+						index = 0;
+					}
+					else
+					{
+						if (bPressed)
+						{
+							if (bHighlighted)
+							{
+								index = 2;
+							}
+						}
+						else if (bHighlighted)
+						{
+							index++;
+						}
+					}
+				}
+			}
+			else if (bDefaultPanelButton)
+			{
+				if (bPressed)
+				{
+					if (bHighlighted)
+					{
+						index = 2;
+					}
+				}
+				else if (bHighlighted)
+				{
+					index = 1;
+				}
+				else if (bChecked)
+				{
+					index = 2;
+				}
+
+				if (bFocused && !bDroppedDown && m_ctrlRibbonBtnDefault.GetImageCount () > 3)
+				{
+					index = 3;
+				}
+
+				if (index != -1)
+				{
+					pRenderer = &m_ctrlRibbonBtnDefault;
+					CMFCVisualManagerBitmapCache* pCache = &m_cacheRibbonBtnDefault;
+
+					const CMFCControlRendererInfo& params = pRenderer->GetParams();
+
+					int nCacheIndex = -1;
+					if (pCache != NULL)
+					{
+						CSize size(params.m_rectImage.Width(), rect.Height());
+						nCacheIndex = pCache->FindIndex(size);
+						if (nCacheIndex == -1)
+						{
+							nCacheIndex = pCache->CacheY(size.cy, *pRenderer);
+						}
+					}
+
+					if (nCacheIndex != -1)
+					{
+						pCache->Get(nCacheIndex)->DrawY(pDC, rect, CSize(params.m_rectInter.left, params.m_rectImage.right - params.m_rectInter.right), index);
+
+						return GetGlobalData()->clrBtnText;
+					}
+				}
+			}
+			else if ((!bDisabled &&(bPressed || bChecked || bHighlighted)) || (bDisabled && bFocused))
+			{
+				if (!pButton->GetMenuRect().IsRectEmpty()/* &&
+														 (pButton->IsHighlighted() || bChecked)*/)
+				{
+					CRect rectC = pButton->GetCommandRect();
+					CRect rectM = pButton->GetMenuRect();
+
+					CMFCControlRenderer* pRendererC = pButton->IsMenuOnBottom() ? &m_ctrlRibbonBtnMenuV[0] : &m_ctrlRibbonBtnMenuH[0];
+					CMFCControlRenderer* pRendererM = pButton->IsMenuOnBottom() ? &m_ctrlRibbonBtnMenuV[1] : &m_ctrlRibbonBtnMenuH[1];
+
+					int indexC = -1;
+					int indexM = -1;
+
+					BOOL bDropped      = pButton->IsDroppedDown();
+					BOOL bHighlightedC = pButton->IsCommandAreaHighlighted();
+					BOOL bHighlightedM = pButton->IsMenuAreaHighlighted();
+
+					if (bDisabled)
+					{
+						if (bHighlightedC || bHighlightedM)
+						{
+							indexC = 4;
+							indexM = 4;
+
+							if (bHighlightedM)
+							{
+								indexM = 0;
+
+								if (bDropped && !bIsMenuMode)
+								{
+									indexC = 5;
+									indexM = 2;
+								}
+								else if (bPressed)
+								{
+									indexM = 1;
+								}
+							}
+						}
+					}
+					else
+					{
+						if (bDropped && !bIsMenuMode)
+						{
+							indexC = 5;
+							indexM = 2;
+						}
+						else
+						{
+							if (bFocused)
+							{
+								indexC = 5;
+								indexM = 4;
+							}
+
+							if (bChecked)
+							{
+								indexC = 2;
+								indexM = 2;
+							}
+
+							if (bHighlightedC || bHighlightedM)
+							{
+								indexM = 4;
+
+								if (bPressed)
+								{
+									if (bHighlightedC)
+									{
+										indexC = 1;
+									}
+									else if (bHighlightedM)
+									{
+										indexC = bChecked ? 3 : 5;
+									}
+								}
+								else
+								{
+									indexC = bChecked ? 3 : 0;
+
+									if (bHighlightedM)
+									{
+										indexC = bChecked ? 3 : 5;
+										indexM = 0;
+									}
+								}
+							}
+						}
+					}
+
+					if (indexC != -1)
+					{
+						pRendererC->Draw(pDC, rectC, indexC);
+					}
+
+					if (indexM != -1)
+					{
+						pRendererM->Draw(pDC, rectM, indexM);
+					}
+
+					return(COLORREF)-1;
+				}
+				else
+				{
+					index = -1;
+
+					pRenderer = &m_ctrlRibbonBtn[0];
+					if (rect.Height() > pRenderer->GetParams().m_rectImage.Height() * 1.5 && m_ctrlRibbonBtn[1].IsValid())
+					{
+						pRenderer = &m_ctrlRibbonBtn[1];
+					}
+
+					if (bDisabled && bFocused)
+					{
+						if (pRenderer->GetImageCount() > 4)
+						{
+							index = 4;
+						}
+						else
+						{
+							index = 0;
+						}
+					}
+
+					if (!bDisabled)
+					{
+						if (bChecked)
+						{
+							index = 2;
+						}
+
+						if (bPressed)
+						{
+							if (bHighlighted)
+							{
+								index = 1;
+							}
+						}
+						else if (bHighlighted)
+						{
+							index++;
+						}
+					}
+				}
+			}
+
+			COLORREF clrText = bWasDisabled ? GetGlobalData()->clrGrayedText : COLORREF(-1);
+
+			if (pRenderer != NULL)
+			{
+				if (index != -1)
+				{
+					int nCacheIndex = -1;
+					if (pCache != NULL)
+					{
+						CSize size(rect.Size());
+						nCacheIndex = pCache->FindIndex(size);
+						if (nCacheIndex == -1)
+						{
+							nCacheIndex = pCache->Cache(size, *pRenderer);
+						}
+					}
+
+					if (nCacheIndex != -1)
+					{
+						pCache->Get(nCacheIndex)->Draw(pDC, rect, index);
+					}
+					else
+					{
+						pRenderer->Draw(pDC, rect, index);
+					}
+
+					if (!bWasDisabled)
+					{
+						clrText = GetGlobalData()->clrBtnText;
+					}
+				}
+			}
+
+			return clrText;
+		}
 };
 
 IMPLEMENT_DYNCREATE( CMFCVisualManagerWindows7Dave, CMFCVisualManagerWindows7 )
@@ -1094,10 +1786,11 @@ void CMainFrame::OnTimer(UINT_PTR nIDEvent)
 				CreateBackgroundCategory();
 			#endif
 			break;
-		case 4: CreateHelpCategory(); break;
-		case 5: CreateHelpButtons(); break;
-		case 6: CreateQuickAccessCommands(); break;
-		case 7: 
+		case 4: CreateOptionsCategory(); break;
+		case 5: CreateHelpCategory(); break;
+		case 6: CreateHelpButtons(); break;
+		case 7: CreateQuickAccessCommands(); break;
+		case 8: 
 		{
 			KillTimer( nIDEvent ); 
 			SetCursor( AfxGetApp()->LoadStandardCursor( IDC_ARROW ) ); 

@@ -61,6 +61,7 @@ private:
 	CMFCRibbonCategory *CreateCategory( CMyMFCRibbonBar *pRibbonBar, UINT StringId );
 	void CreateHomeCategory( void );
 	void CreateBackgroundCategory( void );
+	void CreateOptionsCategory( void );
 	void CreatePrintingCategory( void );
 	void CreateQuickAccessCommands( void );
 	//void CreateSamplePanel( CMFCRibbonCategory* pCategory );
@@ -77,6 +78,7 @@ private:
 	void CreateHelpButtons( void );
 	void CreateHelpCategory( void );
 	void CreateBackgroundPanel( CMFCRibbonCategory* pCategory );
+	void CreateOptionsPanel( CMFCRibbonCategory* pCategory );
 	void CreateBackgroundViewPanel( CMFCRibbonCategory* pCategory );
 	void CreateHelpPanel( CMFCRibbonCategory* pCategory );
 	void InitializeRibbon();

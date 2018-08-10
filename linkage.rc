@@ -913,6 +913,7 @@ STRINGTABLE
 BEGIN
     IDS_RIBBON_HELP         "Help"
     IDS_RIBBON_BACKGROUNDCAT "&Background"
+	IDS_RIBBON_OPTIONS		"&Preferences"
     IDS_RIBBON_IMAGE        "Image"
     IDS_RIBBON_TRANSPARENCY "Transparency"
     IDS_RIBBON_APPEARANCE   "Appearance"
