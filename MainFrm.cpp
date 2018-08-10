@@ -138,7 +138,7 @@ class CMyMFCRibbonCheckBox : public CMFCRibbonCheckBox
 	CSize GetIntermediateSize(CDC* /*pDC*/)
 	{
 		ASSERT_VALID(this);
-		m_szMargin = CSize(2, 3);
+		m_szMargin = CSize( 2, 3);
 
 		const CSize sizeCheckBox = CSize(AFX_CHECK_BOX_DEFAULT_SIZE, AFX_CHECK_BOX_DEFAULT_SIZE);
 
@@ -162,8 +162,8 @@ class CMyMFCRibbonCheckBox : public CMFCRibbonCheckBox
 
 		// Draw check box:
 		CRect rectCheck = m_rect;
-		rectCheck.top += GetGlobalData()->GetRibbonImageScale();
-		rectCheck.bottom += GetGlobalData()->GetRibbonImageScale();
+		rectCheck.top += (int)( GetGlobalData()->GetRibbonImageScale() );
+		rectCheck.bottom += (int)( GetGlobalData()->GetRibbonImageScale() );
 		rectCheck.DeflateRect(m_szMargin);
 		//rectCheck.left++;
 		rectCheck.right = rectCheck.left + sizeCheckBox.cx;
@@ -380,19 +380,18 @@ void CMainFrame::CreateViewPanel( CMFCRibbonCategory* pCategory )
 	CMFCRibbonButton* pDetailsButton = new CMFCRibbonButton( ID_ALIGN_DETAILSBUTTON, "Details", 69 );
 
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_LABELS, ID_VIEW_LABELS, 10 );
-	AppendMenuItem( pDetailsButton, IDS_RIBBON_ANGLES, ID_VIEW_ANGLES, 12 );
+	//AppendMenuItem( pDetailsButton, IDS_RIBBON_ANGLES, ID_VIEW_ANGLES, 12 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_ANICROP, ID_VIEW_ANICROP, 13 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_DIMENSIONS, ID_VIEW_DIMENSIONS, 15 );
-	AppendMenuItem( pDetailsButton, IDS_RIBBON_GROUNDDIMENSIONS, ID_VIEW_GROUNDDIMENSIONS, 88 );
-	AppendMenuItem( pDetailsButton, IDS_RIBBON_DRAWINGLAYERDIMENSIONS, ID_VIEW_DRAWINGLAYERDIMENSIONS, 88 );
-	AppendMenuItem( pDetailsButton, IDS_RIBBON_USEDIAMETER, ID_VIEW_USEDIAMETER, 108 );
-	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_LARGEFONT, ID_VIEW_LARGEFONT, 78 );
-	AppendMenuItem( pDetailsButton, IDS_RIBBON_SOLIDLINKS, ID_VIEW_SOLIDLINKS, 75 );
+	//AppendMenuItem( pDetailsButton, IDS_RIBBON_GROUNDDIMENSIONS, ID_VIEW_GROUNDDIMENSIONS, 88 );
+	//AppendMenuItem( pDetailsButton, IDS_RIBBON_DRAWINGLAYERDIMENSIONS, ID_VIEW_DRAWINGLAYERDIMENSIONS, 88 );
+	//AppendMenuItem( pDetailsButton, IDS_RIBBON_USEDIAMETER, ID_VIEW_USEDIAMETER, 108 );
+	//AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_LARGEFONT, ID_VIEW_LARGEFONT, 78 );
+	//AppendMenuItem( pDetailsButton, IDS_RIBBON_SOLIDLINKS, ID_VIEW_SOLIDLINKS, 75 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_AUTOGRID, ID_VIEW_SHOWGRID, 85 );
 	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_USERGRID, ID_VIEW_EDITGRID, 97 );
-	//AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_PARTS, ID_VIEW_PARTS, 86 );
-	AppendMenuItem( pDetailsButton, IDS_RIBBON_MOMENTUM, ID_EDIT_MOMENTUM, 94 );
-	AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_DEBUG, ID_VIEW_DEBUG, 81 );
+	//AppendMenuItem( pDetailsButton, IDS_RIBBON_MOMENTUM, ID_EDIT_MOMENTUM, 94 );
+	//AppendMenuItem( pDetailsButton, IDS_RIBBON_VIEW_DEBUG, ID_VIEW_DEBUG, 81 );
 
 	// The menu is only needed in order to make the button work properly.
 	// Without the menu, clicking on the icon in the button will not display
@@ -489,17 +488,17 @@ void CMainFrame::CreateOptionsPanel( CMFCRibbonCategory* pCategory )
 {
 	CMFCRibbonPanel* pPanelOptions = AddPanel( pCategory, IDS_RIBBON_OPTIONS, m_PanelImages.ExtractIcon(33) );
 
-	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_LABELS, ID_VIEW_LABELS );
+	//AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_LABELS, ID_VIEW_LABELS );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_ANGLES, ID_VIEW_ANGLES );
-	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_ANICROP, ID_VIEW_ANICROP );
-	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_DIMENSIONS, ID_VIEW_DIMENSIONS );
+	//AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_ANICROP, ID_VIEW_ANICROP );
+	//AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_DIMENSIONS, ID_VIEW_DIMENSIONS );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_GROUNDDIMENSIONS, ID_VIEW_GROUNDDIMENSIONS );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_DRAWINGLAYERDIMENSIONS, ID_VIEW_DRAWINGLAYERDIMENSIONS );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_USEDIAMETER, ID_VIEW_USEDIAMETER );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_LARGEFONT, ID_VIEW_LARGEFONT );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_SOLIDLINKS, ID_VIEW_SOLIDLINKS );
-	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_AUTOGRID, ID_VIEW_SHOWGRID );
-	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_USERGRID, ID_VIEW_EDITGRID );
+	//AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_AUTOGRID, ID_VIEW_SHOWGRID );
+	//AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_USERGRID, ID_VIEW_EDITGRID );
 	//AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_PARTS, ID_VIEW_PARTS );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_MOMENTUM, ID_EDIT_MOMENTUM );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_DEBUG, ID_VIEW_DEBUG );
@@ -596,31 +595,6 @@ void CMainFrame::AppendMenuItem( CMFCRibbonButton *pButton, UINT StringID, UINT 
 	pButton->AddSubItem( new CMFCRibbonButton( ID, strTemp, BitmapIndex ) );
 }
 
-class MyMenuCheck : public CMFCRibbonCheckBox
-{
-	public:
-	MyMenuCheck( UINT ID, const char *pText ) : CMFCRibbonCheckBox( ID, pText ) {}
-
-	virtual void OnDraw( CDC* pDC )
-	{
-		m_szMargin;
-		CMFCRibbonCheckBox::OnDraw( pDC );
-	}
-};
-
-void CMainFrame::AppendMenuCheck( CMFCRibbonButton *pButton, UINT StringID, UINT ID )
-{
-	CValidatedString strTemp;
-	strTemp.LoadString( StringID );
-
-	CMFCRibbonCheckBox * pTemp = new MyMenuCheck( ID, strTemp );
-
-	pButton->AddSubItem( pTemp );
-}
-
-CMenu *pDerp;
-CMFCRibbonButton *pDerpBut;
-
 void CMainFrame::CreateAlignPanel( CMFCRibbonCategory* pCategory )
 {
 	CMFCRibbonPanel* pPaneAlign = AddPanel( pCategory, IDS_RIBBON_ALIGN, m_PanelImages.ExtractIcon(35) );
@@ -674,9 +648,6 @@ void CMainFrame::CreateAlignPanel( CMFCRibbonCategory* pCategory )
 	static CMenu Menu2;
 	Menu2.CreatePopupMenu();
 	pAlignButton->SetMenu( Menu2.GetSafeHmenu() );
-
-	pDerpBut = pAlignButton;
-	pDerp = &Menu2;
 
 	pPaneAlign->Add( pAlignButton );
 }
