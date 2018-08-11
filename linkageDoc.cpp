@@ -408,6 +408,8 @@ bool CLinkageDoc::ReadIn( CArchive& ar, bool bSelectAll, bool bObeyUnscaleOffset
 			pConnector->SetName( Value );
 			Value = pNode->GetAttribute( "locked" );
 			pConnector->SetLocked( Value == "true" );
+			Value = pNode->GetAttribute( "showaspoint" );
+			pConnector->SetShowAsPoint( Value == "true" );
 			Value = pNode->GetAttribute( "layer" );
 			if( Value.IsEmpty() || atoi( Value ) == 0 )
 				pConnector->SetLayers( MECHANISMLAYER );
@@ -947,6 +949,7 @@ bool CLinkageDoc::WriteOut( CArchive& ar, bool bUseBackground, bool bSelectedOnl
 		AppendXMLAttribute( TempString, "slideradius", pConnector->GetSlideRadius(), pConnector->GetSlideRadius() != 0 && pConnector->IsSlider() );
 		AppendXMLAttribute( TempString, "color", (unsigned int)(COLORREF)pConnector->GetColor() );
 		AppendXMLAttribute( TempString, "usercolor", pConnector->IsUserColor() );
+		AppendXMLAttribute( TempString, "showaspoint", pConnector->IsShowAsPoint() && pConnector->GetLinkCount() <= 1, pConnector->IsShowAsPoint() && pConnector->GetLinkCount() <= 1 );
 
 		TempString += bSlideLimits ? ">" : "/>";
 

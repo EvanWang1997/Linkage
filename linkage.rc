@@ -9,8 +9,7 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
-
+#include "afxres.h"
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -317,7 +316,7 @@ END
 // Dialog
 //
 
-IDD_CONNECTOR_PROPERTIES DIALOGEX 0, 0, 246, 280
+IDD_CONNECTOR_PROPERTIES DIALOGEX 0, 0, 246, 291
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Connector Properties"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -326,28 +325,29 @@ BEGIN
     EDITTEXT        IDC_EDIT3,70,16,128,12,ES_AUTOHSCROLL
     CONTROL         "Connector",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,45,38,49,10
     CONTROL         "Draw Motion Path",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,133,38,73,10
-    CONTROL         "Anchor",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,45,59,39,10
-    CONTROL         "Rotating Input Anchor of RPM:",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON,45,80,109,10
-    EDITTEXT        IDC_EDIT1,157,80,42,12,ES_AUTOHSCROLL
-    LTEXT           "Oscillation Limit Angle:",IDC_LIMITPROMPT,61,94,74,8
-    EDITTEXT        IDC_EDIT8,157,93,42,12,ES_AUTOHSCROLL
-    LTEXT           "Oscillation Start Angle:",IDC_LIMITPROMPT2,61,107,73,8
-    EDITTEXT        IDC_EDIT9,157,106,42,12,ES_AUTOHSCROLL
-    CONTROL         "Always Manual Operation",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,61,119,97,10
-    CONTROL         "Locked",IDC_LOCKED2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,139,38,10
-    CONTROL         "Slide Path Radius:",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,157,73,10
-    EDITTEXT        IDC_EDIT7,157,155,42,12,ES_AUTOHSCROLL
-    LTEXT           "Slide Path Minimum Radius:",IDC_SLIDERADIUSMINPROMPT,62,169,91,8
-    LTEXT           "Static",IDC_SLIDRADIUSMINVALUE,161,169,33,8
-    LTEXT           "Color:",IDC_STATIC,45,188,20,8
-    CONTROL         "",IDC_COLOR,"Static",SS_GRAYRECT | SS_NOTIFY,157,185,42,13
-    LTEXT           "Coordinates:",IDC_STATIC,45,208,42,8
-    EDITTEXT        IDC_EDIT2,102,206,43,12,ES_AUTOHSCROLL
-    LTEXT           ",",IDC_STATIC,148,208,8,8
-    EDITTEXT        IDC_EDIT4,156,206,43,12,ES_AUTOHSCROLL
-    LTEXT           "Fastened to Link",IDC_FASTENEDTO,45,229,139,8
-    DEFPUSHBUTTON   "OK",IDOK,49,260,66,14
-    PUSHBUTTON      "Cancel",IDCANCEL,131,260,66,14
+    CONTROL         "Draw as Point",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,133,51,60,10
+    CONTROL         "Anchor",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,45,70,39,10
+    CONTROL         "Rotating Input Anchor of RPM:",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON,45,91,109,10
+    EDITTEXT        IDC_EDIT1,157,91,42,12,ES_AUTOHSCROLL
+    LTEXT           "Oscillation Limit Angle:",IDC_LIMITPROMPT,61,105,74,8
+    EDITTEXT        IDC_EDIT8,157,104,42,12,ES_AUTOHSCROLL
+    LTEXT           "Oscillation Start Angle:",IDC_LIMITPROMPT2,61,118,73,8
+    EDITTEXT        IDC_EDIT9,157,117,42,12,ES_AUTOHSCROLL
+    CONTROL         "Always Manual Operation",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,61,130,97,10
+    CONTROL         "Locked",IDC_LOCKED2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,150,38,10
+    CONTROL         "Slide Path Radius:",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,45,168,73,10
+    EDITTEXT        IDC_EDIT7,157,166,42,12,ES_AUTOHSCROLL
+    LTEXT           "Slide Path Minimum Radius:",IDC_SLIDERADIUSMINPROMPT,62,180,91,8
+    LTEXT           "Static",IDC_SLIDRADIUSMINVALUE,161,180,33,8
+    LTEXT           "Color:",IDC_STATIC,45,199,20,8
+    CONTROL         "",IDC_COLOR,"Static",SS_GRAYRECT | SS_NOTIFY,157,196,42,13
+    LTEXT           "Coordinates:",IDC_STATIC,45,219,42,8
+    EDITTEXT        IDC_EDIT2,102,217,43,12,ES_AUTOHSCROLL
+    LTEXT           ",",IDC_STATIC,148,219,8,8
+    EDITTEXT        IDC_EDIT4,156,217,43,12,ES_AUTOHSCROLL
+    LTEXT           "Fastened to Link",IDC_FASTENEDTO,45,240,139,8
+    DEFPUSHBUTTON   "OK",IDOK,49,271,66,14
+    PUSHBUTTON      "Cancel",IDCANCEL,131,271,66,14
 END
 
 IDD_SELECT_IMAGE_OPTION DIALOGEX 0, 0, 249, 75
@@ -644,7 +644,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 237
         TOPMARGIN, 7
-        BOTTOMMARGIN, 264
+        BOTTOMMARGIN, 275
     END
 
     IDD_SELECT_IMAGE_OPTION, DIALOG
@@ -913,13 +913,13 @@ STRINGTABLE
 BEGIN
     IDS_RIBBON_HELP         "Help"
     IDS_RIBBON_BACKGROUNDCAT "&Background"
-	IDS_RIBBON_OPTIONS		"Preference&s"
     IDS_RIBBON_IMAGE        "Image"
     IDS_RIBBON_TRANSPARENCY "Transparency"
     IDS_RIBBON_APPEARANCE   "Appearance"
     IDS_RIBBON_BACKGROUND_DELETE "&Remove"
     ID_SIMULATION_ONECYCLE  "Run one cycle of the simulation and pause.\nRun One Cycle"
     ID_SIMULATION_ONECYCLEX "Run the simulation and only show the end of the cycle.\nJump One Cycle"
+    IDS_RIBBON_OPTIONS      "Preference&s"
 END
 
 STRINGTABLE
@@ -957,7 +957,6 @@ END
 STRINGTABLE
 BEGIN
     ID_INSERT_MEASUREMENT   "Add a measurement line to the drawing layer.\nInsert Measurement"
-	ID_INSERT_ANGLEMEASUREMENT "Add a polyline to the drawing layer showing the angle between the segments.\nInsert Angle Measurement"
     IDS_RIBBON_INSERTMEASUREMENT "Measurement"
     IDS_SAMPLE_THROW        "Linear actuator throw distance test.\nThrow Distance Test"
     IDS_SAMPLE_PISTON       "Piston and crank mechanism.\nPiston and Crank Mechanism"
@@ -967,6 +966,8 @@ BEGIN
     ID_INSERT_CIRCLE        "Add a circle to the drawing layer\nInsert Circle"
     IDS_SAMPLE_LIFTER       "Two-stage ball lifting mechanism.\nBall Lifter"
     IDS_RIBBON_REDO         "Redo"
+    ID_INSERT_ANGLEMEASUREMENT 
+                            "Add a polyline to the drawing layer showing the angle between the segments.\nInsert Angle Measurement"
 END
 
 STRINGTABLE
@@ -987,6 +988,7 @@ END
 STRINGTABLE
 BEGIN
     ID_DIMENSION_SCALE      "Scale the selected elements by a percentage.\nScale"
+    ID_SIMULATION_RUNFAST   "Run the mechanism faster than real-time, showing the animation in the window.\nRun Fast"
     IDS_DIMENSION_SETLOCATION "Location..."
     IDS_DIMENSION_SETLENGTH "Length/Distance..."
     IDS_DIMENSION_SETLENGTHP "Length/Distance..."
@@ -1295,16 +1297,19 @@ BEGIN
     IDS_RIBBON_VIEW_ZOOMOUT "Out"
     IDS_RIBBON_SIMULATION   "Simulate"
     IDS_RIBBON_RUN          "Run\nr"
-	IDS_RIBBON_RUNFAST		"Run Fast"
     IDS_RIBBON_SIMULATE     "Simulate"
     IDS_RIBBON_STOP         "Stop\ns"
-	ID_SIMULATION_RUN       "Run the mechanism in real-time, showing the animation in the window.\nRun"
-	ID_SIMULATION_RUNFAST   "Run the mechanism faster than real-time, showing the animation in the window.\nRun Fast"
-	ID_SIMULATION_STOP      "Stop the mechanism animation and reset it to its original condition.\nStop"
+    ID_SIMULATION_RUN       "Run the mechanism in real-time, showing the animation in the window.\nRun"
+    ID_SIMULATION_STOP      "Stop the mechanism animation and reset it to its original condition.\nStop"
     ID_SIMULATION_SIMULATE  "Simulate the mechanism movement and show the results of any drawing connectors in the window.\nSimulate"
     IDS_RIBBON_LINKPROPERTIES "Link"
     IDS_RIBBON_SAMPLES      "Open Sample Mechanism"
     IDS_RIBBON_INSERT       "Insert"
+END
+
+STRINGTABLE
+BEGIN
+    IDS_RIBBON_RUNFAST      "Run Fast"
 END
 
 STRINGTABLE

@@ -38,6 +38,7 @@
 #define IDC_RPMPROMPT2                  1009
 #define IDC_RADIO4                      1010
 #define IDC_SPIN1                       1010
+#define IDC_CHECK8                      1010
 #define IDC_RADIO5                      1011
 #define IDC_RADIO6                      1011
 #define IDC_SPIN2                       1011
@@ -98,7 +99,7 @@
 #define IDS_RIBBON_BACKGROUND_DELETE    3032
 #define ID_SIMULATION_ONECYCLE          3033
 #define ID_SIMULATION_ONECYCLEX         3034
-#define IDS_RIBBON_OPTIONS				3035
+#define IDS_RIBBON_OPTIONS              3035
 #define IDB_INSERT_POPUP_GALLERY        4000
 #define IDB_NAVIGATION_LARGE_HC         4100
 #define IDB_PAGES                       4101
@@ -107,6 +108,7 @@
 #define IDB_PAGES_SMALL_HC              4104
 #define IDR_THEME_MENU                  4105
 #define ID_SET_STYLE                    4106
+#define IDS_RIBBON_RUNFAST              4111
 #define ID_TOOLS_OPTIONS                4116
 #define ID_VIEW_CAPTION_BAR             4117
 #define IDB_INFO                        4118
@@ -198,7 +200,6 @@
 #define ID_DIMENSION_SCALE              4208
 #define ID_DIMENSION_ANGLE              4209
 #define ID_SIMULATION_RUNFAST           4210
-#define IDS_RIBBON_RUNFAST              4111
 #define IDS_DIMENSION_SETLOCATION       4214
 #define IDS_DIMENSION_SETLENGTH         4215
 #define IDS_DIMENSION_SETLENGTHP        4216
@@ -459,7 +460,7 @@
 #define IDS_SAMPLE_LIFTER               5240
 #define ID_EDIT_SELECTLINK              5241
 #define IDS_RIBBON_REDO                 5242
-#define ID_INSERT_ANGLEMEASUREMENT		5243
+#define ID_INSERT_ANGLEMEASUREMENT      5243
 #define IDC_COPYRIGHT                   5303
 #define IDC_COMBO1                      5303
 #define IDC_COMBO2                      5304

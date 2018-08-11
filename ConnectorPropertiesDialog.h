@@ -72,4 +72,7 @@ public:
 	CButton m_LockControl;
 	BOOL m_bLocked;
 	bool m_bColorIsSet;
+	BOOL m_bDrawAsPoint;
+	CButton m_AsPointControl;
+	int m_LinkCount;
 };

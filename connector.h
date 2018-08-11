@@ -52,6 +52,7 @@ public:
 	void SetAsDrawing( bool bSet ) { m_bDrawingConnector = bSet; }
 	void SetAsInput( bool bSet ) { m_bInput = bSet; }
 	void SetAsAnchor( bool bSet ) { m_bAnchor = bSet; }
+	void SetShowAsPoint( bool bSet ) { m_bShowAsPoint = bSet; }
 	void SetAlwaysManual( bool bSet ) { m_bAlwaysManual = bSet; }
 	void Select( bool bSelected );
 	CList< class CLink*, class CLink* >* GetLinkList( void ) { return &m_Links; }
@@ -82,6 +83,7 @@ public:
 	bool IsTempFixed( void ) { return m_bTempFixed; }
 	bool IsFixed( void ) { return m_bTempFixed | m_bAnchor | m_bInput; }
 	bool IsAlwaysManual( void ) { return m_bAlwaysManual; }
+	bool IsShowAsPoint( void ) { return m_bShowAsPoint; }
 	int GetSelectedLinkCount( void );
 	bool GetSlideLimits( class CConnector *&pConnector1, class CConnector *&pConnector2 ) { pConnector1 = m_pSlideLimits[0]; pConnector2 = m_pSlideLimits[1]; return IsSlider(); }
 	bool GetSlideLimits( CFPoint &Point1, CFPoint &Point2 );
@@ -137,6 +139,7 @@ private:
 	double m_OriginalSlideRadius;
 	double m_LimitAngle;
 	double m_InputStartOffset;
+	bool m_bShowAsPoint;
 
 	static const int MAX_DRAWING_POINTS = 600;
 	CFPoint m_DrawingPoints[MAX_DRAWING_POINTS];

@@ -45,6 +45,7 @@ void CConnector::Reset( void )
 	m_OriginalDrawCircleRadius = 0;
 	m_SlideRadius = 0;
 	m_OriginalSlideRadius = 0;
+	m_bShowAsPoint = false;
 	m_Color = RGB( 200, 200, 200 );
 	UpdateControlKnobs();
 }
@@ -379,21 +380,11 @@ CConnector::CConnector( const CConnector &ExistingConnector ) : CElement( Existi
 	m_OriginalDrawCircleRadius = ExistingConnector.m_OriginalDrawCircleRadius;
 	m_OriginalSlideRadius = ExistingConnector.m_OriginalSlideRadius;
 	m_InputStartOffset = ExistingConnector.m_InputStartOffset;
-//	m_pSlideLimits[0] = ExistingConnector.m_pSlideLimits[0];
-//	m_pSlideLimits[1] = ExistingConnector.m_pSlideLimits[1];
+	m_bShowAsPoint = ExistingConnector.m_bShowAsPoint;
 
 	m_StartPoint = 0;
 	m_PointCount = 0;
 	m_DrawingPointCounter = 0;
-
-//	POSITION Position = ExistingConnector.m_Links.GetHeadPosition();
-//	while( Position != 0 )
-//	{
-//		CLink *pLink = ExistingConnector.m_Links.GetNext( Position );
-//		if( pLink == 0 )
-//			continue;
-//		m_Links.AddTail( pLink );
-//	}
 }
 
 bool CConnector::SlideBetween( class CConnector *pConnector1, class CConnector *pConnector2 )

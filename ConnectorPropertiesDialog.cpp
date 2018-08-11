@@ -31,12 +31,14 @@ CConnectorPropertiesDialog::CConnectorPropertiesDialog( CWnd* pParent /*=NULL*/ 
 	, m_LimitAngle(0)
 	, m_StartOffset(0)
 	, m_bLocked(FALSE)
+	, m_bDrawAsPoint(FALSE)
 {
 	m_bAnchor = false;
 	m_bInput = false;
 	m_bIsSlider = false;
 	m_bColorIsSet = false;
 	m_Color = RGB( 200, 200, 200 );
+	m_LinkCount = 0;
 }
 
 CConnectorPropertiesDialog::~CConnectorPropertiesDialog()
@@ -59,7 +61,7 @@ void CConnectorPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_MyDoubleText(pDX, IDC_EDIT7, m_SlideRadius, 4);
 	DDX_Control(pDX, IDC_SLIDERADIUSMINPROMPT, m_SlideRadiusMinPrompt);
 	DDX_Control(pDX, IDC_SLIDRADIUSMINVALUE, m_SlideRadiusMinControl);
-	DDX_Text(pDX, IDC_SLIDRADIUSMINVALUE, m_MinimumSlideRadius );
+	DDX_Text(pDX, IDC_SLIDRADIUSMINVALUE, m_MinimumSlideRadius);
 	DDX_Control(pDX, IDC_EDIT2, m_xControl);
 	DDX_Control(pDX, IDC_EDIT4, m_yControl);
 	DDX_Control(pDX, IDC_FASTENEDTO, m_FastenedToControl);
@@ -73,6 +75,8 @@ void CConnectorPropertiesDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_EDIT9, m_StartOffset);
 	DDX_Control(pDX, IDC_LOCKED2, m_LockControl);
 	DDX_Check(pDX, IDC_LOCKED2, m_bLocked);
+	DDX_Check(pDX, IDC_CHECK8, m_bDrawAsPoint);
+	DDX_Control(pDX, IDC_CHECK8, m_AsPointControl);
 
 	int CheckValue;
 	if (pDX->m_bSaveAndValidate)
@@ -152,6 +156,7 @@ void CConnectorPropertiesDialog::OnBnClickedRadio()
 	m_StartOffsetPrompt.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_AlwaysManualCheckbox.EnableWindow( m_RotatingAnchorControl.GetCheck() != 0 ? TRUE : FALSE );
 	m_DrawCheckControl.EnableWindow( m_ConnectorControl.GetCheck() != 0 ? TRUE : FALSE );
+	m_AsPointControl.EnableWindow( ( m_ConnectorControl.GetCheck() != 0 && m_LinkCount <= 1 ) ? TRUE : FALSE );
 }
 
 BOOL CConnectorPropertiesDialog::OnInitDialog()

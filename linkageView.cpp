@@ -6277,8 +6277,11 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 				bLinkSelected = true;
 		}
 	}
+	
+	bool bUsePointStyle	= !pConnector->IsOnLayers( CLinkageDoc::MECHANISMLAYERS )
+	                      || ( pConnector->IsShowAsPoint() && pConnector->GetLinkCount() <= 1 );
 
-	if( !pConnector->IsOnLayers( CLinkageDoc::MECHANISMLAYERS ) )
+	if( bUsePointStyle )
 	{
 		Color = pConnector->IsAlone() ? pConnector->GetColor() : COLOR_DRAWINGDARK;
 		bSkipConnectorDraw = !bControlKnob;
@@ -6321,7 +6324,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 
 	if( !bSkipConnectorDraw )
 	{
-		if( !pConnector->IsOnLayers( CLinkageDoc::MECHANISMLAYERS ) )
+		if( bUsePointStyle )
 		{
 			Pen.CreatePen( PS_SOLID, 1, Color );
 			Brush.CreateSolidBrush( Color );
@@ -6368,7 +6371,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 			}
 
 			CString &Name = pConnector->GetName();
-			if( !Name.IsEmpty() || ( pConnector->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) != 0 || m_bShowDebug )
+			if( !Name.IsEmpty() || !bUsePointStyle || m_bShowDebug )
 			{
 				CString Number;
 				if( pConnector->IsAlone() && m_bShowDebug )
@@ -6403,7 +6406,7 @@ void CLinkageView::DrawConnector( CRenderer* pRenderer, unsigned int OnLayers, C
 		pOldPen = pRenderer->SelectObject( &Pen );
 		pOldBrush = pRenderer->SelectObject( &Brush );
 
-		if( !pConnector->IsOnLayers( CLinkageDoc::MECHANISMLAYERS ) )
+		if( bUsePointStyle )
 		{
 			if( bControlKnob )
 			{
@@ -8813,6 +8816,8 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 	if( pConnector->GetFastenedTo() != 0 && pConnector->GetFastenedTo()->GetElement() != 0 )
 		Dialog.m_FastenedTo = "Fastened to " + pConnector->GetFastenedTo()->GetElement()->GetIdentifierString( m_bShowDebug );
 	Dialog.m_Color = pConnector->GetColor();
+	Dialog.m_LinkCount = pConnector->GetLinkCount();
+	Dialog.m_bDrawAsPoint = ( pConnector->IsShowAsPoint() && Dialog.m_LinkCount <= 1 ) ? 1 : 0;
 
 	if( pConnector->IsSlider() )
 	{
@@ -8844,6 +8849,7 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 		else
 			pConnector->SetStartOffset( fabs( fmod( Dialog.m_StartOffset, pConnector->GetLimitAngle() * 2 ) ) );
 		pConnector->SetLocked( Dialog.m_bLocked == TRUE );
+		pConnector->SetShowAsPoint( Dialog.m_bDrawAsPoint != 0 && !Dialog.m_bAnchor );
 
 		if( Dialog.m_xPosition != pConnector->GetPoint().x ||
 		    Dialog.m_yPosition != pConnector->GetPoint().y )
