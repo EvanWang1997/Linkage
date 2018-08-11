@@ -116,8 +116,7 @@ static CMFCRibbonPanel* AddPanel( CMFCRibbonCategory *pCategory, int NameID, HIC
 	CValidatedString strTemp;
 	if( NameID > 0 )
 		strTemp.LoadString( NameID );
-	if( strTemp.GetAt( 0 ) == '&' )
-		strTemp = strTemp.Mid( 1 );
+	strTemp.Remove( '&' );
 	return pCategory->AddPanel( strTemp, hIcon );
 }
 
@@ -717,6 +716,7 @@ void CMainFrame::CreateSimulationPanel( CMFCRibbonCategory* pCategory )
 	MyCMFCRibbonButtonsGroup *pGroup2 = new MyCMFCRibbonButtonsGroup( 10 );
 	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_ONECYCLE, "", 104, -1 ) );
 	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_ONECYCLEX, "", 106, -1 ) );
+	pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_RUNFAST, "", 109, -1 ) );
 	//pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATION_PAUSE, "", 70, -1 ) );
 	//pGroup2->AddButton( new CMFCRibbonButton( ID_SIMULATE_FORWARD, "", 72, -1 ) );
 	pPanelMechanism->Add( pGroup2 );

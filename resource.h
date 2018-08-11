@@ -197,6 +197,8 @@
 #define ID_DIMENSION_ROTATE             4207
 #define ID_DIMENSION_SCALE              4208
 #define ID_DIMENSION_ANGLE              4209
+#define ID_SIMULATION_RUNFAST           4210
+#define IDS_RIBBON_RUNFAST              4111
 #define IDS_DIMENSION_SETLOCATION       4214
 #define IDS_DIMENSION_SETLENGTH         4215
 #define IDS_DIMENSION_SETLENGTHP        4216

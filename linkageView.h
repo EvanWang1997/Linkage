@@ -108,7 +108,7 @@ public:
 
 	void HighlightSelected( bool bHighlight ) { m_bSuperHighlight = bHighlight; InvalidateRect( 0 ); }
 
-	enum _SimulationControl { AUTO, GLOBAL, INDIVIDUAL, STEP, ONECYCLE, ONECYCLEX };
+	enum _SimulationControl { AUTO, AUTOFAST, GLOBAL, INDIVIDUAL, STEP, ONECYCLE, ONECYCLEX };
 
 private:
 	typedef enum _AdjustmentType { ADJUSTMENT_NONE, ADJUSTMENT_ROTATE, ADJUSTMENT_STRETCH } AdjustmentType;
@@ -440,6 +440,7 @@ public:
 	afx_msg void OnUpdateButtonRun(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateButtonStop(CCmdUI *pCmdUI);
 	afx_msg void OnButtonRun();
+	afx_msg void OnButtonRunFast();
 	afx_msg void OnButtonStop();
 	afx_msg void OnButtonPin();
 	afx_msg void OnUpdateButtonPin(CCmdUI *pCmdUI);

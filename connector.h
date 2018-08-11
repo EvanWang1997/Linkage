@@ -82,6 +82,7 @@ public:
 	bool IsTempFixed( void ) { return m_bTempFixed; }
 	bool IsFixed( void ) { return m_bTempFixed | m_bAnchor | m_bInput; }
 	bool IsAlwaysManual( void ) { return m_bAlwaysManual; }
+	bool IsAsPoint( void ) 
 	int GetSelectedLinkCount( void );
 	bool GetSlideLimits( class CConnector *&pConnector1, class CConnector *&pConnector2 ) { pConnector1 = m_pSlideLimits[0]; pConnector2 = m_pSlideLimits[1]; return IsSlider(); }
 	bool GetSlideLimits( CFPoint &Point1, CFPoint &Point2 );

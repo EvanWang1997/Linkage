@@ -210,7 +210,9 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_RUN, &CLinkageView::OnUpdateButtonRun)
+	ON_UPDATE_COMMAND_UI(ID_SIMULATION_RUNFAST, &CLinkageView::OnUpdateButtonRun)
 	ON_COMMAND(ID_SIMULATION_RUN, &CLinkageView::OnButtonRun)
+	ON_COMMAND(ID_SIMULATION_RUNFAST, &CLinkageView::OnButtonRunFast)
 	ON_COMMAND(ID_SIMULATION_RUNTOGGLE, &CLinkageView::OnButtonRun) // run-toggle is not affected by the enabling and disabling of the Run button and will always cal the function when the command is recieved.
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_STOP, &CLinkageView::OnUpdateButtonStop)
 	ON_COMMAND(ID_SIMULATION_STOP, &CLinkageView::OnButtonStop)
@@ -3854,6 +3856,8 @@ void CLinkageView::StepSimulation( enum _SimulationControl SimulationControl )
 
 	if( SimulationControl == AUTO )
 		m_SimulationSteps = 1;
+	else if( SimulationControl == AUTOFAST )
+		m_SimulationSteps = 10;
 	else if( SimulationControl == ONECYCLE )
 	{
 		if( m_SimulationSteps >= m_PauseStep )
@@ -4363,6 +4367,25 @@ void CLinkageView::OnButtonRun()
 	{
 		ConfigureControlWindow( AUTO );
 		StartMechanismSimulate( AUTO );
+	}
+}
+
+void CLinkageView::OnButtonRunFast()
+{
+	if( !CanSimulate() )
+		return;
+	if( m_bSimulating )
+	{
+		// If it is paused, get it running again. If it's running normally, stop it.
+		if( m_SimulationControl == STEP )
+			m_SimulationControl = AUTOFAST;
+		else
+			StopMechanismSimulate();
+	}
+	else
+	{
+		ConfigureControlWindow( AUTO );
+		StartMechanismSimulate( AUTOFAST );
 	}
 }
 
@@ -9447,7 +9470,7 @@ void CLinkageView::OnSimulatePause()
 	if( !CanSimulate() )
 		return;
 
-	if( m_bSimulating && ( m_SimulationControl == AUTO || m_SimulationControl == ONECYCLE ) )
+	if( m_bSimulating && ( m_SimulationControl == AUTO || m_SimulationControl == AUTOFAST || m_SimulationControl == ONECYCLE ) )
 		m_SimulationControl = STEP;
 	else
 	{
@@ -9594,7 +9617,7 @@ void CLinkageView::OnUpdateSimulatePause(CCmdUI *pCmdUI)
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	pCmdUI->Enable( ( !m_bSimulating || m_SimulationControl == AUTO ) && !pDoc->IsEmpty() && m_bAllowEdit );
+	pCmdUI->Enable( ( !m_bSimulating || m_SimulationControl == AUTO || m_SimulationControl == AUTOFAST ) && !pDoc->IsEmpty() && m_bAllowEdit );
 }
 
 void CLinkageView::OnUpdateSimulateOneCycle(CCmdUI *pCmdUI)
