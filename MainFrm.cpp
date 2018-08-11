@@ -892,6 +892,23 @@ void CMainFrame::InitializeRibbon()
 	m_wndRibbonBar.SetWindows7Look( TRUE );
 	m_wndRibbonBar.EnablePrintPreview( 1 );
 
+#if defined( LINKAGE_USE_DIRECT2D ) // only use the system DPI setting, the one the user can control for scaling, if DPI awareness is built into the program.
+	CWindowDC DC( 0 );
+	int PPI = DC.GetDeviceCaps( LOGPIXELSX );
+	double DPIScale = (double)PPI / 96.0; // The assumption that all scaling is done from 96 DPI seems correct.
+#else
+	double DPIScale = 1.0;
+#endif
+
+	/*
+	 * The MFC ribbon and tooltip code does not account for high DPI displays. The tooltips are unusually narrow on a 2.5x
+	 * display density. This code attempts to set the max width, used by tooltips that have images, as well as the fixed widths
+	 * that are used as the width for tips with no images. The MFC code is a bit crappy since it doesn't just take the max width
+	 * and then reduce it by the image size then shrink to fit if there is a single line of text. Instead, it has up to three
+	 * different "maximum" values all used in different situations.
+	 */
+
+	int MaxTooltipWidth = (int)( 200 * DPIScale );
 	CWinAppEx *pAppEx = (CWinAppEx *)AfxGetApp();
 	if( pAppEx != 0 )
 	{
@@ -900,47 +917,23 @@ void CMainFrame::InitializeRibbon()
 		{
 			CMFCToolTipInfo Params;
 
-#if defined( LINKAGE_USE_DIRECT2D ) // only use the system DPI setting, the one the user can control for scaling, if DPI awareness is built into the program.
-			CWindowDC DC( 0 );
-			int PPI = DC.GetDeviceCaps( LOGPIXELSX );
-			double DPIScale = (double)PPI / 96.0; // The assumption that all scaling is done from 96 DPI seems correct.
-#else
-			double DPIScale = 1.0;
-#endif
 			// This number will override the tooltip width information set elsewhere. Just take it and adjust it to deal with the text scaling DPI 
-			Params.m_nMaxDescrWidth = (int)( Params.m_nMaxDescrWidth * DPIScale );
+			MaxTooltipWidth = (int)( Params.m_nMaxDescrWidth * DPIScale );
+			Params.m_nMaxDescrWidth = MaxTooltipWidth;
 			pTTM->SetTooltipParams( AFX_TOOLTIP_TYPE_ALL, RUNTIME_CLASS (CMFCToolTipCtrl), &Params );
+
 		}
 	}
+
+	m_wndRibbonBar.SetTooltipFixedWidth( MaxTooltipWidth, MaxTooltipWidth );
 
 	// Load panel images:
 	m_PanelImages.SetImageSize(CSize(16, 16));
 	m_PanelImages.Load(IDB_BUTTONS);
-
-
-	//m_PanelImagesList.Create( IDB_BUTTONS, 16, 1, ILC_COLOR32 );
-
 	m_RibbonInitializingCounter = 0;
 
 	SetTimer( 0, 1, 0 );
 	return;
-
-
-	CreateMainCategory();
-	CreateHomeCategory();
-	CreatePrintingCategory();
-	#if defined( LINKAGE_USE_DIRECT2D )
-		CreateBackgroundCategory();
-	#endif
-	CreateOptionsCategory();
-	CreateHelpCategory();
-	CreateQuickAccessCommands();
-	CreateHelpButtons();
-
-	// strTemp.LoadString(IDS_RIBBON_CONFIG);
-	// CMFCRibbonCategory* pCategoryConfig = m_wndRibbonBar.AddCategory(strTemp, IDB_FILESMALL, IDB_FILELARGE, CSize( 16, 16 ), CSize( 32, 32 ));
-	// strTemp.LoadString(IDS_RIBBON_SETTINGS);
-	// CMFCRibbonCategory* pCategoryDetails = m_wndRibbonBar.AddCategory(strTemp, IDB_FILESMALL, IDB_FILELARGE, CSize( 16, 16 ), CSize( 32, 32 ));
 }
 
 // CMainFrame diagnostics

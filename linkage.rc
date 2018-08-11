@@ -901,7 +901,7 @@ BEGIN
     IDS_RIBBON_LINEUP       "Line Up"
     ID_FILE_SAVEVIDEO       "Export a video of the mechanism movement.\nCExport Video"
     IDS_RIBBON_SAVEVIDEO    "Export Video..."
-    ID_EDIT_MOMENTUM        "Give moving parts momentum.\\Use Momentum"
+    ID_EDIT_MOMENTUM        "Use momentun calculations to help position moving parts properly.\nUse Momentum"
     IDS_RIBBON_MOMENTUM     "Use Momentum"
     ID_DIMENSION_SETLOCATION 
                             "Set the absolute location of the connector.\nSet Location"
