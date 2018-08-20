@@ -5341,7 +5341,7 @@ CLink *CLinkageDoc::GetSelectedLink( int Index, bool bOnlyWithMultipleConnectors
 	return 0;
 }
 
-bool CLinkageDoc::AddConnectorToSelected( double Offset )
+bool CLinkageDoc::AddConnectorToSelected( double Radius )
 {
 	if( !CanAddConnector() )
 		return false;
@@ -5362,11 +5362,37 @@ bool CLinkageDoc::AddConnectorToSelected( double Offset )
 	}
 
 	CFPoint Point;
-	pLink->GetAveragePoint( m_GearConnectionList, Point );
+	//pLink->GetAveragePoint( m_GearConnectionList, Point );
 	CFRect Rect;
 	pLink->GetAdjustArea( m_GearConnectionList, Rect );
+	Point.x = ( Rect.left + Rect.right ) / 2;
+	Point.y = ( Rect.top + Rect.bottom ) / 2;
 
-	Point.x = Rect.right + Offset;
+	/*
+	 * Find a place for the new connector that does not overlap any existing connectors.
+	 */
+	double Diameter = Radius * 2;
+	vector<double> ConflictConnectors;
+	POSITION Position = pLink->GetConnectorList()->GetHeadPosition();
+	while( Position != 0 )
+	{
+		CConnector *pConnector = pLink->GetConnectorList()->GetNext( Position );
+		if( pConnector == 0 )
+			continue;
+		CFPoint TestPoint = pConnector->GetPoint();
+		if( TestPoint.y < Point.y - Diameter || TestPoint.y > Point.y + Diameter )
+			continue;
+		if( TestPoint.x < Point.x - Diameter )
+			continue;
+		ConflictConnectors.push_back( TestPoint.x );
+	}
+
+	sort( ConflictConnectors.begin(), ConflictConnectors.end() );
+	for( vector<double>::iterator it = ConflictConnectors.begin(); it != ConflictConnectors.end(); ++it )
+	{
+		if( Point.x > *it - Radius && Point.x < *it + Radius )
+			Point.x = *it + Diameter;
+	}
 
 	CConnector *pConnector = new CConnector;
 	if( pConnector == 0 )

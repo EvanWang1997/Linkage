@@ -221,13 +221,14 @@ class CMyMFCRibbonCheckBox : public CMFCRibbonCheckBox
 	}
 };
 
-static void AddRibbonButton( CMFCRibbonPanel *pPanel, int NameID, UINT CommandID, int ImageOffset = -1, enum _ButtonDisplayMode Mode = TEXT )
+static CMFCRibbonButton* AddRibbonButton( CMFCRibbonPanel *pPanel, int NameID, UINT CommandID, int ImageOffset = -1, enum _ButtonDisplayMode Mode = TEXT )
 {
 	CValidatedString strTemp;
 	if( NameID > 0 )
 		strTemp.LoadString( NameID );
 	CMFCRibbonButton *pTemp = new CMFCRibbonButton( CommandID, strTemp, Mode == TEXT || Mode == LARGEONLY ? -1 : ImageOffset, Mode == TEXT || Mode == SMALL ? -1 : ImageOffset);
 	pPanel->Add( pTemp );
+	return pTemp;
 }
 
 static void AddRibbonText( CMFCRibbonPanel *pPanel, int NameID )
@@ -700,11 +701,14 @@ class MyCMFCRibbonButtonsGroup : public CMFCRibbonButtonsGroup
 	}
 };
 
+CMFCRibbonButton *pRunButton = 0;
+CMFCRibbonButton *pPauseButton = 0;
+
 void CMainFrame::CreateSimulationPanel( CMFCRibbonCategory* pCategory )
 {
 	CMFCRibbonPanel* pPanelMechanism = AddPanel( pCategory, IDS_RIBBON_SIMULATION, m_PanelImages.ExtractIcon(36) );
-	AddRibbonButton( pPanelMechanism, IDS_RIBBON_RUN, ID_SIMULATION_RUN, 23, LARGE );
-	AddRibbonButton( pPanelMechanism, IDS_RIBBON_STOP, ID_SIMULATION_STOP, 24, LARGE );
+	pRunButton = AddRibbonButton( pPanelMechanism, IDS_RIBBON_RUN, ID_SIMULATION_RUN, 23, LARGE );
+	//AddRibbonButton( pPanelMechanism, IDS_RIBBON_STOP, ID_SIMULATION_STOP, 24, LARGE );
 	AddRibbonButton( pPanelMechanism, IDS_RIBBON_PIN, ID_SIMULATION_PIN, 63, LARGE );
 
 	MyCMFCRibbonButtonsGroup *pGroup = new MyCMFCRibbonButtonsGroup( 6 );
@@ -723,7 +727,8 @@ void CMainFrame::CreateSimulationPanel( CMFCRibbonCategory* pCategory )
 
 	MyCMFCRibbonButtonsGroup *pGroup3 = new MyCMFCRibbonButtonsGroup( 10 );
 	pGroup3->AddButton( new CMFCRibbonButton( ID_SIMULATE_BACKWARD, "", 71, -1 ) );
-	pGroup3->AddButton( new CMFCRibbonButton( ID_SIMULATION_PAUSE, "", 70, -1 ) );
+	pPauseButton = new CMFCRibbonButton( ID_SIMULATION_PAUSE, "", 70, -1 );
+	pGroup3->AddButton( pPauseButton );
 	pGroup3->AddButton( new CMFCRibbonButton( ID_SIMULATE_FORWARD, "", 72, -1 ) );
 	pPanelMechanism->Add( pGroup3 );
 }
@@ -887,10 +892,27 @@ void CMainFrame::CreateHomeCategory( void )
 	CreateSimulationPanel( pCategoryHome );
 }
 
+static COLORREF LightenColor( COLORREF Color, double byAmount )
+{
+	double Red = GetRValue( Color ) / 255.0;
+	double Green = GetGValue( Color ) / 255.0;
+	double Blue = GetBValue( Color ) / 255.0;
+	if( Red < 1.0 )
+		Red += ( 1.0 - Red ) * byAmount;
+	if( Green < 1.0 )
+		Green += ( 1.0 - Green ) * byAmount;
+	if( Blue < 1.0 )
+		Blue += ( 1.0 - Blue ) * byAmount;
+
+	return RGB( (int)( Red * 255 ), (int)( Green * 255 ), (int)( Blue * 255 ) );
+}
 void CMainFrame::InitializeRibbon()
 {
 	m_wndRibbonBar.SetWindows7Look( TRUE );
 	m_wndRibbonBar.EnablePrintPreview( 1 );
+
+	AFX_GLOBAL_DATA *pData = GetGlobalData();
+	pData->clrGrayedText = LightenColor( pData->clrGrayedText, 0.5 ); // Lighter than the framework defaults.
 
 #if defined( LINKAGE_USE_DIRECT2D ) // only use the system DPI setting, the one the user can control for scaling, if DPI awareness is built into the program.
 	CWindowDC DC( 0 );

@@ -150,12 +150,12 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_MECHANISM_RESET, OnMechanismReset)
 	ON_COMMAND(ID_MECHANISM_SIMULATE, &CLinkageView::OnMechanismSimulate)
 	ON_COMMAND(ID_CONTROL_WINDOW, &CLinkageView::OnControlWindow)
-	ON_UPDATE_COMMAND_UI(ID_MECHANISM_SIMULATE, &CLinkageView::OnUpdateButtonRun)
+	ON_UPDATE_COMMAND_UI(ID_MECHANISM_SIMULATE, &CLinkageView::OnUpdateButtonRunStop)
 	ON_COMMAND(ID_SIMULATION_SIMULATE, &CLinkageView::OnMechanismQuicksim)
-	ON_UPDATE_COMMAND_UI(ID_SIMULATION_SIMULATE, &CLinkageView::OnUpdateButtonRun)
+	ON_UPDATE_COMMAND_UI(ID_SIMULATION_SIMULATE, &CLinkageView::OnUpdateButtonRunNotPaused)
 
 	ON_COMMAND(ID_SIMULATE_INTERACTIVE, &CLinkageView::OnSimulateInteractive)
-	ON_UPDATE_COMMAND_UI(ID_SIMULATE_INTERACTIVE, &CLinkageView::OnUpdateButtonRun)
+	ON_UPDATE_COMMAND_UI(ID_SIMULATE_INTERACTIVE, &CLinkageView::OnUpdateButtonRunNotPaused)
 
 	ON_COMMAND(ID_SIMULATION_PAUSE, &CLinkageView::OnSimulatePause)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_PAUSE, &CLinkageView::OnUpdateSimulatePause)
@@ -176,7 +176,7 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_SIMULATE_BACKWARD_BIG, &CLinkageView::OnSimulateBackwardBig)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATE_BACKWARD_BIG, &CLinkageView::OnUpdateSimulateForwardBackward)
 	ON_COMMAND(ID_SIMULATE_MANUAL, &CLinkageView::OnSimulateManual)
-	ON_UPDATE_COMMAND_UI(ID_SIMULATE_MANUAL, &CLinkageView::OnUpdateButtonRun)
+	ON_UPDATE_COMMAND_UI(ID_SIMULATE_MANUAL, &CLinkageView::OnUpdateButtonRunNotPaused)
 	ON_WM_TIMER()
 	ON_UPDATE_COMMAND_UI(ID_MECHANISM_RESET, &CLinkageView::OnUpdateMechanismReset)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_COMBINE, &CLinkageView::OnUpdateEditCombine)
@@ -209,7 +209,7 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_EDIT_DELETESELECTED, &CLinkageView::OnEditDeleteselected)
 	ON_WM_ERASEBKGND()
 	ON_WM_SIZE()
-	ON_UPDATE_COMMAND_UI(ID_SIMULATION_RUN, &CLinkageView::OnUpdateButtonRun)
+	ON_UPDATE_COMMAND_UI(ID_SIMULATION_RUN, &CLinkageView::OnUpdateButtonRunStop)
 	ON_UPDATE_COMMAND_UI(ID_SIMULATION_RUNFAST, &CLinkageView::OnUpdateButtonRun)
 	ON_COMMAND(ID_SIMULATION_RUN, &CLinkageView::OnButtonRun)
 	ON_COMMAND(ID_SIMULATION_RUNFAST, &CLinkageView::OnButtonRunFast)
@@ -3703,6 +3703,8 @@ void CLinkageView::StartMechanismSimulate( enum _SimulationControl SimulationCon
 	//StartTimer();
 
 	m_TimerID = timeSetEvent( 33, 1, TimeProc, (DWORD_PTR)this, 0 );
+
+	ConfigureRunButton( true );
 }
 
 void CLinkageView::StopMechanismSimulate( bool KeepCurrentPositions )
@@ -3734,6 +3736,8 @@ void CLinkageView::StopMechanismSimulate( bool KeepCurrentPositions )
 	m_Simulator.Reset();
 
 	UpdateForDocumentChange();
+
+	ConfigureRunButton( false );
 }
 
 bool CLinkageView::CanSimulate( void )
@@ -4339,11 +4343,25 @@ void CLinkageView::OnSize(UINT nType, int cx, int cy)
 	GetClientRect( &m_DrawingRect );
 }
 
+void CLinkageView::OnUpdateButtonRunStop(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !pDoc->IsEmpty() );
+}
+
 void CLinkageView::OnUpdateButtonRun(CCmdUI *pCmdUI)
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	pCmdUI->Enable( ( !m_bSimulating || m_SimulationControl == STEP ) && !pDoc->IsEmpty() && m_bAllowEdit );
+}
+
+void CLinkageView::OnUpdateButtonRunNotPaused(CCmdUI *pCmdUI)
+{
+	CLinkageDoc* pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+	pCmdUI->Enable( !m_bSimulating && !pDoc->IsEmpty() && m_bAllowEdit );
 }
 
 void CLinkageView::OnUpdateButtonStop(CCmdUI *pCmdUI)
@@ -4358,9 +4376,9 @@ void CLinkageView::OnButtonRun()
 	if( m_bSimulating )
 	{
 		// If it is paused, get it running again. If it's running normally, stop it.
-		if( m_SimulationControl == STEP )
-			m_SimulationControl = AUTO;
-		else
+		//if( m_SimulationControl == STEP )
+		//	m_SimulationControl = AUTO;
+		//else
 			StopMechanismSimulate();
 	}
 	else
@@ -4368,6 +4386,33 @@ void CLinkageView::OnButtonRun()
 		ConfigureControlWindow( AUTO );
 		StartMechanismSimulate( AUTO );
 	}
+}
+
+extern CMFCRibbonButton *pRunButton;
+extern CMFCRibbonButton *pPauseButton;
+
+void CLinkageView::ConfigureRunButton( bool bStarting )
+{
+	if( pRunButton == 0 || pPauseButton == 0 )
+		return;
+
+	if( bStarting )
+	{
+		pRunButton->SetImageIndex( 24, 1 );
+		pRunButton->SetText( "Stop" );
+		if( m_SimulationControl == STEP )
+			pPauseButton->SetImageIndex( 23, 0 );
+		else
+			pPauseButton->SetImageIndex( 70, 0 );
+	} 
+	else
+	{
+		pRunButton->SetImageIndex( 23, 1 );
+		pRunButton->SetText( "Run" );
+		pPauseButton->SetImageIndex( 70, 0 );
+	}
+	pRunButton->Redraw();
+	pPauseButton->Redraw();
 }
 
 void CLinkageView::OnButtonRunFast()
@@ -4378,7 +4423,10 @@ void CLinkageView::OnButtonRunFast()
 	{
 		// If it is paused, get it running again. If it's running normally, stop it.
 		if( m_SimulationControl == STEP )
+		{
 			m_SimulationControl = AUTOFAST;
+			ConfigureRunButton( true );
+		}
 		else
 			StopMechanismSimulate();
 	}
@@ -4932,7 +4980,8 @@ void CLinkageView::OnAddConnector()
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-	if( pDoc->AddConnectorToSelected( Scale( GRAB_DISTANCE * 4 ) ) )
+	// Pass in a radius that leaves some room around the inserted connector.
+	if( pDoc->AddConnectorToSelected( m_ConnectorRadius * 1.5 ) )
 		UpdateForDocumentChange();
 }
 
@@ -5476,10 +5525,6 @@ void CLinkageView::OnMButtonDown(UINT nFlags, CPoint MousePoint)
 	m_bMouseMovedEnough	= false;
 }
 
-extern CMenu *pDerp;
-extern CMFCRibbonButton *pDerpBut;
-
-
 void CLinkageView::OnRButtonUp(UINT nFlags, CPoint MousePoint)
 {
 	ReleaseCapture();
@@ -5505,11 +5550,6 @@ void CLinkageView::OnRButtonUp(UINT nFlags, CPoint MousePoint)
 		CFPoint point = AdjustClientAreaPoint( MousePoint );
 		if( FindDocumentItem( point, pLink, pConnector ) )
 		{
-			//ClientToScreen( &MousePoint );
-			//pDerp->TrackPopupMenu( 0, MousePoint.x, MousePoint.y, AfxGetMainWnd(), 0 );
-			//DWORD ack = GetLastError();
-			//return;
-
 			bool bResult = false;
 			if( pConnector != 0 )
 				EditProperties( pConnector, 0, false );
@@ -9476,8 +9516,14 @@ void CLinkageView::OnSimulatePause()
 	if( !CanSimulate() )
 		return;
 
-	if( m_bSimulating && ( m_SimulationControl == AUTO || m_SimulationControl == AUTOFAST || m_SimulationControl == ONECYCLE ) )
-		m_SimulationControl = STEP;
+	if( m_bSimulating )
+	{
+		if( m_SimulationControl == STEP )
+			m_SimulationControl = AUTO;
+		else
+			m_SimulationControl = STEP;
+		ConfigureRunButton( true );
+	}
 	else
 	{
 		ConfigureControlWindow( STEP );
@@ -9623,7 +9669,7 @@ void CLinkageView::OnUpdateSimulatePause(CCmdUI *pCmdUI)
 {
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
-	pCmdUI->Enable( ( !m_bSimulating || m_SimulationControl == AUTO || m_SimulationControl == AUTOFAST ) && !pDoc->IsEmpty() && m_bAllowEdit );
+	pCmdUI->Enable( ( !m_bSimulating || m_bSimulating || m_SimulationControl == AUTO || m_SimulationControl == AUTOFAST ) && !pDoc->IsEmpty() && m_bAllowEdit );
 }
 
 void CLinkageView::OnUpdateSimulateOneCycle(CCmdUI *pCmdUI)

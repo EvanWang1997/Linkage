@@ -9,7 +9,8 @@
 //
 #define SPECSTRING_SUPP_H
 #define SAL_SUPP_H
-#include "afxres.h"
+#include "afxres.h"
+
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -917,8 +918,8 @@ BEGIN
     IDS_RIBBON_TRANSPARENCY "Transparency"
     IDS_RIBBON_APPEARANCE   "Appearance"
     IDS_RIBBON_BACKGROUND_DELETE "&Remove"
-    ID_SIMULATION_ONECYCLE  "Run one cycle of the simulation and pause.\nRun One Cycle"
-    ID_SIMULATION_ONECYCLEX "Run the simulation and only show the end of the cycle.\nJump One Cycle"
+    ID_SIMULATION_ONECYCLE  "Run one cycle of the simulation and pause. This is only available if there is a single input.\nRun One Cycle"
+    ID_SIMULATION_ONECYCLEX "Run the simulation and only show the end of the cycle. This is only available if there is a single input.\nJump One Cycle"
     IDS_RIBBON_OPTIONS      "Preference&s"
 END
 
@@ -973,7 +974,7 @@ END
 STRINGTABLE
 BEGIN
     IDS_RIBBON_PAUSE        "Pause"
-    ID_SIMULATION_PAUSE     "Pause the simulation or start it in a paused state.\nPause Simulation"
+    ID_SIMULATION_PAUSE     "Pause the simulation or start it in a paused state. Run it if it is paused.\nPause Simulation / Run"
     IDS_RIBBON_FORWARD      "Forward"
     ID_SIMULATE_FORWARD     "Step the simulation forward 0.033 (1/30) seconds.\nStep Forward"
     IDS_RIBBON_BACKWARD     "Backward"
@@ -1299,7 +1300,7 @@ BEGIN
     IDS_RIBBON_RUN          "Run\nr"
     IDS_RIBBON_SIMULATE     "Simulate"
     IDS_RIBBON_STOP         "Stop\ns"
-    ID_SIMULATION_RUN       "Run the mechanism in real-time, showing the animation in the window.\nRun"
+    ID_SIMULATION_RUN       "Run and animate the mechanism in real-time, or stop it if it is running.\nRun/Stop"
     ID_SIMULATION_STOP      "Stop the mechanism animation and reset it to its original condition.\nStop"
     ID_SIMULATION_SIMULATE  "Simulate the mechanism movement and show the results of any drawing connectors in the window.\nSimulate"
     IDS_RIBBON_LINKPROPERTIES "Link"

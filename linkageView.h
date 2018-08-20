@@ -108,7 +108,7 @@ public:
 
 	void HighlightSelected( bool bHighlight ) { m_bSuperHighlight = bHighlight; InvalidateRect( 0 ); }
 
-	enum _SimulationControl { AUTO, AUTOFAST, GLOBAL, INDIVIDUAL, STEP, ONECYCLE, ONECYCLEX };
+	enum _SimulationControl { NONE, AUTO, AUTOFAST, GLOBAL, INDIVIDUAL, STEP, ONECYCLE, ONECYCLEX };
 
 private:
 	typedef enum _AdjustmentType { ADJUSTMENT_NONE, ADJUSTMENT_ROTATE, ADJUSTMENT_STRETCH } AdjustmentType;
@@ -373,6 +373,8 @@ private:
 	void UpdateForDocumentChange( bool bUpdateRotationCenter = true );
 	void SelectionChanged( void );
 
+	void ConfigureRunButton( bool bStarting );
+
 	/*
 	 * Standard accelerators work regardless of the focus. The editor window handles
 	 * editor-specific keys in it's own handling function to avoid this problem.
@@ -437,7 +439,9 @@ public:
 
 	afx_msg void OnEscape();
 	afx_msg void OnUpdateEscape(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateButtonRunStop(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateButtonRun(CCmdUI *pCmdUI);
+	afx_msg void OnUpdateButtonRunNotPaused(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateButtonStop(CCmdUI *pCmdUI);
 	afx_msg void OnButtonRun();
 	afx_msg void OnButtonRunFast();
