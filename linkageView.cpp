@@ -3403,6 +3403,8 @@ void CLinkageView::OnMouseEndStretch(UINT nFlags, CFPoint point)
 
 void CLinkageView::SetLocationAsStatus( CFPoint &Point )
 {
+	return; // Don't do this. Try showing otehr things instead.
+
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
@@ -10531,6 +10533,8 @@ void CLinkageView::SelectionChanged( void )
 
 	if( pDoc->IsSelectionAdjustable() )
 		SetStatusText( m_VisibleAdjustment == ADJUSTMENT_ROTATE ? "0.0000°" : ( m_VisibleAdjustment == ADJUSTMENT_STRETCH ? "100.000%" : "" ) );
+	else
+		SetStatusText();
 }
 
 #if 0

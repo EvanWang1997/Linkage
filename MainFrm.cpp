@@ -21,6 +21,8 @@ IMPLEMENT_DYNCREATE(CMainFrame, CFrameWndEx)
 BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_CREATE()
 	//ON_COMMAND_RANGE(ID_VIEW_APPLOOK_WIN_2000, ID_VIEW_APPLOOK_OFF_2007_AQUA, &CMainFrame::OnApplicationLook)
+	ON_COMMAND(ID_STATUSBAR_PANE1, &CMainFrame::OnHelpAbout) // Need this to show it as enabled even if it cannot be clicked.
+	ON_COMMAND(ID_STATUSBAR_PANE2, &CMainFrame::OnHelpAbout) // Need this to show it as enabled even if it cannot be clicked.
 	ON_COMMAND(ID_FILE_PRINT, &CMainFrame::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CMainFrame::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CMainFrame::OnFilePrintPreview)
@@ -93,7 +95,12 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	EnableDocking( CBRS_ALIGN_ANY );
 
-	m_wndStatusBar.AddElement( new CMFCRibbonStatusBarPane( ID_STATUSBAR_PANE1, "", TRUE, 0, "This is a sample of the type on this machine. This is filler to ensure that the pane is large enough for my text!" ), "" );
+	m_wndStatusBar.AddElement( new CMFCRibbonStatusBarPane( ID_STATUSBAR_PANE1, "", TRUE, 0, "XXXXXXXXXXXXXXXXXXX" ), "" );
+	m_wndStatusBar.AddExtendedElement( new CMFCRibbonSeparator(), "" );
+	m_wndStatusBar.AddExtendedElement( new CMFCRibbonStatusBarPane( ID_STATUSBAR_PANE2, "", TRUE, 0, "100.0000%XX" ), "" );
+
+	
+	//m_wndStatusBar.AddSeparator();
 
 	// enable Visual Studio 2005 style docking window behavior
 	CDockingManager::SetDockingMode(DT_SMART);
@@ -662,6 +669,8 @@ class MyCMFCRibbonButtonsGroup : public CMFCRibbonButtonsGroup
 		m_SpecialOffsetForMe = yOffset;
 	}
 
+	// The function below is the one that keeps two or more groups from displahying on the same horizontal line.
+
 	virtual BOOL IsAlignByColumn() const { return TRUE; }
 
 	int m_SpecialOffsetForMe;
@@ -672,7 +681,7 @@ class MyCMFCRibbonButtonsGroup : public CMFCRibbonButtonsGroup
 		 * After calling the parent class function, adjust the rectangles
 		 * of the buttons to get them to display better. This is a kludge
 		 * and there may be code in the ribbon classes that doesn't deal
-		 * wwell with this adjustment. A parent window might not know the
+		 * well with this adjustment. A parent window might not know the
 		 * right location of these buttons after this change it made.
 		 */
 
@@ -690,14 +699,16 @@ class MyCMFCRibbonButtonsGroup : public CMFCRibbonButtonsGroup
 
 			rect.OffsetRect( 0, m_SpecialOffsetForMe );
 
-			pButton->SetRect( rect );
+			// NOT DOING THIS ANYMORE!
+			//pButton->SetRect( rect );
 		}
 
 		// The overall rect for this button group needs to get changed too.
 		CRect rect;
 		rect = GetRect();
 		rect.OffsetRect( 0, m_SpecialOffsetForMe );
-		SetRect( rect );
+		// NOT DOING THIS ANYMORE!
+		//SetRect( rect );
 	}
 };
 
@@ -1723,7 +1734,9 @@ void CMainFrame::ConfigureDocumentationMenu( CMenu *pMenu )
 void SetStatusText( const char *pText )
 {
 	CMainFrame* pFrame= (CMainFrame*)AfxGetMainWnd();
+
 	pFrame->m_wndStatusBar.GetElement( 0 )->SetText( pText == 0 ? "" : pText );
+	pFrame->m_wndStatusBar.GetExElement( 1 )->SetText( pText == 0 ? "" : pText ); // There is a separator so get item 2 as the second text pane.
 	pFrame->m_wndStatusBar.Invalidate( true );
 }
 
