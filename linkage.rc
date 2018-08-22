@@ -1074,8 +1074,8 @@ BEGIN
     IDS_RIBBON_PROPERTIES   "Element"
     IDS_RIBBON_CONNECTPROPERTIES "Connector"
     IDS_RIBBON_CAPTIONBAR   "Caption Bar"
-    IDS_RIBBON_SELECTELEMENTS "Select Elements"
-    ID_EDIT_SELECT_ELEMENTS "Select links and connectors from a list.\nSelect Elements"
+    IDS_RIBBON_SELECTELEMENTS "Select"
+    ID_EDIT_SELECT_ELEMENTS "Select links, connectors, etc., from a list.\nSelect"
 END
 
 STRINGTABLE

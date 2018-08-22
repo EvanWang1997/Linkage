@@ -2147,6 +2147,10 @@ CSize CMFCRibbonButton::DrawBottomText(CDC* pDC, BOOL bCalcOnly)
 	CSize sizeText = pDC->GetTextExtent(m_strText);
 
 	const int nTextLineHeight = sizeText.cy;
+
+	// Improve the line spacing for high DPI displays - this is a change from the original MFC code.
+	int TwoLineSpacing = GetGlobalData()->GetRibbonImageScale() > 1.0 ? (int)( nTextLineHeight * 0.8 ) : nTextLineHeight;
+
 	int nMenuArrowWidth = (HasMenu() || IsDefaultPanelButton()) ?(CMenuImages::Size().cx) : 0;
 
 	if (nMenuArrowWidth != NULL && GetGlobalData()->GetRibbonImageScale() > 1.)
@@ -2247,7 +2251,7 @@ CSize CMFCRibbonButton::DrawBottomText(CDC* pDC, BOOL bCalcOnly)
 		CString strLineOne = m_strText.Left(m_nWrapIndex);
 		pDC->DrawText(strLineOne, rectText, uiDTFlags);
 
-		rectText.top = y + nTextLineHeight;
+		rectText.top = y + TwoLineSpacing;
 		rectText.right -= nMenuArrowWidth;
 
 		CString strLineTwo = m_strText.Mid(m_nWrapIndex + 1);
