@@ -428,6 +428,7 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 		ON_COMMAND(ID_FILE_SAVE, &CLinkageView::OnFileSave)
 		ON_WM_SETFOCUS()
 		ON_WM_KILLFOCUS()
+		ON_WM_SYSKEYUP()
 		END_MESSAGE_MAP()
 
 static const int SMALL_FONT_SIZE = 9;
@@ -2868,19 +2869,29 @@ bool CLinkageView::SelectDocumentItem( UINT nFlags, CFPoint point )
 	if( !DepthSelect )
 		m_SelectionDepth = 0;
 
+	int SelectedCount = pDoc->GetSelectedConnectorCount() + pDoc->GetSelectedLinkCount( false );
+
+	if( DepthSelect && SelectedCount > 0 )
+	{
+		++m_SelectionDepth;
+		//if( m_MouseAction != ACTION_NONE )
+		//	++m_SelectionDepth;
+		//else
+		//	m_SelectionDepth = 0;
+	}
+
 	CFPoint AdjustedPoint = Unscale( point );
 
 	double GrabDistance = Unscale( GRAB_DISTANCE ); // The mouse point has already been adjusted for the DPI so the grab distance is not.
 
 	bool bSelectionChanged = false;
 	m_MouseAction = pDoc->SelectElement( AdjustedPoint, GrabDistance, 0, bMultiSelect, m_SelectionDepth, bSelectionChanged ) ? ACTION_DRAG : ACTION_NONE;
-
-	if( DepthSelect )
+	
+	if( DepthSelect && m_MouseAction == ACTION_NONE )
 	{
-		if( m_MouseAction != ACTION_NONE )
-			++m_SelectionDepth;
-		else
-			m_SelectionDepth = 0;
+		// No selection? Try at depth zero.
+		m_SelectionDepth = 0;
+		m_MouseAction = pDoc->SelectElement( AdjustedPoint, GrabDistance, 0, bMultiSelect, m_SelectionDepth, bSelectionChanged ) ? ACTION_DRAG : ACTION_NONE;
 	}
 
 	SelectionChanged();
@@ -2937,13 +2948,22 @@ void CLinkageView::OnLButtonDown(UINT nFlags, CPoint MousePoint)
 	SetLocationAsStatus( DocumentPoint );
 
 	if( m_bAllowEdit && SelectAdjustmentControl( nFlags, point ) )
+	{
+		SetFocus();
 		return;
+	}
 
 	if( SelectDocumentItem( nFlags, point ) )
+	{
+		SetFocus();
 		return;
+	}
 
 	if( DragSelectionBox( nFlags, point ) )
+	{
+		SetFocus();
 		return;
+	}
 }
 
 void CLinkageView::OnButtonUp(UINT nFlags, CPoint MousePoint)
@@ -4180,6 +4200,7 @@ void CLinkageView::OnEditSetLocation()
 			pConnector->SetPoint( dlg.m_xPosition / DocumentScale, dlg.m_yPosition / DocumentScale );
 			pDoc->SetModifiedFlag( true );
 			SetScrollExtents();
+			SelectionChanged();
 			InvalidateRect( 0 );
 		}
 	}
@@ -4789,6 +4810,7 @@ void CLinkageView::OnEditSelectElements()
 	pDoc->FillElementList( dlg.m_AllElements );
 	if( dlg.DoModal() == IDOK )
 	{
+		SelectionChanged();
 		InvalidateRect( 0 );
 	}
 }
@@ -5321,6 +5343,7 @@ void CLinkageView::OnViewDebug()
 {
 	m_bShowDebug = !m_bShowDebug;
 	SaveSettings();
+	SelectionChanged();
 	InvalidateRect( 0 );
 }
 
@@ -8890,7 +8913,7 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 			pConnector->SetStartOffset( Dialog.m_StartOffset );
 		else
 			pConnector->SetStartOffset( fabs( fmod( Dialog.m_StartOffset, pConnector->GetLimitAngle() * 2 ) ) );
-		pConnector->SetLocked( Dialog.m_bLocked == TRUE );
+		pConnector->SetLocked( Dialog.m_bLocked == TRUE && pConnector->IsAnchor() );
 		pConnector->SetShowAsPoint( Dialog.m_bDrawAsPoint != 0 && !Dialog.m_bAnchor );
 
 		if( Dialog.m_xPosition != pConnector->GetPoint().x ||
@@ -8916,6 +8939,8 @@ bool CLinkageView::ConnectorProperties( CConnector *pConnector )
 			// Anchor-to-anchor gear connections break when the connector is no longer an anchor.
 			pDoc->RemoveGearRatio( pConnector, 0 );
 		}
+
+		SelectionChanged();
 
 		return true;
 	}
@@ -8966,7 +8991,7 @@ bool CLinkageView::PointProperties( CConnector *pConnector )
 			pConnector->SetPoint( Dialog.m_xPosition / DocumentScale, Dialog.m_yPosition / DocumentScale );
 		}
 		pConnector->UpdateControlKnobs();
-
+		SelectionChanged();
 		return true;
 	}
 	return false;
@@ -9079,7 +9104,7 @@ bool CLinkageView::LinkProperties( CLink *pLink )
 
 			pLink->SetStartOffset( fmod( fabs( Dialog.m_StartOffset ), pLink->GetStroke() * 2 ) / pDoc->GetUnitScale() );
 		}
-
+		SelectionChanged();
 		return true;
 	}
 	return false;
@@ -9166,7 +9191,7 @@ bool CLinkageView::LineProperties( CLink *pLink )
 				case 0: default: pLink->SetShapeType( CLink::HULL ); break;
 			}
 		}
-
+		SelectionChanged();
 		return true;
 	}
 	return false;
@@ -10028,6 +10053,15 @@ BOOL CLinkageView::PreTranslateMessage(MSG* pMsg)
 		return TRUE;
 	}
 
+	if( pMsg->message == WM_SYSKEYUP && pMsg->wParam==VK_MENU )
+	{
+		return TRUE;
+	}
+
+	if( pMsg->message == WM_SYSKEYDOWN && pMsg->wParam==VK_MENU )
+	{
+		return TRUE;
+	}
 	return CView::PreTranslateMessage(pMsg);
 }
 
@@ -10523,6 +10557,7 @@ void CLinkageView::UpdateForDocumentChange( bool bUpdateRotationCenter )
 	SetScrollExtents();
 	InvalidateRect( 0 );
 	MarkSelection( true, bUpdateRotationCenter );
+	SelectionChanged();
 	ShowSelectedElementCoordinates();
 }
 
@@ -10531,10 +10566,37 @@ void CLinkageView::SelectionChanged( void )
 	CLinkageDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
+	CString Adjustable = "";
+	CString Selected = "";
+
 	if( pDoc->IsSelectionAdjustable() )
-		SetStatusText( m_VisibleAdjustment == ADJUSTMENT_ROTATE ? "0.0000°" : ( m_VisibleAdjustment == ADJUSTMENT_STRETCH ? "100.000%" : "" ) );
-	else
-		SetStatusText();
+		Adjustable = m_VisibleAdjustment == ADJUSTMENT_ROTATE ? "0.0000°" : ( m_VisibleAdjustment == ADJUSTMENT_STRETCH ? "100.000%" : "" );
+
+	int Count = pDoc->GetSelectedConnectorCount() + pDoc->GetSelectedLinkCount( true );
+	if( Count == 1 )
+	{
+		CElement *pElement = pDoc->GetSelectedConnector( 0 );
+		if( pElement == 0 )
+			pElement = pDoc->GetSelectedLink( 0, true );
+		if( pElement != 0 )
+		{
+			Selected = pElement->GetTypeString();
+			Selected += " " + pElement->GetIdentifierString( m_bShowDebug );
+			if( pElement->IsMeasurementElement() && pElement->IsLink() )
+			{
+				CLink *pLink = (CLink*)pElement;
+				double DocumentScale = pDoc->GetUnitScale();
+				double Length = DocumentScale * pLink->GetLinkLength( pLink->GetConnector( 0 ), pLink->GetConnector( 1 ) );
+				Selected.Format( "%.3lf", Length );
+			}
+			else if( pElement->GetName().IsEmpty() && ( pElement->GetLayers() & CLinkageDoc::MECHANISMLAYERS ) == 0 )
+				Selected += "  (unlabeled)";
+		}
+	}
+	else if( Count > 1 )
+		Selected.Format( "%d element%s selected.", Count, Count == 1 ? "" : "s" );
+
+	SetStatusText( Selected, Adjustable );
 }
 
 #if 0
@@ -10619,4 +10681,12 @@ void CLinkageView::OnKillFocus(CWnd* pNewWnd)
 	CView::OnKillFocus(pNewWnd);
 
 	// TODO: Add your message handler code here
+}
+
+
+void CLinkageView::OnSysKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	CView::OnSysKeyUp(nChar, nRepCnt, nFlags);
 }

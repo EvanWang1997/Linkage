@@ -57,8 +57,8 @@ public:
 	DECLARE_MESSAGE_MAP()
 };
 
-void SetStatusText( const char *pText = 0 );
-void SetStatusText( UINT ResourceID);
+void SetStatusText( const char *pText = 0, const char *pOtherText = 0 );
+//void SetStatusText( UINT ResourceID );
 void ShowPrintPreviewCategory( bool bShow = true );
 
 

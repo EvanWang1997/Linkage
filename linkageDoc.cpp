@@ -2234,7 +2234,7 @@ int CLinkageDoc::BuildSelectedLockGroup( ConnectorList *pLockGroup )
 					bConnectorIsLocked = true;
 			}
 
-			if( bConnectorIsLocked )
+			/*if( bConnectorIsLocked && false )
 			{
 				POSITION Position2 = pLink->GetConnectorList()->GetHeadPosition();
 				while( Position2 != 0 )
@@ -2247,9 +2247,11 @@ int CLinkageDoc::BuildSelectedLockGroup( ConnectorList *pLockGroup )
 					++ChangeCount;
 				}
 			}
-			else if( bOneIsSelectedLocked )
+			else */
+
+			if( bOneIsSelectedLocked )
 			{
-				POSITION Position2 = pLink->GetConnectorList()->GetHeadPosition();
+				Position2 = pLink->GetConnectorList()->GetHeadPosition();
 				while( Position2 != 0 )
 				{
 					CConnector *pConnector = pLink->GetConnectorList()->GetNext( Position2 );
@@ -2330,7 +2332,7 @@ bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap
 				if( pCenter == pConnector )
 					pCenter = pLockedLink->GetConnector( 1 );
 
-				double Angle = GetAngle( pCenter->GetOriginalPoint(), CFPoint( Point.x - m_CaptureOffset.x, Point.y - m_CaptureOffset.y ), OriginalPoint );
+				double Angle = GetAngle( pCenter->GetOriginalPoint(), OriginalPoint, CFPoint( Point.x - m_CaptureOffset.x, Point.y - m_CaptureOffset.y ) );
 				pConnector->MovePoint( pConnector->GetOriginalPoint() );
 				pConnector->RotateAround( pCenter->GetOriginalPoint(), Angle );
 				pConnector->MakePermanent();
@@ -2343,6 +2345,17 @@ bool CLinkageDoc::MoveSelected( CFPoint Point, bool bElementSnap, bool bGridSnap
 	ConnectorList MoveConnectors;
 	int MoveCount = BuildSelectedLockGroup( &MoveConnectors );
 	POSITION Position = MoveConnectors.GetHeadPosition();
+	while( Position != 0 )
+	{
+		CConnector* pConnector = MoveConnectors.GetNext( Position );
+		if( pConnector == 0 )
+			continue;
+
+		if( pConnector->IsLocked() && pConnector->IsAnchor() )
+			return false; // Cannot move anything if one of the lock group is a locked anchor.
+	}
+
+	Position = MoveConnectors.GetHeadPosition();
 	while( Position != 0 )
 	{
 		CConnector* pConnector = MoveConnectors.GetNext( Position );

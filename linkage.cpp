@@ -184,6 +184,7 @@ BOOL CLinkageApp::InitInstance()
 
 BOOL CLinkageApp::PreTranslateMessage(MSG *pMsg)
 {
+
 	//if (menu.m_hAccelTable)
 	//{
 		//if (::TranslateAccelerator(m_pMainWnd->m_hWnd, menu.m_hAccelTable, pMsg))
@@ -193,6 +194,7 @@ BOOL CLinkageApp::PreTranslateMessage(MSG *pMsg)
 	//}
 	return CWinApp::PreTranslateMessage(pMsg);
 }
+
 void CLinkageApp::SaveStdProfileSettings( void )
 {
 	CWinApp::SaveStdProfileSettings();

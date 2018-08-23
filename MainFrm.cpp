@@ -36,6 +36,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWndEx)
 	ON_WM_DROPFILES()
 	ON_WM_TIMER()
 	ON_WM_CLOSE()
+	ON_WM_SYSKEYUP()
 END_MESSAGE_MAP()
 
 // CMainFrame construction/destruction
@@ -1731,12 +1732,12 @@ void CMainFrame::ConfigureDocumentationMenu( CMenu *pMenu )
 		pMenu->DeleteMenu( Index, MF_BYPOSITION );
 }
 
-void SetStatusText( const char *pText )
+void SetStatusText( const char *pText, const char *pOtherText )
 {
 	CMainFrame* pFrame= (CMainFrame*)AfxGetMainWnd();
 
 	pFrame->m_wndStatusBar.GetElement( 0 )->SetText( pText == 0 ? "" : pText );
-	pFrame->m_wndStatusBar.GetExElement( 1 )->SetText( pText == 0 ? "" : pText ); // There is a separator so get item 2 as the second text pane.
+	pFrame->m_wndStatusBar.GetExElement( 1 )->SetText( pOtherText == 0 ? "" : pOtherText ); // There is a separator so get item 2 as the second text pane.
 	pFrame->m_wndStatusBar.Invalidate( true );
 }
 
@@ -1823,4 +1824,12 @@ void CMainFrame::OnClose()
 	}
 
 	CFrameWndEx::OnClose();
+}
+
+
+void CMainFrame::OnSysKeyUp(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// TODO: Add your message handler code here and/or call default
+
+	CFrameWndEx::OnSysKeyUp(nChar, nRepCnt, nFlags);
 }
