@@ -1041,6 +1041,8 @@ BEGIN
     IDS_RIBBON_SETANGLE     "Angle..."
     ID_ALIGN_SETANGLE       "Align the selected connectors to form the specified angle.\nSet Angle"
     ID_VIEW_DRAWING         "View the drawing layer.\nView Drawing"
+	IDS_RIBBON_EXPORT_AS_CSV "Motion as CSV"
+	ID_EDIT_EXPORT_AS_CSV	"Export motion paths in CSV format.\nMotion as CSV"
 END
 
 STRINGTABLE

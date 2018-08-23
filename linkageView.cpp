@@ -312,6 +312,9 @@ BEGIN_MESSAGE_MAP(CLinkageView, CView)
 	ON_COMMAND(ID_EDIT_MOMENTUM, &CLinkageView::OnMoreMomentum)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_MOMENTUM, &CLinkageView::OnUpdateMoreMomentum)
 
+	ON_COMMAND(ID_EDIT_EXPORT_AS_CSV, &CLinkageView::OnExportMoAsCSV)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_EXPORT_AS_CSV, &CLinkageView::OnUpdateExportMoAsCSV)
+
 	ON_COMMAND(ID_EDIT_AUTOJOIN, &CLinkageView::OnEditAutoJoin)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_AUTOJOIN, &CLinkageView::OnUpdateEditAutoJoin)
 
@@ -521,6 +524,7 @@ CLinkageView::CLinkageView()
 	m_bUseVideoCounters = false;
 	m_bShowSelection = true;
 	m_pBackgroundBitmap = 0;
+	m_bExportMotionAsCSV = true;
 
 	m_SelectedEditLayers = CLinkageDoc::ALLLAYERS;
 	m_SelectedViewLayers = CLinkageDoc::ALLLAYERS;
@@ -590,6 +594,7 @@ CLinkageView::CLinkageView()
 		m_SelectedEditLayers = (unsigned int)pApp->GetProfileInt( SETTINGS, "EditLayers", 0xFFFFFFFF );
 		m_SelectedViewLayers = (unsigned int)pApp->GetProfileInt( SETTINGS, "ViewLayers", 0xFFFFFFFF );
 		m_bUseDiameterDimensions = pApp->GetProfileInt( SETTINGS, "UseDiameterDimensions", 0 ) != 0;
+		m_bExportMotionAsCSV = pApp->GetProfileInt( SETTINGS, "ExportMotionAsCSV", 1 ) != 0;
 
 
 		m_Rotate0 = pApp->LoadIcon( IDI_ICON5 );
@@ -680,8 +685,7 @@ void CLinkageView::SaveSettings( void )
 	pApp->WriteProfileInt( SETTINGS, "EditLayers", (int)m_SelectedEditLayers  );
 	pApp->WriteProfileInt( SETTINGS, "ViewLayers", (int)m_SelectedViewLayers );
 	pApp->WriteProfileInt( SETTINGS, "UseDiameterDimensions", m_bUseDiameterDimensions ? 1 : 0  );
-
-
+	pApp->WriteProfileInt( SETTINGS, "ExportMotionAsCSV", m_bExportMotionAsCSV ? 1 : 0 );
 }
 
 CLinkageView::~CLinkageView()
@@ -5405,6 +5409,19 @@ void CLinkageView::OnUpdateMoreMomentum(CCmdUI *pCmdUI)
 	pCmdUI->Enable( !m_bSimulating );
 }
 
+void CLinkageView::OnExportMoAsCSV()
+{
+	m_bExportMotionAsCSV = !m_bExportMotionAsCSV;
+	SaveSettings();
+	InvalidateRect( 0 );
+}
+
+void CLinkageView::OnUpdateExportMoAsCSV(CCmdUI *pCmdUI)
+{
+	pCmdUI->SetCheck( m_bExportMotionAsCSV );
+	pCmdUI->Enable( !m_bSimulating );
+}
+
 void CLinkageView::OnViewShowGrid()
 {
 	m_bShowGrid = !m_bShowGrid;
@@ -9415,7 +9432,16 @@ CRendererBitmap* CLinkageView::ImageBytesToRendererBitmap( std::vector<byte> &Bu
 
 void CLinkageView::OnFileSaveMotion()
 {
-	CFileDialog dlg( 0, "txt", 0, 0, "Text Files (*.txt)|*.txt|All Files (*.*)|*.*||" );
+	CString Extension = "txt";
+	CString FileTypes = "Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
+	if( m_bExportMotionAsCSV )
+	{
+		Extension = "csv";
+		FileTypes = "CSV Files (*.csv)|*.csv|Text Files (*.txt)|*.txt|All Files (*.*)|*.*||";
+	}
+
+	CFileDialog dlg( 0, Extension, 0, 0, FileTypes );
+
 	dlg.m_ofn.lpstrTitle = "Export Motion Paths";
 	dlg.m_ofn.Flags |= OFN_NOCHANGEDIR | OFN_NONETWORKBUTTON | OFN_OVERWRITEPROMPT;
 	if( dlg.DoModal() != IDOK )
@@ -9433,48 +9459,150 @@ void CLinkageView::OnFileSaveMotion()
 
 	double DocumentScale = pDoc->GetUnitScale();
 
+	int OutputMotionPoints = INT_MAX; // How many to write to the file based on the number of points found for each motion drawing connector (not anchors).
 	ConnectorList* pConnectors = pDoc->GetConnectorList();
-	POSITION Position = pConnectors->GetHeadPosition();
-	bool bFirst = true;
-	while( Position != 0 )
+	if( m_bExportMotionAsCSV )
 	{
-		CConnector *pConnector = pConnectors->GetNext( Position );
-		if( pConnector == 0 )
-			continue;
-		if( !pConnector->IsDrawing() && !pConnector->IsAnchor() )
-			continue;
-
-		if( pConnector->IsAnchor() )
+		int PathCount = 0;
+		int PointCount = 0;
+		POSITION Position = pConnectors->GetHeadPosition();
+		while( Position != 0 )
 		{
-			CFPoint Point = pConnector->GetOriginalPoint();
-			CString Name = "Anchor ";
-			Name += pConnector->GetIdentifierString( m_bShowDebug );
-			Name += "\r\n";
-			OutputFile.Write( Name, Name.GetLength() );
-			CString Temp;
-			Temp.Format( "%.6f,%.6f\r\n", Point.x * DocumentScale, Point.y * DocumentScale );
-			OutputFile.Write( (const char*)Temp, Temp.GetLength() );
+			CConnector *pConnector = pConnectors->GetNext( Position );
+			if( pConnector == 0 )
+				continue;
+			if( !pConnector->IsDrawing() && !pConnector->IsAnchor() )
+				continue;
+				
+			++PathCount;
+			if( PointCount == 0 && !pConnector->IsAnchor() )
+			{
+				int DrawPoint = 0;
+				int PointCount = 0;
+				int MaxPoints = 0;
+				pConnector->GetMotionPath( DrawPoint, PointCount, MaxPoints );
+				if( OutputMotionPoints > MaxPoints )
+					OutputMotionPoints = MaxPoints;
+				if( OutputMotionPoints > PointCount )
+					OutputMotionPoints = PointCount;
+			}
 		}
-		else
+		if( PathCount == 0 )
+			return;
+
+		CFPoint **ppPoints = new CFPoint*[PathCount];
+		if( ppPoints == 0 )
+			return;
+
+		Position = pConnectors->GetHeadPosition();
+		int Index = 0;
+		while( Position != 0 && Index < PathCount )
 		{
+			CConnector *pConnector = pConnectors->GetNext( Position );
+			if( pConnector == 0 )
+				continue;
+			if( !pConnector->IsDrawing() && !pConnector->IsAnchor() )
+				continue;
+
 			int DrawPoint = 0;
 			int PointCount = 0;
 			int MaxPoints = 0;
-			CFPoint *pPoints = pConnector->GetMotionPath( DrawPoint, PointCount, MaxPoints );
+			ppPoints[Index] = pConnector->GetMotionPath( DrawPoint, PointCount, MaxPoints );
 
-			CString Name = "Connector ";
-			Name += pConnector->GetIdentifierString( m_bShowDebug );
-			Name += "\r\n";
-			OutputFile.Write( Name, Name.GetLength() );
-
-			CString Temp;
-			Temp.Format( "%d\r\n", PointCount );
-			OutputFile.Write( Temp, Temp.GetLength() );
-
-			for( int Counter = 0; Counter < PointCount; ++Counter )
+			// Write the header line and also get the anchor original points repeated in every point in their array.
+			CString Name = Index == 0 ? "" : ",";
+			if( pConnector->IsAnchor() )
 			{
-				Temp.Format( "%.6f,%.6f\r\n", pPoints[Counter].x * DocumentScale, pPoints[Counter].y * DocumentScale );
+				// THIS IS A KLUDGE...
+				// The anchor has no drawing points but the point array still exists and is still valid, just empty.
+				// Fill it with the original location of the anchor so it can be written to the file with all of the other points.
+
+				CFPoint Point = pConnector->GetOriginalPoint();
+				for( int Counter = 0; Counter < OutputMotionPoints; ++Counter )
+					ppPoints[Index][Counter] = Point;
+
+				Name += "Anchor ";
+			}
+			else
+				Name += "Connector ";
+
+			Name += pConnector->GetIdentifierString( m_bShowDebug );
+			Name += ",";
+			OutputFile.Write( (const char*)Name, Name.GetLength() );
+
+			++Index;
+		}
+		OutputFile.Write( "\r\n", 2 );
+
+		int PointSetCount = Index;
+
+		CString Temp;
+
+		// Write header line 2
+		for( Index = 0; Index < PointSetCount; ++Index )
+		{
+			Temp.Format( "%sX,Y", Index == 0 ? "" : "," );
+			OutputFile.Write( (const char*)Temp, Temp.GetLength() );
+		}
+		OutputFile.Write( "\r\n", 2 );
+
+		// Write the points
+		for( int Counter = 0; Counter < OutputMotionPoints; ++Counter )
+		{
+			for( Index = 0; Index < PointSetCount; ++Index )
+			{
+				Temp.Format( "%s%.6f,%.6f", Index == 0 ? "" : ",", ppPoints[Index][Counter].x * DocumentScale, ppPoints[Index][Counter].y * DocumentScale );
 				OutputFile.Write( (const char*)Temp, Temp.GetLength() );
+			}
+			OutputFile.Write( "\r\n", 2 );
+		}
+
+		delete [] ppPoints;
+	}
+	else
+	{
+		POSITION Position = pConnectors->GetHeadPosition();
+		bool bFirst = true;
+		while( Position != 0 )
+		{
+			CConnector *pConnector = pConnectors->GetNext( Position );
+			if( pConnector == 0 )
+				continue;
+			if( !pConnector->IsDrawing() && !pConnector->IsAnchor() )
+				continue;
+
+			if( pConnector->IsAnchor() )
+			{
+				CFPoint Point = pConnector->GetOriginalPoint();
+				CString Name = "Anchor ";
+				Name += pConnector->GetIdentifierString( m_bShowDebug );
+				Name += "\r\n";
+				OutputFile.Write( Name, Name.GetLength() );
+				CString Temp;
+				Temp.Format( "%.6f,%.6f\r\n", Point.x * DocumentScale, Point.y * DocumentScale );
+				OutputFile.Write( (const char*)Temp, Temp.GetLength() );
+			}
+			else
+			{
+				int DrawPoint = 0;
+				int PointCount = 0;
+				int MaxPoints = 0;
+				CFPoint *pPoints = pConnector->GetMotionPath( DrawPoint, PointCount, MaxPoints );
+
+				CString Name = "Connector ";
+				Name += pConnector->GetIdentifierString( m_bShowDebug );
+				Name += "\r\n";
+				OutputFile.Write( Name, Name.GetLength() );
+
+				CString Temp;
+				Temp.Format( "%d\r\n", PointCount );
+				OutputFile.Write( Temp, Temp.GetLength() );
+
+				for( int Counter = 0; Counter < PointCount; ++Counter )
+				{
+					Temp.Format( "%.6f,%.6f\r\n", pPoints[Counter].x * DocumentScale, pPoints[Counter].y * DocumentScale );
+					OutputFile.Write( (const char*)Temp, Temp.GetLength() );
+				}
 			}
 		}
 	}

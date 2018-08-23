@@ -509,6 +509,7 @@ void CMainFrame::CreateOptionsPanel( CMFCRibbonCategory* pCategory )
 	//AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_USERGRID, ID_VIEW_EDITGRID );
 	//AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_PARTS, ID_VIEW_PARTS );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_MOMENTUM, ID_EDIT_MOMENTUM );
+	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_EXPORT_AS_CSV, ID_EDIT_EXPORT_AS_CSV );
 	AddRibbonCheckbox( pPanelOptions, IDS_RIBBON_VIEW_DEBUG, ID_VIEW_DEBUG );
 }
 

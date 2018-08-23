@@ -193,6 +193,7 @@ private:
 	int m_PrintOrientationMode;
 	int m_PrintWidthInPages;
 	int m_VisiblePageNumber;
+	bool m_bExportMotionAsCSV;
 
 	CBitmap *m_pCachedRenderBitmap;
 	int m_CachedBitmapWidth;
@@ -522,6 +523,8 @@ public:
 	afx_msg void OnEditGrid();
 	afx_msg void OnUpdateMoreMomentum(CCmdUI *pCmdUI);
 	afx_msg void OnMoreMomentum();
+	afx_msg void OnExportMoAsCSV();
+	afx_msg void OnUpdateExportMoAsCSV(CCmdUI *pCmdUI);
 	afx_msg void OnUpdateViewLargeFont(CCmdUI *pCmdUI);
 	afx_msg void OnViewLargeFont();
 	afx_msg void OnViewDebug();

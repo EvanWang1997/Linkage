@@ -5250,7 +5250,7 @@ CLinkageDoc::_CoordinateChange CLinkageDoc::SetSelectedElementCoordinates( CFPoi
 
 	if( CoordinateCount == 2 )
 	{
-		if( IsLinkLocked( pConnector ) )
+		if( IsLinkLocked( pConnector ) || pConnector->IsLocked() )
 			return _CoordinateChange::NONE;
 		PushUndo();
 		pConnector->SetPoint( CFPoint( xValue, yValue ) );

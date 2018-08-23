@@ -255,9 +255,6 @@ void CConnector::RemoveLink( CLink *pLink )
 
 CFPoint * CConnector::GetMotionPath( int &StartPoint, int &PointCount, int &MaxPoint )
 {
-	if( m_PointCount < 2 )
-		return 0;
-
 	StartPoint = m_StartPoint;
 	PointCount = m_PointCount;
 	MaxPoint = MAX_DRAWING_POINTS - 1;
