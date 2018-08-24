@@ -219,16 +219,16 @@ bool CLink::PointOnLink( const GearConnectionList &GearConnections, CFPoint Poin
 
 	for( int Counter = 0; Counter < PointCount; ++Counter )
 	{
-		
 		if( Counter == PointCount - 1 && m_ShapeType == POLYLINE )
 				break;
-		double Distance = DistanceToSegment( Points[Counter], Points[(Counter+1)%PointCount], CFPoint( Point ) );
+		int Next = (Counter+1)%PointCount;
+		double Distance = DistanceToSegment( Points[Counter], Points[Next], CFPoint( Point ) );
 		if( Distance < TestDistance )
 		{
-			double left = min( Points[Counter].x, Points[(Counter+1)%PointCount].x ) - TestDistance;
-			double top = max( Points[Counter].y, Points[(Counter+1)%PointCount].y ) + TestDistance;
-			double right = max( Points[Counter].x, Points[(Counter+1)%PointCount].x ) + TestDistance;
-			double bottom = min( Points[Counter].y, Points[(Counter+1)%PointCount].y ) - TestDistance;
+			double left = min( Points[Counter].x, Points[Next].x ) - TestDistance;
+			double top = max( Points[Counter].y, Points[Next].y ) + TestDistance;
+			double right = max( Points[Counter].x, Points[Next].x ) + TestDistance;
+			double bottom = min( Points[Counter].y, Points[Next].y ) - TestDistance;
 			if( Point.x >= left && Point.y >= bottom && Point.x <= right && Point.y <= top )
 			{
 				bResult = true;
