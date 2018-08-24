@@ -3797,6 +3797,8 @@ CLink * CLinkageDoc::InsertLink( unsigned int Layers, double ScaleFactor, CFPoin
 	pLink->SetMeasurementElement( ( Type == MEASUREMENT || Type == ANGLE_MEASUREMENT ) && ( Layers & DRAWINGLAYER ) != 0, false );
 	if( Type == ANGLE_MEASUREMENT )
 		pLink->SetMeasurementUseAngles( true );
+	if( pLink->IsMeasurementElement() )
+		pLink->SetShapeType( CLink::POLYLINE );
 	if( bSelectInsert && ( m_UsableLayers & Layers ) != 0 )
 		SelectElement( pLink );
 
@@ -3945,6 +3947,8 @@ void CLinkageDoc::SplitSelected( void )
 			CLink *pLink = pConnector->GetLinkList()->GetNext( Position2 );
 			if( pLink == 0 )
 				continue;
+
+			++SplitLinkCount;
 		}
 
 		if( SplitLinkCount > 1 )
@@ -4466,7 +4470,8 @@ bool CLinkageDoc::ConnectSliderLimits( bool bTestOnly )
 
 	// Test code... pUseConnectors[Slider]->SetSlideRadius( 400 );
 
-	pUseConnectors[Slider]->SetPoint( pUseConnectors[FirstLimit]->GetPoint().MidPoint( pUseConnectors[SecondLimit]->GetPoint(), .5 ) );
+	//pUseConnectors[Slider]->SetPoint( pUseConnectors[FirstLimit]->GetPoint().MidPoint( pUseConnectors[SecondLimit]->GetPoint(), .5 ) );
+	FixupSliderLocation( pUseConnectors[Slider] );
 
 	Position = pUseConnectors[Slider]->GetLinkList()->GetHeadPosition();
 	while( Position != 0 )

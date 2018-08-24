@@ -205,6 +205,9 @@ bool CLink::PointOnLink( const GearConnectionList &GearConnections, CFPoint Poin
 	if( ( m_ShapeType == POLYGON || m_ShapeType == HULL ) && IsPointInPoly( PointCount, Points, Point ) )
 		return true;
 
+	if( m_ShapeType == POLYLINE )
+		--PointCount; // Don't close the polygon
+
 	if( m_ConnectedSliders.GetCount() > 0 )
 	{
 		// Someday, links may get drawn with curves for the hull slider paths instead of the dotted lines.
@@ -215,26 +218,27 @@ bool CLink::PointOnLink( const GearConnectionList &GearConnections, CFPoint Poin
 		TestDistance *= 1.5; // Just a guess - might help the user interface.
 
 	// Point on one of the lines method next. This lets the user click outside of the polygon and still get a hit.
+
+	CFPoint *pPreviousPoint = &Points[PointCount-1];
+
 	bool bResult = false;
 
 	for( int Counter = 0; Counter < PointCount; ++Counter )
 	{
-		
-		if( Counter == PointCount - 1 && m_ShapeType == POLYLINE )
-				break;
-		double Distance = DistanceToSegment( Points[Counter], Points[(Counter+1)%PointCount], CFPoint( Point ) );
+		double Distance = DistanceToSegment( *pPreviousPoint, Points[Counter], CFPoint( Point ) );
 		if( Distance < TestDistance )
 		{
-			double left = min( Points[Counter].x, Points[(Counter+1)%PointCount].x ) - TestDistance;
-			double top = max( Points[Counter].y, Points[(Counter+1)%PointCount].y ) + TestDistance;
-			double right = max( Points[Counter].x, Points[(Counter+1)%PointCount].x ) + TestDistance;
-			double bottom = min( Points[Counter].y, Points[(Counter+1)%PointCount].y ) - TestDistance;
+			double left = min( pPreviousPoint->x, Points[Counter].x ) - TestDistance;
+			double top = max( pPreviousPoint->y, Points[Counter].y ) + TestDistance;
+			double right = max( pPreviousPoint->x, Points[Counter].x ) + TestDistance;
+			double bottom = min( pPreviousPoint->y, Points[Counter].y ) - TestDistance;
 			if( Point.x >= left && Point.y >= bottom && Point.x <= right && Point.y <= top )
 			{
 				bResult = true;
 				break;
 			}
 		}
+		pPreviousPoint = &Points[Counter];
 	}
 
 	return bResult;

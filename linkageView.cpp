@@ -10433,6 +10433,7 @@ void CLinkageView::OnViewCoordinates()
 	m_SelectionAdjustmentRect = GetDocumentAdjustArea( true );
 
 	UpdateForDocumentChange( bUpdateRotationCenter );
+	SetFocus();
 }
 
 void CLinkageView::OnUpdateViewCoordinates( CCmdUI *pCmdUI )
