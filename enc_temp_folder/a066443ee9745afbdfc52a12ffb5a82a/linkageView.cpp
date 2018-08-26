@@ -5852,12 +5852,6 @@ void CLinkageView::OnInitialUpdate()
 
 void CLinkageView::OnUpdate( CView* pSender, LPARAM lHint, CObject* pHint )
 {
-	if( lHint == 2 )
-	{
-		// Document said to stop, probably because it's reading in new data.
-		StopMechanismSimulate();
-		return;
-	}
 	SetScrollExtents();
 
 	CMFCRibbonBar *pRibbon = ((CFrameWndEx*) AfxGetMainWnd())->GetRibbonBar();

@@ -1141,10 +1141,7 @@ void CLinkageDoc::Serialize(CArchive& ar)
 	if (ar.IsStoring())
 		WriteOut( ar, true, false );
 	else
-	{
-		UpdateAllViews( 0, 2 );
 		ReadIn( ar, false, true, false, false, true );
-	}
 }
 
 /////////////////////////////////////////////////////////////////////////////

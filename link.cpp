@@ -400,44 +400,50 @@ bool CLink::FixAll( void )
 	if( GetFixedConnectorCount() < 2 )
 		return false;
 
-	CConnector *pPreviousFixed = 0;
-	CConnector *pFixed1 = 0;
-	CConnector *pFixed2 = 0;
+	CConnector *pKnownFixed = GetFixedConnector( 0 );
+	CConnector *pOtherFixed = GetFixedConnector( 1 );
+	if( pKnownFixed == 0 || pOtherFixed == 0 )
+		return false;
 
 	POSITION Position = m_Connectors.GetHeadPosition();
 	CConnector *pBaseConnector = GetFixedConnector();
 	while( Position != 0 )
 	{
 		CConnector* pConnector = m_Connectors.GetNext( Position );
-		if( pConnector == 0 )
+		if( pConnector == 0 || pConnector == pKnownFixed )
 			continue;
 		if( pConnector->IsFixed() )
 		{
-			pFixed1 = pConnector;
-			if( pPreviousFixed != 0 )
-			{
-				// Check to make sure it's probably in the right place already.
-				double d1 = Distance( pFixed1->GetOriginalPoint(), pPreviousFixed->GetOriginalPoint() );
-				double d2 = Distance( pFixed1->GetPoint(), pPreviousFixed->GetPoint() );
+			// Check to make sure it's probably in the right place already.
+			double d1 = Distance( pKnownFixed->GetOriginalPoint(), pConnector->GetOriginalPoint() );
+			double d2 = Distance( pKnownFixed->GetTempPoint(), pConnector->GetTempPoint() );
 
-				double Difference = fabs( d2 - d1 );
-				if( Difference > ( d1 / 1000.0 ) )
-					return false;
-			}
-			pFixed2 = pPreviousFixed;
-			pPreviousFixed = pConnector;
+			double Difference = fabs( d2 - d1 );
+			if( Difference > 0.0001 )
+				return false;
 		}
 	}
 
-	if( pFixed1 == 0 || pFixed2 == 0 )
-		return false;
+	/*
+	 * There is a sample that has a link on a rotating input anchor with the other end on an anchor. This should
+	 * be an error since the rotating input can't rotate the link. But since it is in the samples and people might
+	 * copy it, detect that case and skip reporting it as an error.
+	 */
+	if( pKnownFixed->IsAnchor() && pOtherFixed->IsAnchor() && GetConnectorCount() == 2 )
+	{
+		SetTempFixed( true );
+		return true;
+	}
 
 	// All of the fixed connectors are where they should be. Rotate the rest
 	// to match.
-
-	pFixed1->SetRotationAngle( GetAngle( pFixed1->GetTempPoint(), pFixed2->GetTempPoint(), pFixed1->GetOriginalPoint(), pFixed2->GetOriginalPoint() ) );
-	if( !RotateAround( pFixed1 ) )
-		return false;
+	double Angle = GetAngle( pKnownFixed->GetTempPoint(), pOtherFixed->GetTempPoint(), pKnownFixed->GetOriginalPoint(), pOtherFixed->GetOriginalPoint() );
+	if( Angle != 0 )
+	{
+		pKnownFixed->SetRotationAngle( Angle );
+		if( !RotateAround( pKnownFixed ) )
+			return false;
+	}
 
 	return true;
 }

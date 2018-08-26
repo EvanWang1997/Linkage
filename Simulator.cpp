@@ -8,8 +8,6 @@ static const double MOMENTUM = 2.5;
 
 extern CDebugItemList DebugItemList;
 
-static const double DISTANCE_ACCURACY = 0.0001;
-
 #define SWAP(x,y) do \
    { unsigned char swap_temp[sizeof(x) == sizeof(y) ? (signed)sizeof(x) : -1]; \
      memcpy(swap_temp,&y,sizeof(x)); \
@@ -486,7 +484,7 @@ class CSimulatorImplementation
 			if( !pCheckConnector->IsFixed() )
 			{
 				pCheckConnector->SetPositionValid( false );
-				//pCheckConnector->SetSimulationError( CElement::UNDEFINED );
+				pCheckConnector->SetSimulationError( CElement::UNDEFINED );
 				bResult = false;
 			}
 		}
@@ -494,13 +492,13 @@ class CSimulatorImplementation
 		while( Position != 0 )
 		{
 			CLink *pLink = pLinks->GetNext( Position );
-			if( pLink == 0 || !pLink->IsGear() )
+			if( pLink == 0 || !pLink->IsOnLayers( CLinkageDoc::MECHANISMLAYERS ) || pLink->GetConnectorCount() <= 1 ) //|| !pLink->IsGear() )
 				continue;
 
 			if( !pLink->IsTempFixed() )
 			{
 				pLink->SetPositionValid( false );
-				//pLink->SetSimulationError( CElement::UNDEFINED );
+				pLink->SetSimulationError( CElement::MANGLE );
 				bResult = false;
 			}
 		}
@@ -667,7 +665,7 @@ class CSimulatorImplementation
 
 			double OriginalDistance = Distance( OriginalFixedPoint, pConnector->GetOriginalPoint() );
 			double distance = Distance( FixedPoint, pConnector->GetPoint() );
-			if( fabs( OriginalDistance - distance ) > DISTANCE_ACCURACY )
+			if( fabs( OriginalDistance - distance ) > 0.0001 )
 				return false;
 		}
 
@@ -707,7 +705,11 @@ class CSimulatorImplementation
 				break;
 		}
 
-		if( !ValidateMovement( pDoc ) )
+		bool bValid = ValidateMovement( pDoc );
+		if( !bValid )
+			return false;
+
+		/*if( !ValidateMovement( pDoc ) )
 		{
 			// Add motion points up to the current position.
 			Position = pConnectors->GetHeadPosition();
@@ -721,7 +723,7 @@ class CSimulatorImplementation
 
 			m_bSimulationValid = false;
 			return false;
-		}
+		}*/
 
 		Position = pConnectors->GetHeadPosition();
 		while( Position != 0 )
@@ -1568,7 +1570,7 @@ class CSimulatorImplementation
 								continue;
 
 							double Diff = fabs( Distance( pConnector->GetOriginalPoint(), pTestConnector->GetOriginalPoint() ) - Distance( pConnector->GetTempPoint(), pTestConnector->GetTempPoint() ) );
-							if( Diff < DISTANCE_ACCURACY )
+							if( Diff < 0.0001 )
 							{
 								double Angle = GetAngle( pConnector->GetTempPoint(), pTestConnector->GetTempPoint(), pConnector->GetOriginalPoint(), pTestConnector->GetOriginalPoint() );
 								Angle = GetClosestAngle( pConnector->GetRotationAngle(), Angle );
@@ -1661,6 +1663,7 @@ class CSimulatorImplementation
 				{
 					pCommonConnector->SetPositionValid( false );
 					pTestLink->SetSimulationError( CElement::MANGLE );
+
 					pOtherToRotate->SetSimulationError( CElement::MANGLE );
 					return false;
 				}

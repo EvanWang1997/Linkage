@@ -34,8 +34,6 @@ public:
 
 	BOOL PreTranslateMessage(MSG * pMsg);
 
-	// There should be no reason for having this public function but MS decided that no one should be able to call it in the base class.
-	// That's rather dumb since all it does is save some settings, which is exactly the type of thing I might want to do in my view class.
 	void SaveStdProfileSettings( void );
 
 // Overrides
