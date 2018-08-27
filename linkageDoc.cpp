@@ -1271,6 +1271,9 @@ bool CLinkageDoc::SelectElement( CLink *pLink )
 	m_SelectedLinks.AddHead( pLink );
 
 	pLink->Select( true );
+
+	SetSelectedModifiableCondition();
+
 	return true;
 }
 
@@ -1283,6 +1286,8 @@ bool CLinkageDoc::DeSelectElement( CLink *pLink )
 		return false;
 
 	pLink->Select( false );
+
+	SetSelectedModifiableCondition();
 
 	return true;
 }
@@ -1300,6 +1305,8 @@ bool CLinkageDoc::DeSelectElement( CConnector *pConnector )
 	if( m_pCapturedConnector == pConnector )
 		m_pCapturedConnector = 0;
 
+	SetSelectedModifiableCondition();
+
 	return true;
 }
 
@@ -1311,6 +1318,7 @@ bool CLinkageDoc::SelectElement( CConnector *pConnector )
 	m_SelectedConnectors.AddHead( pConnector );
 	pConnector->Select( true );
 	m_pCapturedConnector = pConnector;
+	SetSelectedModifiableCondition();
 
 	return true;
 }
@@ -2454,7 +2462,7 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector, CFPoint &NewPoint
 		if( pConnector->GetSlideRadius() == 0 )
 		{
 			CFLine Line( pStart->GetPoint(), pEnd->GetPoint() );
-			NewPoint = pConnector->GetOriginalPoint();
+			NewPoint = pConnector->GetPoint();
 			NewPoint.SnapToLine( Line, true );
 		}
 		else
@@ -2463,7 +2471,7 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector, CFPoint &NewPoint
 			if( !pConnector->GetSliderArc( TheArc, false ) )
 				return false;
 
-			NewPoint = pConnector->GetOriginalPoint();
+			NewPoint = pConnector->GetPoint();
 			NewPoint.SnapToArc( TheArc );
 		}
 	}
@@ -2717,6 +2725,10 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 	CConnector *pLockedConnector = 0;
 	int Connectors = (int)m_SelectedConnectors.GetCount();
 
+	CConnector *pLimit1 = 0;
+	CConnector *pLimit2 = 0;
+	bool bSlidersShareLimits = true;
+
 	POSITION Position = m_SelectedConnectors.GetHeadPosition();
 	CConnector *pKeepConnector = m_SelectedConnectors.GetAt( Position );
 
@@ -2745,10 +2757,17 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 		{
 			++Sliders;
 			pKeepConnector = pConnector;
+			CConnector *pTemp1 = 0;
+			CConnector *pTemp2 = 0;
+			pConnector->GetSlideLimits( pTemp1, pTemp2 );
+			if( ( pLimit1 != 0 && pTemp1 != pLimit1 ) || ( pLimit2 != 0 && pTemp2 != pLimit2 ) )
+				bSlidersShareLimits = false;
+			pLimit1 = pTemp1;
+			pLimit2 = pTemp2;
 		}
 	}
 
-	if( Sliders > 1 )
+	if( Sliders > 1 && !bSlidersShareLimits )
 		return false;
 
 	if( LockedLinks > 1 )
@@ -2763,8 +2782,78 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 	if( bSaveUndoState )
 		PushUndo();
 
-	Position = m_SelectedConnectors.GetHeadPosition();
+	/*
+	* Check for sliding connectors that have any of the joined conectors as their limits. Change the limits to use the new joined connector.
+	* IMPORTANT: The joined connectors are all deleted except for the one being kept. The pointers are stil available but are not pointing to
+	* any valid memory!
+	*/
+	Position = m_Connectors.GetHeadPosition();
+	while( Position != NULL )
+	{
+		CConnector *pConnector = m_Connectors.GetNext( Position );
+		if( pConnector == 0 )
+			continue;
 
+		CConnector *pLimit1 = NULL;
+		CConnector *pLimit2 = NULL;
+
+		if( pConnector->GetSlideLimits( pLimit1, pLimit2 ) )
+		{
+			if( pLimit1->IsSelected() && pLimit2->IsSelected() )
+			{
+				// No sliding between the single resulting connectors when the join is finished!
+				pConnector->SlideBetween();
+				continue;
+			}
+
+			if( pConnector->IsSelected() && ( pLimit1->IsSelected() || pLimit2->IsSelected() ) )
+			{
+				// No slider if it's joined to it's limit connector.
+				pConnector->SlideBetween();
+				continue;
+			}
+
+			if( pConnector->IsSelected() && pConnector != pKeepConnector )
+			{
+				// This slider will be joined to another connector and that connector must also be a slider (or this one would be pKeepConnector)...
+				// Change it to a non-slider so it's limit connectors no longer know about it.
+				pConnector->SlideBetween();
+				continue;
+			}
+
+			if( pLimit1->IsSelected() || pLimit2->IsSelected() )
+			{
+				bool bKeepChecking = true;
+				CConnector *pSelectedLimit = pLimit1;
+				if( pLimit2->IsSelected() )
+					pSelectedLimit = pLimit2;
+
+				POSITION Position2 = pConnector->GetLinkList()->GetHeadPosition();
+				while( Position2 != 0 && bKeepChecking )
+				{
+					CLink *pLink = pConnector->GetLinkList()->GetNext( Position2 );
+					if( pLink == 0 )
+						continue;
+					POSITION Position3 = pLink->GetConnectorList()->GetHeadPosition();
+					while( Position3 != 0 && bKeepChecking )
+					{
+						CConnector *pTestConnector = pLink->GetConnectorList()->GetNext( Position3 );
+						if( pTestConnector == 0 || !pTestConnector->IsSelected() )
+							continue;
+						// No slider if one of the limits is being joined to a connector that is on one of the links with the slider.
+						pConnector->SlideBetween();
+
+						bKeepChecking = false;
+					}
+				}
+
+				if( !bKeepChecking )
+					continue;
+			}
+		}
+	}
+
+	Position = m_SelectedConnectors.GetHeadPosition();
 	for( Counter = 0; Position != NULL; ++Counter )
 	{
 		CConnector* pConnector = m_SelectedConnectors.GetNext( Position );
@@ -2798,15 +2887,14 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 	}
 
 	/*
-	 * Check for sliding connectors that have any of the joined conectors as their limits. Change the limits to use the new joined connector.
-	 * IMPORTANT: The joined connectors are all deleted except for the one being kept. The pointers are stil available but are not pointing to
-	 * any valid memory!
-	 */
+	* Check for changes to the slide limits where the slide limit changes to the new joined connector.
+	* This is done after links are changed because otherwise the sliding might be invalid due to limits being on two differnt links.
+	*/
 	Position = m_Connectors.GetHeadPosition();
 	while( Position != NULL )
 	{
 		CConnector *pConnector = m_Connectors.GetNext( Position );
-		if( pConnector == NULL )
+		if( pConnector == 0 )
 			continue;
 
 		CConnector *pLimit1 = NULL;
@@ -2814,12 +2902,6 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 
 		if( pConnector->GetSlideLimits( pLimit1, pLimit2 ) )
 		{
-			if( pLimit1->IsSelected() && pLimit2->IsSelected() )
-			{
-				pConnector->SlideBetween();
-				continue;
-			}
-
 			POSITION Position2 = m_SelectedConnectors.GetHeadPosition();
 
 			while( Position2 != NULL )
@@ -2828,6 +2910,7 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 				if( pTestConnector == 0 || !pTestConnector->IsSelected() || pTestConnector == pKeepConnector )
 					continue;
 
+				// If pTestConnector is selected and it's not being kept and it's also a limit, change the limit to the keep connector. 
 				if( pLimit1 == pTestConnector )
 					pLimit1 = pKeepConnector;
 				else if( pLimit2 == pTestConnector )
@@ -2850,7 +2933,7 @@ bool CLinkageDoc::JoinSelected( bool bSaveUndoState )
 		pKeepConnector->SetPoint( AveragePoint );
 
 	pKeepConnector->SetAsInput( bInput );
-	pKeepConnector->SetAsAnchor( bAnchor );
+	pKeepConnector->SetAsAnchor( bAnchor && !pKeepConnector->IsSlider() );
 	pKeepConnector->SetLayers( CombinedLayers );
 
 	m_SelectedConnectors.RemoveAll();
@@ -4525,6 +4608,10 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 	CLink *pSelectedGear = 0;
 	CLink *pSelectedLink = 0;
 
+	CConnector *pLimit1 = 0;
+	CConnector *pLimit2 = 0;
+	bool bSlidersShareLimits = true;
+
 	m_SelectedLayers = 0;
 
 	POSITION Position = m_Connectors.GetHeadPosition();
@@ -4538,7 +4625,16 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 			m_SelectedLayers |= pConnector->GetLayers();
 			++SelectedConnectors;
 			if( pConnector->IsSlider() )
+			{
 				++Sliders;
+				CConnector *pTemp1 = 0;
+				CConnector *pTemp2 = 0;
+				pConnector->GetSlideLimits( pTemp1, pTemp2 );
+				if( ( pLimit1 != 0 && pTemp1 != pLimit1 ) || ( pLimit2 != 0 && pTemp2 != pLimit2 ) )
+					bSlidersShareLimits = false;
+				pLimit1 = pTemp1;
+				pLimit2 = pTemp2;
+			}
 			if( pConnector->IsAnchor() )
 				++SelectedAnchors;
 			if( pConnector->GetFastenedTo() != 0 )
@@ -4634,7 +4730,7 @@ void CLinkageDoc::SetSelectedModifiableCondition( void )
 	{
 		CConnector* pConnector2 = GetSelectedConnector( 1 );
 		m_bSelectionCombinable = SelectedRealLinks >= 1 && ( SelectedRealLinks + SelectedConnectors > 1 ) && Actuators == 0 && SelectedGears == 0;
-		m_bSelectionJoinable = ( SelectedConnectors > 1 && Sliders <= 1 ) || ( SelectedConnectors == 1 && SelectedRealLinks >= 1 );
+		m_bSelectionJoinable = ( SelectedConnectors > 1 && ( Sliders <= 1 || bSlidersShareLimits ) ) || ( SelectedConnectors == 1 && SelectedRealLinks >= 1 );
 		m_bSelectionSlideable = ConnectSliderLimits( true );
 		m_bSelectionLockable = SelectedAnchors > 0 || SelectedRealLinks > 0;
 		m_bSelectionMakeAnchor = SelectedConnectors > 0 && SelectedRealLinks == 0;
