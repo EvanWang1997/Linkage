@@ -419,7 +419,7 @@ bool CLink::FixAll( void )
 			double d2 = Distance( pKnownFixed->GetTempPoint(), pConnector->GetTempPoint() );
 
 			double Difference = fabs( d2 - d1 );
-			if( Difference > 0.0001 )
+			if( Difference > 0.005 )
 				return false;
 		}
 	}
