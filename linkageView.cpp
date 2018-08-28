@@ -2478,7 +2478,7 @@ void CLinkageView::OnDraw( CDC* pDC, CPrintInfo *pPrintInfo )
 
 	Renderer.EndDraw();
 
-	DebugItemList.Clear();
+	//DebugItemList.Clear();
 
 
 	/*

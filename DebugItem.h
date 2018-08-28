@@ -7,25 +7,25 @@
 class CDebugItem
 {
 	public:
-	CDebugItem( CFPoint Point, COLORREF Color = DEFAULT_COLOR ) 
+	CDebugItem( const CFPoint &Point, COLORREF Color = DEFAULT_COLOR ) 
 	{ 
 		m_Type = DEBUG_OBJECT_POINT;
 		m_Point = Point;
 		m_Color = Color;
 	}
-	CDebugItem( CFLine Line, COLORREF Color = DEFAULT_COLOR ) 
+	CDebugItem( const CFLine &Line, COLORREF Color = DEFAULT_COLOR ) 
 	{ 
 		m_Type = DEBUG_OBJECT_LINE;
 		m_Line = Line;
 		m_Color = Color;
 	}
-	CDebugItem( CFCircle Circle, COLORREF Color = DEFAULT_COLOR ) 
+	CDebugItem( const CFCircle &Circle, COLORREF Color = DEFAULT_COLOR ) 
 	{ 
 		m_Type = DEBUG_OBJECT_CIRCLE;
 		m_Circle = Circle;
 		m_Color = Color;
 	}
-	CDebugItem( CFArc Arc, COLORREF Color = DEFAULT_COLOR ) 
+	CDebugItem( const CFArc &Arc, COLORREF Color = DEFAULT_COLOR ) 
 	{ 
 		m_Type = DEBUG_OBJECT_ARC;
 		m_Arc = Arc;

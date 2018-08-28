@@ -804,7 +804,7 @@ class CSimulatorImplementation
 			return false;
 
 		CFArc LinkArc;
-		if( !pSlider1->GetSliderArc( LinkArc, true ) )
+		if( !pSlider1->GetOriginalSliderArc( LinkArc ) )
 			return false;
 
 
@@ -844,10 +844,14 @@ class CSimulatorImplementation
 			{
 				// This is the arc that the common connector slides on for this link, not for the sliding pOtherLink.
 				CFArc TheArc;
-				if( !pCommonConnector->GetSliderArc( TheArc, false ) )
+				if( !pCommonConnector->GetTempSliderArc( TheArc ) )
 					return false;
 
-				bHit = bHit2 = CommonCircle.CircleIntersection( TheArc, &Intersect, &Intersect2 );
+				bHit = bHit2 = TheArc.ArcIntersection( CommonCircle, &Intersect, &Intersect2 );
+				//DebugItemList.AddTail( new CDebugItem( CommonCircle, RGB( 255, 0, 0 ) ) );
+				//DebugItemList.AddTail( new CDebugItem( TheArc, RGB( 0, 255, 0 ) ) );
+				//DebugItemList.AddTail( new CDebugItem( Intersect, RGB( 0, 0, 255 ) ) );
+				//DebugItemList.AddTail( new CDebugItem( Intersect2, RGB( 0, 0, 255 ) ) );
 			}
 		}
 		else
@@ -860,7 +864,7 @@ class CSimulatorImplementation
  			CFCircle Circle( pFixedConnector->GetTempPoint(), r );
 
 			bHit = bHit2 = CommonCircle.CircleIntersection( Circle, &Intersect, &Intersect2 );
- 		}
+		}
 
 		if( !bHit && !bHit2 )
 			return false;
@@ -888,9 +892,9 @@ class CSimulatorImplementation
 			pLink->IncrementMoveCount( -1 ); // Don't count the common connector twice.
 		}
 
-		// Calculate the difference between the origibal center of the slider arc and the new center of the slider arc.
+		// Calculate the difference between the original center of the slider arc and the new center of the slider arc.
 		CFArc OriginalArc;
-		if( !pSlider1->GetSliderArc( OriginalArc, true ) )
+		if( !pSlider1->GetOriginalSliderArc( OriginalArc ) )
 			return false;
 
 		CFPoint Offset = LinkArc.GetCenter() - OriginalArc.GetCenter();
@@ -923,13 +927,13 @@ class CSimulatorImplementation
 		 * This is easier to do now than earlier. Use the new arc location.
 		 */
 
-		if( !pActualSlider1->GetSliderArc( LinkArc ) )
+		if( !pActualSlider1->GetTempSliderArc( LinkArc ) )
 		{
 			pLink->ResetMoveCount();
 			return false;
 		}
 		CFArc LinkArc2;
-		if( !pActualSlider2->GetSliderArc( LinkArc2 ) )
+		if( !pActualSlider2->GetTempSliderArc( LinkArc2 ) )
 		{
 			pLink->ResetMoveCount();
 			return false;
@@ -1083,7 +1087,7 @@ class CSimulatorImplementation
 			else
 			{
 				CFArc TheArc;
-				if( !pCommonConnector->GetSliderArc( TheArc, false ) )
+				if( !pCommonConnector->GetTempSliderArc( TheArc ) )
 					return false;
 
 				Intersects( LimitLine, TheArc, Intersect, Intersect2, bHit, bHit2, false, false );
@@ -1160,7 +1164,7 @@ class CSimulatorImplementation
 	bool SlideToLink( CLink* pLink, CConnector *pFixedConnector, CConnector *pSlider, CConnector *pLimit1, CConnector *pLimit2 )
 	{
 		/*
-		 * Rotate the "this" Link so that the slider it on the segment between
+		 * Rotate the "this" Link so that the slider is on the segment between
 		 * the limit connectors. The other link is left unmodified AT THIS TIME.
 		 * The slide path may be an arc so move and rotate the slider to be on the arc.
 		 *
@@ -1170,7 +1174,7 @@ class CSimulatorImplementation
 		 */
 
 		double r;   // = Distance( pFixedConnector->GetOriginalPoint(), pSlider->GetOriginalPoint() );
-		r = pLink->GetLinkLength( pFixedConnector, pSlider );
+ 		r = pLink->GetLinkLength( pFixedConnector, pSlider );
  		CFCircle Circle( pFixedConnector->GetTempPoint(), r );
 
 		CFPoint Intersect;
@@ -1197,18 +1201,11 @@ class CSimulatorImplementation
 		else
 		{
 			CFArc TheArc;
-			if( !pSlider->GetSliderArc( TheArc ) )
+			if( !pSlider->GetTempSliderArc( TheArc ) )
 				return false;
 
-			if( !TheArc.CircleIntersection( Circle, &Intersect, &Intersect2 ) )
+			if( !TheArc.ArcIntersection( Circle, &Intersect, &Intersect2 ) )
 				return false;
-
-			if( !TheArc.PointOnArc( Intersect2 ) )
-			{
-				Intersect2 = Intersect;
-				if( !TheArc.PointOnArc( Intersect ) )
-					return false;
-			}
 		}
 
 		// Try to give the point momentum by determining where it would be if
@@ -1238,6 +1235,7 @@ class CSimulatorImplementation
 		// issues that cause the picture of the mechanism to look a tiny bit off.
 
 		pSlider->MovePoint( Intersect );
+		DebugItemList.AddTail( new CDebugItem(pSlider->GetTempPoint(), RGB( 0, 255, 0 ) ) );
 
 		return true;
 	}
@@ -1320,8 +1318,8 @@ class CSimulatorImplementation
 		if( !Intersects( ConnectedLine, SlideLine, Intersect ) )
 			return false;
 
-		DebugItemList.AddTail( new CDebugItem(NewConnectedLine, RGB( 0, 255, 0 ) ) );
-		DebugItemList.AddTail( new CDebugItem(Intersect, RGB( 0, 0, 255 ) ) );
+		//DebugItemList.AddTail( new CDebugItem(NewConnectedLine, RGB( 0, 255, 0 ) ) );
+		//DebugItemList.AddTail( new CDebugItem(Intersect, RGB( 0, 0, 255 ) ) );
 
 		// Get the new intersection of the new connected line and the new slide path line.
 		CFPoint NewIntersect;
@@ -1404,13 +1402,14 @@ class CSimulatorImplementation
 
  		CFCircle Circle( pFixedConnector->GetTempPoint(), pSlider->GetTempPoint() );
 		Circle.r = Distance( pSlider->GetTempPoint(), pFixedConnector->GetTempPoint() );
+		//DebugItemList.AddTail( new CDebugItem( CFArc( Circle ), RGB( 255, 0, 0 ) ) );
 
 		CFPoint Offset = pFixedConnector->GetTempPoint() - pFixedConnector->GetOriginalPoint();
 
  		CFPoint Intersect;
  		CFPoint Intersect2;
 
-		if( pSlider->GetSlideRadius() == 0 )
+		if(  pSlider->GetSlideRadius() == 0 )
 		{
  			CConnector *pLimit1 = 0;
  			CConnector *pLimit2 = 0;
@@ -1438,21 +1437,19 @@ class CSimulatorImplementation
 		else
 		{
 			CFArc TheArc;
-			if( !pSlider->GetSliderArc( TheArc, true ) )
+			if( !pSlider->GetOriginalSliderArc( TheArc ) )
 				return false;
+
+			//DebugItemList.AddTail( new CDebugItem( TheArc, RGB( 0, 0, 255 ) ) );
 
 			TheArc.x += Offset.x;
 			TheArc.y += Offset.y;
 
-			if( !TheArc.CircleIntersection( Circle, &Intersect, &Intersect2 ) )
+			if( !TheArc.ArcIntersection( Circle, &Intersect, &Intersect2 ) )
 				return false;
 
-			if( !TheArc.PointOnArc( Intersect2 ) )
-			{
-				Intersect2 = Intersect;
-				if( !TheArc.PointOnArc( Intersect ) )
-					return false;
-			}
+			//DebugItemList.AddTail( new CDebugItem( Intersect, RGB( 255, 0, 0 ) ) );
+			//DebugItemList.AddTail( new CDebugItem( Intersect2, RGB( 0, 128, 128 ) ) );
 		}
 
 		// No momentum for this calculation.
@@ -1466,7 +1463,7 @@ class CSimulatorImplementation
 			Intersect = Intersect2;
 
 		double Angle = GetAngle( pFixedConnector->GetTempPoint(), Intersect, pSlider->GetTempPoint() );
-		Angle = GetClosestAngle( pFixedConnector->GetRotationAngle(), Angle );
+		Angle = GetSmallestAngle( Angle );
 		pFixedConnector->SetRotationAngle( Angle );
 		if( !pLink->RotateAround( pFixedConnector ) )
 			return false;

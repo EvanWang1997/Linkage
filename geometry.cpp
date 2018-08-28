@@ -19,15 +19,15 @@ bool CFPoint::SnapToLine( CFLine &Line, bool bToSegment, bool bStartToInfinity )
 		 {
 			t = 0.0f;
 			bOnAllowedSegment = false;
-			DebugItemList.AddTail( new CDebugItem( Line, RGB( 0, 255, 0 ) ) );
-			DebugItemList.AddTail( new CDebugItem( *this, RGB( 255, 0, 0 ) ) );
+			//DebugItemList.AddTail( new CDebugItem( Line, RGB( 0, 255, 0 ) ) );
+			//DebugItemList.AddTail( new CDebugItem( *this, RGB( 255, 0, 0 ) ) );
 		 }
          else if( !bStartToInfinity && t > 1.0f )
 		 {
 			t = 1.0f;
 			bOnAllowedSegment = false;
-			DebugItemList.AddTail( new CDebugItem( Line, RGB( 0, 255, 0 ) ) );
-			DebugItemList.AddTail( new CDebugItem( *this, RGB( 255, 0, 0 ) ) );
+			//DebugItemList.AddTail( new CDebugItem( Line, RGB( 0, 255, 0 ) ) );
+			//DebugItemList.AddTail( new CDebugItem( *this, RGB( 255, 0, 0 ) ) );
 		 }
     }
 
@@ -50,8 +50,26 @@ void CFCircle::SetCircle( CFPoint Center, CFPoint RadiusPoint )
 	SetCircle( Center, r );
 }
 
-bool CFCircle::CircleIntersection( CFCircle& OtherCircle, CFPoint* ReturnPoint0, CFPoint* ReturnPoint1 )
+bool CFArc::ArcIntersection( const CFCircle& Circle, CFPoint* ReturnPoint0, CFPoint* ReturnPoint1 )
+{
+	if( !CFCircle::CircleIntersection( Circle, ReturnPoint0, ReturnPoint1 ) )
+		return false;
+
+	if( !PointOnArc( *ReturnPoint0 ) )
 	{
+		if( !PointOnArc( *ReturnPoint1 ) )
+			return false;
+		*ReturnPoint0 = *ReturnPoint1;
+	}
+
+	if( !PointOnArc( *ReturnPoint1 ) )
+		*ReturnPoint1 = *ReturnPoint0;
+
+	return true;
+}
+
+bool CFCircle::CircleIntersection( const CFCircle& OtherCircle, CFPoint* ReturnPoint0, CFPoint* ReturnPoint1 )
+{
 	CFPoint p2;
 	CFPoint p3;
 	double d;		// distance between circles

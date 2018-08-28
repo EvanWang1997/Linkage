@@ -521,10 +521,27 @@ CFPoint CConnector::GetTempPoint( void )
 	return IsAnchor() ? m_OriginalPoint : m_TempPoint;
 }
 
-bool CConnector::GetSliderArc( CFArc &TheArc,bool bGetOriginal )
+bool CConnector::GetSliderArc( CFArc &TheArc )
+{
+	return GetSliderArc( TheArc, false, false );
+}
+
+bool CConnector::GetOriginalSliderArc( CFArc &TheArc )
+{
+	return GetSliderArc( TheArc, true, false );
+}
+
+bool CConnector::GetTempSliderArc( CFArc &TheArc )
+{
+	return GetSliderArc( TheArc, false, true );
+}
+
+bool CConnector::GetSliderArc( CFArc &TheArc, bool bGetOriginal, bool bGetTemp )
 {
 	if( GetSlideRadius() == 0 )
 		return false;
+
+	ASSERT( !bGetOriginal || !bGetTemp );
 
 	CConnector *pLimit1;
 	CConnector *pLimit2;
@@ -532,8 +549,8 @@ bool CConnector::GetSliderArc( CFArc &TheArc,bool bGetOriginal )
 	if( !GetSlideLimits( pLimit1, pLimit2 ) )
 		return false;
 
-	CFPoint Point1 = bGetOriginal ? pLimit1->GetOriginalPoint() : pLimit1->GetPoint();
-	CFPoint Point2 = bGetOriginal ? pLimit2->GetOriginalPoint() : pLimit2->GetPoint();
+	CFPoint Point1 = bGetOriginal ? pLimit1->GetOriginalPoint() : ( bGetTemp ? pLimit1->GetTempPoint() : pLimit1->GetPoint() );
+	CFPoint Point2 = bGetOriginal ? pLimit2->GetOriginalPoint() : ( bGetTemp ? pLimit2->GetTempPoint() : pLimit2->GetPoint() );
 
 	CFLine Line( Point1, Point2 );
 	CFLine Perpendicular;

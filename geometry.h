@@ -157,13 +157,14 @@ class CFCircle
 	double y;
 	double r;	// radius
 
-	bool CircleIntersection( CFCircle& OtherCircle, CFPoint* ReturnPoint0, CFPoint* ReturnPoint1 );
+	bool CircleIntersection( const CFCircle& OtherCircle, CFPoint* ReturnPoint0, CFPoint* ReturnPoint1 );
 };
 
 class CFArc : public CFCircle
 {
 	public:
 	CFArc() {}
+	CFArc( CFCircle &Circle ) { SetArc( Circle.GetCenter(), Circle.r, CFPoint( Circle.GetCenter().x, Circle.GetCenter().y -  Circle.r ), CFPoint( Circle.GetCenter().x, Circle.GetCenter().y -  Circle.r ) ); }
 	CFArc( CFPoint &Center, double Radius, CFPoint &Start, CFPoint &End ) { SetArc( Center, Radius, Start, End ); }
 	CFArc( double x, double y, double Radius, CFPoint &Start, CFPoint &End ) { SetArc( CFPoint( x, y ), Radius, Start, End ); }
 	void SetArc( CFPoint &Center, double Radius, CFPoint &Start, CFPoint &End ) { x = Center.x; y = Center.y; r = Radius; m_Start = Start; m_End = End; }
@@ -191,6 +192,7 @@ class CFArc : public CFCircle
 		return Angle - EndAngle;
 	}
 
+	bool ArcIntersection( const CFCircle& Circle, CFPoint* ReturnPoint0, CFPoint* ReturnPoint1 );
 
 	CFPoint m_Start;
 	CFPoint m_End;

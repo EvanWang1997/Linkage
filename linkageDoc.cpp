@@ -2468,7 +2468,7 @@ bool CLinkageDoc::FixupSliderLocation( CConnector *pConnector, CFPoint &NewPoint
 		else
 		{
 			CFArc TheArc;
-			if( !pConnector->GetSliderArc( TheArc, false ) )
+			if( !pConnector->GetSliderArc( TheArc ) )
 				return false;
 
 			NewPoint = pConnector->GetPoint();

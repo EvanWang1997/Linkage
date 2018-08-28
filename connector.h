@@ -68,7 +68,9 @@ public:
 	double GetSlideRadius( void );
 	double GetOriginalSlideRadius( void );
 
-	bool GetSliderArc( CFArc &TheArc, bool bGetOriginal = false );
+	bool GetSliderArc( CFArc &TheArc );
+	bool GetOriginalSliderArc( CFArc &TheArc );
+	bool GetTempSliderArc( CFArc &TheArc );
 	double GetStartOffset( void ) { return IsInput() ? m_InputStartOffset : 0; }
 	void SetStartOffset( double Value ) { m_InputStartOffset = Value; }
 
@@ -146,6 +148,8 @@ private:
 	int m_StartPoint;
 	int m_PointCount;
 	int m_DrawingPointCounter;
+
+	bool GetSliderArc( CFArc &TheArc, bool bGetOriginal, bool bGetTemp );
 };
 
 struct ConnectorDistance
