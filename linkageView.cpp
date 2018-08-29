@@ -712,6 +712,12 @@ CLinkageView::~CLinkageView()
 
 	if( m_pAvi != 0 )
 		delete m_pAvi;
+	m_pAvi = 0;
+
+	if( m_pCachedRenderBitmap != 0 )
+		delete m_pCachedRenderBitmap;
+	m_pCachedRenderBitmap = 0;
+
 
    GdiplusShutdown( m_gdiplusToken );
 }
@@ -1727,16 +1733,6 @@ void CLinkageView::DrawGrid( CRenderer* pRenderer, int Type )
 	}
 
 	pRenderer->SelectObject( pOldPen );
-}
-
-void CLinkageView::ClearDebugItems( void )
-{
-	while( true )
-	{
-		CDebugItem *pDebugItem = DebugItemList.Pop();
-		if( pDebugItem == 0 )
-			break;
-	}
 }
 
 void CLinkageView::DrawDebugItems( CRenderer *pRenderer )
@@ -3740,7 +3736,7 @@ void CLinkageView::StopMechanismSimulate( bool KeepCurrentPositions )
 
 	CloseVideoFile();
 
-	ClearDebugItems();
+	DebugItemList.Clear();
 
 	if( m_TimerID != 0 )
 		timeKillEvent( m_TimerID );
@@ -3920,7 +3916,7 @@ void CLinkageView::StepSimulation( enum _SimulationControl SimulationControl )
 
 	if( m_SimulationSteps != 0 || SimulationControl == INDIVIDUAL || bSetToAbsoluteStep )
 	{
-		ClearDebugItems();
+		DebugItemList.Clear();
 		m_Simulator.SimulateStep( pDoc, m_SimulationSteps, bSetToAbsoluteStep, pControlIDs, pPositions, ControlCount, AnyAlwaysManual() && SimulationControl != INDIVIDUAL, ForceCPM );
 	}
 
@@ -7840,7 +7836,7 @@ CFArea CLinkageView::DrawDimensions( CRenderer* pRenderer, const GearConnectionL
 	bool bIsLine = true;
 	for( int Index = 2; Index < PointCount; ++Index )
 	{
-		if( DistanceToLine( pPoints[0], pPoints[1], pPoints[Index] ) > 0.0001 )
+		if( DistanceToLine( pPoints[0], pPoints[1], pPoints[Index] ) > 0.005 )
 		{
 			bIsLine = false;
 			break;

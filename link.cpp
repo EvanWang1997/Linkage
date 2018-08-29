@@ -24,6 +24,8 @@ CLink::CLink()
 	m_TempActuatorExtension = 0;
 	m_pHull = 0;
 	m_HullCount = 0;
+	m_pPoints = 0;
+	m_PointCount = 0;
 	m_bGear = false;
 	m_RotationAngle = 0.0;
 	m_TempRotationAngle = 0.0;
@@ -78,6 +80,10 @@ CLink::~CLink()
 		delete [] m_pHull;
 	m_pHull = 0;
 	m_HullCount = 0;
+	if( m_pPoints != 0 )
+		delete [] m_pPoints;
+	m_pPoints = 0;
+	m_PointCount = 0;
 }
 
 double CLink::GetLength( void )
@@ -1003,8 +1009,17 @@ CFPoint *CLink::GetPoints( int &Count )
 	POSITION Position;
 	int Counter;
 	Count = (int)m_Connectors.GetCount();
-	CFPoint* PointArray = new CFPoint[Count];
-	if( PointArray == NULL )
+
+	// Create a new array only if it's really needed.
+	if( Count > m_PointCount || ( Count > 0 && Count < m_PointCount - 10 ) )
+	{
+		if( m_pPoints != 0 )
+			delete [] m_pPoints;
+		m_PointCount = Count;
+		m_pPoints = new CFPoint[m_PointCount];
+	}
+
+	if( m_pPoints == 0 )
 		return 0;
 
 	Position = m_Connectors.GetHeadPosition();
@@ -1013,11 +1028,11 @@ CFPoint *CLink::GetPoints( int &Count )
 		CConnector* pConnector = m_Connectors.GetNext( Position );
 		if( pConnector != 0 )
 		{
-			PointArray[Counter].x = pConnector->GetPoint().x;
-			PointArray[Counter].y = pConnector->GetPoint().y;
+			m_pPoints[Counter].x = pConnector->GetPoint().x;
+			m_pPoints[Counter].y = pConnector->GetPoint().y;
 		}
 	}
-	return PointArray;
+	return m_pPoints;
 }
 
 CConnector *CLink::GetConnector( int Index ) const

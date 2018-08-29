@@ -51,6 +51,11 @@ class CDebugItemList : public CList< class CDebugItem*, class CDebugItem* >
 	CDebugItem *Pop( void ) { return GetHeadPosition() == 0 ? 0 : RemoveHead(); }
 	void Push( CDebugItem *pItem ) { AddHead( pItem ); }
 
+	void RemoveAll( void )
+	{
+		Clear();
+	}
+
 	void Clear( void )
 	{
 		while( true )

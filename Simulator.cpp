@@ -665,7 +665,7 @@ class CSimulatorImplementation
 
 			double OriginalDistance = Distance( OriginalFixedPoint, pConnector->GetOriginalPoint() );
 			double distance = Distance( FixedPoint, pConnector->GetPoint() );
-			if( fabs( OriginalDistance - distance ) > 0.0001 )
+			if( fabs( OriginalDistance - distance ) > 0.005 )
 				return false;
 		}
 
@@ -1513,7 +1513,7 @@ class CSimulatorImplementation
 					{
 						double d1 = Distance( pTestConnector->GetOriginalPoint(), pCheckConnector->GetOriginalPoint() );
 						double d2 = Distance( pTestConnector->GetTempPoint(), pCheckConnector->GetTempPoint() );
-						if( fabs( d1 - d2 ) > 0.00000001 )
+						if( fabs( d1 - d2 ) > 0.005 )
 						{
 							pTestConnector->SetPositionValid( false );
 							pLink->SetPositionValid( false );
@@ -1567,7 +1567,7 @@ class CSimulatorImplementation
 								continue;
 
 							double Diff = fabs( Distance( pConnector->GetOriginalPoint(), pTestConnector->GetOriginalPoint() ) - Distance( pConnector->GetTempPoint(), pTestConnector->GetTempPoint() ) );
-							if( Diff < 0.0001 )
+							if( Diff < 0.005 )
 							{
 								double Angle = GetAngle( pConnector->GetTempPoint(), pTestConnector->GetTempPoint(), pConnector->GetOriginalPoint(), pTestConnector->GetOriginalPoint() );
 								Angle = GetClosestAngle( pConnector->GetRotationAngle(), Angle );

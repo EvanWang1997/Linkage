@@ -202,6 +202,8 @@ class CLink : public CElement
 	double m_ActuatorExtension;
 	bool m_bAlwaysManual;
 	CFPoint *m_pHull;
+	CFPoint *m_pPoints;
+	int m_PointCount;
 	int m_HullCount;
 	double m_ActuatorStartOffset;
 	enum _ShapeType m_ShapeType;

@@ -273,7 +273,6 @@ private:
 	void DebugDrawLink( CRenderer* pRenderer, unsigned int OnLayers, CLink *pLink, bool bShowlabels, bool bDrawHighlight = false, bool bDrawFill = false );
 	void DrawLink( CRenderer* pRenderer, const GearConnectionList *pGearConnections, unsigned int OnLayers, CLink *pLink, bool bShowlabels, bool bDrawHighlight = false, bool bDrawFill = false );
 	void DrawDebugItems( CRenderer *pRenderer );
-	void ClearDebugItems( void );
 	void DrawChain( CRenderer* pRenderer, unsigned int OnLayers, CGearConnection *pGearConnection );
 	void DrawFailureMarks( CRenderer* pRenderer, unsigned int OnLayers, CFPoint Point, double Radius, CElement::_ElementError Error );
 	CFArea DrawMeasurementLine( CRenderer* pRenderer, CFLine &InputLine, CFPoint &Firstpoint, CFPoint &SecondPoint, double Offset, bool bDrawLines, bool bDrawText );
